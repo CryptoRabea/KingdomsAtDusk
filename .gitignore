@@ -1,0 +1,31 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+
+# VS / Rider
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.booproj
+
+# Auto-generated
+*.unityproj
+*.suo
+*.userprefs
+*.pidb.meta
+*.booproj.meta
+
+# Cache
+*.apk
+*.aab
+*.unitypackage
+*.DS_Store
