@@ -29,3 +29,42 @@ MemoryCaptures/
 *.aab
 *.unitypackage
 *.DS_Store
+
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild*/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+Sysroot/
+Snapshots/
+
+# IDE
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.booproj
+
+# Packages & builds
+*.unitypackage
+*.apk
+*.aab
+*.zip
+*.rar
+*.7z
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Excluded asset packs
+Assets/2D Casual UI/
+Assets/Palmov Island/
+Assets/Other Models/
+Assets/3D Cartoon Village/
+Assets/Materials/
