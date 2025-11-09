@@ -56,7 +56,6 @@ namespace RTS.Core.Services
 
         public Dictionary<ResourceType, int> Create() => new Dictionary<ResourceType, int>(resources);
     }
-}
 
 
 
@@ -65,10 +64,11 @@ namespace RTS.Core.Services
 
 
 
-/// <summary>
-/// Interface for happiness/morale system.
-/// </summary>
-public interface IHappinessService
+
+    /// <summary>
+    /// Interface for happiness/morale system.
+    /// </summary>
+    public interface IHappinessService
     {
         float CurrentHappiness { get; }
         float TaxLevel { get; set; }
@@ -120,3 +120,4 @@ public interface IHappinessService
         Victory
     }
 
+}
