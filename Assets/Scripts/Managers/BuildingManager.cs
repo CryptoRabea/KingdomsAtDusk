@@ -1,9 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using RTS.Core.Services;
 using RTS.Core.Events;
 using RTS.Buildings;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RTS.Managers
 {
@@ -238,6 +239,18 @@ namespace RTS.Managers
 
                         return;
                     }
+
+                    // ✅ CRITICAL FIX: ACTUALLY SPEND THE RESOURCES!
+                    bool success = resourceService.SpendResources(costs);
+                    if (success)
+                    {
+                        Debug.Log($"✅ Spent resources: {string.Join(", ", costs.Select(c => $"{c.Key}:{c.Value}"))}");
+                    }
+                    else
+                    {
+                        Debug.LogError("Failed to spend resources even though CanAfford returned true!");
+                        return;
+                    }
                 }
                 else
                 {
@@ -251,7 +264,7 @@ namespace RTS.Managers
             // Publish event
             EventBus.Publish(new BuildingPlacedEvent(newBuilding, position));
 
-            Debug.Log($"Placed building: {currentBuildingPrefab.name}");
+            Debug.Log($"✅ Placed building: {currentBuildingPrefab.name}");
 
             // Cancel placement (or continue placing same building)
             CancelPlacement();
@@ -279,12 +292,6 @@ namespace RTS.Managers
                     return false; // Overlapping with another building
                 }
             }
-
-            // Optional: Check if on valid ground (NavMesh)
-            // You can add more validation here, such as:
-            // - Checking terrain slope
-            // - Checking for water
-            // - Checking for resources nearby (for resource buildings)
 
             return true;
         }
