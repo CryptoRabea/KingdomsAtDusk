@@ -5571,6 +5571,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1965759172}
   - component: {fileID: 1965759173}
+  - component: {fileID: 1965759174}
   m_Layer: 0
   m_Name: BuildManager
   m_TagString: Untagged
@@ -5616,6 +5617,22 @@ MonoBehaviour:
   buildingPrefabs:
   - {fileID: 1790573884270694, guid: 7bd910c227164784fb24248b1dd111c1, type: 3}
   - {fileID: 1873880996608776, guid: 4cf3e2658584d4e49993cfd3808b5295, type: 3}
+--- !u!114 &1965759174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965759171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a12115c12bd1d0f44b154cbb22f46660, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RTS.UI.BuildingUI
+  buildingManager: {fileID: 0}
+  buttonContainer: {fileID: 0}
+  buildingButtonPrefab: {fileID: 0}
+  availableBuildings: []
 --- !u!1 &1969597700
 GameObject:
   m_ObjectHideFlags: 0
@@ -5658,6 +5675,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1981337852}
   - component: {fileID: 1981337853}
+  - component: {fileID: 1981337856}
+  - component: {fileID: 1981337855}
+  - component: {fileID: 1981337854}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -5689,53 +5709,65 @@ MonoBehaviour:
   m_GameObject: {fileID: 1981337851}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e1a66260154aff4a893a96e735420fe, type: 3}
+  m_Script: {fileID: 11500000, guid: a12115c12bd1d0f44b154cbb22f46660, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RTS.UI.ResourceUI
-  resourceDisplays:
-  - resourceType: 0
-    textComponent: {fileID: 398650944}
-    iconImage: {fileID: 0}
-    displayFormat: '{0}:{1}'
-    showName: 1
-    animateChanges: 1
-    positiveChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    negativeChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    colorFadeDuration: 0
-    cachedAmount: 0
-  - resourceType: 3
-    textComponent: {fileID: 1454784068}
-    iconImage: {fileID: 0}
-    displayFormat: '{0}:{1}'
-    showName: 1
-    animateChanges: 1
-    positiveChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    negativeChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    colorFadeDuration: 0
-    cachedAmount: 0
-  - resourceType: 2
-    textComponent: {fileID: 463323667}
-    iconImage: {fileID: 0}
-    displayFormat: '{0}:{1}'
-    showName: 1
-    animateChanges: 1
-    positiveChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    negativeChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    colorFadeDuration: 0
-    cachedAmount: 0
-  - resourceType: 1
-    textComponent: {fileID: 592808292}
-    iconImage: {fileID: 0}
-    displayFormat: '{0}:{1}'
-    showName: 1
-    animateChanges: 1
-    positiveChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    negativeChangeColor: {r: 0, g: 0, b: 0, a: 0}
-    colorFadeDuration: 0
-    cachedAmount: 0
+  buildingManager: {fileID: 0}
+  buttonContainer: {fileID: 0}
+  buildingButtonPrefab: {fileID: 0}
+  availableBuildings: []
+--- !u!114 &1981337854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981337851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f69d4ad0e0c9754d9b42f8d48ce7962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RTS.UI.ResourceUI
+  resourceDisplays: []
   autoCreateDisplays: 0
   displayContainer: {fileID: 0}
   displayPrefab: {fileID: 0}
+--- !u!114 &1981337855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981337851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4edaf92719bc29341b022d92180abc7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RTS.UI.NotificationUI
+  notificationText: {fileID: 0}
+  canvasGroup: {fileID: 0}
+  displayDuration: 3
+  fadeDuration: 0.5
+--- !u!114 &1981337856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981337851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8bd73d7c7da10b4282c631137153dd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RTS.UI.HappinessUI
+  happinessText: {fileID: 0}
+  happinessSlider: {fileID: 0}
+  textFormat: 'Happiness: {0}%'
+  highHappinessColor: {r: 0, g: 1, b: 0, a: 1}
+  mediumHappinessColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  lowHappinessColor: {r: 1, g: 0, b: 0, a: 1}
+  highThreshold: 70
+  lowThreshold: 30
 --- !u!1 &1998262271
 GameObject:
   m_ObjectHideFlags: 0
