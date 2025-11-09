@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 793884b12281ca040ab85b541bf0d741, type: 3}
+  m_Name: FarmBuildingData
+  m_EditorClassIdentifier: Assembly-CSharp::RTS.Buildings.BuildingDataSO
+  buildingName: Farm
+  buildingType: 1
+  description: A building
+  icon: {fileID: 0}
+  woodCost: 10
+  foodCost: 0
+  goldCost: 0
+  stoneCost: 0
+  happinessBonus: 500
+  generatesResources: 1
+  resourceType: 1
+  resourceAmount: 10
+  generationInterval: 5
+  resourceGenerationRate: 5
+  constructionTime: 5
+  buildTime: 5
+  buildingPrefab: {fileID: 3089128098304807374, guid: dd387ace6e8a9184faa6b3a87ab30d13, type: 3}
+  providesHousing: 0
+  housingCapacity: 0
+  maxHealth: 100
+  repairCostMultiplier: 0.5

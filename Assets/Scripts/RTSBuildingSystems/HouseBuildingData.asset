@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 793884b12281ca040ab85b541bf0d741, type: 3}
+  m_Name: HouseBuildingData
+  m_EditorClassIdentifier: Assembly-CSharp::RTS.Buildings.BuildingDataSO
+  buildingName: House
+  buildingType: 12
+  description: A building
+  icon: {fileID: 21300008, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
+  woodCost: 20
+  foodCost: 0
+  goldCost: 0
+  stoneCost: 0
+  happinessBonus: 500
+  generatesResources: 1
+  resourceType: 0
+  resourceAmount: 500
+  generationInterval: 1
+  resourceGenerationRate: 1
+  constructionTime: 5
+  buildTime: 5
+  buildingPrefab: {fileID: 290748344025257268, guid: a8408e09ea6797e48870a1bc0e50b519, type: 3}
+  providesHousing: 1
+  housingCapacity: 5
+  maxHealth: 100
+  repairCostMultiplier: 0.5
