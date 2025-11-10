@@ -3,7 +3,7 @@ using UnityEngine;
 namespace RTS.Units.AI
 {
     /// <summary>
-    /// ScriptableObject containing global AI settings.
+    /// ScriptableObjects containing global AI settings.
     /// Shared across all AI units for consistent behavior.
     /// </summary>
     [CreateAssetMenu(fileName = "AISettings", menuName = "RTS/AISettings")]
