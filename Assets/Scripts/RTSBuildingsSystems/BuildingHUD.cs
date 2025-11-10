@@ -43,11 +43,11 @@ namespace RTS.UI
         };
 
         private List<BuildingButton> buildingButtons = new List<BuildingButton>();
-        private IResourceService resourceService;
+        private IResourcesService resourceService;
 
         private void Start()
         {
-            resourceService = ServiceLocator.TryGet<IResourceService>();
+            resourceService = ServiceLocator.TryGet<IResourcesService>();
 
             if (buildingManager == null)
             {

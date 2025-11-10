@@ -9,7 +9,7 @@ namespace RTS.Core.Services
     /// DATA-DRIVEN ResourceManager - adding new resources is now trivial!
     /// Just add to ResourceType enum and set starting value.
     /// </summary>
-    public class ResourceManager : MonoBehaviour, IResourceService
+    public class ResourceManager : MonoBehaviour, IResourcesService
     {
         [Header("Starting Resources")]
         [SerializeField] private int startingWood = 100;

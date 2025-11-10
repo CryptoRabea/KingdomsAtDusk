@@ -82,7 +82,7 @@ namespace RTS.Managers
                 return;
             }
 
-            ServiceLocator.Register<IResourceService>(resourceManager);
+            ServiceLocator.Register<IResourcesService>(resourceManager);
         }
 
         private void InitializeHappinessManager()

@@ -19,7 +19,7 @@ namespace RTS.Core.Services
     /// <summary>
     /// Data-driven resource manager - adding new resources is now trivial!
     /// </summary>
-    public interface IResourceService
+    public interface IResourcesService
     {
         int GetResource(ResourceType type);
         bool CanAfford(Dictionary<ResourceType, int> costs);

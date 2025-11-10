@@ -53,7 +53,7 @@ namespace RTS.UI
             if (nameText == null) nameText = GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        public void UpdateState(IResourceService resourceService)
+        public void UpdateState(IResourcesService resourceService)
         {
             if (buildingData == null || resourceService == null) return;
 
@@ -151,7 +151,7 @@ namespace RTS.UI
             // Reset to affordable/unaffordable color
             if (backgroundImage != null)
             {
-                var resourceService = ServiceLocator.TryGet<IResourceService>();
+                var resourceService = ServiceLocator.TryGet<IResourcesService>();
                 if (resourceService != null)
                 {
                     var costs = buildingData.GetCosts();

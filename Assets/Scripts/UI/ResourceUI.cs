@@ -50,12 +50,12 @@ namespace RTS.UI
         [SerializeField] private Transform displayContainer;
         [SerializeField] private GameObject displayPrefab;
 
-        private IResourceService resourceService;
+        private IResourcesService resourceService;
 
         private void OnEnable()
         {
             EventBus.Subscribe<ResourcesChangedEvent>(OnResourcesChanged);
-            resourceService = ServiceLocator.TryGet<IResourceService>();
+            resourceService = ServiceLocator.TryGet<IResourcesService>();
 
             if (autoCreateDisplays && displayContainer != null && displayPrefab != null)
             {
@@ -233,12 +233,12 @@ namespace RTS.UI
 
         [SerializeField] private AdvancedResourceDisplay[] displays;
 
-        private IResourceService resourceService;
+        private IResourcesService resourceService;
 
         private void OnEnable()
         {
             EventBus.Subscribe<ResourcesChangedEvent>(OnResourcesChanged);
-            resourceService = ServiceLocator.TryGet<IResourceService>();
+            resourceService = ServiceLocator.TryGet<IResourcesService>();
             RefreshAll();
         }
 

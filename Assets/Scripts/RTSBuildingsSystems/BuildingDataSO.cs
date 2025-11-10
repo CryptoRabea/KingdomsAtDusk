@@ -96,7 +96,7 @@ namespace RTS.Buildings
         /// <summary>
         /// Check if we have enough resources to build this.
         /// </summary>
-        public bool CanAfford(IResourceService resourceService)
+        public bool CanAfford(IResourcesService resourceService)
         {
             if (resourceService == null) return false;
             return resourceService.CanAfford(GetCosts());

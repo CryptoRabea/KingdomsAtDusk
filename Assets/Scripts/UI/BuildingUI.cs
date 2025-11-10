@@ -108,7 +108,7 @@ namespace RTS.UI
             }
 
             // Check if affordable
-            var resourceService = ServiceLocator.TryGet<IResourceService>();
+            var resourceService = ServiceLocator.TryGet<IResourcesService>();
             if (resourceService != null)
             {
                 var costs = buildingData.GetCosts();

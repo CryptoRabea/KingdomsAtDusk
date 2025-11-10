@@ -39,7 +39,7 @@ namespace RTS.Managers
         private Keyboard keyboard;
 
         // Services
-        private IResourceService resourceService;
+        private IResourcesService resourceService;
 
         private void Awake()
         {
@@ -52,7 +52,7 @@ namespace RTS.Managers
 
         private void Start()
         {
-            resourceService = ServiceLocator.TryGet<IResourceService>();
+            resourceService = ServiceLocator.TryGet<IResourcesService>();
 
             if (resourceService == null)
             {
