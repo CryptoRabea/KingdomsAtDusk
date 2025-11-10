@@ -1,89 +1,88 @@
-using RTS.Buildings;
+﻿using RTS.Buildings;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-
 namespace RTS.UI
 {
     public class BuildingTooltip : MonoBehaviour
-{
-    [SerializeField] private GameObject tooltipPanel;
-    [SerializeField] private TextMeshProUGUI tooltipTitle;
-    [SerializeField] private TextMeshProUGUI tooltipDescription;
-    [SerializeField] private TextMeshProUGUI tooltipCosts;
-    [SerializeField] private TextMeshProUGUI tooltipStats;
-
-    public void ShowTooltip(BuildingDataSO buildingData, Vector3 position)
     {
-        if (tooltipPanel == null || buildingData == null) return;
+        [SerializeField] private GameObject tooltipPanel;
+        [SerializeField] private TextMeshProUGUI tooltipTitle;
+        [SerializeField] private TextMeshProUGUI tooltipDescription;
+        [SerializeField] private TextMeshProUGUI tooltipCosts;
+        [SerializeField] private TextMeshProUGUI tooltipStats;
 
-        tooltipPanel.SetActive(true);
-        tooltipPanel.transform.position = position;
-
-        if (tooltipTitle != null)
-            tooltipTitle.text = buildingData.buildingName;
-
-        if (tooltipDescription != null)
-            tooltipDescription.text = GetBuildingDescription(buildingData);
-
-        if (tooltipCosts != null)
-            tooltipCosts.text = GetDetailedCosts(buildingData);
-
-        if (tooltipStats != null)
-            tooltipStats.text = GetBuildingStats(buildingData);
-    }
-
-    public void HideTooltip()
-    {
-        if (tooltipPanel != null)
-            tooltipPanel.SetActive(false);
-    }
-
-    private string GetBuildingDescription(BuildingDataSO data)
-    {
-        return data.buildingType switch
+        public void ShowTooltip(BuildingDataSO buildingData, Vector3 position)
         {
-            BuildingType.House => "Provides housing for citizens",
-            BuildingType.Farm => "Generates food over time",
-            BuildingType.Barracks => "Trains military units",
-            BuildingType.Tower => "Defensive structure",
-            BuildingType.Wall => "Protects your base",
-            _ => "Building"
-        };
-    }
+            if (tooltipPanel == null || buildingData == null) return;
 
-    private string GetDetailedCosts(BuildingDataSO data)
-    {
-        var costs = data.GetCosts();
-        var lines = new List<string>();
+            tooltipPanel.SetActive(true);
+            tooltipPanel.transform.position = position;
 
-        foreach (var cost in costs)
-        {
-            lines.Add($"{cost.Key}: {cost.Value}");
+            if (tooltipTitle != null)
+                tooltipTitle.text = buildingData.buildingName;
+
+            if (tooltipDescription != null)
+                tooltipDescription.text = GetBuildingDescription(buildingData);
+
+            if (tooltipCosts != null)
+                tooltipCosts.text = GetDetailedCosts(buildingData);
+
+            if (tooltipStats != null)
+                tooltipStats.text = GetBuildingStats(buildingData);
         }
 
-        return string.Join("\n", lines);
-    }
+        public void HideTooltip()
+        {
+            if (tooltipPanel != null)
+                tooltipPanel.SetActive(false);
+        }
 
-    private string GetBuildingStats(BuildingDataSO data)
-    {
-        var stats = new List<string>();
+        private string GetBuildingDescription(BuildingDataSO data)
+        {
+            return data.buildingType switch
+            {
+                BuildingType.House => "Provides housing for citizens",
+                BuildingType.Farm => "Generates food over time",
+                BuildingType.Barracks => "Trains military units",
+                BuildingType.Tower => "Defensive structure",
+                BuildingType.Wall => "Protects your base",
+                _ => "Building"
+            };
+        }
 
-        stats.Add($"Build Time: {data.buildTime}s");
+        private string GetDetailedCosts(BuildingDataSO data)
+        {
+            var costs = data.GetCosts();
+            var lines = new List<string>();
 
-        if (data.happinessBonus > 0)
-            stats.Add($"Happiness: +{data.happinessBonus}");
+            foreach (var cost in costs)
+            {
+                lines.Add($"{cost.Key}: {cost.Value}");
+            }
 
-        if (data.housingCapacity > 0)
-            stats.Add($"Housing: +{data.housingCapacity}");
+            return string.Join("\n", lines);
+        }
 
-        if (data.resourceGenerationRate > 0)
-            stats.Add($"Production: +{data.resourceGenerationRate}/s");
+        private string GetBuildingStats(BuildingDataSO data)
+        {
+            var stats = new List<string>();
 
-        return string.Join("\n", stats);
+            // ✅ FIXED: Use constructionTime instead of buildTime
+            stats.Add($"Build Time: {data.constructionTime}s");
+
+            if (data.happinessBonus > 0)
+                stats.Add($"Happiness: +{data.happinessBonus}");
+
+            if (data.housingCapacity > 0)
+                stats.Add($"Housing: +{data.housingCapacity}");
+
+            // ✅ FIXED: Use generationInterval instead of resourceGenerationRate
+            if (data.generationInterval > 0)
+                stats.Add($"Production: +{data.resourceAmount} every {data.generationInterval}s");
+
+            return string.Join("\n", stats);
+        }
     }
 }
-}
-
-

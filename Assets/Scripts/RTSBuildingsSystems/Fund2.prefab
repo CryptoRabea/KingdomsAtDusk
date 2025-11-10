@@ -838,7 +838,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RTS.Buildings.Building
   data: {fileID: 11400000, guid: 71b7321f96a5c004497afa6f9f4ed8ea, type: 2}
-  requiresConstruction: 1
+  requiresConstruction: 0
   constructionTime: 5
   constructionVisual: {fileID: 0}
 --- !u!1 &3208571159728069084

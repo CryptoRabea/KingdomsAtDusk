@@ -124,4 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aee43469801f8334e9aa57592eabb21c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RTS.Buildings.Building
-  buildingData: {fileID: 11400000, guid: 8e1160ab4dc702241a5bf96c48717153, type: 2}
+  data: {fileID: 11400000, guid: 8e1160ab4dc702241a5bf96c48717153, type: 2}
+  requiresConstruction: 1
+  constructionTime: 5
+  constructionVisual: {fileID: 0}

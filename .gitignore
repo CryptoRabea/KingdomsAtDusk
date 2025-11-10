@@ -1,72 +1,11 @@
-# Unity
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-UserSettings/
-MemoryCaptures/
+# Ignore everything
+/*
 
-# VS / Rider
-.vscode/
-.idea/
-*.csproj
-*.sln
-*.user
-*.pidb
-*.booproj
+# But keep the Scripts folder
+!Assets/
+Assets/*
+!Assets/Scripts/
+!Assets/Scripts/**
 
-# Auto-generated
-*.unityproj
-*.suo
-*.userprefs
-*.pidb.meta
-*.booproj.meta
-
-# Cache
-*.apk
-*.aab
-*.unitypackage
-*.DS_Store
-
-# Unity generated folders
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild*/
-[Ll]ogs/
-UserSettings/
-MemoryCaptures/
-Sysroot/
-Snapshots/
-
-# IDE
-.vscode/
-.idea/
-*.csproj
-*.sln
-*.user
-*.pidb
-*.booproj
-
-# Packages & builds
-*.unitypackage
-*.apk
-*.aab
-*.zip
-*.rar
-*.7z
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Excluded asset packs
-Assets/2D Casual UI/
-Assets/Palmov Island/
-Assets/Other Models/
-Assets/3D Cartoon Village/
-Assets/Materials/
-
-.vs/
+# Optional: keep .gitignore itself
+!.gitignore
