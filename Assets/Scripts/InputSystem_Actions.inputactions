@@ -106,6 +106,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Click1",
+                    "type": "Button",
+                    "id": "bbd2dc6e-9e5a-4248-89b3-de48783d4dcf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Zoom",
                     "type": "Value",
                     "id": "b3ccd186-71fd-41ee-90aa-6e84dbfa932d",
@@ -529,6 +538,17 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a51e94fc-2325-4800-8c30-808c730010df",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Click1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -285,7 +285,7 @@ namespace RTS.Editor
             Debug.Log($"✅ TrainUnitButton prefab created at: {prefabPath}");
 
             // Try to assign to BuildingDetailsUI if it exists
-            BuildingDetailsUI detailsUI = FindObjectOfType<BuildingDetailsUI>();
+            BuildingDetailsUI detailsUI = Object.FindAnyObjectByType<BuildingDetailsUI>();
             if (detailsUI != null)
             {
                 SerializedObject serializedUI = new SerializedObject(detailsUI);
@@ -328,7 +328,7 @@ namespace RTS.Editor
             BuildingHUDToggle toggle = buttonObj.AddComponent<BuildingHUDToggle>();
 
             // Try to find and assign BuildingHUD
-            BuildingHUD buildingHUD = FindObjectOfType<BuildingHUD>();
+            BuildingHUD buildingHUD = Object.FindAnyObjectByType<BuildingHUD>();
             if (buildingHUD != null)
             {
                 SerializedObject serializedToggle = new SerializedObject(toggle);

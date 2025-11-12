@@ -98,7 +98,7 @@ namespace RTS.Editor
             // Auto-find BuildingManager if not assigned
             if (buildingManager == null)
             {
-                buildingManager = FindObjectOfType<BuildingManager>();
+                buildingManager = Object.FindAnyObjectByType<BuildingManager>();
             }
 
             GameObject hudPanel = CreateBuildingHUDPanel();
@@ -185,7 +185,7 @@ namespace RTS.Editor
             // Auto-find BuildingManager if not assigned
             if (buildingManager == null)
             {
-                buildingManager = FindObjectOfType<BuildingManager>();
+                buildingManager = Object.FindAnyObjectByType<BuildingManager>();
             }
 
             serializedHUD.FindProperty("buildingManager").objectReferenceValue = buildingManager;
@@ -315,7 +315,7 @@ namespace RTS.Editor
             Debug.Log($"✅ BuildingButton prefab created at: {prefabPath}");
 
             // Try to assign to BuildingHUD if it exists
-            BuildingHUD hud = FindObjectOfType<BuildingHUD>();
+            BuildingHUD hud = Object.FindAnyObjectByType<BuildingHUD>();
             if (hud != null)
             {
                 SerializedObject serializedHUD = new SerializedObject(hud);
@@ -391,7 +391,7 @@ namespace RTS.Editor
             BuildingHUDToggle toggle = buttonObj.AddComponent<BuildingHUDToggle>();
 
             // Try to find and assign BuildingHUD
-            BuildingHUD buildingHUD = FindObjectOfType<BuildingHUD>();
+            BuildingHUD buildingHUD = Object.FindAnyObjectByType<BuildingHUD>();
             if (buildingHUD != null)
             {
                 SerializedObject serializedToggle = new SerializedObject(toggle);
