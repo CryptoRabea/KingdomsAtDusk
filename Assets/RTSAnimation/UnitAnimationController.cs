@@ -100,7 +100,7 @@ namespace RTS.Units.Animation
         private void SubscribeToEvents()
         {
             EventBus.Subscribe<UnitHealthChangedEvent>(OnHealthChanged);
-            EventBus.Subscribe<UnitDiedEvent>(OnUnitDied);
+           // EventBus.Subscribe<UnitDiedEvent>(OnUnitDied);
             EventBus.Subscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Subscribe<UnitStateChangedEvent>(OnUnitStateChanged);
         }
@@ -108,7 +108,7 @@ namespace RTS.Units.Animation
         private void UnsubscribeFromEvents()
         {
             EventBus.Unsubscribe<UnitHealthChangedEvent>(OnHealthChanged);
-            EventBus.Unsubscribe<UnitDiedEvent>(OnUnitDied);
+          //  EventBus.Unsubscribe<UnitDiedEvent>(OnUnitDied);
             EventBus.Unsubscribe<DamageDealtEvent>(OnDamageDealt);
             EventBus.Unsubscribe<UnitStateChangedEvent>(OnUnitStateChanged);
         }
@@ -258,12 +258,12 @@ namespace RTS.Units.Animation
             }
         }
 
-        private void OnUnitDied(UnitDiedEvent evt)
+       /* private void OnUnitDied(UnitDiedEvent evt)
         {
             if (evt.Unit != gameObject) return;
 
             TriggerDeath();
-        }
+        }*/
 
         private void OnDamageDealt(DamageDealtEvent evt)
         {
@@ -408,10 +408,10 @@ namespace RTS.Units.Animation
 
         #region Callbacks
 
-        private void OnUnitDied()
+      /*  private void OnUnitDied()
         {
             TriggerDeath();
-        }
+        }*/
 
         #endregion
     }

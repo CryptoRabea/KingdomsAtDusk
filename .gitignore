@@ -62,7 +62,6 @@ MemoryCaptures/
 *.lighting
 *.terrainlayer
 *.controller
-*.json
 *.vsconfig
 
 # OS

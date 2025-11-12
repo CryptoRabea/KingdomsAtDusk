@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{F968BF03-5D38-3DB4-C1FC-C8BE286CAF62}</ProjectGuid>
+    <ProjectGuid>{B5EA29A3-EC65-216C-2E76-061E46E42EC0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -67,6 +67,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
     <Compile Include="Assets\RTSAnimation\AnimationSetupHelper.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\RetreatState.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectable.cs" />
     <Compile Include="Assets\Scripts\Managers\WaveManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitHealth.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="Assets\Scripts\Units\AI\States\DeadState.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
+    <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingButton.cs" />
@@ -109,12 +111,15 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\HealingState.cs" />
+    <Compile Include="Assets\Scripts\UI\BuildingHUDToggle.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Units\Data\UnitConfigSO.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\IdleState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
+    <Compile Include="Assets\Scripts\UI\BuildingDetailsUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitStateType.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
@@ -122,6 +127,7 @@
     <Compile Include="Assets\Scripts\InputSystem_Actions.cs" />
     <Compile Include="Assets\Scripts\UI\ResourceUI.cs" />
     <Compile Include="Assets\Scripts\Units\AI\UnitAIController.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\UnitTrainingQueue.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
     <Compile Include="Assets\Scripts\Core\IServices.cs" />
@@ -144,6 +150,7 @@
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PlayerMovement.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationEvents.cs" />
+    <Compile Include="Assets\Scripts\UI\TrainUnitButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
