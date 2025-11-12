@@ -2,7 +2,7 @@ using UnityEngine;
 using RTS.Buildings;
 using RTS.Core.Events;
 
-namespace RTS.Debug
+namespace RTS.Debugging
 {
     /// <summary>
     /// Debug script to diagnose building selection issues.
