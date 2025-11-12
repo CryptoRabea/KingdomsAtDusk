@@ -76,6 +76,7 @@
     <Compile Include="Assets\Scripts\Units\AI\States\DeadState.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
+    <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingButton.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\HealingState.cs" />
+    <Compile Include="Assets\Scripts\UI\BuildingHUDToggle.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Units\Data\UnitConfigSO.cs" />

@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Editor\BuildingTrainingUISetup.cs" />
+    <Compile Include="Assets\Scripts\Editor\BuildingHUDSetup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
