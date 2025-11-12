@@ -10,7 +10,6 @@ UserSettings/
 # VS / Rider
 .vscode/
 .idea/
-*.csproj
 *.sln
 *.user
 *.pidb
@@ -43,7 +42,6 @@ MemoryCaptures/
 # IDE
 .vscode/
 .idea/
-*.csproj
 *.sln
 *.user
 *.pidb
@@ -60,7 +58,6 @@ MemoryCaptures/
 *.shader
 *.png
 *.asset
-*.meta
 *.mat
 *.prefab
 *.jpg

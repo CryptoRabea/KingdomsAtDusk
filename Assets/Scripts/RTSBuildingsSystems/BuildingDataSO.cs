@@ -1,8 +1,6 @@
-﻿using RTS.Core.Services;
+﻿using UnityEngine;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Security.AccessControl;
-using UnityEngine;
+using RTS.Core.Services;
 
 namespace RTS.Buildings
 {
@@ -18,12 +16,7 @@ namespace RTS.Buildings
         Religious,      // Temples, churches
         Cultural,       // Libraries, monuments
         Defensive,      // Walls, towers
-        Special,      // Unique buildings
-        Wall,
-        Tower,
-        Barracks,
-        Farm,
-        House
+        Special         // Unique buildings
     }
 
     /// <summary>
@@ -57,9 +50,11 @@ namespace RTS.Buildings
         public ResourceType resourceType = ResourceType.Wood;
         public int resourceAmount = 10;
         public float generationInterval = 5f; // seconds
+        public float resourceGenerationRate = 5f; // Alias for generationInterval (backwards compatible)
 
         [Header("Construction")]
         public float constructionTime = 5f;
+        public float buildTime = 5f; // Alias for constructionTime (for backwards compatibility)
         public GameObject buildingPrefab;
 
         [Header("Population/Housing (Optional)")]
@@ -71,12 +66,14 @@ namespace RTS.Buildings
         public int maxHealth = 100;
         public float repairCostMultiplier = 0.5f; // 50% of build cost to repair
 
-        // ❌ REMOVED OnValidate() - IT WAS CAUSING 8GB MEMORY LEAK!
-        // OnValidate() gets called thousands of times during asset import,
-        // causing massive memory leaks when combined with multiple BuildingData assets.
+        private void OnValidate()
+        {
+            // Keep buildTime in sync with constructionTime
+            buildTime = constructionTime;
 
-        // Instead, we removed the duplicate fields (buildTime, resourceGenerationRate)
-        // and now only use constructionTime and generationInterval.
+            // Keep resourceGenerationRate in sync with generationInterval
+            resourceGenerationRate = generationInterval;
+        }
 
         /// <summary>
         /// Get costs as a dictionary for the new resource system.
@@ -94,29 +91,71 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Check if we have enough resources to build this.
+        /// Get total cost for display purposes.
         /// </summary>
-        public bool CanAfford(IResourcesService resourceService)
+        public int GetTotalCost()
         {
-            if (resourceService == null) return false;
-            return resourceService.CanAfford(GetCosts());
+            return woodCost + foodCost + goldCost + stoneCost;
         }
 
         /// <summary>
-        /// Get a formatted cost string for UI display.
+        /// Get a formatted cost string for UI.
         /// </summary>
         public string GetCostString()
         {
-            var costs = GetCosts();
-            if (costs.Count == 0) return "Free";
+            var costs = new List<string>();
 
-            var parts = new List<string>();
-            foreach (var cost in costs)
+            if (woodCost > 0) costs.Add($"Wood: {woodCost}");
+            if (foodCost > 0) costs.Add($"Food: {foodCost}");
+            if (goldCost > 0) costs.Add($"Gold: {goldCost}");
+            if (stoneCost > 0) costs.Add($"Stone: {stoneCost}");
+
+            return string.Join(", ", costs);
+        }
+
+        /// <summary>
+        /// Get repair costs (percentage of original build cost).
+        /// </summary>
+        public Dictionary<ResourceType, int> GetRepairCosts()
+        {
+            var costs = new Dictionary<ResourceType, int>();
+
+            if (woodCost > 0) costs[ResourceType.Wood] = Mathf.CeilToInt(woodCost * repairCostMultiplier);
+            if (foodCost > 0) costs[ResourceType.Food] = Mathf.CeilToInt(foodCost * repairCostMultiplier);
+            if (goldCost > 0) costs[ResourceType.Gold] = Mathf.CeilToInt(goldCost * repairCostMultiplier);
+            if (stoneCost > 0) costs[ResourceType.Stone] = Mathf.CeilToInt(stoneCost * repairCostMultiplier);
+
+            return costs;
+        }
+
+        /// <summary>
+        /// Get a formatted description including all relevant info.
+        /// </summary>
+        public string GetFullDescription()
+        {
+            var details = new List<string>();
+
+            details.Add(description);
+            details.Add($"\nCost: {GetCostString()}");
+            details.Add($"Build Time: {constructionTime}s");
+
+            if (happinessBonus != 0)
             {
-                parts.Add($"{cost.Key}: {cost.Value}");
+                string sign = happinessBonus > 0 ? "+" : "";
+                details.Add($"Happiness: {sign}{happinessBonus}");
             }
 
-            return string.Join(", ", parts);
+            if (providesHousing && housingCapacity > 0)
+            {
+                details.Add($"Housing: +{housingCapacity} population");
+            }
+
+            if (generatesResources)
+            {
+                details.Add($"Generates: {resourceAmount} {resourceType} every {generationInterval}s");
+            }
+
+            return string.Join("\n", details);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using RTS.Core.Events;
 using RTS.Core.Services;
+using System.Collections.Generic;
 
 namespace RTS.Buildings
 {
@@ -21,6 +22,10 @@ namespace RTS.Buildings
         private bool isConstructed = false;
         private float constructionProgress = 0f;
         private IHappinessService happinessService;
+        private IResourcesService resourceService;
+
+        // Resource generation
+        private float resourceGenerationTimer = 0f;
 
         public BuildingDataSO Data => data;
         public bool IsConstructed => isConstructed;
@@ -29,6 +34,7 @@ namespace RTS.Buildings
         private void Start()
         {
             happinessService = ServiceLocator.TryGet<IHappinessService>();
+            resourceService = ServiceLocator.TryGet<IResourcesService>();
 
             if (!requiresConstruction)
             {
@@ -42,6 +48,7 @@ namespace RTS.Buildings
 
         private void Update()
         {
+            // Handle construction
             if (!isConstructed && requiresConstruction)
             {
                 constructionProgress += Time.deltaTime;
@@ -49,6 +56,18 @@ namespace RTS.Buildings
                 if (constructionProgress >= constructionTime)
                 {
                     CompleteConstruction();
+                }
+            }
+
+            // Handle resource generation (only after construction is complete)
+            if (isConstructed && data != null && data.generatesResources)
+            {
+                resourceGenerationTimer += Time.deltaTime;
+
+                if (resourceGenerationTimer >= data.generationInterval)
+                {
+                    GenerateResources();
+                    resourceGenerationTimer = 0f;
                 }
             }
         }
@@ -92,6 +111,29 @@ namespace RTS.Buildings
             }
 
             Debug.Log($"✅ {data?.buildingName ?? "Building"} construction complete!");
+        }
+
+        private void GenerateResources()
+        {
+            if (resourceService == null || data == null) return;
+
+            // Create resource dictionary with the generated amount
+            var resources = new Dictionary<ResourceType, int>
+            {
+                { data.resourceType, data.resourceAmount }
+            };
+
+            // Add resources to the player
+            resourceService.AddResources(resources);
+
+            Debug.Log($"✅ {data.buildingName} generated {data.resourceAmount} {data.resourceType}");
+
+            // Publish event (optional - for UI updates, sound effects, etc.)
+            EventBus.Publish(new ResourcesGeneratedEvent(
+                data.buildingName,
+                data.resourceType,
+                data.resourceAmount
+            ));
         }
 
         private void OnDestroy()

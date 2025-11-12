@@ -9,7 +9,7 @@ using System.Linq;
 namespace RTS.Managers
 {
     /// <summary>
-    /// Manages building placement, construction, and destruction using the new resource system.
+    /// Manages building placement, construction, and destruction using BuildingDataSO as source of truth.
     /// Handles player input for placing buildings.
     /// </summary>
     public class BuildingManager : MonoBehaviour
@@ -24,11 +24,17 @@ namespace RTS.Managers
         [SerializeField] private float gridSize = 1f;               // Snap to grid
         [SerializeField] private bool useGridSnapping = true;
 
-        [Header("Building Prefabs")]
-        [SerializeField] private GameObject[] buildingPrefabs; // Assign in Inspector
+        [Header("Terrain Validation")]
+        [SerializeField] private float maxHeightDifference = 2f;    // Max slope tolerance
+        [SerializeField] private bool requireFlatGround = true;      // Enforce flat ground check
+        [SerializeField] private int groundSamples = 5;              // Number of ground check points
+
+        [Header("Building Data - SOURCE OF TRUTH")]
+        [Tooltip("Assign BuildingDataSO assets here, NOT prefabs!")]
+        [SerializeField] private BuildingDataSO[] buildingDataArray; // ✅ USE DATA, NOT PREFABS
 
         // Current state
-        private GameObject currentBuildingPrefab;
+        private BuildingDataSO currentBuildingData;  // ✅ Store data, not prefab
         private GameObject previewBuilding;
         private bool isPlacingBuilding = false;
         private Material[] originalMaterials;
@@ -58,6 +64,9 @@ namespace RTS.Managers
             {
                 Debug.LogError("BuildingManager: ResourceService not available!");
             }
+
+            // Validate building data
+            ValidateBuildingData();
         }
 
         private void Update()
@@ -72,40 +81,46 @@ namespace RTS.Managers
         #region Building Selection
 
         /// <summary>
-        /// Start placing a building. Call this when player clicks a building button.
+        /// Start placing a building by index. Call this when player clicks a building button.
         /// </summary>
         public void StartPlacingBuilding(int buildingIndex)
         {
-            if (buildingIndex < 0 || buildingIndex >= buildingPrefabs.Length)
+            if (buildingIndex < 0 || buildingIndex >= buildingDataArray.Length)
             {
                 Debug.LogError($"Invalid building index: {buildingIndex}");
                 return;
             }
 
-            StartPlacingBuilding(buildingPrefabs[buildingIndex]);
+            StartPlacingBuilding(buildingDataArray[buildingIndex]);
         }
 
         /// <summary>
-        /// Start placing a specific building prefab.
+        /// Start placing a building from BuildingDataSO (SOURCE OF TRUTH).
         /// </summary>
-        public void StartPlacingBuilding(GameObject buildingPrefab)
+        public void StartPlacingBuilding(BuildingDataSO buildingData)
         {
-            if (buildingPrefab == null)
+            if (buildingData == null)
             {
-                Debug.LogError("Building prefab is null!");
+                Debug.LogError("Building data is null!");
+                return;
+            }
+
+            if (buildingData.buildingPrefab == null)
+            {
+                Debug.LogError($"Building data '{buildingData.buildingName}' has no prefab assigned!");
                 return;
             }
 
             // Cancel any existing placement
             CancelPlacement();
 
-            currentBuildingPrefab = buildingPrefab;
+            currentBuildingData = buildingData;  // ✅ Store the data
             isPlacingBuilding = true;
 
-            // Create preview
+            // Create preview from the prefab referenced in the data
             CreateBuildingPreview();
 
-            Debug.Log($"Started placing: {buildingPrefab.name}");
+            Debug.Log($"Started placing: {buildingData.buildingName}");
         }
 
         /// <summary>
@@ -119,7 +134,7 @@ namespace RTS.Managers
                 previewBuilding = null;
             }
 
-            currentBuildingPrefab = null;
+            currentBuildingData = null;
             isPlacingBuilding = false;
             originalMaterials = null;
         }
@@ -130,10 +145,10 @@ namespace RTS.Managers
 
         private void CreateBuildingPreview()
         {
-            if (currentBuildingPrefab == null) return;
+            if (currentBuildingData == null || currentBuildingData.buildingPrefab == null) return;
 
-            // Instantiate preview
-            previewBuilding = Instantiate(currentBuildingPrefab);
+            // Instantiate preview from the prefab in the data
+            previewBuilding = Instantiate(currentBuildingData.buildingPrefab);
 
             // Disable scripts on preview
             var building = previewBuilding.GetComponent<Building>();
@@ -210,90 +225,200 @@ namespace RTS.Managers
 
         private void PlaceBuilding()
         {
-            if (previewBuilding == null || currentBuildingPrefab == null) return;
+            if (previewBuilding == null || currentBuildingData == null) return;
 
             Vector3 position = previewBuilding.transform.position;
             Quaternion rotation = previewBuilding.transform.rotation;
 
-            // Check if player can afford it using the new resource system
-            var building = currentBuildingPrefab.GetComponent<Building>();
-            if (building != null && building.Data != null)
+            // ✅ CHECK COSTS DIRECTLY FROM DATA (not from prefab)
+            if (resourceService != null)
             {
-                if (resourceService != null)
+                var costs = currentBuildingData.GetCosts();
+
+                if (!resourceService.CanAfford(costs))
                 {
-                    // Get costs using the new system
-                    var costs = building.Data.GetCosts();
+                    Debug.Log($"Not enough resources for {currentBuildingData.buildingName}!");
 
-                    if (!resourceService.CanAfford(costs))
-                    {
-                        Debug.Log("Not enough resources!");
+                    // Publish failure event
+                    EventBus.Publish(new ResourcesSpentEvent(
+                        costs.GetValueOrDefault(ResourceType.Wood, 0),
+                        costs.GetValueOrDefault(ResourceType.Food, 0),
+                        costs.GetValueOrDefault(ResourceType.Gold, 0),
+                        costs.GetValueOrDefault(ResourceType.Stone, 0),
+                        false
+                    ));
 
-                        // Optional: Show notification to player
-                        EventBus.Publish(new ResourcesSpentEvent(
-                            costs.GetValueOrDefault(ResourceType.Wood, 0),
-                            costs.GetValueOrDefault(ResourceType.Food, 0),
-                            costs.GetValueOrDefault(ResourceType.Gold, 0),
-                            costs.GetValueOrDefault(ResourceType.Stone, 0),
-                            false
-                        ));
+                    return;
+                }
 
-                        return;
-                    }
-
-                    // ✅ CRITICAL FIX: ACTUALLY SPEND THE RESOURCES!
-                    bool success = resourceService.SpendResources(costs);
-                    if (success)
-                    {
-                        Debug.Log($"✅ Spent resources: {string.Join(", ", costs.Select(c => $"{c.Key}:{c.Value}"))}");
-                    }
-                    else
-                    {
-                        Debug.LogError("Failed to spend resources even though CanAfford returned true!");
-                        return;
-                    }
+                // ✅ SPEND THE RESOURCES!
+                bool success = resourceService.SpendResources(costs);
+                if (success)
+                {
+                    Debug.Log($"✅ Spent resources for {currentBuildingData.buildingName}: {string.Join(", ", costs.Select(c => $"{c.Key}:{c.Value}"))}");
                 }
                 else
                 {
-                    Debug.LogWarning("ResourceService not available, placing building anyway!");
+                    Debug.LogError("Failed to spend resources even though CanAfford returned true!");
+                    return;
                 }
             }
+            else
+            {
+                Debug.LogWarning("ResourceService not available, placing building anyway!");
+            }
 
-            // Place the actual building
-            GameObject newBuilding = Instantiate(currentBuildingPrefab, position, rotation);
+            // ✅ PLACE THE ACTUAL BUILDING (from data's prefab)
+            GameObject newBuilding = Instantiate(currentBuildingData.buildingPrefab, position, rotation);
 
-            // Publish event
+            // ✅ ENSURE BUILDING HAS DATA REFERENCE
+            var buildingComponent = newBuilding.GetComponent<Building>();
+            if (buildingComponent != null)
+            {
+                buildingComponent.SetData(currentBuildingData);
+                Debug.Log($"✅ Assigned {currentBuildingData.buildingName} data to building component");
+            }
+            else
+            {
+                Debug.LogWarning($"Building prefab for {currentBuildingData.buildingName} doesn't have Building component!");
+            }
+
+            // Publish success event
             EventBus.Publish(new BuildingPlacedEvent(newBuilding, position));
 
-            Debug.Log($"✅ Placed building: {currentBuildingPrefab.name}");
+            Debug.Log($"✅ Placed building: {currentBuildingData.buildingName} at {position}");
 
             // Cancel placement (or continue placing same building)
             CancelPlacement();
 
             // Uncomment this to place multiple of same building:
-            // StartPlacingBuilding(currentBuildingPrefab);
+            // StartPlacingBuilding(currentBuildingData);
         }
 
         private bool IsValidPlacement(Vector3 position)
         {
             if (previewBuilding == null) return false;
 
-            // Check if overlapping with other buildings
+            // Get bounds for overlap check
+            Bounds buildingBounds = GetBuildingBounds(previewBuilding);
+
+            // Check for overlapping with OTHER BUILDINGS (ignore terrain!)
             Collider[] colliders = Physics.OverlapBox(
-                position,
-                previewBuilding.transform.localScale / 2f,
-                previewBuilding.transform.rotation
+                position + buildingBounds.center,
+                buildingBounds.extents,
+                previewBuilding.transform.rotation,
+                ~groundLayer // ✅ Exclude ground layer from check
             );
 
             foreach (var col in colliders)
             {
-                // Check if it's another building (ignore self)
-                if (col.gameObject != previewBuilding && col.GetComponent<Building>() != null)
+                // Ignore self
+                if (col.gameObject == previewBuilding) continue;
+
+                // Check if it's another building
+                if (col.GetComponent<Building>() != null)
                 {
                     return false; // Overlapping with another building
                 }
+
+                // Ignore colliders on the preview itself
+                if (col.transform.IsChildOf(previewBuilding.transform)) continue;
+
+                // If we got here, it's some other obstacle
+                return false;
+            }
+
+            // ✅ NEW: Check if ground is too steep/uneven
+            if (!IsGroundSuitable(position))
+            {
+                return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Check if the ground is suitable for building (not too steep).
+        /// </summary>
+        private bool IsGroundSuitable(Vector3 centerPosition)
+        {
+            if (previewBuilding == null) return true;
+            if (!requireFlatGround) return true; // Skip check if not required
+
+            // Get building size
+            Bounds bounds = GetBuildingBounds(previewBuilding);
+
+            // Sample points: center + 4 corners
+            Vector3[] samplePoints = new Vector3[groundSamples];
+            samplePoints[0] = centerPosition; // Center
+
+            if (groundSamples >= 5)
+            {
+                // Four corners
+                Vector3 halfExtents = bounds.extents;
+                samplePoints[1] = centerPosition + new Vector3(halfExtents.x, 0, halfExtents.z);
+                samplePoints[2] = centerPosition + new Vector3(-halfExtents.x, 0, halfExtents.z);
+                samplePoints[3] = centerPosition + new Vector3(halfExtents.x, 0, -halfExtents.z);
+                samplePoints[4] = centerPosition + new Vector3(-halfExtents.x, 0, -halfExtents.z);
+            }
+
+            // Get heights at each sample point
+            float minHeight = float.MaxValue;
+            float maxHeight = float.MinValue;
+            int validSamples = 0;
+
+            for (int i = 0; i < Mathf.Min(groundSamples, samplePoints.Length); i++)
+            {
+                Vector3 point = samplePoints[i];
+
+                // Raycast down to find ground
+                if (Physics.Raycast(point + Vector3.up * 10f, Vector3.down, out RaycastHit hit, 20f, groundLayer))
+                {
+                    float height = hit.point.y;
+                    minHeight = Mathf.Min(minHeight, height);
+                    maxHeight = Mathf.Max(maxHeight, height);
+                    validSamples++;
+                }
+            }
+
+            // Need at least half the samples to be valid
+            int requiredSamples = Mathf.Max(1, groundSamples / 2);
+            if (validSamples < requiredSamples)
+            {
+                return false; // Not enough ground detected
+            }
+
+            // Check if height difference is acceptable
+            float heightDifference = maxHeight - minHeight;
+            return heightDifference <= maxHeightDifference;
+        }
+
+        /// <summary>
+        /// Get the bounds of a building (works with or without collider).
+        /// </summary>
+        private Bounds GetBuildingBounds(GameObject building)
+        {
+            // Try to get bounds from collider
+            Collider col = building.GetComponent<Collider>();
+            if (col != null)
+            {
+                return col.bounds;
+            }
+
+            // Fallback: Use renderer bounds
+            Renderer[] renderers = building.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+                return bounds;
+            }
+
+            // Last resort: Use transform scale
+            return new Bounds(building.transform.position, building.transform.localScale);
         }
 
         private void SetPreviewMaterial(Material material)
@@ -312,6 +437,45 @@ namespace RTS.Managers
 
         #endregion
 
+        #region Validation
+
+        private void ValidateBuildingData()
+        {
+            if (buildingDataArray == null || buildingDataArray.Length == 0)
+            {
+                Debug.LogWarning("BuildingManager: No building data assigned!");
+                return;
+            }
+
+            Debug.Log($"BuildingManager: Loaded {buildingDataArray.Length} building types");
+
+            for (int i = 0; i < buildingDataArray.Length; i++)
+            {
+                var data = buildingDataArray[i];
+                if (data == null)
+                {
+                    Debug.LogError($"BuildingManager: Building data at index {i} is null!");
+                    continue;
+                }
+
+                if (data.buildingPrefab == null)
+                {
+                    Debug.LogError($"BuildingManager: '{data.buildingName}' has no prefab assigned!");
+                    continue;
+                }
+
+                var building = data.buildingPrefab.GetComponent<Building>();
+                if (building == null)
+                {
+                    Debug.LogWarning($"BuildingManager: '{data.buildingName}' prefab doesn't have Building component!");
+                }
+
+                Debug.Log($"✅ Building {i}: {data.buildingName} ({data.buildingType}) - Cost: {data.GetCostString()}");
+            }
+        }
+
+        #endregion
+
         #region Public API
 
         /// <summary>
@@ -320,35 +484,49 @@ namespace RTS.Managers
         public bool IsPlacing => isPlacingBuilding;
 
         /// <summary>
-        /// Get the current building being placed (if any).
+        /// Get the current building data being placed (if any).
         /// </summary>
-        public GameObject CurrentBuildingPrefab => currentBuildingPrefab;
+        public BuildingDataSO CurrentBuildingData => currentBuildingData;
+
+        /// <summary>
+        /// Get all available building data.
+        /// </summary>
+        public BuildingDataSO[] GetAllBuildingData() => buildingDataArray;
 
         /// <summary>
         /// Check if a specific building can be afforded.
         /// </summary>
-        public bool CanAffordBuilding(GameObject buildingPrefab)
+        public bool CanAffordBuilding(BuildingDataSO buildingData)
         {
-            if (buildingPrefab == null || resourceService == null) return false;
+            if (buildingData == null || resourceService == null) return false;
 
-            var building = buildingPrefab.GetComponent<Building>();
-            if (building == null || building.Data == null) return false;
-
-            var costs = building.Data.GetCosts();
+            var costs = buildingData.GetCosts();
             return resourceService.CanAfford(costs);
         }
 
         /// <summary>
         /// Get the cost of a building as a dictionary.
         /// </summary>
-        public Dictionary<ResourceType, int> GetBuildingCost(GameObject buildingPrefab)
+        public Dictionary<ResourceType, int> GetBuildingCost(BuildingDataSO buildingData)
         {
-            if (buildingPrefab == null) return new Dictionary<ResourceType, int>();
+            if (buildingData == null) return new Dictionary<ResourceType, int>();
+            return buildingData.GetCosts();
+        }
 
-            var building = buildingPrefab.GetComponent<Building>();
-            if (building == null || building.Data == null) return new Dictionary<ResourceType, int>();
+        /// <summary>
+        /// Get buildings of a specific type.
+        /// </summary>
+        public BuildingDataSO[] GetBuildingsByType(BuildingType type)
+        {
+            return buildingDataArray.Where(b => b != null && b.buildingType == type).ToArray();
+        }
 
-            return building.Data.GetCosts();
+        /// <summary>
+        /// Get a building by name.
+        /// </summary>
+        public BuildingDataSO GetBuildingByName(string buildingName)
+        {
+            return buildingDataArray.FirstOrDefault(b => b != null && b.buildingName == buildingName);
         }
 
         #endregion
@@ -358,7 +536,7 @@ namespace RTS.Managers
         [ContextMenu("Test Place Building 0")]
         private void TestPlaceBuilding()
         {
-            if (buildingPrefabs.Length > 0)
+            if (buildingDataArray.Length > 0)
             {
                 StartPlacingBuilding(0);
             }
@@ -374,20 +552,32 @@ namespace RTS.Managers
         private void PrintBuildingCosts()
         {
             Debug.Log("=== Building Costs ===");
-            foreach (var prefab in buildingPrefabs)
+            foreach (var data in buildingDataArray)
             {
-                if (prefab == null) continue;
+                if (data == null) continue;
 
-                var building = prefab.GetComponent<Building>();
-                if (building == null || building.Data == null) continue;
-
-                var costs = building.Data.GetCosts();
-                string costString = building.Data.buildingName + ": ";
+                var costs = data.GetCosts();
+                string costString = $"{data.buildingName} ({data.buildingType}): ";
                 foreach (var cost in costs)
                 {
                     costString += $"{cost.Key}={cost.Value} ";
                 }
                 Debug.Log(costString);
+            }
+        }
+
+        [ContextMenu("List Buildings By Type")]
+        private void ListBuildingsByType()
+        {
+            Debug.Log("=== Buildings By Type ===");
+            var types = System.Enum.GetValues(typeof(BuildingType));
+            foreach (BuildingType type in types)
+            {
+                var buildings = GetBuildingsByType(type);
+                if (buildings.Length > 0)
+                {
+                    Debug.Log($"{type}: {string.Join(", ", buildings.Select(b => b.buildingName))}");
+                }
             }
         }
 

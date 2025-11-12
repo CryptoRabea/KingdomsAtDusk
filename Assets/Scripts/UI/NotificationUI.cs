@@ -39,7 +39,7 @@ namespace RTS.UI
 
     private void OnBuildingCompleted(BuildingCompletedEvent evt)
     {
-        ShowNotification($"{evt.BuildingType} completed!");
+       // ShowNotification($"{evt.BuildingType} completed!");
     }
 
     private void OnWaveStarted(WaveStartedEvent evt)

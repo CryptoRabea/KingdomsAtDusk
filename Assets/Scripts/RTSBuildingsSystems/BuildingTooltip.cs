@@ -43,15 +43,39 @@ namespace RTS.UI
         {
             return data.buildingType switch
             {
-                BuildingType.House => "Provides housing for citizens",
-                BuildingType.Farm => "Generates food over time",
-                BuildingType.Barracks => "Trains military units",
-                BuildingType.Tower => "Defensive structure",
-                BuildingType.Wall => "Protects your base",
-                _ => "Building"
+                BuildingType.Residential =>
+                    $"Provides housing for {data.housingCapacity} citizens. " +
+                    $"Increases happiness by {data.happinessBonus}.",
+
+                BuildingType.Production when data.generatesResources =>
+                    $"Generates {data.resourceAmount} {data.resourceType} " +
+                    $"every {data.resourceGenerationRate} seconds.",
+
+                BuildingType.Production =>
+                    "Production building for gathering resources.",
+
+                BuildingType.Military =>
+                    "Military building for training units and defense.",
+
+                BuildingType.Economic =>
+                    "Economic building that boosts trade and gold production.",
+
+                BuildingType.Religious =>
+                    $"Religious building. Increases happiness by {data.happinessBonus}.",
+
+                BuildingType.Cultural =>
+                    "Cultural building that provides knowledge and culture points.",
+
+                BuildingType.Defensive =>
+                    $"Defensive structure with {data.maxHealth} HP. " +
+                    "Protects your base from enemy attacks.",
+
+                BuildingType.Special =>
+                    "Unique building with special game-changing effects.",
+
+                _ => data.description ?? "Building"
             };
         }
-
         private string GetDetailedCosts(BuildingDataSO data)
         {
             var costs = data.GetCosts();

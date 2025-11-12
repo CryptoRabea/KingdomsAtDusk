@@ -1,20 +1,19 @@
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.InputSystem;
-using TMPro;
-using RTS.Core.Services;
+﻿using RTS.Buildings;
 using RTS.Core.Events;
-using RTS.Buildings;
+using RTS.Core.Services;
 using RTS.Managers;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace RTS.UI
 {
     /// <summary>
     /// PROFESSIONAL RTS-STYLE BUILDING HUD
-    /// Modular, data-driven, automatically updates based on resources and building availability.
-    /// Uses Unity's NEW Input System for modern input handling.
-    /// Inspired by Starcraft, Age of Empires, Command & Conquer.
+    /// Gets building list from BuildingManager - NO DUPLICATE DATA!
+    /// Automatically updates based on resources and building availability.
     /// </summary>
     public class BuildingHUD : MonoBehaviour
     {
@@ -22,9 +21,6 @@ namespace RTS.UI
         [SerializeField] private BuildingManager buildingManager;
         [SerializeField] private Transform buildingButtonContainer;
         [SerializeField] private GameObject buildingButtonPrefab;
-
-        [Header("Available Buildings")]
-        [SerializeField] private BuildingDataSO[] availableBuildings;
 
         [Header("UI Panels")]
         [SerializeField] private GameObject buildingPanel;
@@ -52,6 +48,11 @@ namespace RTS.UI
             if (buildingManager == null)
             {
                 buildingManager = Object.FindAnyObjectByType<BuildingManager>();
+                if (buildingManager == null)
+                {
+                    Debug.LogError("BuildingHUD: BuildingManager not found in scene!");
+                    return;
+                }
             }
 
             InitializeBuildingButtons();
@@ -99,16 +100,25 @@ namespace RTS.UI
 
         private void InitializeBuildingButtons()
         {
-            if (buildingButtonContainer == null || availableBuildings == null)
+            if (buildingButtonContainer == null || buildingManager == null)
             {
                 Debug.LogError("BuildingHUD: Missing references!");
+                return;
+            }
+
+            // ✅ GET BUILDINGS FROM BUILDINGMANAGER - NO DUPLICATE ARRAY!
+            BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
+
+            if (availableBuildings == null || availableBuildings.Length == 0)
+            {
+                Debug.LogWarning("BuildingHUD: No buildings available in BuildingManager!");
                 return;
             }
 
             // Clear existing buttons
             ClearButtons();
 
-            // Create button for each building
+            // Create button for each building from BuildingManager
             for (int i = 0; i < availableBuildings.Length; i++)
             {
                 BuildingDataSO buildingData = availableBuildings[i];
@@ -119,6 +129,8 @@ namespace RTS.UI
 
             // Initial update
             UpdateAllButtons();
+
+            Debug.Log($"BuildingHUD: Created {buildingButtons.Count} building buttons from BuildingManager");
         }
 
         private void ClearButtons()
@@ -192,24 +204,32 @@ namespace RTS.UI
 
         private void OnBuildingButtonClicked(int buildingIndex)
         {
-            if (buildingManager == null || buildingIndex >= availableBuildings.Length)
+            if (buildingManager == null)
+            {
+                Debug.LogError("BuildingManager not available!");
+                return;
+            }
+
+            // ✅ GET BUILDINGS FROM BUILDINGMANAGER
+            BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
+
+            if (buildingIndex >= availableBuildings.Length)
             {
                 Debug.LogError("Invalid building selection!");
                 return;
             }
 
             var buildingData = availableBuildings[buildingIndex];
-            var costs = buildingData.GetCosts();
 
             // Check if can afford
-            if (resourceService != null && !resourceService.CanAfford(costs))
+            if (!buildingManager.CanAffordBuilding(buildingData))
             {
                 Debug.Log($"Cannot afford {buildingData.buildingName}!");
                 ShowInsufficientResourcesFeedback(buildingData);
                 return;
             }
 
-            // Start placing building
+            // Start placing building through BuildingManager
             buildingManager.StartPlacingBuilding(buildingIndex);
             Debug.Log($"Started placing: {buildingData.buildingName}");
         }
@@ -219,6 +239,9 @@ namespace RTS.UI
             // Check keyboard input for hotkeys
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
+
+            // ✅ GET BUILDINGS FROM BUILDINGMANAGER
+            BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             for (int i = 0; i < buildingHotkeyStrings.Length && i < availableBuildings.Length; i++)
             {
@@ -275,7 +298,7 @@ namespace RTS.UI
                 "8" => Key.Digit8,
                 "9" => Key.Digit9,
                 "0" => Key.Digit0,
-                _ => Key.None // Use a default enum value like Key.None
+                _ => Key.None
             };
         }
 
@@ -319,6 +342,9 @@ namespace RTS.UI
             // Flash the button or show error message
             // You could also trigger a sound effect here
             Debug.LogWarning($"Not enough resources for {buildingData.buildingName}!");
+
+            // Optional: Show a UI notification
+            // notificationSystem.Show($"Need: {buildingData.GetCostString()}");
         }
 
         #endregion
@@ -337,11 +363,44 @@ namespace RTS.UI
         }
 
         /// <summary>
-        /// Refresh all building buttons (call this if you change available buildings at runtime).
+        /// Refresh all building buttons.
+        /// Call this if BuildingManager's building list changes at runtime.
         /// </summary>
         public void RefreshButtons()
         {
             InitializeBuildingButtons();
+        }
+
+        /// <summary>
+        /// Get the BuildingManager reference.
+        /// </summary>
+        public BuildingManager BuildingManager => buildingManager;
+
+        #endregion
+
+        #region Debug
+
+        [ContextMenu("Refresh Building Buttons")]
+        private void DebugRefreshButtons()
+        {
+            RefreshButtons();
+        }
+
+        [ContextMenu("Print Available Buildings")]
+        private void DebugPrintBuildings()
+        {
+            if (buildingManager == null)
+            {
+                Debug.Log("BuildingManager not assigned!");
+                return;
+            }
+
+            var buildings = buildingManager.GetAllBuildingData();
+            Debug.Log($"=== Available Buildings ({buildings.Length}) ===");
+            for (int i = 0; i < buildings.Length; i++)
+            {
+                Debug.Log($"{i}: {buildings[i].buildingName} ({buildings[i].buildingType})");
+            }
         }
 
         #endregion

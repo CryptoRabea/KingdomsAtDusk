@@ -1,3 +1,4 @@
+﻿using RTS.Core.Services;
 using UnityEngine;
 
 namespace RTS.Core.Events
@@ -63,11 +64,11 @@ namespace RTS.Core.Events
     }
 
     // ==================== BUILDING EVENTS ====================
-    
+
     public struct BuildingPlacedEvent
     {
-        public GameObject Building;
-        public Vector3 Position;
+        public GameObject Building { get; }
+        public Vector3 Position { get; }
 
         public BuildingPlacedEvent(GameObject building, Vector3 position)
         {
@@ -76,32 +77,72 @@ namespace RTS.Core.Events
         }
     }
 
+    /// <summary>
+    /// Event published when a building completes construction.
+    /// </summary>
     public struct BuildingCompletedEvent
     {
-        public GameObject Building;
-        public string BuildingType;
+        public GameObject Building { get; }
+        public string BuildingName { get; }
 
-        public BuildingCompletedEvent(GameObject building, string buildingType)
+        public BuildingCompletedEvent(GameObject building, string buildingName)
         {
             Building = building;
-            BuildingType = buildingType;
+            BuildingName = buildingName;
         }
     }
 
+    /// <summary>
+    /// Event published when a building is destroyed/demolished.
+    /// </summary>
     public struct BuildingDestroyedEvent
     {
-        public GameObject Building;
-        public string BuildingType;
+        public GameObject Building { get; }
+        public string BuildingName { get; }
 
-        public BuildingDestroyedEvent(GameObject building, string buildingType)
+        public BuildingDestroyedEvent(GameObject building, string buildingName)
         {
             Building = building;
-            BuildingType = buildingType;
+            BuildingName = buildingName;
+        }
+    }
+
+    /// <summary>
+    /// Event published when a building generates resources.
+    /// </summary>
+    public struct ResourcesGeneratedEvent
+    {
+        public string BuildingName { get; }
+        public ResourceType ResourceType { get; }
+        public int Amount { get; }
+
+        public ResourcesGeneratedEvent(string buildingName, ResourceType resourceType, int amount)
+        {
+            BuildingName = buildingName;
+            ResourceType = resourceType;
+            Amount = amount;
+        }
+    }
+
+    /// <summary>
+    /// Event published when construction progress updates (optional, for UI).
+    /// </summary>
+    public struct ConstructionProgressEvent
+    {
+        public GameObject Building { get; }
+        public string BuildingName { get; }
+        public float Progress { get; } // 0-1
+
+        public ConstructionProgressEvent(GameObject building, string buildingName, float progress)
+        {
+            Building = building;
+            BuildingName = buildingName;
+            Progress = progress;
         }
     }
 
     // ==================== UNIT EVENTS ====================
-    
+
     public struct UnitSpawnedEvent
     {
         public GameObject Unit;
