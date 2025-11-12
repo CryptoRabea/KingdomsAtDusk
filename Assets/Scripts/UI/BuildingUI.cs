@@ -52,7 +52,7 @@ namespace RTS.UI
         {
             if (buttonContainer == null || buildingManager == null)
             {
-                Debug.LogError("BuildingUI: Missing references!");
+               // Debug.LogError("BuildingUI: Missing references!");
                 return;
             }
 
