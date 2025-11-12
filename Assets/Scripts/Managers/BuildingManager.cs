@@ -302,7 +302,7 @@ namespace RTS.Managers
             // Get bounds for overlap check
             Bounds buildingBounds = GetBuildingBounds(previewBuilding);
 
-            // Check for overlapping with OTHER BUILDINGS (ignore terrain!)
+            // Check for overlapping with OTHER BUILDINGS and objects (ignore terrain!)
             Collider[] colliders = Physics.OverlapBox(
                 position + buildingBounds.center,
                 buildingBounds.extents,
@@ -312,23 +312,27 @@ namespace RTS.Managers
 
             foreach (var col in colliders)
             {
-                // Ignore self
-                if (col.gameObject == previewBuilding) continue;
-
-                // Check if it's another building
-                if (col.GetComponent<Building>() != null)
+                // ✅ FIRST: Ignore colliders on the preview building itself (must check BEFORE anything else!)
+                if (col.gameObject == previewBuilding || col.transform.IsChildOf(previewBuilding.transform))
                 {
-                    return false; // Overlapping with another building
+                    continue;
                 }
 
-                // Ignore colliders on the preview itself
-                if (col.transform.IsChildOf(previewBuilding.transform)) continue;
+                // ✅ SECOND: Ignore terrain colliders specifically (in case terrain is on a different layer)
+                if (col is TerrainCollider)
+                {
+                    continue;
+                }
 
-                // If we got here, it's some other obstacle
+                // ✅ THIRD: Block placement for ANY other collider (buildings, trees, rocks, units, etc.)
+                // This includes:
+                // - Other buildings (col.GetComponent<Building>() != null)
+                // - Any other objects with colliders (obstacles, resources, units, etc.)
+                Debug.Log($"Cannot place: colliding with {col.gameObject.name} (Layer: {LayerMask.LayerToName(col.gameObject.layer)})");
                 return false;
             }
 
-            // ✅ NEW: Check if ground is too steep/uneven
+            // ✅ Check if ground is too steep/uneven
             if (!IsGroundSuitable(position))
             {
                 return false;
