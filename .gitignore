@@ -29,12 +29,6 @@ UserSettings/
 *.DS_Store
 
 # Unity generated folders
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild*/
-[Ll]ogs/
-UserSettings/
 Sysroot/
 Snapshots/
 MemoryCaptures/
@@ -83,5 +77,10 @@ Assets/Other Models/
 Assets/3D Cartoon Village/
 Assets/Materials/
 Assets/TextMesh pro/
+Assets/60 free icons pack/
+Assets/Medieval Buildings and Objects/
+Assets/StrategyGameResourceIcons/
+Assets/VanillaLoopStudio/
+
 
 .vs/
