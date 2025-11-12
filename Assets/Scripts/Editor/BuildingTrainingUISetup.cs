@@ -69,6 +69,13 @@ namespace RTS.Editor
                 CreateTrainUnitButtonPrefab();
             }
 
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Create BuildingHUD Toggle Button", GUILayout.Height(40)))
+            {
+                CreateBuildingHUDToggleButton();
+            }
+
             GUI.enabled = true;
         }
 
@@ -84,9 +91,10 @@ namespace RTS.Editor
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 
-            // Add background image
+            // Add background image (blocks raycasts to prevent clicking through)
             Image panelBg = panelRoot.AddComponent<Image>();
             panelBg.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            panelBg.raycastTarget = true; // ✅ Block clicks to buildings behind panel
 
             // Add BuildingDetailsUI component
             BuildingDetailsUI detailsUI = panelRoot.AddComponent<BuildingDetailsUI>();
@@ -119,6 +127,7 @@ namespace RTS.Editor
             AddVerticalLayout(trainingQueuePanel, 5, TextAnchor.UpperLeft);
             Image queueBg = trainingQueuePanel.AddComponent<Image>();
             queueBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            queueBg.raycastTarget = true; // Block clicks
             SetupLayoutElement(trainingQueuePanel, 0, 120);
 
             // Queue count text
@@ -286,6 +295,59 @@ namespace RTS.Editor
             }
         }
 
+        private void CreateBuildingHUDToggleButton()
+        {
+            // Create toggle button
+            GameObject buttonObj = CreateUIElement("BuildingHUDToggleButton", targetCanvas.transform);
+            RectTransform buttonRect = buttonObj.GetComponent<RectTransform>();
+
+            // Position in top-left corner
+            buttonRect.anchorMin = new Vector2(0, 1);
+            buttonRect.anchorMax = new Vector2(0, 1);
+            buttonRect.pivot = new Vector2(0, 1);
+            buttonRect.anchoredPosition = new Vector2(10, -10);
+            buttonRect.sizeDelta = new Vector2(50, 50);
+
+            // Add button component
+            Button button = buttonObj.AddComponent<Button>();
+
+            // Add background image
+            Image buttonBg = buttonObj.AddComponent<Image>();
+            buttonBg.color = new Color(0.2f, 0.5f, 0.8f, 0.9f);
+            button.targetGraphic = buttonBg;
+
+            // Add icon text (using unicode hammer/tools icon)
+            GameObject textObj = CreateTextElement("Text", buttonObj.transform, "🏗️", 24, TextAlignmentOptions.Center);
+            RectTransform textRect = textObj.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+
+            // Add BuildingHUDToggle component
+            BuildingHUDToggle toggle = buttonObj.AddComponent<BuildingHUDToggle>();
+
+            // Try to find and assign BuildingHUD
+            BuildingHUD buildingHUD = FindObjectOfType<BuildingHUD>();
+            if (buildingHUD != null)
+            {
+                SerializedObject serializedToggle = new SerializedObject(toggle);
+                serializedToggle.FindProperty("buildingHUD").objectReferenceValue = buildingHUD;
+                serializedToggle.FindProperty("startOpen").boolValue = true;
+                serializedToggle.ApplyModifiedProperties();
+                Debug.Log("✅ BuildingHUD automatically assigned to toggle button!");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ BuildingHUD not found in scene. Assign it manually in the inspector.");
+            }
+
+            EditorUtility.SetDirty(buttonObj);
+            Selection.activeGameObject = buttonObj;
+
+            Debug.Log("✅ BuildingHUD toggle button created in top-left corner!");
+        }
+
         // Helper methods
         private GameObject CreateUIElement(string name, Transform parent)
         {
@@ -322,6 +384,7 @@ namespace RTS.Editor
 
             Image scrollBg = scrollObj.AddComponent<Image>();
             scrollBg.color = new Color(0.15f, 0.15f, 0.15f, 0.8f);
+            scrollBg.raycastTarget = true; // Block clicks
 
             ScrollRect scroll = scrollObj.AddComponent<ScrollRect>();
             scroll.horizontal = false;
@@ -335,7 +398,8 @@ namespace RTS.Editor
             viewportRect.offsetMin = Vector2.zero;
             viewportRect.offsetMax = Vector2.zero;
 
-            viewport.AddComponent<Image>();
+            Image viewportImage = viewport.AddComponent<Image>();
+            viewportImage.raycastTarget = true; // Block clicks
             viewport.AddComponent<Mask>().showMaskGraphic = false;
 
             // Content
