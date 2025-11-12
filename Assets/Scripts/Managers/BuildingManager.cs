@@ -303,8 +303,9 @@ namespace RTS.Managers
             Bounds buildingBounds = GetBuildingBounds(previewBuilding);
 
             // Check for overlapping with OTHER BUILDINGS and objects (ignore terrain!)
+            // NOTE: buildingBounds.center is already in world space, don't add position again!
             Collider[] colliders = Physics.OverlapBox(
-                position + buildingBounds.center,
+                buildingBounds.center,
                 buildingBounds.extents,
                 previewBuilding.transform.rotation,
                 ~groundLayer // ✅ Exclude ground layer from check
@@ -593,6 +594,19 @@ namespace RTS.Managers
             if (useGridSnapping && Application.isPlaying)
             {
                 // Optional: Draw placement grid for debugging
+            }
+
+            // Draw collision detection box for preview building
+            if (isPlacingBuilding && previewBuilding != null)
+            {
+                Bounds bounds = GetBuildingBounds(previewBuilding);
+
+                // Draw the overlap box that's being checked for collisions
+                Gizmos.color = canPlace ? Color.green : Color.red;
+                Gizmos.DrawWireCube(bounds.center, bounds.size);
+
+                // Draw a small sphere at the center
+                Gizmos.DrawSphere(bounds.center, 0.2f);
             }
         }
     }
