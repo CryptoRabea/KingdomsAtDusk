@@ -278,7 +278,7 @@ namespace RTS.Editor
             hotkeyText.color = new Color(1f, 1f, 0.5f, 0.8f);
 
             // Add BuildingButton component
-            var buildingButton = buttonObj.AddComponent<RTS.RTSBuildingsSystems.BuildingButton>();
+            var buildingButton = buttonObj.AddComponent<RTS.UI.BuildingButton>();
 
             // Assign references using reflection (since fields are private/serialized)
             SerializedObject serializedButton = new SerializedObject(buildingButton);
