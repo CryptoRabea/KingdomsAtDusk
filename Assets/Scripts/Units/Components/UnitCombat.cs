@@ -193,12 +193,12 @@ namespace RTS.Units
 
         #region Callbacks
 
-        private void OnUnitDied()
+      /*  private void OnUnitDied()
         {
             // Disable combat when unit dies
             canAttack = false;
             currentTarget = null;
-        }
+        }*/
 
         #endregion
 
