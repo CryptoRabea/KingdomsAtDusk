@@ -252,7 +252,7 @@ namespace RTS.Core.Events
     }
 
     // ==================== SELECTION EVENTS ====================
-    
+
     public struct UnitSelectedEvent
     {
         public GameObject Unit;
@@ -280,6 +280,68 @@ namespace RTS.Core.Events
         public SelectionChangedEvent(int count)
         {
             SelectionCount = count;
+        }
+    }
+
+    public struct BuildingSelectedEvent
+    {
+        public GameObject Building;
+
+        public BuildingSelectedEvent(GameObject building)
+        {
+            Building = building;
+        }
+    }
+
+    public struct BuildingDeselectedEvent
+    {
+        public GameObject Building;
+
+        public BuildingDeselectedEvent(GameObject building)
+        {
+            Building = building;
+        }
+    }
+
+    // ==================== UNIT TRAINING EVENTS ====================
+
+    public struct UnitTrainingStartedEvent
+    {
+        public GameObject Building;
+        public string UnitName;
+
+        public UnitTrainingStartedEvent(GameObject building, string unitName)
+        {
+            Building = building;
+            UnitName = unitName;
+        }
+    }
+
+    public struct UnitTrainingCompletedEvent
+    {
+        public GameObject Building;
+        public GameObject Unit;
+        public string UnitName;
+
+        public UnitTrainingCompletedEvent(GameObject building, GameObject unit, string unitName)
+        {
+            Building = building;
+            Unit = unit;
+            UnitName = unitName;
+        }
+    }
+
+    public struct TrainingProgressEvent
+    {
+        public GameObject Building;
+        public string UnitName;
+        public float Progress; // 0-1
+
+        public TrainingProgressEvent(GameObject building, string unitName, float progress)
+        {
+            Building = building;
+            UnitName = unitName;
+            Progress = progress;
         }
     }
 }

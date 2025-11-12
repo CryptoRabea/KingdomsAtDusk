@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Services;
+using RTS.Units;
 
 namespace RTS.Buildings
 {
@@ -17,6 +18,33 @@ namespace RTS.Buildings
         Cultural,       // Libraries, monuments
         Defensive,      // Walls, towers
         Special         // Unique buildings
+    }
+
+    /// <summary>
+    /// Configuration for a trainable unit.
+    /// </summary>
+    [System.Serializable]
+    public class TrainableUnitData
+    {
+        public UnitConfigSO unitConfig;
+        public int woodCost;
+        public int foodCost;
+        public int goldCost;
+        public int stoneCost;
+        public float trainingTime = 5f;
+
+        /// <summary>
+        /// Get costs as a dictionary.
+        /// </summary>
+        public Dictionary<ResourceType, int> GetCosts()
+        {
+            var costs = new Dictionary<ResourceType, int>();
+            if (woodCost > 0) costs[ResourceType.Wood] = woodCost;
+            if (foodCost > 0) costs[ResourceType.Food] = foodCost;
+            if (goldCost > 0) costs[ResourceType.Gold] = goldCost;
+            if (stoneCost > 0) costs[ResourceType.Stone] = stoneCost;
+            return costs;
+        }
     }
 
     /// <summary>
@@ -65,6 +93,12 @@ namespace RTS.Buildings
         [Header("Additional Properties (Optional)")]
         public int maxHealth = 100;
         public float repairCostMultiplier = 0.5f; // 50% of build cost to repair
+
+        [Header("Unit Training (Optional)")]
+        [Tooltip("Can this building train units?")]
+        public bool canTrainUnits = false;
+        [Tooltip("Units that can be trained from this building")]
+        public List<TrainableUnitData> trainableUnits = new List<TrainableUnitData>();
 
         private void OnValidate()
         {
