@@ -29,6 +29,10 @@ namespace RTS.Managers
         [SerializeField] private bool requireFlatGround = true;      // Enforce flat ground check
         [SerializeField] private int groundSamples = 5;              // Number of ground check points
 
+        [Header("Wall Placement")]
+        [SerializeField] private WallPlacementController wallPlacementController;
+        [SerializeField] private bool useWallPlacementForWalls = true; // Use pole-to-pole placement for walls
+
         [Header("Building Data - SOURCE OF TRUTH")]
         [Tooltip("Assign BuildingDataSO assets here, NOT prefabs!")]
         [SerializeField] private BuildingDataSO[] buildingDataArray; // ✅ USE DATA, NOT PREFABS
@@ -114,13 +118,27 @@ namespace RTS.Managers
             // Cancel any existing placement
             CancelPlacement();
 
-            currentBuildingData = buildingData;  // ✅ Store the data
-            isPlacingBuilding = true;
+            // Check if this is a wall and should use wall placement controller
+            bool isWall = buildingData.buildingType == BuildingType.Defensive &&
+                          buildingData.buildingPrefab.GetComponent<WallConnectionSystem>() != null;
 
-            // Create preview from the prefab referenced in the data
-            CreateBuildingPreview();
+            if (isWall && useWallPlacementForWalls && wallPlacementController != null)
+            {
+                // Use wall placement controller for walls
+                wallPlacementController.StartPlacingWalls(buildingData);
+                Debug.Log($"Started placing walls (pole-to-pole mode): {buildingData.buildingName}");
+            }
+            else
+            {
+                // Use regular building placement
+                currentBuildingData = buildingData;  // ✅ Store the data
+                isPlacingBuilding = true;
 
-            Debug.Log($"Started placing: {buildingData.buildingName}");
+                // Create preview from the prefab referenced in the data
+                CreateBuildingPreview();
+
+                Debug.Log($"Started placing: {buildingData.buildingName}");
+            }
         }
 
         /// <summary>
@@ -128,6 +146,13 @@ namespace RTS.Managers
         /// </summary>
         public void CancelPlacement()
         {
+            // Cancel wall placement if active
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
+            {
+                wallPlacementController.CancelWallPlacement();
+            }
+
+            // Cancel regular building placement
             if (previewBuilding != null)
             {
                 Destroy(previewBuilding);
@@ -486,7 +511,7 @@ namespace RTS.Managers
         /// <summary>
         /// Check if currently placing a building.
         /// </summary>
-        public bool IsPlacing => isPlacingBuilding;
+        public bool IsPlacing => isPlacingBuilding || (wallPlacementController != null && wallPlacementController.IsPlacingWalls);
 
         /// <summary>
         /// Get the current building data being placed (if any).
