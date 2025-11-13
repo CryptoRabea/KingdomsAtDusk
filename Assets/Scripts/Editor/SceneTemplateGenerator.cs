@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
+using RTS.Core.Services;
 
 namespace RTS.Editor
 {
@@ -317,7 +318,7 @@ namespace RTS.Editor
             {
                 GameObject rm = new GameObject("ResourceManager");
                 rm.transform.SetParent(gameManager.transform);
-                rm.AddComponent<RTS.Managers.ResourceManager>();
+                rm.AddComponent<ResourceManager>();
             }
 
             if (includeHappinessManager)
