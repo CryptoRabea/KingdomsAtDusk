@@ -43,7 +43,7 @@ namespace RTS.Debugging
         {
             Debug.Log("--- 1. Checking BuildingDetailsUI ---");
 
-            var detailsUI = FindObjectOfType<BuildingDetailsUI>();
+            var detailsUI = FindFirstObjectByType<BuildingDetailsUI>();
             if (detailsUI == null)
             {
                 Debug.LogError("❌ PROBLEM FOUND: BuildingDetailsUI component NOT found in scene!");
@@ -125,7 +125,7 @@ namespace RTS.Debugging
         {
             Debug.Log("--- 2. Checking BuildingSelectionManager ---");
 
-            var selectionManager = FindObjectOfType<BuildingSelectionManager>();
+            var selectionManager = FindFirstObjectByType<BuildingSelectionManager>();
             if (selectionManager == null)
             {
                 Debug.LogError("❌ PROBLEM FOUND: BuildingSelectionManager NOT found in scene!");
@@ -198,7 +198,7 @@ namespace RTS.Debugging
         {
             Debug.Log("--- 3. Checking Buildings in Scene ---");
 
-            var buildings = FindObjectsOfType<Building>();
+            var buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
             if (buildings.Length == 0)
             {
                 Debug.LogWarning("⚠️ No Building components found in scene!");
@@ -318,7 +318,7 @@ namespace RTS.Debugging
 
             // This would require accessing EventBus internals
             // For now, just check if BuildingDetailsUI is subscribing
-            var detailsUI = FindObjectOfType<BuildingDetailsUI>();
+            var detailsUI = FindFirstObjectByType<BuildingDetailsUI>();
             if (detailsUI != null && detailsUI.enabled)
             {
                 Debug.Log("✅ BuildingDetailsUI is enabled and should be subscribed to events");
