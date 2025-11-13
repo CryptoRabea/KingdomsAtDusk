@@ -373,7 +373,7 @@ public bool IsPlacing { get; }
 
 ```csharp
 // Get building manager
-BuildingManager buildingManager = FindObjectOfType<BuildingManager>();
+BuildingManager buildingManager = Object.FindFirstObjectByType<BuildingManager>();
 
 // Get wall data
 BuildingDataSO wallData = buildingManager.GetBuildingByName("Stone Wall");
@@ -388,7 +388,8 @@ buildingManager.StartPlacingBuilding(wallData);
 
 ```csharp
 // Place walls programmatically
-WallPlacementController wallController = FindObjectOfType<WallPlacementController>();
+WallPlacementController wallController = Object.FindFirstObjectByType<WallPlacementController>();
+BuildingManager buildingManager = Object.FindFirstObjectByType<BuildingManager>();
 BuildingDataSO wallData = buildingManager.GetBuildingByName("Stone Wall");
 
 wallController.StartPlacingWalls(wallData);

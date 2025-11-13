@@ -101,7 +101,7 @@ namespace RTS.Debugging
         [ContextMenu("Check BuildingDetailsUI in Scene")]
         private void CheckBuildingDetailsUI()
         {
-            var detailsUI = FindObjectOfType<RTS.UI.BuildingDetailsUI>();
+            var detailsUI = FindFirstObjectByType<RTS.UI.BuildingDetailsUI>();
 
             if (detailsUI != null)
             {
@@ -137,7 +137,7 @@ namespace RTS.Debugging
         [ContextMenu("List All Buildings in Scene")]
         private void ListAllBuildings()
         {
-            var buildings = FindObjectsOfType<Building>();
+            var buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
             Debug.Log($"Found {buildings.Length} buildings in scene:");
 
             foreach (var building in buildings)
