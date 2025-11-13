@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using RTS.Units;
 using RTS.Units.AI;
-using RTS.Units.Components;
 
 namespace RTS.Editor
 {

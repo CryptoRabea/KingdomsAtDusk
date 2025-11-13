@@ -5,9 +5,9 @@ using RTS.Core.Events;
 namespace RTS.Buildings
 {
     /// <summary>
-    /// Simplified centralized wall system - Stronghold Crusader style.
-    /// Uses single wall prefab with automatic rotation and connection detection.
-    /// Walls can be dragged to create long segments and upgraded to towers.
+    /// Handles modular wall connections in RTS style.
+    /// Walls automatically detect neighbors and update their visual mesh based on connections.
+    /// Attach this component to wall building prefabs.
     /// </summary>
     public class WallConnectionSystem : MonoBehaviour
     {
@@ -16,15 +16,9 @@ namespace RTS.Buildings
         [Tooltip("Should this wall connect to other walls?")]
         [SerializeField] private bool enableConnections = true;
 
-        [Header("Wall Visual")]
-        [Tooltip("The main wall mesh object that will be rotated")]
-        [SerializeField] private GameObject wallMesh;
-
-        [Header("Collider Settings")]
-        [Tooltip("Wall collider for selection and gameplay")]
-        [SerializeField] private BoxCollider wallCollider;
-        [Tooltip("Auto-create collider if not assigned")]
-        [SerializeField] private bool autoCreateCollider = true;
+        [Header("Visual Variants")]
+        [Tooltip("Assign 16 mesh variants (index = connection bitmask). North=1, East=2, South=4, West=8")]
+        [SerializeField] private GameObject[] meshVariants = new GameObject[16];
 
         // Static registry of all walls - NO GRID, just a list
         private static List<WallConnectionSystem> allWalls = new List<WallConnectionSystem>();
@@ -32,23 +26,11 @@ namespace RTS.Buildings
         // Instance data
         private List<WallConnectionSystem> connectedWalls = new List<WallConnectionSystem>();
         private Building buildingComponent;
+        private bool isRegistered = false;
 
         private void Awake()
         {
             buildingComponent = GetComponent<Building>();
-
-            // Auto-find wall mesh if not assigned
-            if (wallMesh == null)
-            {
-                Transform meshTransform = transform.Find("WallMesh");
-                if (meshTransform != null)
-                {
-                    wallMesh = meshTransform.gameObject;
-                }
-            }
-
-            // Setup collider
-            SetupCollider();
         }
 
         private void Start()
@@ -186,6 +168,36 @@ namespace RTS.Buildings
             {
                 // Junction (3+ connections) - keep default
                 wallMesh.transform.localRotation = Quaternion.identity;
+        /// Update the visual mesh based on connection state.
+        /// </summary>
+        private void UpdateVisual()
+        {
+            if (meshVariants == null || meshVariants.Length != 16)
+            {
+                Debug.LogWarning($"Wall at {gridPosition}: meshVariants array must have exactly 16 elements!");
+                return;
+            }
+
+            // Deactivate all variants
+            for (int i = 0; i < meshVariants.Length; i++)
+            {
+                if (meshVariants[i] != null)
+                {
+                    meshVariants[i].SetActive(false);
+                }
+            }
+
+            // Activate the correct variant
+            if (connectionState >= 0 && connectionState < meshVariants.Length)
+            {
+                if (meshVariants[connectionState] != null)
+                {
+                    meshVariants[connectionState].SetActive(true);
+                }
+                else
+                {
+                    Debug.LogWarning($"Wall at {gridPosition}: mesh variant {connectionState} is not assigned!");
+                }
             }
         }
 
@@ -279,8 +291,27 @@ namespace RTS.Buildings
             {
                 wallMesh.transform.Rotate(0, yRotation, 0);
             }
+        public Vector2Int GetGridPosition() => gridPosition;
+
+        /// <summary>
+        /// Check if this wall is connected in a specific direction.
+        /// </summary>
+        public bool IsConnected(WallDirection direction)
+        {
+            return (connectionState & (int)direction) != 0;
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Wall connection directions.
+    /// </summary>
+    public enum WallDirection
+    {
+        North = 1,
+        East = 2,
+        South = 4,
+        West = 8
     }
 }

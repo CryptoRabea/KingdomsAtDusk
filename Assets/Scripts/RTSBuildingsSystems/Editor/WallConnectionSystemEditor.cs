@@ -8,17 +8,13 @@ namespace RTS.Buildings.Editor
     {
         private SerializedProperty connectionDistanceProp;
         private SerializedProperty enableConnectionsProp;
-        private SerializedProperty wallMeshProp;
-        private SerializedProperty wallColliderProp;
-        private SerializedProperty autoCreateColliderProp;
+        private SerializedProperty meshVariantsProp;
 
         private void OnEnable()
         {
             connectionDistanceProp = serializedObject.FindProperty("connectionDistance");
             enableConnectionsProp = serializedObject.FindProperty("enableConnections");
-            wallMeshProp = serializedObject.FindProperty("wallMesh");
-            wallColliderProp = serializedObject.FindProperty("wallCollider");
-            autoCreateColliderProp = serializedObject.FindProperty("autoCreateCollider");
+            meshVariantsProp = serializedObject.FindProperty("meshVariants");
         }
 
         public override void OnInspectorGUI()
@@ -40,6 +36,7 @@ namespace RTS.Buildings.Editor
                 MessageType.Info
             );
 
+            EditorGUILayout.LabelField("Wall Connection System", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
             // Basic settings
@@ -47,15 +44,24 @@ namespace RTS.Buildings.Editor
             EditorGUILayout.PropertyField(enableConnectionsProp);
             EditorGUILayout.Space();
 
-            // Visual settings
-            EditorGUILayout.LabelField("Visual Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(wallMeshProp, new GUIContent("Wall Mesh", "The main wall mesh object that will be rotated"));
+            // Mesh variants with visual guide
+            EditorGUILayout.LabelField("Mesh Variants (16 Connection States)", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Each index represents a connection state:\n" +
+                "North=1, East=2, South=4, West=8\n\n" +
+                "Examples:\n" +
+                "0 = No connections (isolated wall)\n" +
+                "3 = North + East (corner)\n" +
+                "5 = North + South (straight vertical)\n" +
+                "10 = East + West (straight horizontal)\n" +
+                "15 = All directions (4-way intersection)",
+                MessageType.Info
+            );
+
             EditorGUILayout.Space();
 
-            // Collider settings
-            EditorGUILayout.LabelField("Collider Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(wallColliderProp, new GUIContent("Wall Collider", "Collider for selection and gameplay"));
-            EditorGUILayout.PropertyField(autoCreateColliderProp, new GUIContent("Auto Create Collider", "Automatically create collider if not assigned"));
+            // Draw mesh variants in a grid
+            DrawMeshVariantsGrid();
 
             EditorGUILayout.Space();
 
@@ -82,24 +88,116 @@ namespace RTS.Buildings.Editor
                     }
                 }
                 EditorGUILayout.EndVertical();
+                EditorGUILayout.LabelField($"Grid Position: {wall.GetGridPosition()}");
+                EditorGUILayout.LabelField($"Connection State: {wall.GetConnectionState()} ({GetConnectionLabel(wall.GetConnectionState())})");
 
                 EditorGUILayout.Space();
 
-                // Manual controls
-                EditorGUILayout.LabelField("Manual Controls", EditorStyles.boldLabel);
+                // Connection status
                 EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("Rotate 90°"))
-                {
-                    wall.RotateWall(90f);
-                }
-                if (GUILayout.Button("Force Update"))
+                DrawConnectionButton("North", wall.IsConnected(WallDirection.North));
+                DrawConnectionButton("East", wall.IsConnected(WallDirection.East));
+                DrawConnectionButton("South", wall.IsConnected(WallDirection.South));
+                DrawConnectionButton("West", wall.IsConnected(WallDirection.West));
+                EditorGUILayout.EndHorizontal();
+
+                if (GUILayout.Button("Force Update Connections"))
                 {
                     wall.UpdateConnections();
                 }
-                EditorGUILayout.EndHorizontal();
             }
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawMeshVariantsGrid()
+        {
+            // Connection state labels and visual representation
+            string[] stateLabels = new string[]
+            {
+                "0: None",           // 0000
+                "1: N",              // 0001
+                "2: E",              // 0010
+                "3: N+E",            // 0011
+                "4: S",              // 0100
+                "5: N+S",            // 0101
+                "6: E+S",            // 0110
+                "7: N+E+S",          // 0111
+                "8: W",              // 1000
+                "9: N+W",            // 1001
+                "10: E+W",           // 1010
+                "11: N+E+W",         // 1011
+                "12: S+W",           // 1100
+                "13: N+S+W",         // 1101
+                "14: E+S+W",         // 1110
+                "15: N+E+S+W"        // 1111
+            };
+
+            for (int i = 0; i < 16; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+
+                // State label with visual diagram
+                GUIStyle labelStyle = new GUIStyle(GUI.skin.label);
+                labelStyle.fixedWidth = 120;
+                EditorGUILayout.LabelField($"{stateLabels[i]}", labelStyle);
+
+                // Draw mini diagram
+                DrawConnectionDiagram(i, 20);
+
+                // Property field
+                SerializedProperty element = meshVariantsProp.GetArrayElementAtIndex(i);
+                EditorGUILayout.PropertyField(element, GUIContent.none);
+
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+
+        private void DrawConnectionDiagram(int connectionState, float size)
+        {
+            Rect rect = GUILayoutUtility.GetRect(size, size);
+
+            // Draw center square
+            EditorGUI.DrawRect(new Rect(rect.center.x - 3, rect.center.y - 3, 6, 6), Color.gray);
+
+            // Draw connections
+            Color connectedColor = new Color(0.3f, 0.8f, 0.3f);
+
+            // North (up)
+            if ((connectionState & 1) != 0)
+                EditorGUI.DrawRect(new Rect(rect.center.x - 1, rect.y, 2, size/2 - 3), connectedColor);
+
+            // East (right)
+            if ((connectionState & 2) != 0)
+                EditorGUI.DrawRect(new Rect(rect.center.x + 3, rect.center.y - 1, size/2 - 3, 2), connectedColor);
+
+            // South (down)
+            if ((connectionState & 4) != 0)
+                EditorGUI.DrawRect(new Rect(rect.center.x - 1, rect.center.y + 3, 2, size/2 - 3), connectedColor);
+
+            // West (left)
+            if ((connectionState & 8) != 0)
+                EditorGUI.DrawRect(new Rect(rect.x, rect.center.y - 1, size/2 - 3, 2), connectedColor);
+        }
+
+        private void DrawConnectionButton(string direction, bool isConnected)
+        {
+            Color oldColor = GUI.backgroundColor;
+            GUI.backgroundColor = isConnected ? Color.green : Color.red;
+            GUILayout.Button(direction, GUILayout.Height(20));
+            GUI.backgroundColor = oldColor;
+        }
+
+        private string GetConnectionLabel(int state)
+        {
+            if (state == 0) return "None";
+
+            string result = "";
+            if ((state & 1) != 0) result += "N";
+            if ((state & 2) != 0) result += "E";
+            if ((state & 4) != 0) result += "S";
+            if ((state & 8) != 0) result += "W";
+            return result;
         }
     }
 }
