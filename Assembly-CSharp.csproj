@@ -137,6 +137,7 @@
     <Compile Include="Assets\Scripts\Core\IServices.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingHUD.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\HealerAI.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\SpawnPointFlag.cs" />
