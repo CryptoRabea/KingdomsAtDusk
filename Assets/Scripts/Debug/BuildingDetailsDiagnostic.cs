@@ -56,6 +56,30 @@ namespace RTS.Debugging
             Debug.Log($"   - Component enabled: {detailsUI.enabled}");
             Debug.Log($"   - GameObject active: {detailsUI.gameObject.activeInHierarchy}");
 
+            // Check GameObject structure
+            Transform panelChild = detailsUI.transform.Find("BuildingDetailsPanel");
+            if (panelChild == null)
+            {
+                Debug.LogError("❌ PROBLEM FOUND: BuildingDetailsPanel child not found!");
+                Debug.LogError("   EXPECTED STRUCTURE:");
+                Debug.LogError("   BuildingDetailsUI (GameObject, ACTIVE)");
+                Debug.LogError("   └─ BuildingDetailsPanel (GameObject, INACTIVE)");
+                Debug.LogError("   FIX: Delete and recreate using Tools > RTS > Setup Building Training UI");
+            }
+            else
+            {
+                Debug.Log($"✅ Correct structure found: {detailsUI.gameObject.name} -> {panelChild.name}");
+                Debug.Log($"   - Parent active: {detailsUI.gameObject.activeSelf}");
+                Debug.Log($"   - Child active: {panelChild.gameObject.activeSelf}");
+
+                if (detailsUI.gameObject.activeSelf == false)
+                {
+                    Debug.LogError("❌ PROBLEM FOUND: BuildingDetailsUI GameObject is INACTIVE!");
+                    Debug.LogError("   The component GameObject must be ACTIVE to receive events!");
+                    Debug.LogError("   FIX: Activate the BuildingDetailsUI GameObject in the hierarchy");
+                }
+            }
+
             // Check panelRoot using reflection
             var panelRootField = typeof(BuildingDetailsUI).GetField("panelRoot",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -65,14 +89,13 @@ namespace RTS.Debugging
                 var panelRoot = panelRootField.GetValue(detailsUI) as GameObject;
                 if (panelRoot == null)
                 {
-                    Debug.LogError("❌ PROBLEM FOUND: panelRoot is NULL!");
+                    Debug.LogError("❌ PROBLEM FOUND: panelRoot reference is NULL!");
                     Debug.LogError("   FIX: Run Tools > RTS > Setup Building Training UI again");
                 }
                 else
                 {
-                    Debug.Log($"✅ PanelRoot assigned: {panelRoot.name}");
-                    Debug.Log($"   - Currently active: {panelRoot.activeSelf}");
-                    Debug.Log($"   - (Panel should start hidden and show when building is selected)");
+                    Debug.Log($"✅ PanelRoot reference assigned: {panelRoot.name}");
+                    Debug.Log($"   - Panel should start INACTIVE and show when building selected");
                 }
             }
 
