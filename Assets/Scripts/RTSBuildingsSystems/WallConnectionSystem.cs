@@ -48,28 +48,6 @@ namespace RTS.Buildings
             UpdateConnections();
         }
 
-        /// <summary>
-        /// Setup or create collider for wall selection and gameplay
-        /// </summary>
-        private void SetupCollider()
-        {
-            if (wallCollider == null && autoCreateCollider)
-            {
-                wallCollider = gameObject.GetComponent<BoxCollider>();
-                if (wallCollider == null)
-                {
-                    wallCollider = gameObject.AddComponent<BoxCollider>();
-                }
-            }
-
-            if (wallCollider != null)
-            {
-                // Set default collider size for a standard wall segment
-                wallCollider.center = new Vector3(0, 1f, 0);
-                wallCollider.size = new Vector3(1f, 2f, 0.5f);
-            }
-        }
-
         private void OnDestroy()
         {
             // Unregister this wall
@@ -135,48 +113,18 @@ namespace RTS.Buildings
         #region Visual Updates
 
         /// <summary>
-        /// Update visual - SUPER SIMPLE, just rotate to face connected walls
-        /// </summary>
-        private void UpdateVisual()
-        {
-            if (wallMesh == null) return;
-
-            int connectionCount = connectedWalls.Count;
-
-            if (connectionCount == 0)
-            {
-                // Standalone - no rotation
-                wallMesh.transform.localRotation = Quaternion.identity;
-            }
-            else if (connectionCount == 1)
-            {
-                // End piece - face the connected wall
-                Vector3 directionToWall = (connectedWalls[0].transform.position - transform.position).normalized;
-                float angle = Mathf.Atan2(directionToWall.x, directionToWall.z) * Mathf.Rad2Deg;
-                wallMesh.transform.localRotation = Quaternion.Euler(0, angle, 0);
-            }
-            else if (connectionCount == 2)
-            {
-                // Straight wall - face between two connections
-                Vector3 dir1 = (connectedWalls[0].transform.position - transform.position).normalized;
-                Vector3 dir2 = (connectedWalls[1].transform.position - transform.position).normalized;
-                Vector3 avgDir = (dir1 + dir2).normalized;
-                float angle = Mathf.Atan2(avgDir.x, avgDir.z) * Mathf.Rad2Deg;
-                wallMesh.transform.localRotation = Quaternion.Euler(0, angle, 0);
-            }
-            else
-            {
-                // Junction (3+ connections) - keep default
-                wallMesh.transform.localRotation = Quaternion.identity;
-        /// Update the visual mesh based on connection state.
+        /// Update visual mesh - activates/deactivates mesh variants based on connections
         /// </summary>
         private void UpdateVisual()
         {
             if (meshVariants == null || meshVariants.Length != 16)
             {
-                Debug.LogWarning($"Wall at {gridPosition}: meshVariants array must have exactly 16 elements!");
+                // No variants configured, skip visual update
                 return;
             }
+
+            // Calculate connection bitmask
+            int connectionBitmask = CalculateConnectionBitmask();
 
             // Deactivate all variants
             for (int i = 0; i < meshVariants.Length; i++)
@@ -187,18 +135,51 @@ namespace RTS.Buildings
                 }
             }
 
-            // Activate the correct variant
-            if (connectionState >= 0 && connectionState < meshVariants.Length)
+            // Activate the correct variant based on bitmask
+            if (connectionBitmask >= 0 && connectionBitmask < meshVariants.Length)
             {
-                if (meshVariants[connectionState] != null)
+                if (meshVariants[connectionBitmask] != null)
                 {
-                    meshVariants[connectionState].SetActive(true);
+                    meshVariants[connectionBitmask].SetActive(true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calculate connection bitmask based on nearby walls
+        /// North=1, East=2, South=4, West=8
+        /// </summary>
+        private int CalculateConnectionBitmask()
+        {
+            int bitmask = 0;
+
+            foreach (var wall in connectedWalls)
+            {
+                if (wall == null) continue;
+
+                Vector3 direction = wall.transform.position - transform.position;
+                direction.y = 0; // Ignore vertical difference
+
+                // Determine which direction the wall is in
+                if (Mathf.Abs(direction.x) > Mathf.Abs(direction.z))
+                {
+                    // East or West
+                    if (direction.x > 0)
+                        bitmask |= 2; // East
+                    else
+                        bitmask |= 8; // West
                 }
                 else
                 {
-                    Debug.LogWarning($"Wall at {gridPosition}: mesh variant {connectionState} is not assigned!");
+                    // North or South
+                    if (direction.z > 0)
+                        bitmask |= 1; // North
+                    else
+                        bitmask |= 4; // South
                 }
             }
+
+            return bitmask;
         }
 
         #endregion
@@ -283,22 +264,12 @@ namespace RTS.Buildings
         public List<WallConnectionSystem> GetConnectedWalls() => connectedWalls;
 
         /// <summary>
-        /// Manual rotation of wall mesh (for player adjustment)
-        /// </summary>
-        public void RotateWall(float yRotation)
-        {
-            if (wallMesh != null)
-            {
-                wallMesh.transform.Rotate(0, yRotation, 0);
-            }
-        public Vector2Int GetGridPosition() => gridPosition;
-
-        /// <summary>
         /// Check if this wall is connected in a specific direction.
         /// </summary>
         public bool IsConnected(WallDirection direction)
         {
-            return (connectionState & (int)direction) != 0;
+            int bitmask = CalculateConnectionBitmask();
+            return (bitmask & (int)direction) != 0;
         }
 
         #endregion
