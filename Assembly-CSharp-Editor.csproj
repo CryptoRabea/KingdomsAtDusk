@@ -62,7 +62,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Editor\BuildingTrainingUISetup.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallConnectionSystemEditor.cs" />
     <Compile Include="Assets\Scripts\Editor\BuildingHUDSetup.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallPrefabSetupUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

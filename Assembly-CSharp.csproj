@@ -122,6 +122,7 @@
     <Compile Include="Assets\Scripts\UI\BuildingDetailsUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitStateType.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallConnectionSystem.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\InputSystem_Actions.cs" />
@@ -135,6 +136,7 @@
     <Compile Include="Assets\Scripts\Units\AI\Specialized\HealerAI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\SpawnPointFlag.cs" />
     <Compile Include="Assets\Scripts\Core\EventBus.cs" />
     <Compile Include="Assets\Scripts\Camera\RTSCameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
