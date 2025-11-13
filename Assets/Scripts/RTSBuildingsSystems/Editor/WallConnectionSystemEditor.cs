@@ -6,7 +6,7 @@ namespace RTS.Buildings.Editor
     [CustomEditor(typeof(WallConnectionSystem))]
     public class WallConnectionSystemEditor : UnityEditor.Editor
     {
-        private SerializedProperty gridSizeProp;
+        private SerializedProperty connectionDistanceProp;
         private SerializedProperty enableConnectionsProp;
         private SerializedProperty wallMeshProp;
         private SerializedProperty wallColliderProp;
@@ -14,7 +14,7 @@ namespace RTS.Buildings.Editor
 
         private void OnEnable()
         {
-            gridSizeProp = serializedObject.FindProperty("gridSize");
+            connectionDistanceProp = serializedObject.FindProperty("connectionDistance");
             enableConnectionsProp = serializedObject.FindProperty("enableConnections");
             wallMeshProp = serializedObject.FindProperty("wallMesh");
             wallColliderProp = serializedObject.FindProperty("wallCollider");
@@ -27,21 +27,23 @@ namespace RTS.Buildings.Editor
 
             WallConnectionSystem wall = (WallConnectionSystem)target;
 
-            EditorGUILayout.LabelField("Simplified Wall System - Stronghold Style", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("FREE-BUILD Wall System - No Grid!", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
             // Info box
             EditorGUILayout.HelpBox(
-                "Simplified wall system using single wall mesh with automatic rotation.\n" +
-                "Walls automatically connect and rotate based on neighbors.\n" +
-                "No need for 16 mesh variants!",
+                "TRUE FREE-BUILD wall system!\n" +
+                "✓ NO grid snapping\n" +
+                "✓ NO variants\n" +
+                "✓ Place anywhere, drag to connect\n" +
+                "✓ Distance-based connections",
                 MessageType.Info
             );
 
             EditorGUILayout.Space();
 
             // Basic settings
-            EditorGUILayout.PropertyField(gridSizeProp);
+            EditorGUILayout.PropertyField(connectionDistanceProp, new GUIContent("Connection Distance", "How close walls need to be to connect"));
             EditorGUILayout.PropertyField(enableConnectionsProp);
             EditorGUILayout.Space();
 
@@ -63,26 +65,23 @@ namespace RTS.Buildings.Editor
                 EditorGUILayout.LabelField("Runtime Info", EditorStyles.boldLabel);
 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                EditorGUILayout.LabelField($"Grid Position: {wall.GetGridPosition()}");
-                EditorGUILayout.LabelField($"Wall Type: {wall.GetWallType()}");
-                EditorGUILayout.LabelField($"Connection State: {wall.GetConnectionState()} ({GetConnectionLabel(wall.GetConnectionState())})");
+                EditorGUILayout.LabelField($"Position: {wall.transform.position}");
+                EditorGUILayout.LabelField($"Connected Walls: {wall.GetConnectionCount()}");
+
+                var connected = wall.GetConnectedWalls();
+                if (connected.Count > 0)
+                {
+                    EditorGUILayout.LabelField("Connected to:");
+                    foreach (var connectedWall in connected)
+                    {
+                        if (connectedWall != null)
+                        {
+                            float dist = Vector3.Distance(wall.transform.position, connectedWall.transform.position);
+                            EditorGUILayout.LabelField($"  • Wall at {connectedWall.transform.position} (dist: {dist:F2})");
+                        }
+                    }
+                }
                 EditorGUILayout.EndVertical();
-
-                EditorGUILayout.Space();
-
-                // Connection status diagram
-                EditorGUILayout.LabelField("Connections", EditorStyles.boldLabel);
-                DrawConnectionDiagram(wall.GetConnectionState(), 60);
-
-                EditorGUILayout.Space();
-
-                // Connection buttons
-                EditorGUILayout.BeginHorizontal();
-                DrawConnectionButton("North", wall.IsConnected(WallDirection.North));
-                DrawConnectionButton("East", wall.IsConnected(WallDirection.East));
-                DrawConnectionButton("South", wall.IsConnected(WallDirection.South));
-                DrawConnectionButton("West", wall.IsConnected(WallDirection.West));
-                EditorGUILayout.EndHorizontal();
 
                 EditorGUILayout.Space();
 
@@ -101,53 +100,6 @@ namespace RTS.Buildings.Editor
             }
 
             serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawConnectionDiagram(int connectionState, float size)
-        {
-            Rect rect = GUILayoutUtility.GetRect(size, size);
-
-            // Draw center square
-            EditorGUI.DrawRect(new Rect(rect.center.x - 3, rect.center.y - 3, 6, 6), Color.gray);
-
-            // Draw connections
-            Color connectedColor = new Color(0.3f, 0.8f, 0.3f);
-
-            // North (up)
-            if ((connectionState & 1) != 0)
-                EditorGUI.DrawRect(new Rect(rect.center.x - 1, rect.y, 2, size/2 - 3), connectedColor);
-
-            // East (right)
-            if ((connectionState & 2) != 0)
-                EditorGUI.DrawRect(new Rect(rect.center.x + 3, rect.center.y - 1, size/2 - 3, 2), connectedColor);
-
-            // South (down)
-            if ((connectionState & 4) != 0)
-                EditorGUI.DrawRect(new Rect(rect.center.x - 1, rect.center.y + 3, 2, size/2 - 3), connectedColor);
-
-            // West (left)
-            if ((connectionState & 8) != 0)
-                EditorGUI.DrawRect(new Rect(rect.x, rect.center.y - 1, size/2 - 3, 2), connectedColor);
-        }
-
-        private void DrawConnectionButton(string direction, bool isConnected)
-        {
-            Color oldColor = GUI.backgroundColor;
-            GUI.backgroundColor = isConnected ? Color.green : Color.red;
-            GUILayout.Button(direction, GUILayout.Height(20));
-            GUI.backgroundColor = oldColor;
-        }
-
-        private string GetConnectionLabel(int state)
-        {
-            if (state == 0) return "None";
-
-            string result = "";
-            if ((state & 1) != 0) result += "N";
-            if ((state & 2) != 0) result += "E";
-            if ((state & 4) != 0) result += "S";
-            if ((state & 8) != 0) result += "W";
-            return result;
         }
     }
 }
