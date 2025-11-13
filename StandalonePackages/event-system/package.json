@@ -1,0 +1,11 @@
+{
+  "name": "com.rts.event-system",
+  "version": "1.0.0",
+  "displayName": "Event System",
+  "description": "Type-safe event bus for decoupled communication between systems.",
+  "unity": "2021.3",
+  "keywords": ["events", "messaging", "decoupling", "architecture"],
+  "author": {
+    "name": "RTS Systems"
+  }
+}

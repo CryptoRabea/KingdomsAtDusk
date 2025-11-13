@@ -1,0 +1,11 @@
+{
+  "name": "com.rts.service-locator",
+  "version": "1.0.0",
+  "displayName": "Service Locator",
+  "description": "Dependency injection pattern implementation for accessing game services.",
+  "unity": "2021.3",
+  "keywords": ["dependency-injection", "services", "architecture"],
+  "author": {
+    "name": "RTS Systems"
+  }
+}

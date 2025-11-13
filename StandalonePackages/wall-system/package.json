@@ -1,0 +1,14 @@
+{
+  "name": "com.rts.wall-system",
+  "version": "1.0.0",
+  "displayName": "Wall Connection System",
+  "description": "Advanced modular wall system with automatic connections, pole-to-pole placement, and multiple construction modes.",
+  "unity": "2021.3",
+  "keywords": ["wall", "fortification", "defense", "rts", "modular"],
+  "author": {
+    "name": "RTS Systems"
+  }
+  ,"dependencies": {
+    "com.unity.inputsystem": "1.4.4"
+  }
+}

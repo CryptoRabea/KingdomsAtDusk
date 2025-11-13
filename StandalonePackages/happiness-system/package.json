@@ -1,0 +1,11 @@
+{
+  "name": "com.rts.happiness-system",
+  "version": "1.0.0",
+  "displayName": "Happiness System",
+  "description": "Population happiness/morale system with tax management and building bonuses.",
+  "unity": "2021.3",
+  "keywords": ["happiness", "morale", "management", "rts"],
+  "author": {
+    "name": "RTS Systems"
+  }
+}

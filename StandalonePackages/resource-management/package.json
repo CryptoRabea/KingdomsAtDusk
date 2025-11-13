@@ -1,0 +1,11 @@
+{
+  "name": "com.rts.resource-management",
+  "version": "1.0.0",
+  "displayName": "Resource Management System",
+  "description": "Complete resource management system with support for multiple resource types (Wood, Food, Gold, Stone). Data-driven design makes adding new resources trivial.",
+  "unity": "2021.3",
+  "keywords": ["resources", "economy", "management", "rts"],
+  "author": {
+    "name": "RTS Systems"
+  }
+}

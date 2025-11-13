@@ -1,0 +1,14 @@
+{
+  "name": "com.rts.selection-system",
+  "version": "1.0.0",
+  "displayName": "Building Selection System",
+  "description": "Building selection and highlighting system with camera integration.",
+  "unity": "2021.3",
+  "keywords": ["selection", "input", "ui"],
+  "author": {
+    "name": "RTS Systems"
+  }
+  ,"dependencies": {
+    "com.unity.inputsystem": "1.4.4"
+  }
+}
