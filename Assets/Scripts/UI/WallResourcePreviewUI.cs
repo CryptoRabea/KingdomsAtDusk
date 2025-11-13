@@ -122,7 +122,7 @@ namespace RTS.UI
                 // Check if player can afford this resource
                 if (resourceService != null)
                 {
-                    int currentAmount = resourceService.GetResourceAmount(resourceType);
+                    int currentAmount = resourceService.GetResource(resourceType);
                     bool canAfford = currentAmount >= cost;
 
                     costText.color = canAfford ? affordableColor : unaffordableColor;
