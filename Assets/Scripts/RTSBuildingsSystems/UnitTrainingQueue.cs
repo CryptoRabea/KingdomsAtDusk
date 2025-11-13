@@ -226,6 +226,29 @@ namespace RTS.Buildings
             Debug.Log("Training queue cleared");
         }
 
+        /// <summary>
+        /// Set spawn point position
+        /// </summary>
+        public void SetSpawnPointPosition(Vector3 position)
+        {
+            if (spawnPoint != null)
+            {
+                spawnPoint.position = position;
+                if (showDebugInfo)
+                {
+                    Debug.Log($"Spawn point set to {position}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the spawn point transform
+        /// </summary>
+        public Transform GetSpawnPoint()
+        {
+            return spawnPoint;
+        }
+
         private void OnDrawGizmosSelected()
         {
             if (spawnPoint != null)
