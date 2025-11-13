@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 using RTS.Buildings;
 using RTS.Core.Events;
 
@@ -9,7 +10,6 @@ namespace RTS.UI
     /// <summary>
     /// UI panel that displays building details and unit training options.
     /// Shows when a building is selected.
-    /// Simplified to use pre-existing UI elements instead of dynamic instantiation.
     /// </summary>
     public class BuildingDetailsUI : MonoBehaviour
     {
@@ -25,20 +25,21 @@ namespace RTS.UI
         [SerializeField] private Image trainingProgressBar;
         [SerializeField] private TextMeshProUGUI currentTrainingText;
 
-        [Header("Unit Training Buttons - Pre-existing in UI")]
-        [SerializeField] private TrainUnitButton[] trainUnitButtons;
+        [Header("Unit Training Buttons")]
+        [SerializeField] private Transform unitButtonContainer;
+        [SerializeField] private GameObject trainUnitButtonPrefab;
 
         [Header("Spawn Point Button")]
         [SerializeField] private GameObject setSpawnPointButton;
         [SerializeField] private TextMeshProUGUI setSpawnPointButtonText;
 
         [Header("Debug")]
-        [SerializeField] private bool enableDebugLogs = false;
+        [SerializeField] private bool enableDebugLogs = true;
 
         private GameObject currentSelectedBuilding;
         private Building buildingComponent;
         private UnitTrainingQueue trainingQueue;
-        private BuildingSelectionManager selectionManager;
+        private List<GameObject> spawnedButtons = new List<GameObject>();
         private bool isSettingSpawnPoint = false;
 
         private void OnEnable()
@@ -67,13 +68,8 @@ namespace RTS.UI
             {
                 Debug.Log($"BuildingDetailsUI.Start() on {gameObject.name}");
                 Debug.Log($"  - panelRoot: {(panelRoot != null ? panelRoot.name : "NULL")}");
-            }
-
-            // Find the BuildingSelectionManager in the scene
-            selectionManager = FindObjectOfType<BuildingSelectionManager>();
-            if (selectionManager == null && enableDebugLogs)
-            {
-                Debug.LogWarning("BuildingDetailsUI: Could not find BuildingSelectionManager in scene");
+                Debug.Log($"  - Component enabled: {enabled}");
+                Debug.Log($"  - GameObject active: {gameObject.activeInHierarchy}");
             }
 
             // Set up spawn point button click handler
@@ -84,7 +80,7 @@ namespace RTS.UI
                 {
                     button.onClick.AddListener(OnSetSpawnPointButtonClicked);
                 }
-                setSpawnPointButton.SetActive(false);
+                setSpawnPointButton.SetActive(false); // Hide initially
             }
 
             HidePanel();
@@ -98,15 +94,8 @@ namespace RTS.UI
                 UpdateTrainingQueueDisplay();
             }
 
-            // Sync spawn point mode state with selection manager
-            if (selectionManager != null && isSettingSpawnPoint)
-            {
-                if (!selectionManager.IsSpawnPointMode())
-                {
-                    isSettingSpawnPoint = false;
-                    UpdateSpawnPointButtonText();
-                }
-            }
+            // TODO: Refactor spawn point mode to use events instead of direct manager coupling
+            // Spawn point mode sync temporarily disabled for refactoring
         }
 
         private void OnBuildingSelected(BuildingSelectedEvent evt)
@@ -117,6 +106,12 @@ namespace RTS.UI
             currentSelectedBuilding = evt.Building;
             buildingComponent = evt.Building.GetComponent<Building>();
             trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"  - Building component: {(buildingComponent != null ? "Found" : "NULL")}");
+                Debug.Log($"  - Building Data: {(buildingComponent?.Data != null ? buildingComponent.Data.buildingName : "NULL")}");
+            }
 
             if (buildingComponent != null && buildingComponent.Data != null)
             {
@@ -145,6 +140,7 @@ namespace RTS.UI
 
         private void OnTrainingProgress(TrainingProgressEvent evt)
         {
+            // Only update if this is our selected building
             if (evt.Building == currentSelectedBuilding)
             {
                 UpdateTrainingQueueDisplay();
@@ -169,6 +165,13 @@ namespace RTS.UI
             if (panelRoot != null)
             {
                 panelRoot.SetActive(true);
+                if (enableDebugLogs)
+                    Debug.Log($"✅ Panel shown: {panelRoot.name} SetActive(true)");
+            }
+            else
+            {
+                if (enableDebugLogs)
+                    Debug.LogError("❌ CRITICAL: panelRoot is NULL! Cannot show panel!");
             }
 
             // Update building info
@@ -195,13 +198,13 @@ namespace RTS.UI
             // Show training options if building can train units
             if (data.canTrainUnits && trainingQueue != null)
             {
-                SetupTrainingButtons(data);
+                ShowTrainingOptions(data);
                 if (trainingQueuePanel != null)
                 {
                     trainingQueuePanel.SetActive(true);
                 }
 
-                // Show spawn point button
+                // Show spawn point button for buildings with training queue
                 if (setSpawnPointButton != null)
                 {
                     setSpawnPointButton.SetActive(true);
@@ -210,13 +213,13 @@ namespace RTS.UI
             }
             else
             {
-                HideTrainingButtons();
+                ClearTrainingButtons();
                 if (trainingQueuePanel != null)
                 {
                     trainingQueuePanel.SetActive(false);
                 }
 
-                // Hide spawn point button
+                // Hide spawn point button for buildings without training queue
                 if (setSpawnPointButton != null)
                 {
                     setSpawnPointButton.SetActive(false);
@@ -224,50 +227,28 @@ namespace RTS.UI
             }
         }
 
-        private void SetupTrainingButtons(BuildingDataSO data)
+        private void ShowTrainingOptions(BuildingDataSO data)
         {
-            if (trainUnitButtons == null || trainUnitButtons.Length == 0)
+            ClearTrainingButtons();
+
+            if (unitButtonContainer == null || trainUnitButtonPrefab == null)
             {
-                if (enableDebugLogs)
-                    Debug.LogWarning("BuildingDetailsUI: No training buttons assigned in inspector");
+                Debug.LogWarning("BuildingDetailsUI: Missing button container or prefab");
                 return;
             }
 
-            // Initialize buttons with trainable units
-            int buttonIndex = 0;
+            // Create a button for each trainable unit
             foreach (var trainableUnit in data.trainableUnits)
             {
-                if (buttonIndex >= trainUnitButtons.Length) break;
                 if (trainableUnit?.unitConfig == null) continue;
 
-                var button = trainUnitButtons[buttonIndex];
+                GameObject buttonObj = Instantiate(trainUnitButtonPrefab, unitButtonContainer);
+                var button = buttonObj.GetComponent<TrainUnitButton>();
+
                 if (button != null)
                 {
-                    button.gameObject.SetActive(true);
                     button.Initialize(trainableUnit, trainingQueue);
-                    buttonIndex++;
-                }
-            }
-
-            // Hide unused buttons
-            for (int i = buttonIndex; i < trainUnitButtons.Length; i++)
-            {
-                if (trainUnitButtons[i] != null)
-                {
-                    trainUnitButtons[i].gameObject.SetActive(false);
-                }
-            }
-        }
-
-        private void HideTrainingButtons()
-        {
-            if (trainUnitButtons == null) return;
-
-            foreach (var button in trainUnitButtons)
-            {
-                if (button != null)
-                {
-                    button.gameObject.SetActive(false);
+                    spawnedButtons.Add(buttonObj);
                 }
             }
         }
@@ -310,6 +291,18 @@ namespace RTS.UI
             }
         }
 
+        private void ClearTrainingButtons()
+        {
+            foreach (var button in spawnedButtons)
+            {
+                if (button != null)
+                {
+                    Destroy(button);
+                }
+            }
+            spawnedButtons.Clear();
+        }
+
         private void HidePanel()
         {
             if (enableDebugLogs)
@@ -318,14 +311,16 @@ namespace RTS.UI
             if (panelRoot != null)
             {
                 panelRoot.SetActive(false);
+                if (enableDebugLogs)
+                    Debug.Log($"✅ Panel hidden: {panelRoot.name} SetActive(false)");
             }
 
-            HideTrainingButtons();
+            ClearTrainingButtons();
 
+            // TODO: Refactor spawn point mode reset to use events
             // Reset spawn point mode when hiding panel
-            if (isSettingSpawnPoint && selectionManager != null)
+            if (isSettingSpawnPoint)
             {
-                selectionManager.SetSpawnPointMode(false);
                 isSettingSpawnPoint = false;
                 UpdateSpawnPointButtonText();
             }
@@ -333,22 +328,13 @@ namespace RTS.UI
 
         private void OnSetSpawnPointButtonClicked()
         {
-            if (selectionManager == null)
-            {
-                if (enableDebugLogs)
-                    Debug.LogWarning("Cannot set spawn point: BuildingSelectionManager not found");
-                return;
-            }
+            // TODO: Refactor to use SpawnPointModeChangedEvent instead of direct manager coupling
+            if (enableDebugLogs)
+                Debug.LogWarning("Spawn point mode temporarily disabled - requires event-based refactoring");
 
             // Toggle spawn point setting mode
-            isSettingSpawnPoint = !isSettingSpawnPoint;
-            selectionManager.SetSpawnPointMode(isSettingSpawnPoint);
-            UpdateSpawnPointButtonText();
-
-            if (enableDebugLogs)
-            {
-                Debug.Log($"Spawn point mode {(isSettingSpawnPoint ? "ENABLED" : "DISABLED")}");
-            }
+            // isSettingSpawnPoint = !isSettingSpawnPoint;
+            // UpdateSpawnPointButtonText();
         }
 
         private void UpdateSpawnPointButtonText()
