@@ -61,8 +61,10 @@
     <Analyzer Include="D:\Work\UnityEditors\6000.2.10f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Editor\StandaloneSystemExtractor.cs" />
     <Compile Include="Assets\Scripts\Editor\BuildingTrainingUISetup.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallConnectionSystemEditor.cs" />
+    <Compile Include="Assets\Scripts\Editor\SystemDefinitions.cs" />
     <Compile Include="Assets\Scripts\Editor\BuildingHUDSetup.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallPrefabSetupUtility.cs" />
   </ItemGroup>

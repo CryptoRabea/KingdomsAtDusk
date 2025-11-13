@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
+    <Compile Include="Assets\Scripts\Core\Utilities\ResourceDisplayUtility.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
     <Compile Include="Assets\Scripts\Core\ServiceLocator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Assets\Scripts\Units\AI\Specialized\SoldierAI.cs" />
     <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\DeadState.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallSegmentConstructor.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
+    <Compile Include="Assets\Scripts\UI\WallResourcePreviewUI.cs" />
     <Compile Include="Assets\Scripts\Units\AI\AISettingsSO.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\ArcherAI.cs" />
     <Compile Include="Assets\RTSAnimation\AnimationConfigSO.cs" />
@@ -91,10 +94,11 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingTooltip.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
-    <Compile Include="Assets\Scripts\UI\BuildingUI.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionMode.cs" />
     <Compile Include="Assets\Scripts\UI\NotificationUI.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallPlacementController.cs" />
     <Compile Include="Assets\Scripts\UI\HappinessUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
@@ -104,7 +108,6 @@
     <Compile Include="Assets\RTSAnimation\UnitAnimationController.cs" />
     <Compile Include="Assets\Scripts\Core\GameEvents.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\MovingState.cs" />
-    <Compile Include="Assets\Scripts\RTSModularCamera.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitSelectable.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationAdvanced.cs" />
     <Compile Include="Assets\Scripts\Managers\HappinessManager.cs" />
