@@ -6,13 +6,13 @@ namespace RTS.Buildings.Editor
     [CustomEditor(typeof(WallConnectionSystem))]
     public class WallConnectionSystemEditor : UnityEditor.Editor
     {
-        private SerializedProperty gridSizeProp;
+        private SerializedProperty connectionDistanceProp;
         private SerializedProperty enableConnectionsProp;
         private SerializedProperty meshVariantsProp;
 
         private void OnEnable()
         {
-            gridSizeProp = serializedObject.FindProperty("gridSize");
+            connectionDistanceProp = serializedObject.FindProperty("connectionDistance");
             enableConnectionsProp = serializedObject.FindProperty("enableConnections");
             meshVariantsProp = serializedObject.FindProperty("meshVariants");
         }
@@ -23,11 +23,24 @@ namespace RTS.Buildings.Editor
 
             WallConnectionSystem wall = (WallConnectionSystem)target;
 
+            EditorGUILayout.LabelField("FREE-BUILD Wall System - No Grid!", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            // Info box
+            EditorGUILayout.HelpBox(
+                "TRUE FREE-BUILD wall system!\n" +
+                "✓ NO grid snapping\n" +
+                "✓ NO variants\n" +
+                "✓ Place anywhere, drag to connect\n" +
+                "✓ Distance-based connections",
+                MessageType.Info
+            );
+
             EditorGUILayout.LabelField("Wall Connection System", EditorStyles.boldLabel);
             EditorGUILayout.Space();
 
             // Basic settings
-            EditorGUILayout.PropertyField(gridSizeProp);
+            EditorGUILayout.PropertyField(connectionDistanceProp, new GUIContent("Connection Distance", "How close walls need to be to connect"));
             EditorGUILayout.PropertyField(enableConnectionsProp);
             EditorGUILayout.Space();
 
@@ -56,6 +69,25 @@ namespace RTS.Buildings.Editor
             if (Application.isPlaying)
             {
                 EditorGUILayout.LabelField("Runtime Info", EditorStyles.boldLabel);
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.LabelField($"Position: {wall.transform.position}");
+                EditorGUILayout.LabelField($"Connected Walls: {wall.GetConnectionCount()}");
+
+                var connected = wall.GetConnectedWalls();
+                if (connected.Count > 0)
+                {
+                    EditorGUILayout.LabelField("Connected to:");
+                    foreach (var connectedWall in connected)
+                    {
+                        if (connectedWall != null)
+                        {
+                            float dist = Vector3.Distance(wall.transform.position, connectedWall.transform.position);
+                            EditorGUILayout.LabelField($"  • Wall at {connectedWall.transform.position} (dist: {dist:F2})");
+                        }
+                    }
+                }
+                EditorGUILayout.EndVertical();
                 EditorGUILayout.LabelField($"Grid Position: {wall.GetGridPosition()}");
                 EditorGUILayout.LabelField($"Connection State: {wall.GetConnectionState()} ({GetConnectionLabel(wall.GetConnectionState())})");
 

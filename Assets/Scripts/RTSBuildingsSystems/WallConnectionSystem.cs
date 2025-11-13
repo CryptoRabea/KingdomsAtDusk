@@ -12,7 +12,7 @@ namespace RTS.Buildings
     public class WallConnectionSystem : MonoBehaviour
     {
         [Header("Wall Settings")]
-        [SerializeField] private float gridSize = 1f;
+        [SerializeField] private float connectionDistance = 1.5f;
         [Tooltip("Should this wall connect to other walls?")]
         [SerializeField] private bool enableConnections = true;
 
@@ -20,18 +20,11 @@ namespace RTS.Buildings
         [Tooltip("Assign 16 mesh variants (index = connection bitmask). North=1, East=2, South=4, West=8")]
         [SerializeField] private GameObject[] meshVariants = new GameObject[16];
 
-        // Connection state bits
-        private const int NORTH = 1;  // 0001
-        private const int EAST = 2;   // 0010
-        private const int SOUTH = 4;  // 0100
-        private const int WEST = 8;   // 1000
-
-        // Static registry of all walls
-        private static Dictionary<Vector2Int, WallConnectionSystem> wallRegistry = new Dictionary<Vector2Int, WallConnectionSystem>();
+        // Static registry of all walls - NO GRID, just a list
+        private static List<WallConnectionSystem> allWalls = new List<WallConnectionSystem>();
 
         // Instance data
-        private Vector2Int gridPosition;
-        private int connectionState = 0;
+        private List<WallConnectionSystem> connectedWalls = new List<WallConnectionSystem>();
         private Building buildingComponent;
         private bool isRegistered = false;
 
@@ -45,7 +38,7 @@ namespace RTS.Buildings
             if (!enableConnections) return;
 
             // Register this wall
-            RegisterWall();
+            allWalls.Add(this);
 
             // Subscribe to building events
             EventBus.Subscribe<BuildingPlacedEvent>(OnBuildingPlaced);
@@ -55,127 +48,84 @@ namespace RTS.Buildings
             UpdateConnections();
         }
 
+        /// <summary>
+        /// Setup or create collider for wall selection and gameplay
+        /// </summary>
+        private void SetupCollider()
+        {
+            if (wallCollider == null && autoCreateCollider)
+            {
+                wallCollider = gameObject.GetComponent<BoxCollider>();
+                if (wallCollider == null)
+                {
+                    wallCollider = gameObject.AddComponent<BoxCollider>();
+                }
+            }
+
+            if (wallCollider != null)
+            {
+                // Set default collider size for a standard wall segment
+                wallCollider.center = new Vector3(0, 1f, 0);
+                wallCollider.size = new Vector3(1f, 2f, 0.5f);
+            }
+        }
+
         private void OnDestroy()
         {
             // Unregister this wall
-            UnregisterWall();
+            allWalls.Remove(this);
 
             // Unsubscribe from events
             EventBus.Unsubscribe<BuildingPlacedEvent>(OnBuildingPlaced);
             EventBus.Unsubscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
             // Update neighbors when this wall is destroyed
-            UpdateNeighborConnections();
+            UpdateNearbyWalls();
         }
-
-        #region Wall Registration
-
-        private void RegisterWall()
-        {
-            if (isRegistered) return;
-
-            gridPosition = WorldToGrid(transform.position);
-
-            if (wallRegistry.ContainsKey(gridPosition))
-            {
-                Debug.LogWarning($"Wall already exists at grid position {gridPosition}! Replacing...");
-                wallRegistry[gridPosition] = this;
-            }
-            else
-            {
-                wallRegistry.Add(gridPosition, this);
-            }
-
-            isRegistered = true;
-            Debug.Log($"Wall registered at grid position {gridPosition}");
-        }
-
-        private void UnregisterWall()
-        {
-            if (!isRegistered) return;
-
-            if (wallRegistry.ContainsKey(gridPosition))
-            {
-                wallRegistry.Remove(gridPosition);
-                Debug.Log($"Wall unregistered from grid position {gridPosition}");
-            }
-
-            isRegistered = false;
-        }
-
-        #endregion
-
-        #region Grid Conversion
-
-        private Vector2Int WorldToGrid(Vector3 worldPosition)
-        {
-            int x = Mathf.RoundToInt(worldPosition.x / gridSize);
-            int z = Mathf.RoundToInt(worldPosition.z / gridSize);
-            return new Vector2Int(x, z);
-        }
-
-        private Vector3 GridToWorld(Vector2Int gridPos)
-        {
-            return new Vector3(gridPos.x * gridSize, 0, gridPos.y * gridSize);
-        }
-
-        #endregion
 
         #region Connection Detection
 
         /// <summary>
-        /// Update this wall's connections based on neighbors.
+        /// Update this wall's connections based on nearby walls - FREE PLACEMENT, NO GRID
         /// </summary>
         public void UpdateConnections()
         {
             if (!enableConnections) return;
 
-            int newConnectionState = 0;
+            // Clear old connections
+            connectedWalls.Clear();
 
-            // Check all 4 directions
-            if (HasWallAt(gridPosition + Vector2Int.up))    newConnectionState |= NORTH;
-            if (HasWallAt(gridPosition + Vector2Int.right)) newConnectionState |= EAST;
-            if (HasWallAt(gridPosition + Vector2Int.down))  newConnectionState |= SOUTH;
-            if (HasWallAt(gridPosition + Vector2Int.left))  newConnectionState |= WEST;
-
-            // Only update visual if state changed
-            if (newConnectionState != connectionState)
+            // Find nearby walls within connection distance
+            Vector3 myPos = transform.position;
+            foreach (var otherWall in allWalls)
             {
-                connectionState = newConnectionState;
-                UpdateVisual();
-                Debug.Log($"Wall at {gridPosition} updated: connections = {GetConnectionDebugString()}");
-            }
-        }
+                if (otherWall == this || otherWall == null) continue;
 
-        /// <summary>
-        /// Check if there's a wall at the given grid position.
-        /// </summary>
-        private bool HasWallAt(Vector2Int gridPos)
-        {
-            return wallRegistry.ContainsKey(gridPos) && wallRegistry[gridPos] != null;
-        }
-
-        /// <summary>
-        /// Update all neighboring walls' connections.
-        /// </summary>
-        private void UpdateNeighborConnections()
-        {
-            Vector2Int[] neighbors = new Vector2Int[]
-            {
-                gridPosition + Vector2Int.up,    // North
-                gridPosition + Vector2Int.right, // East
-                gridPosition + Vector2Int.down,  // South
-                gridPosition + Vector2Int.left   // West
-            };
-
-            foreach (var neighborPos in neighbors)
-            {
-                if (wallRegistry.TryGetValue(neighborPos, out WallConnectionSystem neighbor))
+                float distance = Vector3.Distance(myPos, otherWall.transform.position);
+                if (distance <= connectionDistance)
                 {
-                    if (neighbor != null)
-                    {
-                        neighbor.UpdateConnections();
-                    }
+                    connectedWalls.Add(otherWall);
+                }
+            }
+
+            // Update visual based on connections
+            UpdateVisual();
+        }
+
+        /// <summary>
+        /// Update all nearby walls' connections
+        /// </summary>
+        private void UpdateNearbyWalls()
+        {
+            Vector3 myPos = transform.position;
+            foreach (var wall in allWalls)
+            {
+                if (wall == this || wall == null) continue;
+
+                float distance = Vector3.Distance(myPos, wall.transform.position);
+                if (distance <= connectionDistance * 2f) // Update walls within double connection distance
+                {
+                    wall.UpdateConnections();
                 }
             }
         }
@@ -185,6 +135,39 @@ namespace RTS.Buildings
         #region Visual Updates
 
         /// <summary>
+        /// Update visual - SUPER SIMPLE, just rotate to face connected walls
+        /// </summary>
+        private void UpdateVisual()
+        {
+            if (wallMesh == null) return;
+
+            int connectionCount = connectedWalls.Count;
+
+            if (connectionCount == 0)
+            {
+                // Standalone - no rotation
+                wallMesh.transform.localRotation = Quaternion.identity;
+            }
+            else if (connectionCount == 1)
+            {
+                // End piece - face the connected wall
+                Vector3 directionToWall = (connectedWalls[0].transform.position - transform.position).normalized;
+                float angle = Mathf.Atan2(directionToWall.x, directionToWall.z) * Mathf.Rad2Deg;
+                wallMesh.transform.localRotation = Quaternion.Euler(0, angle, 0);
+            }
+            else if (connectionCount == 2)
+            {
+                // Straight wall - face between two connections
+                Vector3 dir1 = (connectedWalls[0].transform.position - transform.position).normalized;
+                Vector3 dir2 = (connectedWalls[1].transform.position - transform.position).normalized;
+                Vector3 avgDir = (dir1 + dir2).normalized;
+                float angle = Mathf.Atan2(avgDir.x, avgDir.z) * Mathf.Rad2Deg;
+                wallMesh.transform.localRotation = Quaternion.Euler(0, angle, 0);
+            }
+            else
+            {
+                // Junction (3+ connections) - keep default
+                wallMesh.transform.localRotation = Quaternion.identity;
         /// Update the visual mesh based on connection state.
         /// </summary>
         private void UpdateVisual()
@@ -224,16 +207,15 @@ namespace RTS.Buildings
 
         private void OnBuildingPlaced(BuildingPlacedEvent evt)
         {
-            // Check if the placed building is a wall
+            // Check if the placed building is a wall nearby
             if (evt.Building == null) return;
 
             var wallSystem = evt.Building.GetComponent<WallConnectionSystem>();
             if (wallSystem != null)
             {
-                // Update this wall if the new wall is adjacent
-                Vector2Int placedGridPos = WorldToGrid(evt.Position);
-
-                if (IsAdjacent(gridPosition, placedGridPos))
+                // Update if nearby
+                float distance = Vector3.Distance(transform.position, evt.Position);
+                if (distance <= connectionDistance * 2f)
                 {
                     UpdateConnections();
                 }
@@ -242,50 +224,30 @@ namespace RTS.Buildings
 
         private void OnBuildingDestroyed(BuildingDestroyedEvent evt)
         {
-            // When any building is destroyed, nearby walls might need updating
-            // This is handled in OnDestroy() which calls UpdateNeighborConnections()
-        }
-
-        private bool IsAdjacent(Vector2Int pos1, Vector2Int pos2)
-        {
-            int dx = Mathf.Abs(pos1.x - pos2.x);
-            int dy = Mathf.Abs(pos1.y - pos2.y);
-            return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
+            // Handled in OnDestroy() which calls UpdateNearbyWalls()
         }
 
         #endregion
 
         #region Debug Helpers
 
-        private string GetConnectionDebugString()
-        {
-            string result = "";
-            if ((connectionState & NORTH) != 0) result += "N";
-            if ((connectionState & EAST) != 0) result += "E";
-            if ((connectionState & SOUTH) != 0) result += "S";
-            if ((connectionState & WEST) != 0) result += "W";
-            return result.Length > 0 ? result : "None";
-        }
-
         private void OnDrawGizmos()
         {
             if (!Application.isPlaying || !enableConnections) return;
 
-            // Draw grid position
-            Gizmos.color = Color.cyan;
-            Vector3 worldPos = GridToWorld(gridPosition);
-            Gizmos.DrawWireSphere(worldPos + Vector3.up * 0.5f, 0.2f);
+            // Draw connection distance sphere
+            Gizmos.color = new Color(0, 1, 0, 0.1f);
+            Gizmos.DrawWireSphere(transform.position, connectionDistance);
 
-            // Draw connection lines to neighbors
+            // Draw lines to connected walls
             Gizmos.color = Color.green;
-            if ((connectionState & NORTH) != 0)
-                Gizmos.DrawLine(transform.position, transform.position + Vector3.forward * gridSize);
-            if ((connectionState & EAST) != 0)
-                Gizmos.DrawLine(transform.position, transform.position + Vector3.right * gridSize);
-            if ((connectionState & SOUTH) != 0)
-                Gizmos.DrawLine(transform.position, transform.position + Vector3.back * gridSize);
-            if ((connectionState & WEST) != 0)
-                Gizmos.DrawLine(transform.position, transform.position + Vector3.left * gridSize);
+            foreach (var wall in connectedWalls)
+            {
+                if (wall != null)
+                {
+                    Gizmos.DrawLine(transform.position, wall.transform.position);
+                }
+            }
         }
 
         [ContextMenu("Force Update Connections")]
@@ -294,20 +256,16 @@ namespace RTS.Buildings
             UpdateConnections();
         }
 
-        [ContextMenu("Print Connection State")]
-        private void DebugPrintState()
+        [ContextMenu("Print Connections")]
+        private void DebugPrintConnections()
         {
-            Debug.Log($"Wall at {gridPosition}: State={connectionState}, Connections={GetConnectionDebugString()}");
+            Debug.Log($"Wall at {transform.position}: {connectedWalls.Count} connections");
         }
 
         [ContextMenu("Print All Walls")]
         private void DebugPrintAllWalls()
         {
-            Debug.Log($"Total walls registered: {wallRegistry.Count}");
-            foreach (var kvp in wallRegistry)
-            {
-                Debug.Log($"  {kvp.Key} -> {(kvp.Value != null ? "Active" : "Null")}");
-            }
+            Debug.Log($"Total walls: {allWalls.Count}");
         }
 
         #endregion
@@ -315,13 +273,24 @@ namespace RTS.Buildings
         #region Public API
 
         /// <summary>
-        /// Get the current connection state bitmask.
+        /// Get number of connected walls
         /// </summary>
-        public int GetConnectionState() => connectionState;
+        public int GetConnectionCount() => connectedWalls.Count;
 
         /// <summary>
-        /// Get the grid position of this wall.
+        /// Get list of connected walls
         /// </summary>
+        public List<WallConnectionSystem> GetConnectedWalls() => connectedWalls;
+
+        /// <summary>
+        /// Manual rotation of wall mesh (for player adjustment)
+        /// </summary>
+        public void RotateWall(float yRotation)
+        {
+            if (wallMesh != null)
+            {
+                wallMesh.transform.Rotate(0, yRotation, 0);
+            }
         public Vector2Int GetGridPosition() => gridPosition;
 
         /// <summary>

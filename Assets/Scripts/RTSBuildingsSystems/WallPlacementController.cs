@@ -25,8 +25,8 @@ namespace RTS.Buildings
         [SerializeField] private Color invalidLineColor = Color.red;
 
         [Header("Placement Settings")]
-        [SerializeField] private float gridSize = 1f;
-        [SerializeField] private bool useGridSnapping = true;
+        [SerializeField] private float wallSpacing = 1f;
+        [SerializeField] private bool useGridSnapping = false;
 
         [Header("Pole Settings")]
         [SerializeField] private GameObject polePrefab; // Pole visual prefab
@@ -284,26 +284,26 @@ namespace RTS.Buildings
             if (isHorizontal)
             {
                 // Horizontal wall (along X axis)
-                int startX = Mathf.RoundToInt(start.x / gridSize);
-                int endX = Mathf.RoundToInt(end.x / gridSize);
+                int startX = Mathf.RoundToInt(start.x / wallSpacing);
+                int endX = Mathf.RoundToInt(end.x / wallSpacing);
                 int step = startX < endX ? 1 : -1;
 
                 for (int x = startX; x != endX + step; x += step)
                 {
-                    Vector3 segmentPos = new Vector3(x * gridSize, start.y, start.z);
+                    Vector3 segmentPos = new Vector3(x * wallSpacing, start.y, start.z);
                     segments.Add(segmentPos);
                 }
             }
             else
             {
                 // Vertical wall (along Z axis)
-                int startZ = Mathf.RoundToInt(start.z / gridSize);
-                int endZ = Mathf.RoundToInt(end.z / gridSize);
+                int startZ = Mathf.RoundToInt(start.z / wallSpacing);
+                int endZ = Mathf.RoundToInt(end.z / wallSpacing);
                 int step = startZ < endZ ? 1 : -1;
 
                 for (int z = startZ; z != endZ + step; z += step)
                 {
-                    Vector3 segmentPos = new Vector3(start.x, start.y, z * gridSize);
+                    Vector3 segmentPos = new Vector3(start.x, start.y, z * wallSpacing);
                     segments.Add(segmentPos);
                 }
             }
@@ -557,8 +557,8 @@ namespace RTS.Buildings
         {
             if (!useGridSnapping) return position;
 
-            position.x = Mathf.Round(position.x / gridSize) * gridSize;
-            position.z = Mathf.Round(position.z / gridSize) * gridSize;
+            position.x = Mathf.Round(position.x / wallSpacing) * wallSpacing;
+            position.z = Mathf.Round(position.z / wallSpacing) * wallSpacing;
             return position;
         }
 
