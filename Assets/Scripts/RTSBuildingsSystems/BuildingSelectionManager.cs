@@ -26,6 +26,7 @@ namespace RTS.Buildings
         [SerializeField] private bool enableDebugLogs = true;
 
         private BuildingSelectable currentlySelected;
+        private bool isSpawnPointMode = false;
 
         public BuildingSelectable CurrentlySelectedBuilding => currentlySelected;
 
@@ -89,7 +90,17 @@ namespace RTS.Buildings
             if (enableDebugLogs)
                 Debug.Log($"BuildingSelectionManager: Click detected at {mousePosition}");
 
-            TrySelectBuilding(mousePosition);
+            // If in spawn point mode, set spawn point on left click
+            if (isSpawnPointMode)
+            {
+                TrySetSpawnPoint(mousePosition);
+                // Auto-exit spawn point mode after setting
+                isSpawnPointMode = false;
+            }
+            else
+            {
+                TrySelectBuilding(mousePosition);
+            }
         }
 
         private void TrySelectBuilding(Vector2 screenPosition)
@@ -205,6 +216,14 @@ namespace RTS.Buildings
         {
             if (currentlySelected == null) return;
 
+            // Don't process if clicking on UI
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: Click was over UI, ignoring");
+                return;
+            }
+
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
             // Try to hit ground layer
@@ -238,8 +257,30 @@ namespace RTS.Buildings
             else
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Right-click did not hit ground");
+                    Debug.Log("BuildingSelectionManager: Click did not hit ground");
             }
+        }
+
+        /// <summary>
+        /// Enable or disable spawn point setting mode.
+        /// When enabled, left-clicking on ground sets spawn point instead of selecting buildings.
+        /// </summary>
+        public void SetSpawnPointMode(bool enabled)
+        {
+            isSpawnPointMode = enabled;
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"Spawn point mode: {(enabled ? "ENABLED" : "DISABLED")}");
+            }
+        }
+
+        /// <summary>
+        /// Check if currently in spawn point setting mode
+        /// </summary>
+        public bool IsSpawnPointMode()
+        {
+            return isSpawnPointMode;
         }
     }
 }

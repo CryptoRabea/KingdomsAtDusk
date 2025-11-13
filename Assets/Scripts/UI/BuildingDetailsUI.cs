@@ -29,13 +29,19 @@ namespace RTS.UI
         [SerializeField] private Transform unitButtonContainer;
         [SerializeField] private GameObject trainUnitButtonPrefab;
 
+        [Header("Spawn Point Button")]
+        [SerializeField] private GameObject setSpawnPointButton;
+        [SerializeField] private TextMeshProUGUI setSpawnPointButtonText;
+
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
         private GameObject currentSelectedBuilding;
         private Building buildingComponent;
         private UnitTrainingQueue trainingQueue;
+        private BuildingSelectionManager selectionManager;
         private List<GameObject> spawnedButtons = new List<GameObject>();
+        private bool isSettingSpawnPoint = false;
 
         private void OnEnable()
         {
@@ -67,6 +73,24 @@ namespace RTS.UI
                 Debug.Log($"  - GameObject active: {gameObject.activeInHierarchy}");
             }
 
+            // Find the BuildingSelectionManager in the scene
+            selectionManager = FindObjectOfType<BuildingSelectionManager>();
+            if (selectionManager == null && enableDebugLogs)
+            {
+                Debug.LogWarning("BuildingDetailsUI: Could not find BuildingSelectionManager in scene");
+            }
+
+            // Set up spawn point button click handler
+            if (setSpawnPointButton != null)
+            {
+                var button = setSpawnPointButton.GetComponent<Button>();
+                if (button != null)
+                {
+                    button.onClick.AddListener(OnSetSpawnPointButtonClicked);
+                }
+                setSpawnPointButton.SetActive(false); // Hide initially
+            }
+
             HidePanel();
         }
 
@@ -76,6 +100,17 @@ namespace RTS.UI
             if (currentSelectedBuilding != null && trainingQueue != null)
             {
                 UpdateTrainingQueueDisplay();
+            }
+
+            // Sync spawn point mode state with selection manager
+            if (selectionManager != null && isSettingSpawnPoint)
+            {
+                // If manager exited spawn point mode, update our state
+                if (!selectionManager.IsSpawnPointMode())
+                {
+                    isSettingSpawnPoint = false;
+                    UpdateSpawnPointButtonText();
+                }
             }
         }
 
@@ -184,6 +219,13 @@ namespace RTS.UI
                 {
                     trainingQueuePanel.SetActive(true);
                 }
+
+                // Show spawn point button for buildings with training queue
+                if (setSpawnPointButton != null)
+                {
+                    setSpawnPointButton.SetActive(true);
+                    UpdateSpawnPointButtonText();
+                }
             }
             else
             {
@@ -191,6 +233,12 @@ namespace RTS.UI
                 if (trainingQueuePanel != null)
                 {
                     trainingQueuePanel.SetActive(false);
+                }
+
+                // Hide spawn point button for buildings without training queue
+                if (setSpawnPointButton != null)
+                {
+                    setSpawnPointButton.SetActive(false);
                 }
             }
         }
@@ -284,6 +332,42 @@ namespace RTS.UI
             }
 
             ClearTrainingButtons();
+
+            // Reset spawn point mode when hiding panel
+            if (isSettingSpawnPoint && selectionManager != null)
+            {
+                selectionManager.SetSpawnPointMode(false);
+                isSettingSpawnPoint = false;
+                UpdateSpawnPointButtonText();
+            }
+        }
+
+        private void OnSetSpawnPointButtonClicked()
+        {
+            if (selectionManager == null)
+            {
+                if (enableDebugLogs)
+                    Debug.LogWarning("Cannot set spawn point: BuildingSelectionManager not found");
+                return;
+            }
+
+            // Toggle spawn point setting mode
+            isSettingSpawnPoint = !isSettingSpawnPoint;
+            selectionManager.SetSpawnPointMode(isSettingSpawnPoint);
+            UpdateSpawnPointButtonText();
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"Spawn point mode {(isSettingSpawnPoint ? "ENABLED" : "DISABLED")}");
+            }
+        }
+
+        private void UpdateSpawnPointButtonText()
+        {
+            if (setSpawnPointButtonText != null)
+            {
+                setSpawnPointButtonText.text = isSettingSpawnPoint ? "Cancel" : "Set Spawn Point";
+            }
         }
     }
 }
