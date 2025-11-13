@@ -1,0 +1,372 @@
+================================================================================
+KINGDOMS AT DUSK - SYSTEMS DEPENDENCY MAP
+================================================================================
+
+LEGEND:
+  →   Depends on
+  ↔   Bidirectional (event-based communication)
+  ✦   Core infrastructure (no dependencies)
+  ⊕   Manager systems
+  ◆   Building systems
+  ◇   Unit systems
+  ■   UI systems
+  ▲   Other systems
+
+================================================================================
+TIER 0: FOUNDATIONAL (No Dependencies)
+================================================================================
+
+✦ EVENT BUS
+   ├─ Publishes: 25+ event types
+   ├─ Subscribers: All systems
+   └─ Pattern: Decoupled pub/sub
+
+✦ SERVICE LOCATOR
+   ├─ Manages: 5 service interfaces
+   ├─ Consumers: All system managers
+   └─ Pattern: Dependency injection
+
+✦ CORE INTERFACES (IServices.cs)
+   ├─ IResourcesService
+   ├─ IHappinessService
+   ├─ IPoolService
+   ├─ IGameStateService
+   └─ ITimeService
+
+✦ SCRIPTABLE OBJECTS (Data)
+   ├─ BuildingDataSO
+   ├─ UnitConfigSO
+   ├─ AISettingsSO
+   ├─ AnimationConfigSO
+   └─ WaveConfigSO
+
+================================================================================
+TIER 1: CORE MANAGERS
+================================================================================
+
+⊕ GAME MANAGER
+   → ServiceLocator
+   → EVENT BUS
+   → Initializes:
+      ├─ ObjectPool
+      ├─ ResourceManager
+      ├─ HappinessManager
+      └─ GameStateService
+
+⊕ RESOURCE MANAGER
+   → EVENT BUS (publishes ResourcesChangedEvent, ResourcesSpentEvent)
+   → Implements IResourcesService
+   → Dependencies: BuildingDataSO, UnitConfigSO
+
+⊕ HAPPINESS MANAGER
+   → EVENT BUS (publishes HappinessChangedEvent)
+   → Implements IHappinessService
+   → Building lifecycle awareness
+
+⊕ OBJECT POOL
+   → Implements IPoolService
+   → Used by: WaveManager, UnitSpawning
+
+================================================================================
+TIER 2: BUILDING SYSTEMS (Interconnected)
+================================================================================
+
+◆ BUILDING MANAGER
+   → ServiceLocator (IResourcesService)
+   → EVENT BUS (BuildingPlacedEvent)
+   → BuildingDataSO array
+   → Manages: Building placement, validation, preview
+   → Used by: BuildingHUD, building buttons
+
+◆ BUILDING DATA (ScriptableObject)
+   → TrainableUnitData array
+   → ResourceType enum
+   → BuildingType enum
+   → Referenced by: Building, BuildingManager, UI
+
+◆ BUILDING COMPONENT
+   → BuildingDataSO (SetData)
+   → IHappinessService (happiness bonuses)
+   → IResourcesService (resource generation)
+   → EVENT BUS (BuildingPlaced, Completed, Destroyed, ResourcesGenerated)
+
+◆ BUILDING SELECTION MANAGER
+   ↔ BuildingSelectable (bi-directional)
+   → EVENT BUS (BuildingSelectedEvent, BuildingDeselectedEvent)
+   → Input System
+
+◆ BUILDING SELECTABLE
+   ↔ BuildingSelectionManager
+   → EVENT BUS (BuildingSelected/DeselectedEvent)
+   → Visual indicators
+
+◆ WALL CONNECTION SYSTEM
+   → Building component
+   → EVENT BUS (BuildingPlaced, BuildingDestroyed events)
+   → Grid-based wall registry
+   → 16 mesh variants
+
+◆ UNIT TRAINING QUEUE
+   → Building component (parent)
+   → IResourcesService (cost validation)
+   → BuildingDataSO (trainable units)
+   → EVENT BUS (TrainingStarted, Completed, ProgressEvent)
+   → Spawns units at spawn point
+
+◆ SPAWN POINT FLAG
+   → BuildingSelectable
+   → UnitTrainingQueue (spawn point reference)
+   → EVENT BUS (BuildingSelected/DeselectedEvent)
+
+================================================================================
+TIER 3: UNIT SYSTEMS (Component-Based)
+================================================================================
+
+◇ UNIT CONFIGURATION (ScriptableObject)
+   → Basic unit stats data
+   → Referenced by: UnitAIController
+
+◇ UNIT AI CONTROLLER (Orchestrator)
+   → UnitConfigSO, AISettingsSO
+   → Coordinates components:
+      ├─ UnitHealth
+      ├─ UnitMovement
+      └─ UnitCombat
+   → Initializes states (IdleState first)
+   → EVENT BUS (subscribes to health/combat events)
+
+◇ UNIT HEALTH
+   → EVENT BUS (UnitHealthChanged, DamageDealt, HealingApplied)
+   → Used by: UnitCombat, AI states
+
+◇ UNIT MOVEMENT
+   → NavMeshAgent (Unity)
+   → Used by: MovingState, AttackingState
+   → Provides: Position, velocity, distance
+
+◇ UNIT COMBAT
+   → UnitHealth (ApplyDamage)
+   → Targeting system
+   → Used by: AttackingState, specialized AI
+
+◇ UNIT STATE MACHINE (Base Class)
+   → Inherited by:
+      ├─ IdleState
+      ├─ MovingState
+      ├─ AttackingState
+      ├─ RetreatState
+      ├─ HealingState
+      └─ DeadState
+   → All access: controller.Health, Movement, Combat
+
+◇ UNIT SELECTION MANAGER
+   → UnitSelectable component
+   → EVENT BUS (UnitSelected, Deselected, SelectionChanged)
+   → Input System (drag selection)
+
+◇ UNIT SPECIALIZED AI
+   → Inherit from UnitAIController
+   → Examples: SoldierAI, ArcherAI, HealerAI
+   → Override: behavior-specific logic
+
+================================================================================
+TIER 4: UI SYSTEMS (Event Subscribers)
+================================================================================
+
+■ RESOURCE UI
+   ↔ EVENT BUS (subscribes ResourcesChangedEvent)
+   → IResourcesService (initialization)
+   → Displays: Wood, Food, Gold, Stone
+
+■ HAPPINESS UI
+   ↔ EVENT BUS (subscribes HappinessChangedEvent)
+   → HappinessManager
+   → Displays: Happiness/Morale
+
+■ BUILDING HUD
+   → BuildingManager (source of building list)
+   → IResourcesService (afford checks)
+   ↔ EVENT BUS (subscribes ResourcesChangedEvent)
+   → Creates: BuildingButton instances
+   → Input System (hotkeys: b,h,f,t,w,g,c,m)
+
+■ BUILDING BUTTON
+   → BuildingManager (place building)
+   → BuildingDataSO (cost, icon, name)
+   → IResourcesService (afford checks)
+   ↔ EVENT BUS (subscribes ResourcesChangedEvent)
+
+■ BUILDING DETAILS UI
+   → Building component (info display)
+   → UnitTrainingQueue (queue info)
+   → BuildingSelectionManager (selection status)
+   ↔ EVENT BUS (BuildingSelected/Deselected, TrainingProgress)
+   → Creates: TrainUnitButton instances
+   → SpawnPointFlag button
+
+■ TRAIN UNIT BUTTON
+   → UnitTrainingQueue (start training)
+   → TrainableUnitData (unit info)
+   → IResourcesService (cost validation)
+
+■ BUILDING TOOLTIP
+   → BuildingDataSO (description, costs)
+
+■ BUILDING UI WRAPPER
+   → Contains/coordinates other building UI
+
+■ BUILDING HUD TOGGLE
+   → Show/hide BuildingHUD panel
+
+================================================================================
+TIER 5: CAMERA & OTHER
+================================================================================
+
+▲ RTS CAMERA CONTROLLER
+   → InputSystem
+   → Camera component
+   → Movement, zoom, rotation, edge scroll
+
+▲ WAVE MANAGER
+   → IPoolService (enemy spawning)
+   ↔ EVENT BUS (WaveStarted, WaveCompleted, subscribes UnitDied)
+   → WaveConfigSO (wave configs)
+   → Spawn point array
+
+================================================================================
+TIER 6: ANIMATION SYSTEM
+================================================================================
+
+▲ UNIT ANIMATION CONTROLLER
+   ↔ EVENT BUS (subscribes to movement, combat, health events)
+   → Animator component
+   → AnimationConfigSO
+   → Syncs with: UnitMovement, UnitCombat, UnitHealth, UnitAIController
+
+▲ UNIT ANIMATION ADVANCED
+   → Animator component
+   → Advanced features: IK, layers
+
+▲ UNIT ANIMATION EVENTS
+   ↔ EVENT BUS (subscribes animation events)
+   → Audio playback
+   → Particle effects
+
+▲ ANIMATION CONFIGURATION
+   → Settings for animation system
+
+▲ ANIMATION SETUP HELPER
+   → Editor tools
+
+================================================================================
+EVENT FLOW DIAGRAM
+================================================================================
+
+ResourceManager publishes:
+   → ResourcesChangedEvent
+   → ResourcesSpentEvent
+   └─ Subscribers: ResourceUI, BuildingHUD, BuildingButton, TrainUnitButton
+
+BuildingManager publishes:
+   → BuildingPlacedEvent
+   └─ Subscribers: WallConnectionSystem, UI panels
+
+Building publishes:
+   → BuildingPlacedEvent
+   → BuildingCompletedEvent
+   → BuildingDestroyedEvent
+   → ResourcesGeneratedEvent
+   └─ Subscribers: WallConnectionSystem, HappinessManager, UI
+
+UnitTrainingQueue publishes:
+   → UnitTrainingStartedEvent
+   → UnitTrainingCompletedEvent
+   → TrainingProgressEvent
+   └─ Subscribers: BuildingDetailsUI, audio/effects
+
+UnitHealth publishes:
+   → UnitHealthChangedEvent
+   → DamageDealtEvent
+   → HealingAppliedEvent
+   └─ Subscribers: UnitAnimationController, UI
+
+BuildingSelectionManager publishes:
+   → BuildingSelectedEvent
+   → BuildingDeselectedEvent
+   └─ Subscribers: SpawnPointFlag, BuildingDetailsUI, UI
+
+UnitSelectionManager publishes:
+   → UnitSelectedEvent
+   → UnitDeselectedEvent
+   → SelectionChangedEvent
+   └─ Subscribers: UI, audio/effects
+
+WaveManager publishes:
+   → WaveStartedEvent
+   → WaveCompletedEvent
+   └─ Subscribers: UI, notifications
+
+================================================================================
+DEPENDENCY COMPLEXITY ANALYSIS
+================================================================================
+
+Most Connected Systems (Hub Pattern):
+  1. EVENT BUS - 45+ subscribers
+  2. SERVICE LOCATOR - 30+ consumers
+  3. BUILDING MANAGER - 8+ dependents
+  4. BUILDING COMPONENT - 6+ dependents
+  5. UNIT AI CONTROLLER - 8+ dependents
+
+Most Isolated Systems:
+  1. Animation System - Only through events
+  2. Camera Controller - Only through Input System
+  3. Specialized AI - Through parent controller
+  4. ScriptableObjects - Pure data, no logic
+
+Circular Dependencies (Avoided):
+  None detected - architecture is acyclic
+
+Critical Path for Extraction:
+  EVENT BUS → SERVICE LOCATOR → MANAGERS → ALL SYSTEMS
+
+================================================================================
+MINIMAL VIABLE SYSTEM EXTRACTION
+================================================================================
+
+To extract one system as standalone package, you need:
+
+Minimum Required:
+  ✓ Core Infrastructure (EventBus, ServiceLocator)
+  ✓ Target system itself
+  ✓ All its direct dependencies
+  ✓ All ScriptableObjects it references
+  ✓ Related data classes
+
+Example: Extract Building System Standalone
+  Required Files:
+    - Core/EventBus.cs
+    - Core/GameEvents.cs (subset)
+    - Core/IServices.cs
+    - Managers/GameManager.cs (or init code)
+    - RTSBuildingsSystems/* (all files)
+    - ScriptableObjects (BuildingDataSO assets)
+  Optional for Full Integration:
+    - UI systems
+    - ResourceManager (for cost validation)
+    - HappinessManager (for bonuses)
+
+Example: Extract Unit System Standalone
+  Required Files:
+    - Core/EventBus.cs
+    - Core/GameEvents.cs (subset)
+    - Units/AI/UnitAIController.cs
+    - Units/AI/States/* (all state classes)
+    - Units/Components/* (all component classes)
+    - Units/Data/UnitConfigSO.cs
+    - ScriptableObjects (UnitConfigSO, AISettingsSO assets)
+  Optional for Full Integration:
+    - UI systems
+    - Animation system
+    - Wave manager (for spawning)
+
+================================================================================

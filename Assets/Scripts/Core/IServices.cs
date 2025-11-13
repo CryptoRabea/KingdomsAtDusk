@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace RTS.Core.Services
 {
@@ -97,6 +98,16 @@ namespace RTS.Core.Services
         float DayProgress { get; } // 0-1
         int CurrentDay { get; }
         void SetTimeScale(float scale);
+    }
+
+    /// <summary>
+    /// Interface for building management system.
+    /// </summary>
+    public interface IBuildingService
+    {
+        void StartPlacingBuilding(int buildingIndex);
+        void CancelPlacement();
+        bool IsPlacing { get; }
     }
 
     /// <summary>

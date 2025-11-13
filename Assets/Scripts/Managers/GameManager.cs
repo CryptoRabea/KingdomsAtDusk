@@ -13,6 +13,7 @@ namespace RTS.Managers
         [Header("Service References")]
         [SerializeField] private ResourceManager resourceManager;
         [SerializeField] private HappinessManager happinessManager;
+        [SerializeField] private BuildingManager buildingManager;
         [SerializeField] private ObjectPool objectPool;
 
         [Header("Settings")]
@@ -59,6 +60,9 @@ namespace RTS.Managers
             InitializeResourceManager();
             InitializeHappinessManager();
 
+            // 4. Building management system
+            InitializeBuildingManager();
+
             Debug.Log("All services initialized successfully!");
         }
 
@@ -94,6 +98,24 @@ namespace RTS.Managers
             }
 
             ServiceLocator.Register<IHappinessService>(happinessManager);
+        }
+
+        private void InitializeBuildingManager()
+        {
+            if (buildingManager == null)
+            {
+                // Try to find it in the scene
+                buildingManager = FindAnyObjectByType<BuildingManager>();
+
+                if (buildingManager == null)
+                {
+                    Debug.LogWarning("BuildingManager not assigned and not found in scene!");
+                    return;
+                }
+            }
+
+            ServiceLocator.Register<IBuildingService>(buildingManager);
+            Debug.Log("BuildingManager registered as IBuildingService");
         }
 
         private void OnDestroy()

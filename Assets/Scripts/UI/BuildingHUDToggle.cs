@@ -30,14 +30,10 @@ namespace RTS.UI
             button = GetComponent<Button>();
             button.onClick.AddListener(TogglePanel);
 
-            // Auto-find BuildingHUD if not assigned
-            if (buildingHUD == null)
+            // Validate BuildingHUD reference
+            if (buildingHUD == null && panelToToggle == null)
             {
-                buildingHUD = FindObjectOfType<BuildingHUD>();
-                if (buildingHUD == null)
-                {
-                    Debug.LogError("BuildingHUDToggle: BuildingHUD not found in scene!");
-                }
+                Debug.LogError("BuildingHUDToggle: BuildingHUD or panelToToggle must be assigned in inspector!");
             }
         }
 

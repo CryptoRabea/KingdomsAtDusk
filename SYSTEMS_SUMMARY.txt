@@ -1,0 +1,219 @@
+================================================================================
+KINGDOMS AT DUSK - GAME SYSTEMS QUICK REFERENCE
+================================================================================
+
+TOTAL SYSTEMS: 45+
+TOTAL CODE FILES: 56 C# scripts
+PROJECT VERSION: Unity 6000.2.10f1
+
+================================================================================
+CORE INFRASTRUCTURE (5 Systems)
+================================================================================
+1. SERVICE LOCATOR     - Dependency injection & service registry
+2. EVENT BUS           - 25+ event types for decoupled communication
+3. OBJECT POOL         - Memory-efficient object reuse
+4. GAME MANAGER        - Entry point & service initialization
+5. INPUT SYSTEM        - Centralized input configuration
+
+================================================================================
+MANAGEMENT SYSTEMS (4 Systems)
+================================================================================
+6. RESOURCE MANAGER    - Wood, Food, Gold, Stone tracking
+7. HAPPINESS MANAGER   - Morale system with building bonuses/tax penalties
+8. BUILDING MANAGER    - Building placement, validation, grid snapping
+9. WAVE MANAGER        - Enemy spawning with difficulty scaling
+
+================================================================================
+BUILDING SYSTEMS (6 Systems)
+================================================================================
+10. CORE BUILDING              - Construction, resource generation, happiness
+11. BUILDING DATA (SO)         - Data-driven configuration with 8 building types
+12. BUILDING SELECTION         - Click-based building selection & UI
+13. WALL CONNECTION SYSTEM     - Modular walls with 16 mesh variants
+14. UNIT TRAINING QUEUE        - Train units from buildings with queue mgmt
+15. SPAWN POINT FLAG          - Visual indicator for unit spawn locations
+
+================================================================================
+UNIT SYSTEMS (9 Systems)
+================================================================================
+16. UNIT AI CONTROLLER         - State machine orchestrator
+17. UNIT STATE MACHINE         - 6 AI states (Idle, Moving, Attacking, etc.)
+18. UNIT MOVEMENT              - NavMesh-based pathfinding
+19. UNIT HEALTH               - Damage, healing, death tracking
+20. UNIT COMBAT               - Attack range, damage dealing, targeting
+21. UNIT CONFIGURATION (SO)   - Data-driven unit stats
+22. UNIT SELECTION MANAGER    - Multi-select with drag selection
+23. UNIT SELECTABLE           - Per-unit selection component
+24. SPECIALIZED AI            - Soldier, Archer, Healer variants
+
+================================================================================
+UI SYSTEMS (9 Systems)
+================================================================================
+25. RESOURCE UI               - Display & animate resource counts
+26. HAPPINESS UI              - Morale indicator display
+27. BUILDING DETAILS UI       - Training options, spawn point button
+28. BUILDING HUD              - Building placement with hotkeys (b,h,f,t,w,g,c,m)
+29. BUILDING BUTTON           - Individual building placement button
+30. BUILDING UI               - Building UI wrapper
+31. BUILDING UI TOGGLE        - Show/hide building panel
+32. BUILDING TOOLTIP          - Hover information
+33. TRAIN UNIT BUTTON         - Unit training button
+
+================================================================================
+CAMERA SYSTEM (1 System)
+================================================================================
+34. RTS CAMERA CONTROLLER     - Pan, zoom, rotate with edge scrolling
+
+================================================================================
+ANIMATION SYSTEM (5 Systems)
+================================================================================
+35. UNIT ANIMATION CONTROLLER - Event-driven animation sync
+36. ANIMATION CONFIGURATION   - ScriptableObject animation settings
+37. UNIT ANIMATION ADVANCED   - IK (look-at, hand), animation layers
+38. UNIT ANIMATION EVENTS     - Audio & particle effects
+39. ANIMATION SETUP HELPER    - Editor tools for animation setup
+
+================================================================================
+EDITOR & DEBUG (5 Systems)
+================================================================================
+40. WALL CONNECTION EDITOR    - Editor tools for wall mesh setup
+41. WALL PREFAB SETUP         - Automated wall prefab creation
+42. BUILDING HUD EDITOR       - Building UI setup helper
+43. BUILDING TRAINING EDITOR  - Training queue UI helper
+44. BUILDING DIAGNOSTIC       - Debug building selection
+45. BUILDING SELECTOR DEBUG   - Debug building selection system
+
+================================================================================
+KEY DEPENDENCIES
+================================================================================
+
+Service Dependencies:
+  IResourcesService    → Track resources, afford checks, spending
+  IHappinessService    → Morale tracking, building bonuses
+  IPoolService         → Object pooling
+  IGameStateService    → Game state transitions
+  ITimeService         → Time management (commented, not yet implemented)
+
+Event-Driven Architecture (25+ Events):
+  - 8 Resource Events
+  - 2 Happiness Events
+  - 6 Building Events
+  - 5 Unit Events
+  - 2 Combat Events
+  - 2 Wave Events
+  - 5 Selection Events
+  - 3 Training Events
+
+External Packages:
+  - Unity Input System 1.14.2
+  - Unity AI Navigation 2.0.9
+  - Universal Render Pipeline 17.2.0
+  - TextMesh Pro (UI)
+  - Animation System
+
+================================================================================
+COMMUNICATION FLOW
+================================================================================
+
+Event Bus (Decoupled):
+  Systems publish events → EventBus → All subscribers notified
+
+Service Locator (Injection):
+  Managers → ServiceLocator.Register() → Available to all systems
+  Systems → ServiceLocator.TryGet<IService>() → Use services
+
+Direct Component References:
+  UI → Building/Unit components
+  Building/Unit → Their data ScriptableObjects
+
+================================================================================
+DATA-DRIVEN ARCHITECTURE
+================================================================================
+
+ScriptableObjects:
+  - BuildingDataSO        (8 building types, costs, effects, training)
+  - UnitConfigSO          (unit stats, health, movement, combat)
+  - AISettingsSO          (AI behavior parameters)
+  - AnimationConfigSO     (animation settings)
+  - WaveConfigSO          (wave definitions - referenced but not shown)
+
+Configurable Enum Extensions:
+  - ResourceType          (Wood, Food, Gold, Stone - easily extensible)
+  - BuildingType          (8 types)
+  - UnitStateType         (6 states)
+  - AIBehaviorType        (Aggressive + custom)
+
+================================================================================
+PERFORMANCE OPTIMIZATIONS
+================================================================================
+
+- Object pooling for unit spawning
+- Event-driven updates (not polling)
+- Parameter hashing in animation system
+- Lazy service initialization
+- Grid-based wall registry for quick neighbor lookups
+- Path update throttling (0.5s intervals)
+- Animator parameter caching
+- Configurable AI update interval
+
+================================================================================
+EXTENSION POINTS
+================================================================================
+
+Easy to Extend:
+  1. Add new resource type → Add to ResourceType enum
+  2. Add new building type → Add BuildingDataSO asset
+  3. Add new unit type → Create specialized AI class
+  4. Add new AI state → Inherit from UnitState
+  5. Add new UI panel → Subscribe to EventBus
+  6. Add new animation → Use UnitAnimationController events
+
+Complex Extensions:
+  1. Add new service → Implement IService, register in GameManager
+  2. Add new event system → Define in GameEvents.cs, publish via EventBus
+  3. Modify building placement → Edit BuildingManager validation
+  4. Change unit AI logic → Modify state implementations
+
+================================================================================
+CRITICAL FILE PATHS FOR EXTRACTION
+================================================================================
+
+Core Systems:
+  /Assets/Scripts/Core/ServiceLocator.cs
+  /Assets/Scripts/Core/EventBus.cs
+  /Assets/Scripts/Core/GameEvents.cs
+  /Assets/Scripts/Core/ObjectPool.cs
+
+Managers:
+  /Assets/Scripts/Managers/GameManager.cs
+  /Assets/Scripts/Managers/ResourceManager.cs
+  /Assets/Scripts/Managers/HappinessManager.cs
+  /Assets/Scripts/Managers/BuildingManager.cs
+  /Assets/Scripts/Managers/WaveManager.cs
+
+Buildings:
+  /Assets/Scripts/RTSBuildingsSystems/ (entire folder - 12 files)
+
+Units:
+  /Assets/Scripts/Units/ (entire folder - 25+ files)
+
+UI:
+  /Assets/Scripts/UI/ (entire folder - 7 files)
+
+Animation:
+  /Assets/Assets/RTSAnimation/ (entire folder - 5 files)
+
+================================================================================
+CURRENT GIT STATUS
+================================================================================
+
+Branch: claude/extract-systems-standalone-011CV5XEPFFbF81MSUjZn4SV
+Recent commits show:
+  - Spawn point button addition
+  - Spawn point flag system
+  - Modular wall building system
+  - Building details UI improvements
+
+Ready for: Package extraction, system isolation, standalone deployment
+
+================================================================================

@@ -18,7 +18,6 @@ namespace RTS.UI
     public class BuildingHUD : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private BuildingManager buildingManager;
         [SerializeField] private Transform buildingButtonContainer;
         [SerializeField] private GameObject buildingButtonPrefab;
 
@@ -40,19 +39,26 @@ namespace RTS.UI
 
         private List<BuildingButton> buildingButtons = new List<BuildingButton>();
         private IResourcesService resourceService;
+        private IBuildingService buildingService;
+        private BuildingManager buildingManager; // Cache for convenience
 
         private void Start()
         {
+            // Get services from ServiceLocator (no more FindObjectOfType!)
             resourceService = ServiceLocator.TryGet<IResourcesService>();
+            buildingService = ServiceLocator.TryGet<IBuildingService>();
+            buildingManager = buildingService as BuildingManager;
 
             if (buildingManager == null)
             {
-                buildingManager = Object.FindAnyObjectByType<BuildingManager>();
-                if (buildingManager == null)
-                {
-                    Debug.LogError("BuildingHUD: BuildingManager not found in scene!");
-                    return;
-                }
+                Debug.LogError("BuildingHUD: BuildingManager not registered in ServiceLocator!");
+                return;
+            }
+
+            if (resourceService == null)
+            {
+                Debug.LogError("BuildingHUD: ResourceService not registered in ServiceLocator!");
+                return;
             }
 
             InitializeBuildingButtons();

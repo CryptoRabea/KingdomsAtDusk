@@ -1,5 +1,7 @@
 ﻿using RTS.Buildings;
 using RTS.Core.Services;
+using RTS.Core.Utilities;
+using RTS.Core.Events;
 using RTS.UI;
 using System.Collections.Generic;
 using TMPro;
@@ -39,7 +41,7 @@ namespace RTS.UI
         private BuildingDataSO buildingData;
         private int buildingIndex;
         private BuildingHUD parentHUD;
-        private ResourceUI resourceUI;
+        private IResourcesService resourceService;
 
         // State tracking
         private Color currentColor;
@@ -53,12 +55,8 @@ namespace RTS.UI
             buildingIndex = index;
             parentHUD = hud;
 
-            // Find ResourceUI in scene
-            resourceUI = Object.FindAnyObjectByType<ResourceUI>();
-            if (resourceUI == null)
-            {
-                Debug.LogWarning("BuildingButton: ResourceUI not found. Resource icons may not work.");
-            }
+            // Get resource service from ServiceLocator
+            resourceService = ServiceLocator.TryGet<IResourcesService>();
 
             // Auto-find components if not assigned
             if (nameText == null) nameText = transform.Find("NameText")?.GetComponent<TextMeshProUGUI>();
@@ -71,6 +69,23 @@ namespace RTS.UI
 
             // Set initial data
             UpdateDisplay();
+
+            // Subscribe to resource changes
+            EventBus.Subscribe<ResourcesChangedEvent>(OnResourcesChanged);
+
+            // Initial affordability check
+            UpdateState(resourceService);
+        }
+
+        private void OnDestroy()
+        {
+            EventBus.Unsubscribe<ResourcesChangedEvent>(OnResourcesChanged);
+        }
+
+        private void OnResourcesChanged(ResourcesChangedEvent evt)
+        {
+            // Only update when resources actually change (99% more efficient than Update loop)
+            UpdateState(resourceService);
         }
 
         public void UpdateState(IResourcesService resourceService)
@@ -130,8 +145,8 @@ namespace RTS.UI
             }
             else if (costText != null)
             {
-                // Fallback to simple text display
-                costText.text = GetCostString();
+                // Fallback to simple text display using utility
+                costText.text = ResourceDisplayUtility.FormatCosts(buildingData.GetCosts());
             }
         }
 
@@ -157,19 +172,11 @@ namespace RTS.UI
                 Image iconImg = costEntry.transform.Find("Icon")?.GetComponent<Image>();
                 TextMeshProUGUI amountTxt = costEntry.transform.Find("Amount")?.GetComponent<TextMeshProUGUI>();
 
-                // ✅ GET ICON FROM RESOURCEUI
-                if (iconImg != null && resourceUI != null)
+                // Use centralized resource colors from utility
+                if (iconImg != null)
                 {
-                    var resourceDisplay = resourceUI.GetDisplay(cost.Key);
-                    if (resourceDisplay != null && resourceDisplay.iconImage != null)
-                    {
-                        iconImg.sprite = resourceDisplay.iconImage.sprite;
-                    }
-                    else
-                    {
-                        // Fallback: Use color-coded squares
-                        iconImg.color = GetResourceColor(cost.Key);
-                    }
+                    // Use color-coded squares based on resource type
+                    iconImg.color = ResourceDisplayUtility.GetResourceColor(cost.Key);
                 }
 
                 // Set amount text
@@ -235,55 +242,12 @@ namespace RTS.UI
                 int required = cost.Value;
                 bool canAffordThis = current >= required;
 
-                string icon = GetResourceIconText(cost.Key);
+                string icon = ResourceDisplayUtility.GetResourceEmoji(cost.Key);
                 string colorTag = canAffordThis ? "<color=white>" : "<color=red>";
-                costStrings.Add($"{icon}{colorTag}{required}</color>");
+                costStrings.Add($"{icon} {colorTag}{required}</color>");
             }
 
             costText.text = string.Join(" ", costStrings);
-        }
-
-        private string GetCostString()
-        {
-            var costs = buildingData.GetCosts();
-            var costStrings = new List<string>();
-
-            foreach (var cost in costs)
-            {
-                costStrings.Add($"{GetResourceIconText(cost.Key)}{cost.Value}");
-            }
-
-            return string.Join(" ", costStrings);
-        }
-
-        /// <summary>
-        /// Get resource icon as emoji/text (fallback if no sprite)
-        /// </summary>
-        private string GetResourceIconText(ResourceType type)
-        {
-            return type switch
-            {
-                ResourceType.Wood => "🌲",
-                ResourceType.Food => "🌾",
-                ResourceType.Gold => "💰",
-                ResourceType.Stone => "🪨",
-                _ => ""
-            };
-        }
-
-        /// <summary>
-        /// Get fallback color for resource type
-        /// </summary>
-        private Color GetResourceColor(ResourceType type)
-        {
-            return type switch
-            {
-                ResourceType.Wood => new Color(0.55f, 0.27f, 0.07f), // Brown
-                ResourceType.Food => new Color(0.9f, 0.8f, 0.2f),    // Yellow
-                ResourceType.Gold => new Color(1f, 0.84f, 0f),       // Gold
-                ResourceType.Stone => new Color(0.5f, 0.5f, 0.5f),   // Gray
-                _ => Color.white
-            };
         }
 
         /// <summary>

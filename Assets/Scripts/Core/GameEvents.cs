@@ -26,6 +26,7 @@ namespace RTS.Core.Events
         public int Wood;
         public int Food;
         public int Gold;
+        public int Stone;
         public bool Success;
 
         public ResourcesSpentEvent(int wood, int food, int gold, int stone, bool success)
@@ -33,6 +34,7 @@ namespace RTS.Core.Events
             Wood = wood;
             Food = food;
             Gold = gold;
+            Stone = stone;
             Success = success;
         }
     }

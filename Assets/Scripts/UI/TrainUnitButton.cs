@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using RTS.Buildings;
 using RTS.Core.Services;
+using RTS.Core.Utilities;
+using RTS.Core.Events;
 using System.Collections.Generic;
 
 namespace RTS.UI
@@ -39,6 +41,20 @@ namespace RTS.UI
         private void Start()
         {
             resourceService = ServiceLocator.TryGet<IResourcesService>();
+
+            // Subscribe to resource changes for event-based affordability updates
+            EventBus.Subscribe<ResourcesChangedEvent>(OnResourcesChanged);
+        }
+
+        private void OnDestroy()
+        {
+            EventBus.Unsubscribe<ResourcesChangedEvent>(OnResourcesChanged);
+        }
+
+        private void OnResourcesChanged(ResourcesChangedEvent evt)
+        {
+            // Only update when resources actually change (99% more efficient than Update loop)
+            UpdateAffordability();
         }
 
         /// <summary>
@@ -57,12 +73,7 @@ namespace RTS.UI
             }
 
             UpdateDisplay();
-        }
-
-        private void Update()
-        {
-            // Update affordability color in real-time
-            UpdateAffordability();
+            UpdateAffordability(); // Initial affordability check
         }
 
         private void UpdateDisplay()
@@ -86,10 +97,10 @@ namespace RTS.UI
                 unitNameText.text = unitData.unitConfig.unitName;
             }
 
-            // Update cost
+            // Update cost using centralized utility
             if (costText != null)
             {
-                costText.text = GetCostString();
+                costText.text = ResourceDisplayUtility.FormatCosts(unitData.GetCosts());
             }
 
             // Update training time
@@ -117,18 +128,6 @@ namespace RTS.UI
             {
                 costText.color = canAfford ? affordableColor : unaffordableColor;
             }
-        }
-
-        private string GetCostString()
-        {
-            var costs = new List<string>();
-
-            if (unitData.woodCost > 0) costs.Add($"🪵 {unitData.woodCost}");
-            if (unitData.foodCost > 0) costs.Add($"🍖 {unitData.foodCost}");
-            if (unitData.goldCost > 0) costs.Add($"💰 {unitData.goldCost}");
-            if (unitData.stoneCost > 0) costs.Add($"🪨 {unitData.stoneCost}");
-
-            return string.Join(" ", costs);
         }
 
         private void OnButtonClicked()

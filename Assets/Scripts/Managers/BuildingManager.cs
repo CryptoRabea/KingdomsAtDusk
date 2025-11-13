@@ -12,7 +12,7 @@ namespace RTS.Managers
     /// Manages building placement, construction, and destruction using BuildingDataSO as source of truth.
     /// Handles player input for placing buildings.
     /// </summary>
-    public class BuildingManager : MonoBehaviour
+    public class BuildingManager : MonoBehaviour, IBuildingService
     {
         [Header("References")]
         [SerializeField] private Camera mainCamera;
