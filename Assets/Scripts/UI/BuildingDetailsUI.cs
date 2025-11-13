@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
 using RTS.Buildings;
 using RTS.Core.Events;
 
@@ -10,6 +9,7 @@ namespace RTS.UI
     /// <summary>
     /// UI panel that displays building details and unit training options.
     /// Shows when a building is selected.
+    /// Simplified to use pre-existing UI elements instead of dynamic instantiation.
     /// </summary>
     public class BuildingDetailsUI : MonoBehaviour
     {
@@ -25,22 +25,20 @@ namespace RTS.UI
         [SerializeField] private Image trainingProgressBar;
         [SerializeField] private TextMeshProUGUI currentTrainingText;
 
-        [Header("Unit Training Buttons")]
-        [SerializeField] private Transform unitButtonContainer;
-        [SerializeField] private GameObject trainUnitButtonPrefab;
+        [Header("Unit Training Buttons - Pre-existing in UI")]
+        [SerializeField] private TrainUnitButton[] trainUnitButtons;
 
         [Header("Spawn Point Button")]
         [SerializeField] private GameObject setSpawnPointButton;
         [SerializeField] private TextMeshProUGUI setSpawnPointButtonText;
 
         [Header("Debug")]
-        [SerializeField] private bool enableDebugLogs = true;
+        [SerializeField] private bool enableDebugLogs = false;
 
         private GameObject currentSelectedBuilding;
         private Building buildingComponent;
         private UnitTrainingQueue trainingQueue;
         private BuildingSelectionManager selectionManager;
-        private List<GameObject> spawnedButtons = new List<GameObject>();
         private bool isSettingSpawnPoint = false;
 
         private void OnEnable()
@@ -69,8 +67,6 @@ namespace RTS.UI
             {
                 Debug.Log($"BuildingDetailsUI.Start() on {gameObject.name}");
                 Debug.Log($"  - panelRoot: {(panelRoot != null ? panelRoot.name : "NULL")}");
-                Debug.Log($"  - Component enabled: {enabled}");
-                Debug.Log($"  - GameObject active: {gameObject.activeInHierarchy}");
             }
 
             // Find the BuildingSelectionManager in the scene
@@ -88,7 +84,7 @@ namespace RTS.UI
                 {
                     button.onClick.AddListener(OnSetSpawnPointButtonClicked);
                 }
-                setSpawnPointButton.SetActive(false); // Hide initially
+                setSpawnPointButton.SetActive(false);
             }
 
             HidePanel();
@@ -105,7 +101,6 @@ namespace RTS.UI
             // Sync spawn point mode state with selection manager
             if (selectionManager != null && isSettingSpawnPoint)
             {
-                // If manager exited spawn point mode, update our state
                 if (!selectionManager.IsSpawnPointMode())
                 {
                     isSettingSpawnPoint = false;
@@ -122,12 +117,6 @@ namespace RTS.UI
             currentSelectedBuilding = evt.Building;
             buildingComponent = evt.Building.GetComponent<Building>();
             trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
-
-            if (enableDebugLogs)
-            {
-                Debug.Log($"  - Building component: {(buildingComponent != null ? "Found" : "NULL")}");
-                Debug.Log($"  - Building Data: {(buildingComponent?.Data != null ? buildingComponent.Data.buildingName : "NULL")}");
-            }
 
             if (buildingComponent != null && buildingComponent.Data != null)
             {
@@ -156,7 +145,6 @@ namespace RTS.UI
 
         private void OnTrainingProgress(TrainingProgressEvent evt)
         {
-            // Only update if this is our selected building
             if (evt.Building == currentSelectedBuilding)
             {
                 UpdateTrainingQueueDisplay();
@@ -181,13 +169,6 @@ namespace RTS.UI
             if (panelRoot != null)
             {
                 panelRoot.SetActive(true);
-                if (enableDebugLogs)
-                    Debug.Log($"✅ Panel shown: {panelRoot.name} SetActive(true)");
-            }
-            else
-            {
-                if (enableDebugLogs)
-                    Debug.LogError("❌ CRITICAL: panelRoot is NULL! Cannot show panel!");
             }
 
             // Update building info
@@ -214,13 +195,13 @@ namespace RTS.UI
             // Show training options if building can train units
             if (data.canTrainUnits && trainingQueue != null)
             {
-                ShowTrainingOptions(data);
+                SetupTrainingButtons(data);
                 if (trainingQueuePanel != null)
                 {
                     trainingQueuePanel.SetActive(true);
                 }
 
-                // Show spawn point button for buildings with training queue
+                // Show spawn point button
                 if (setSpawnPointButton != null)
                 {
                     setSpawnPointButton.SetActive(true);
@@ -229,13 +210,13 @@ namespace RTS.UI
             }
             else
             {
-                ClearTrainingButtons();
+                HideTrainingButtons();
                 if (trainingQueuePanel != null)
                 {
                     trainingQueuePanel.SetActive(false);
                 }
 
-                // Hide spawn point button for buildings without training queue
+                // Hide spawn point button
                 if (setSpawnPointButton != null)
                 {
                     setSpawnPointButton.SetActive(false);
@@ -243,28 +224,50 @@ namespace RTS.UI
             }
         }
 
-        private void ShowTrainingOptions(BuildingDataSO data)
+        private void SetupTrainingButtons(BuildingDataSO data)
         {
-            ClearTrainingButtons();
-
-            if (unitButtonContainer == null || trainUnitButtonPrefab == null)
+            if (trainUnitButtons == null || trainUnitButtons.Length == 0)
             {
-                Debug.LogWarning("BuildingDetailsUI: Missing button container or prefab");
+                if (enableDebugLogs)
+                    Debug.LogWarning("BuildingDetailsUI: No training buttons assigned in inspector");
                 return;
             }
 
-            // Create a button for each trainable unit
+            // Initialize buttons with trainable units
+            int buttonIndex = 0;
             foreach (var trainableUnit in data.trainableUnits)
             {
+                if (buttonIndex >= trainUnitButtons.Length) break;
                 if (trainableUnit?.unitConfig == null) continue;
 
-                GameObject buttonObj = Instantiate(trainUnitButtonPrefab, unitButtonContainer);
-                var button = buttonObj.GetComponent<TrainUnitButton>();
-
+                var button = trainUnitButtons[buttonIndex];
                 if (button != null)
                 {
+                    button.gameObject.SetActive(true);
                     button.Initialize(trainableUnit, trainingQueue);
-                    spawnedButtons.Add(buttonObj);
+                    buttonIndex++;
+                }
+            }
+
+            // Hide unused buttons
+            for (int i = buttonIndex; i < trainUnitButtons.Length; i++)
+            {
+                if (trainUnitButtons[i] != null)
+                {
+                    trainUnitButtons[i].gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private void HideTrainingButtons()
+        {
+            if (trainUnitButtons == null) return;
+
+            foreach (var button in trainUnitButtons)
+            {
+                if (button != null)
+                {
+                    button.gameObject.SetActive(false);
                 }
             }
         }
@@ -307,18 +310,6 @@ namespace RTS.UI
             }
         }
 
-        private void ClearTrainingButtons()
-        {
-            foreach (var button in spawnedButtons)
-            {
-                if (button != null)
-                {
-                    Destroy(button);
-                }
-            }
-            spawnedButtons.Clear();
-        }
-
         private void HidePanel()
         {
             if (enableDebugLogs)
@@ -327,11 +318,9 @@ namespace RTS.UI
             if (panelRoot != null)
             {
                 panelRoot.SetActive(false);
-                if (enableDebugLogs)
-                    Debug.Log($"✅ Panel hidden: {panelRoot.name} SetActive(false)");
             }
 
-            ClearTrainingButtons();
+            HideTrainingButtons();
 
             // Reset spawn point mode when hiding panel
             if (isSettingSpawnPoint && selectionManager != null)
