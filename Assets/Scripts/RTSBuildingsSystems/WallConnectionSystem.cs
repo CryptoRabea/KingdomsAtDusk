@@ -5,9 +5,9 @@ using RTS.Core.Events;
 namespace RTS.Buildings
 {
     /// <summary>
-    /// Handles modular wall connections in RTS style.
-    /// Walls automatically detect neighbors and update their visual mesh based on connections.
-    /// Attach this component to wall building prefabs.
+    /// Simplified centralized wall system - Stronghold Crusader style.
+    /// Uses single wall prefab with automatic rotation and connection detection.
+    /// Walls can be dragged to create long segments and upgraded to towers.
     /// </summary>
     public class WallConnectionSystem : MonoBehaviour
     {
@@ -16,9 +16,15 @@ namespace RTS.Buildings
         [Tooltip("Should this wall connect to other walls?")]
         [SerializeField] private bool enableConnections = true;
 
-        [Header("Visual Variants")]
-        [Tooltip("Assign 16 mesh variants (index = connection bitmask). North=1, East=2, South=4, West=8")]
-        [SerializeField] private GameObject[] meshVariants = new GameObject[16];
+        [Header("Wall Visual")]
+        [Tooltip("The main wall mesh object that will be rotated")]
+        [SerializeField] private GameObject wallMesh;
+
+        [Header("Collider Settings")]
+        [Tooltip("Wall collider for selection and gameplay")]
+        [SerializeField] private BoxCollider wallCollider;
+        [Tooltip("Auto-create collider if not assigned")]
+        [SerializeField] private bool autoCreateCollider = true;
 
         // Connection state bits
         private const int NORTH = 1;  // 0001
@@ -34,10 +40,24 @@ namespace RTS.Buildings
         private int connectionState = 0;
         private Building buildingComponent;
         private bool isRegistered = false;
+        private WallType currentWallType = WallType.Straight;
 
         private void Awake()
         {
             buildingComponent = GetComponent<Building>();
+
+            // Auto-find wall mesh if not assigned
+            if (wallMesh == null)
+            {
+                Transform meshTransform = transform.Find("WallMesh");
+                if (meshTransform != null)
+                {
+                    wallMesh = meshTransform.gameObject;
+                }
+            }
+
+            // Setup collider
+            SetupCollider();
         }
 
         private void Start()
@@ -53,6 +73,28 @@ namespace RTS.Buildings
 
             // Initial update
             UpdateConnections();
+        }
+
+        /// <summary>
+        /// Setup or create collider for wall selection and gameplay
+        /// </summary>
+        private void SetupCollider()
+        {
+            if (wallCollider == null && autoCreateCollider)
+            {
+                wallCollider = gameObject.GetComponent<BoxCollider>();
+                if (wallCollider == null)
+                {
+                    wallCollider = gameObject.AddComponent<BoxCollider>();
+                }
+            }
+
+            if (wallCollider != null)
+            {
+                // Set default collider size for a standard wall segment
+                wallCollider.center = new Vector3(0, 1f, 0);
+                wallCollider.size = new Vector3(gridSize, 2f, 0.5f);
+            }
         }
 
         private void OnDestroy()
@@ -185,37 +227,145 @@ namespace RTS.Buildings
         #region Visual Updates
 
         /// <summary>
-        /// Update the visual mesh based on connection state.
+        /// Update the visual mesh based on connection state using rotation.
+        /// Simplified system - one mesh, automatic rotation based on connections.
         /// </summary>
         private void UpdateVisual()
         {
-            if (meshVariants == null || meshVariants.Length != 16)
+            if (wallMesh == null)
             {
-                Debug.LogWarning($"Wall at {gridPosition}: meshVariants array must have exactly 16 elements!");
+                Debug.LogWarning($"Wall at {gridPosition}: wallMesh is not assigned!");
                 return;
             }
 
-            // Deactivate all variants
-            for (int i = 0; i < meshVariants.Length; i++)
-            {
-                if (meshVariants[i] != null)
-                {
-                    meshVariants[i].SetActive(false);
-                }
-            }
+            // Determine wall type and rotation based on connections
+            DetermineWallTypeAndRotation();
 
-            // Activate the correct variant
-            if (connectionState >= 0 && connectionState < meshVariants.Length)
+            Debug.Log($"Wall at {gridPosition} updated: Type={currentWallType}, Connections={GetConnectionDebugString()}");
+        }
+
+        /// <summary>
+        /// Determine wall type (straight, corner, T-junction, cross) and apply rotation
+        /// </summary>
+        private void DetermineWallTypeAndRotation()
+        {
+            int connectionCount = CountConnections();
+
+            switch (connectionCount)
             {
-                if (meshVariants[connectionState] != null)
-                {
-                    meshVariants[connectionState].SetActive(true);
-                }
-                else
-                {
-                    Debug.LogWarning($"Wall at {gridPosition}: mesh variant {connectionState} is not assigned!");
-                }
+                case 0:
+                    // Standalone wall - no rotation needed
+                    currentWallType = WallType.Standalone;
+                    wallMesh.transform.localRotation = Quaternion.identity;
+                    break;
+
+                case 1:
+                    // End piece - rotate to face connection
+                    currentWallType = WallType.End;
+                    RotateToSingleConnection();
+                    break;
+
+                case 2:
+                    // Either straight or corner
+                    if (IsOppositeConnections())
+                    {
+                        currentWallType = WallType.Straight;
+                        RotateForStraightWall();
+                    }
+                    else
+                    {
+                        currentWallType = WallType.Corner;
+                        RotateForCorner();
+                    }
+                    break;
+
+                case 3:
+                    // T-junction
+                    currentWallType = WallType.TJunction;
+                    RotateForTJunction();
+                    break;
+
+                case 4:
+                    // Cross/intersection
+                    currentWallType = WallType.Cross;
+                    wallMesh.transform.localRotation = Quaternion.identity;
+                    break;
             }
+        }
+
+        private int CountConnections()
+        {
+            int count = 0;
+            if ((connectionState & NORTH) != 0) count++;
+            if ((connectionState & EAST) != 0) count++;
+            if ((connectionState & SOUTH) != 0) count++;
+            if ((connectionState & WEST) != 0) count++;
+            return count;
+        }
+
+        private bool IsOppositeConnections()
+        {
+            bool northSouth = ((connectionState & NORTH) != 0) && ((connectionState & SOUTH) != 0);
+            bool eastWest = ((connectionState & EAST) != 0) && ((connectionState & WEST) != 0);
+            return northSouth || eastWest;
+        }
+
+        private void RotateToSingleConnection()
+        {
+            if ((connectionState & NORTH) != 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            else if ((connectionState & EAST) != 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 90, 0);
+            else if ((connectionState & SOUTH) != 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 180, 0);
+            else if ((connectionState & WEST) != 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 270, 0);
+        }
+
+        private void RotateForStraightWall()
+        {
+            // North-South orientation
+            if (((connectionState & NORTH) != 0) && ((connectionState & SOUTH) != 0))
+            {
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            }
+            // East-West orientation
+            else if (((connectionState & EAST) != 0) && ((connectionState & WEST) != 0))
+            {
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 90, 0);
+            }
+        }
+
+        private void RotateForCorner()
+        {
+            // North-East corner
+            if (((connectionState & NORTH) != 0) && ((connectionState & EAST) != 0))
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            // East-South corner
+            else if (((connectionState & EAST) != 0) && ((connectionState & SOUTH) != 0))
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 90, 0);
+            // South-West corner
+            else if (((connectionState & SOUTH) != 0) && ((connectionState & WEST) != 0))
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 180, 0);
+            // West-North corner
+            else if (((connectionState & WEST) != 0) && ((connectionState & NORTH) != 0))
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 270, 0);
+        }
+
+        private void RotateForTJunction()
+        {
+            // Missing North (connected E, S, W)
+            if ((connectionState & NORTH) == 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 180, 0);
+            // Missing East (connected N, S, W)
+            else if ((connectionState & EAST) == 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 270, 0);
+            // Missing South (connected N, E, W)
+            else if ((connectionState & SOUTH) == 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            // Missing West (connected N, E, S)
+            else if ((connectionState & WEST) == 0)
+                wallMesh.transform.localRotation = Quaternion.Euler(0, 90, 0);
         }
 
         #endregion
@@ -332,6 +482,22 @@ namespace RTS.Buildings
             return (connectionState & (int)direction) != 0;
         }
 
+        /// <summary>
+        /// Get the current wall type (straight, corner, etc.)
+        /// </summary>
+        public WallType GetWallType() => currentWallType;
+
+        /// <summary>
+        /// Manual rotation of wall mesh (for player adjustment)
+        /// </summary>
+        public void RotateWall(float yRotation)
+        {
+            if (wallMesh != null)
+            {
+                wallMesh.transform.Rotate(0, yRotation, 0);
+            }
+        }
+
         #endregion
     }
 
@@ -344,5 +510,18 @@ namespace RTS.Buildings
         East = 2,
         South = 4,
         West = 8
+    }
+
+    /// <summary>
+    /// Wall types based on connection patterns.
+    /// </summary>
+    public enum WallType
+    {
+        Standalone,  // No connections
+        End,         // 1 connection
+        Straight,    // 2 opposite connections
+        Corner,      // 2 adjacent connections
+        TJunction,   // 3 connections
+        Cross        // 4 connections
     }
 }
