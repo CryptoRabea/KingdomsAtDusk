@@ -29,6 +29,9 @@ namespace RTS.UI
         [SerializeField] private Transform unitButtonContainer;
         [SerializeField] private GameObject trainUnitButtonPrefab;
 
+        [Header("Debug")]
+        [SerializeField] private bool enableDebugLogs = true;
+
         private GameObject currentSelectedBuilding;
         private Building buildingComponent;
         private UnitTrainingQueue trainingQueue;
@@ -39,6 +42,9 @@ namespace RTS.UI
             EventBus.Subscribe<BuildingSelectedEvent>(OnBuildingSelected);
             EventBus.Subscribe<BuildingDeselectedEvent>(OnBuildingDeselected);
             EventBus.Subscribe<TrainingProgressEvent>(OnTrainingProgress);
+
+            if (enableDebugLogs)
+                Debug.Log($"✅ BuildingDetailsUI subscribed to events on {gameObject.name}");
         }
 
         private void OnDisable()
@@ -46,10 +52,21 @@ namespace RTS.UI
             EventBus.Unsubscribe<BuildingSelectedEvent>(OnBuildingSelected);
             EventBus.Unsubscribe<BuildingDeselectedEvent>(OnBuildingDeselected);
             EventBus.Unsubscribe<TrainingProgressEvent>(OnTrainingProgress);
+
+            if (enableDebugLogs)
+                Debug.Log($"❌ BuildingDetailsUI unsubscribed from events on {gameObject.name}");
         }
 
         private void Start()
         {
+            if (enableDebugLogs)
+            {
+                Debug.Log($"BuildingDetailsUI.Start() on {gameObject.name}");
+                Debug.Log($"  - panelRoot: {(panelRoot != null ? panelRoot.name : "NULL")}");
+                Debug.Log($"  - Component enabled: {enabled}");
+                Debug.Log($"  - GameObject active: {gameObject.activeInHierarchy}");
+            }
+
             HidePanel();
         }
 
@@ -64,18 +81,35 @@ namespace RTS.UI
 
         private void OnBuildingSelected(BuildingSelectedEvent evt)
         {
+            if (enableDebugLogs)
+                Debug.Log($"🟢 BuildingDetailsUI received BuildingSelectedEvent for: {evt.Building.name}");
+
             currentSelectedBuilding = evt.Building;
             buildingComponent = evt.Building.GetComponent<Building>();
             trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
+
+            if (enableDebugLogs)
+            {
+                Debug.Log($"  - Building component: {(buildingComponent != null ? "Found" : "NULL")}");
+                Debug.Log($"  - Building Data: {(buildingComponent?.Data != null ? buildingComponent.Data.buildingName : "NULL")}");
+            }
 
             if (buildingComponent != null && buildingComponent.Data != null)
             {
                 ShowBuildingDetails(buildingComponent);
             }
+            else
+            {
+                if (enableDebugLogs)
+                    Debug.LogWarning($"⚠️ Cannot show details - Building component or Data is null!");
+            }
         }
 
         private void OnBuildingDeselected(BuildingDeselectedEvent evt)
         {
+            if (enableDebugLogs)
+                Debug.Log($"🔴 BuildingDetailsUI received BuildingDeselectedEvent for: {evt.Building.name}");
+
             if (currentSelectedBuilding == evt.Building)
             {
                 HidePanel();
@@ -96,14 +130,29 @@ namespace RTS.UI
 
         private void ShowBuildingDetails(Building building)
         {
-            if (building?.Data == null) return;
+            if (building?.Data == null)
+            {
+                if (enableDebugLogs)
+                    Debug.LogWarning("⚠️ ShowBuildingDetails called with null building or data!");
+                return;
+            }
 
             var data = building.Data;
+
+            if (enableDebugLogs)
+                Debug.Log($"📋 Showing building details for: {data.buildingName}");
 
             // Show panel
             if (panelRoot != null)
             {
                 panelRoot.SetActive(true);
+                if (enableDebugLogs)
+                    Debug.Log($"✅ Panel shown: {panelRoot.name} SetActive(true)");
+            }
+            else
+            {
+                if (enableDebugLogs)
+                    Debug.LogError("❌ CRITICAL: panelRoot is NULL! Cannot show panel!");
             }
 
             // Update building info
@@ -224,9 +273,14 @@ namespace RTS.UI
 
         private void HidePanel()
         {
+            if (enableDebugLogs)
+                Debug.Log($"🙈 Hiding building details panel");
+
             if (panelRoot != null)
             {
                 panelRoot.SetActive(false);
+                if (enableDebugLogs)
+                    Debug.Log($"✅ Panel hidden: {panelRoot.name} SetActive(false)");
             }
 
             ClearTrainingButtons();
