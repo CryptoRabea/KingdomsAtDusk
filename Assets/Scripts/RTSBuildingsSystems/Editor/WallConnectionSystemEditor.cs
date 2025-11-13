@@ -8,13 +8,17 @@ namespace RTS.Buildings.Editor
     {
         private SerializedProperty gridSizeProp;
         private SerializedProperty enableConnectionsProp;
-        private SerializedProperty meshVariantsProp;
+        private SerializedProperty wallMeshProp;
+        private SerializedProperty wallColliderProp;
+        private SerializedProperty autoCreateColliderProp;
 
         private void OnEnable()
         {
             gridSizeProp = serializedObject.FindProperty("gridSize");
             enableConnectionsProp = serializedObject.FindProperty("enableConnections");
-            meshVariantsProp = serializedObject.FindProperty("meshVariants");
+            wallMeshProp = serializedObject.FindProperty("wallMesh");
+            wallColliderProp = serializedObject.FindProperty("wallCollider");
+            autoCreateColliderProp = serializedObject.FindProperty("autoCreateCollider");
         }
 
         public override void OnInspectorGUI()
@@ -23,7 +27,17 @@ namespace RTS.Buildings.Editor
 
             WallConnectionSystem wall = (WallConnectionSystem)target;
 
-            EditorGUILayout.LabelField("Wall Connection System", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Simplified Wall System - Stronghold Style", EditorStyles.boldLabel);
+            EditorGUILayout.Space();
+
+            // Info box
+            EditorGUILayout.HelpBox(
+                "Simplified wall system using single wall mesh with automatic rotation.\n" +
+                "Walls automatically connect and rotate based on neighbors.\n" +
+                "No need for 16 mesh variants!",
+                MessageType.Info
+            );
+
             EditorGUILayout.Space();
 
             // Basic settings
@@ -31,24 +45,15 @@ namespace RTS.Buildings.Editor
             EditorGUILayout.PropertyField(enableConnectionsProp);
             EditorGUILayout.Space();
 
-            // Mesh variants with visual guide
-            EditorGUILayout.LabelField("Mesh Variants (16 Connection States)", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox(
-                "Each index represents a connection state:\n" +
-                "North=1, East=2, South=4, West=8\n\n" +
-                "Examples:\n" +
-                "0 = No connections (isolated wall)\n" +
-                "3 = North + East (corner)\n" +
-                "5 = North + South (straight vertical)\n" +
-                "10 = East + West (straight horizontal)\n" +
-                "15 = All directions (4-way intersection)",
-                MessageType.Info
-            );
-
+            // Visual settings
+            EditorGUILayout.LabelField("Visual Settings", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(wallMeshProp, new GUIContent("Wall Mesh", "The main wall mesh object that will be rotated"));
             EditorGUILayout.Space();
 
-            // Draw mesh variants in a grid
-            DrawMeshVariantsGrid();
+            // Collider settings
+            EditorGUILayout.LabelField("Collider Settings", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(wallColliderProp, new GUIContent("Wall Collider", "Collider for selection and gameplay"));
+            EditorGUILayout.PropertyField(autoCreateColliderProp, new GUIContent("Auto Create Collider", "Automatically create collider if not assigned"));
 
             EditorGUILayout.Space();
 
@@ -56,12 +61,22 @@ namespace RTS.Buildings.Editor
             if (Application.isPlaying)
             {
                 EditorGUILayout.LabelField("Runtime Info", EditorStyles.boldLabel);
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.LabelField($"Grid Position: {wall.GetGridPosition()}");
+                EditorGUILayout.LabelField($"Wall Type: {wall.GetWallType()}");
                 EditorGUILayout.LabelField($"Connection State: {wall.GetConnectionState()} ({GetConnectionLabel(wall.GetConnectionState())})");
+                EditorGUILayout.EndVertical();
 
                 EditorGUILayout.Space();
 
-                // Connection status
+                // Connection status diagram
+                EditorGUILayout.LabelField("Connections", EditorStyles.boldLabel);
+                DrawConnectionDiagram(wall.GetConnectionState(), 60);
+
+                EditorGUILayout.Space();
+
+                // Connection buttons
                 EditorGUILayout.BeginHorizontal();
                 DrawConnectionButton("North", wall.IsConnected(WallDirection.North));
                 DrawConnectionButton("East", wall.IsConnected(WallDirection.East));
@@ -69,56 +84,23 @@ namespace RTS.Buildings.Editor
                 DrawConnectionButton("West", wall.IsConnected(WallDirection.West));
                 EditorGUILayout.EndHorizontal();
 
-                if (GUILayout.Button("Force Update Connections"))
+                EditorGUILayout.Space();
+
+                // Manual controls
+                EditorGUILayout.LabelField("Manual Controls", EditorStyles.boldLabel);
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("Rotate 90°"))
+                {
+                    wall.RotateWall(90f);
+                }
+                if (GUILayout.Button("Force Update"))
                 {
                     wall.UpdateConnections();
                 }
+                EditorGUILayout.EndHorizontal();
             }
 
             serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawMeshVariantsGrid()
-        {
-            // Connection state labels and visual representation
-            string[] stateLabels = new string[]
-            {
-                "0: None",           // 0000
-                "1: N",              // 0001
-                "2: E",              // 0010
-                "3: N+E",            // 0011
-                "4: S",              // 0100
-                "5: N+S",            // 0101
-                "6: E+S",            // 0110
-                "7: N+E+S",          // 0111
-                "8: W",              // 1000
-                "9: N+W",            // 1001
-                "10: E+W",           // 1010
-                "11: N+E+W",         // 1011
-                "12: S+W",           // 1100
-                "13: N+S+W",         // 1101
-                "14: E+S+W",         // 1110
-                "15: N+E+S+W"        // 1111
-            };
-
-            for (int i = 0; i < 16; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-
-                // State label with visual diagram
-                GUIStyle labelStyle = new GUIStyle(GUI.skin.label);
-                labelStyle.fixedWidth = 120;
-                EditorGUILayout.LabelField($"{stateLabels[i]}", labelStyle);
-
-                // Draw mini diagram
-                DrawConnectionDiagram(i, 20);
-
-                // Property field
-                SerializedProperty element = meshVariantsProp.GetArrayElementAtIndex(i);
-                EditorGUILayout.PropertyField(element, GUIContent.none);
-
-                EditorGUILayout.EndHorizontal();
-            }
         }
 
         private void DrawConnectionDiagram(int connectionState, float size)
