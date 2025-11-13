@@ -14,10 +14,12 @@ namespace RTS.Buildings
     {
         [Header("Input Settings")]
         [SerializeField] private InputActionReference clickAction;
+        [SerializeField] private InputActionReference rightClickAction;
         [SerializeField] private InputActionReference positionAction;
 
         [Header("Selection Settings")]
         [SerializeField] private LayerMask buildingLayer;
+        [SerializeField] private LayerMask groundLayer;
         [SerializeField] private Camera mainCamera;
 
         [Header("Debug")]
@@ -41,6 +43,12 @@ namespace RTS.Buildings
                 clickAction.action.performed += OnClick;
             }
 
+            if (rightClickAction != null)
+            {
+                rightClickAction.action.Enable();
+                rightClickAction.action.performed += OnRightClick;
+            }
+
             if (positionAction != null)
             {
                 positionAction.action.Enable();
@@ -53,6 +61,12 @@ namespace RTS.Buildings
             {
                 clickAction.action.Disable();
                 clickAction.action.performed -= OnClick;
+            }
+
+            if (rightClickAction != null)
+            {
+                rightClickAction.action.Disable();
+                rightClickAction.action.performed -= OnRightClick;
             }
 
             if (positionAction != null)
@@ -156,6 +170,76 @@ namespace RTS.Buildings
         public void DeselectBuilding()
         {
             DeselectCurrentBuilding();
+        }
+
+        private void OnRightClick(InputAction.CallbackContext context)
+        {
+            // Only process right-clicks if a building is selected
+            if (currentlySelected == null)
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: Right-click but no building selected");
+                return;
+            }
+
+            // Don't process if clicking on UI
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: Right-click was over UI, ignoring");
+                return;
+            }
+
+            if (positionAction == null)
+            {
+                if (enableDebugLogs)
+                    Debug.LogWarning("BuildingSelectionManager: positionAction is null!");
+                return;
+            }
+
+            Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
+            TrySetSpawnPoint(mousePosition);
+        }
+
+        private void TrySetSpawnPoint(Vector2 screenPosition)
+        {
+            if (currentlySelected == null) return;
+
+            Ray ray = mainCamera.ScreenPointToRay(screenPosition);
+
+            // Try to hit ground layer
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, groundLayer))
+            {
+                if (enableDebugLogs)
+                    Debug.Log($"BuildingSelectionManager: Setting spawn point at {hit.point}");
+
+                // Get UnitTrainingQueue component
+                var trainingQueue = currentlySelected.GetComponent<UnitTrainingQueue>();
+                if (trainingQueue != null)
+                {
+                    trainingQueue.SetSpawnPointPosition(hit.point);
+
+                    // Update flag position if present
+                    var spawnFlag = currentlySelected.GetComponent<SpawnPointFlag>();
+                    if (spawnFlag != null)
+                    {
+                        spawnFlag.SetSpawnPointPosition(hit.point);
+                    }
+
+                    if (enableDebugLogs)
+                        Debug.Log($"✅ Spawn point set for {currentlySelected.gameObject.name}");
+                }
+                else
+                {
+                    if (enableDebugLogs)
+                        Debug.LogWarning($"Building {currentlySelected.gameObject.name} has no UnitTrainingQueue component");
+                }
+            }
+            else
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: Right-click did not hit ground");
+            }
         }
     }
 }
