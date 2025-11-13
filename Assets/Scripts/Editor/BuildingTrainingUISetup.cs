@@ -81,8 +81,12 @@ namespace RTS.Editor
 
         private void CreateBuildingDetailsUI()
         {
-            // Create main panel
-            GameObject panelRoot = CreateUIElement("BuildingDetailsPanel", targetCanvas.transform);
+            // ✅ FIX: Create wrapper GameObject for the component (stays active to receive events)
+            GameObject componentWrapper = CreateUIElement("BuildingDetailsUI", targetCanvas.transform);
+            BuildingDetailsUI detailsUI = componentWrapper.AddComponent<BuildingDetailsUI>();
+
+            // Create visual panel as child (this gets hidden/shown)
+            GameObject panelRoot = CreateUIElement("BuildingDetailsPanel", componentWrapper.transform);
             RectTransform panelRect = panelRoot.GetComponent<RectTransform>();
 
             // Position panel on the right side of screen
@@ -95,9 +99,6 @@ namespace RTS.Editor
             Image panelBg = panelRoot.AddComponent<Image>();
             panelBg.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
             panelBg.raycastTarget = true; // ✅ Block clicks to buildings behind panel
-
-            // Add BuildingDetailsUI component
-            BuildingDetailsUI detailsUI = panelRoot.AddComponent<BuildingDetailsUI>();
 
             // Create header section
             GameObject headerSection = CreateUIElement("HeaderSection", panelRoot.transform);
@@ -192,13 +193,18 @@ namespace RTS.Editor
 
             serializedUI.ApplyModifiedProperties();
 
-            // Initially hide the panel
+            // ✅ Keep component wrapper ACTIVE so it can receive events
+            componentWrapper.SetActive(true);
+
+            // ✅ Initially hide the VISUAL panel (not the component!)
             panelRoot.SetActive(false);
 
-            EditorUtility.SetDirty(panelRoot);
-            Selection.activeGameObject = panelRoot;
+            EditorUtility.SetDirty(componentWrapper);
+            Selection.activeGameObject = componentWrapper;
 
-            Debug.Log("✅ BuildingDetailsUI created successfully! Panel is initially hidden and will show when you select a building.");
+            Debug.Log("✅ BuildingDetailsUI created successfully!");
+            Debug.Log("   - BuildingDetailsUI component: ACTIVE (receives events)");
+            Debug.Log("   - BuildingDetailsPanel visual: INACTIVE (will show when building selected)");
         }
 
         private void CreateTrainUnitButtonPrefab()
@@ -333,9 +339,10 @@ namespace RTS.Editor
             {
                 SerializedObject serializedToggle = new SerializedObject(toggle);
                 serializedToggle.FindProperty("buildingHUD").objectReferenceValue = buildingHUD;
-                serializedToggle.FindProperty("startOpen").boolValue = true;
+                serializedToggle.FindProperty("startOpen").boolValue = false; // ✅ Start closed
                 serializedToggle.ApplyModifiedProperties();
                 Debug.Log("✅ BuildingHUD automatically assigned to toggle button!");
+                Debug.Log("   - HUD starts CLOSED (click toggle button to open)");
             }
             else
             {

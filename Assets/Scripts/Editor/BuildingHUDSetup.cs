@@ -202,10 +202,14 @@ namespace RTS.Editor
 
             serializedHUD.ApplyModifiedProperties();
 
+            // ✅ Start inactive - will be shown by toggle button
+            hudPanel.SetActive(false);
+
             EditorUtility.SetDirty(hudPanel);
             Selection.activeGameObject = hudPanel;
 
             Debug.Log("✅ BuildingHUD panel created successfully!");
+            Debug.Log("   - Panel starts INACTIVE (use toggle button to show/hide)");
 
             if (buildingManager == null)
             {
@@ -396,7 +400,7 @@ namespace RTS.Editor
             {
                 SerializedObject serializedToggle = new SerializedObject(toggle);
                 serializedToggle.FindProperty("buildingHUD").objectReferenceValue = buildingHUD;
-                serializedToggle.FindProperty("startOpen").boolValue = true;
+                serializedToggle.FindProperty("startOpen").boolValue = false; // ✅ Start closed
                 serializedToggle.ApplyModifiedProperties();
                 Debug.Log("✅ BuildingHUD automatically assigned to toggle button!");
             }
@@ -404,6 +408,7 @@ namespace RTS.Editor
             EditorUtility.SetDirty(buttonObj);
 
             Debug.Log("✅ BuildingHUD toggle button created!");
+            Debug.Log("   - HUD starts CLOSED (click toggle button to open)");
         }
 
         // Helper methods
