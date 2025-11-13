@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using RTS.Buildings.Editor;
 
 namespace RTS.Editor
 {
