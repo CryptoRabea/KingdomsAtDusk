@@ -17,6 +17,13 @@ namespace RTS.UI
         [SerializeField] private RectTransform miniMapRect;
         [SerializeField] private RawImage miniMapImage;
 
+        [Header("Mini-Map Camera (World Rendering)")]
+        [SerializeField] private bool renderWorldMap = true;
+        [SerializeField] private Camera miniMapCamera;
+        [SerializeField] private int renderTextureSize = 512;
+        [SerializeField] private float miniMapCameraHeight = 500f;
+        [SerializeField] private LayerMask miniMapLayers = -1;
+
         [Header("Camera Reference")]
         [SerializeField] private RTSCameraController cameraController;
 
@@ -52,6 +59,7 @@ namespace RTS.UI
         private Dictionary<GameObject, RectTransform> unitMarkers = new Dictionary<GameObject, RectTransform>();
         private Coroutine cameraMoveCoroutine;
         private Vector2 worldSize;
+        private RenderTexture miniMapRenderTexture;
 
         private void Awake()
         {
@@ -62,6 +70,12 @@ namespace RTS.UI
             if (cameraController == null)
             {
                 cameraController = FindFirstObjectByType<RTSCameraController>();
+            }
+
+            // Setup mini-map camera and render texture
+            if (renderWorldMap)
+            {
+                SetupMiniMapCamera();
             }
 
             // Setup viewport indicator
@@ -118,6 +132,73 @@ namespace RTS.UI
             UpdateBuildingMarkers();
             UpdateUnitMarkers();
         }
+
+        private void OnDestroy()
+        {
+            // Clean up render texture
+            if (miniMapRenderTexture != null)
+            {
+                miniMapRenderTexture.Release();
+                Destroy(miniMapRenderTexture);
+            }
+        }
+
+        #region Mini-Map Camera Setup
+
+        private void SetupMiniMapCamera()
+        {
+            // Create render texture
+            miniMapRenderTexture = new RenderTexture(renderTextureSize, renderTextureSize, 16);
+            miniMapRenderTexture.name = "MiniMapRenderTexture";
+
+            // Assign to raw image
+            if (miniMapImage != null)
+            {
+                miniMapImage.texture = miniMapRenderTexture;
+            }
+
+            // Setup camera
+            if (miniMapCamera == null)
+            {
+                // Create new camera GameObject
+                GameObject camObj = new GameObject("MiniMapCamera");
+                miniMapCamera = camObj.AddComponent<Camera>();
+
+                // Don't destroy on load if mini-map persists
+                // DontDestroyOnLoad(camObj); // Uncomment if needed
+            }
+
+            // Configure camera
+            miniMapCamera.targetTexture = miniMapRenderTexture;
+            miniMapCamera.orthographic = true;
+            miniMapCamera.orthographicSize = worldSize.y / 2f; // Cover entire world height
+
+            // Position camera above world center
+            Vector3 worldCenter = new Vector3(
+                (worldMin.x + worldMax.x) / 2f,
+                miniMapCameraHeight,
+                (worldMin.y + worldMax.y) / 2f
+            );
+            miniMapCamera.transform.position = worldCenter;
+            miniMapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // Look straight down
+
+            // Set render settings
+            miniMapCamera.cullingMask = miniMapLayers;
+            miniMapCamera.clearFlags = CameraClearFlags.SolidColor;
+            miniMapCamera.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 1f); // Dark background
+            miniMapCamera.depth = -10; // Render before main camera
+
+            // Disable audio listener if it has one
+            AudioListener listener = miniMapCamera.GetComponent<AudioListener>();
+            if (listener != null)
+            {
+                Destroy(listener);
+            }
+
+            Debug.Log($"Mini-map camera setup complete. Rendering {worldSize.x}x{worldSize.y} world area.");
+        }
+
+        #endregion
 
         #region Click Handling
 
