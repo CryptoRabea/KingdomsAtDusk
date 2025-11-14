@@ -4,11 +4,13 @@
 The mini-map displays the entire playable area (2000x2000 units) and allows you to click anywhere on it to smoothly move the camera to that location.
 
 ## Features
+✓ **Real-time world map rendering** - See the actual terrain and world
 ✓ Click-to-move camera with smooth transitions
 ✓ Camera viewport indicator (shows current camera position)
 ✓ Building markers (automatically tracked via events)
 ✓ Unit markers (friendly and enemy, automatically tracked)
 ✓ Customizable colors, sizes, and movement speeds
+✓ Auto-generated mini-map camera or use your own
 
 ## Unity Setup Instructions
 
@@ -47,6 +49,13 @@ The mini-map displays the entire playable area (2000x2000 units) and allows you 
    **Mini-Map Setup:**
    - `Mini Map Rect`: Drag the MiniMap panel here
    - `Mini Map Image`: Drag the MapBackground RawImage here
+
+   **Mini-Map Camera (World Rendering):**
+   - `Render World Map`: ✓ Checked (to show actual terrain)
+   - `Mini Map Camera`: (Optional) Leave empty for auto-creation
+   - `Render Texture Size`: 512 (higher = better quality, more performance cost)
+   - `Mini Map Camera Height`: 500 (how high above the world the camera sits)
+   - `Mini Map Layers`: Everything (or customize to show only specific layers)
 
    **Camera Reference:**
    - `Camera Controller`: Drag your Main Camera (with RTSCameraController) here
@@ -98,12 +107,15 @@ If you want custom-styled markers instead of auto-generated ones:
 
 1. **Enter Play Mode**
 2. **You should see:**
-   - A mini-map in the corner showing the entire playable area
+   - A mini-map in the corner showing the **actual world terrain** from above
    - A white indicator showing where your camera is
    - Building markers appearing when you place buildings
    - Unit markers appearing when units spawn
+   - Real-time rendering of the game world
 
 3. **Click anywhere on the mini-map** and watch the camera smoothly move to that location!
+
+4. **Check the Console** for a confirmation message: "Mini-map camera setup complete. Rendering 2000x2000 world area."
 
 ## Customization Options
 
@@ -128,7 +140,38 @@ If you want custom-styled markers instead of auto-generated ones:
 - `Building Marker Size`: Make buildings more visible (try 7-10 for larger markers)
 - `Unit Marker Size`: Keep smaller than buildings (try 2-4)
 
+### Customize World Map Rendering
+- **Render Texture Size**:
+  - 256: Low quality, fast performance
+  - 512: Good balance (default)
+  - 1024: High quality, moderate performance
+  - 2048+: Very high quality, performance intensive
+- **Mini Map Camera Height**: Adjust how high the camera sits (500 is default, increase if objects are cut off)
+- **Mini Map Layers**: Use LayerMask to show/hide specific objects on the mini-map:
+  - Show only Ground layer for terrain-only view
+  - Hide UI layers to prevent clutter
+  - Show Enemy layer to see enemy positions
+
+### Disable World Rendering (Markers Only)
+If you want a simple mini-map with just markers and no terrain:
+- Uncheck `Render World Map`
+- Set the MapBackground color to your desired background
+- This improves performance significantly
+
 ## How It Works
+
+### Real-Time Rendering
+The mini-map uses a second camera positioned above the world center:
+- Renders from orthographic view (no perspective distortion)
+- Positioned at `miniMapCameraHeight` above the world
+- Renders to a RenderTexture which is displayed on the RawImage
+- Updates every frame automatically
+
+### Render Layers
+You can control what appears on the mini-map using Unity's Layer system:
+- Create a "MiniMapIgnore" layer for objects you don't want shown
+- Assign the `Mini Map Layers` to exclude that layer
+- Useful for hiding UI, effects, or decorative objects
 
 ### Event-Driven Architecture
 The mini-map automatically tracks buildings and units through the EventBus system:
@@ -198,7 +241,40 @@ MiniMapController miniMap = FindObjectOfType<MiniMapController>();
 - Make the viewport indicator larger
 - Ensure it's on top of other UI elements (last in hierarchy)
 
+### World not rendering on mini-map?
+- Verify `Render World Map` is checked
+- Check the Console for the setup confirmation message
+- Ensure `Mini Map Image` (RawImage) is assigned
+- Verify your terrain/world objects are on layers included in `Mini Map Layers`
+- Check that objects are within the world bounds (-1000 to 1000)
+
+### Mini-map shows black screen?
+- Increase `Mini Map Camera Height` (try 1000 if 500 doesn't work)
+- Check `Mini Map Layers` - make sure ground/terrain layers are included
+- Verify the background color isn't too dark
+- Check that your world has visible objects to render
+
+### Mini-map looks distorted or cut off?
+- Adjust `World Bounds` to match your actual playable area
+- Increase `Mini Map Camera Height` to see taller objects
+- Check the orthographic size calculation (should be worldSize.y / 2)
+
+### Performance issues with mini-map?
+- Lower `Render Texture Size` (try 256 instead of 512)
+- Reduce `Mini Map Layers` to only essential layers
+- Consider disabling world rendering (uncheck `Render World Map`) and use markers only
+- Reduce marker update frequency if you have many units
+
 ## Performance Notes
+
+### Mini-Map Camera Rendering
+- The mini-map camera renders every frame by default
+- RenderTexture size directly impacts performance (512x512 is a good balance)
+- Consider these optimizations:
+  - Lower render texture resolution on mobile devices
+  - Use fewer layers in the mini-map camera's culling mask
+  - Position the mini-map camera to avoid rendering unnecessary objects
+  - Use simpler LODs or shaders for objects visible on the mini-map
 
 - Markers update every frame, which is fine for small-medium unit counts
 - For large numbers of units (1000+), consider updating positions less frequently
