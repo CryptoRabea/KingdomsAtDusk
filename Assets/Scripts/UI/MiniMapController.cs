@@ -159,9 +159,6 @@ namespace RTS.UI
             if (miniMapImage != null)
             {
                 miniMapImage.texture = miniMapRenderTexture;
-                // Flip the texture vertically to match Unity's RenderTexture orientation
-                // This ensures clicks on the minimap correspond to the correct world positions
-                miniMapImage.uvRect = new Rect(0, 1, 1, -1);
             }
 
             // Setup camera
@@ -236,12 +233,17 @@ namespace RTS.UI
                     (localPoint.y + miniMapRect.rect.height * 0.5f) / miniMapRect.rect.height
                 );
 
+                // Flip Y to account for RenderTexture coordinate system
+                normalizedPos.y = 1f - normalizedPos.y;
+
                 // Convert normalized position to world position
                 Vector3 worldPos = new Vector3(
                     Mathf.Lerp(worldMin.x, worldMax.x, normalizedPos.x),
                     cameraController.transform.position.y,
                     Mathf.Lerp(worldMin.y, worldMax.y, normalizedPos.y)
                 );
+
+                Debug.Log($"Minimap Click - LocalPoint: {localPoint}, NormalizedPos: {normalizedPos}, WorldPos: {worldPos}, RectSize: {miniMapRect.rect.size}");
 
                 // Move camera to world position
                 MoveCameraToPosition(worldPos);
@@ -305,6 +307,9 @@ namespace RTS.UI
                 Mathf.InverseLerp(worldMin.x, worldMax.x, camPos.x),
                 Mathf.InverseLerp(worldMin.y, worldMax.y, camPos.z)
             );
+
+            // Flip Y to account for RenderTexture coordinate system
+            normalizedPos.y = 1f - normalizedPos.y;
 
             // Convert to local mini-map coordinates
             Vector2 localPos = new Vector2(
@@ -509,6 +514,9 @@ namespace RTS.UI
                 Mathf.InverseLerp(worldMin.y, worldMax.y, worldPosition.z)
             );
 
+            // Flip Y to account for RenderTexture coordinate system
+            normalizedPos.y = 1f - normalizedPos.y;
+
             // Convert to local mini-map coordinates
             Vector2 localPos = new Vector2(
                 (normalizedPos.x - 0.5f) * miniMapRect.rect.width,
@@ -516,6 +524,12 @@ namespace RTS.UI
             );
 
             marker.anchoredPosition = localPos;
+
+            // Debug first marker update only to avoid spam
+            if (buildingMarkers.Count == 1 || unitMarkers.Count == 1)
+            {
+                Debug.Log($"Marker Position - World: {worldPosition}, NormalizedPos: {normalizedPos}, LocalPos: {localPos}");
+            }
         }
 
         private Sprite CreateCircleSprite()
