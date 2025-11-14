@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
 
@@ -16,10 +16,6 @@ namespace RTS.Buildings
         [Tooltip("Should this wall connect to other walls?")]
         [SerializeField] private bool enableConnections = true;
 
-        [Header("Visual Variants")]
-        [Tooltip("Assign 16 mesh variants (index = connection bitmask). North=1, East=2, South=4, West=8")]
-        [SerializeField] private GameObject[] meshVariants = new GameObject[16];
-
         // Static registry of all walls - NO GRID, just a list
         private static List<WallConnectionSystem> allWalls = new List<WallConnectionSystem>();
 
@@ -27,6 +23,10 @@ namespace RTS.Buildings
         private List<WallConnectionSystem> connectedWalls = new List<WallConnectionSystem>();
         private Building buildingComponent;
         private bool isRegistered = false;
+
+        // ✅ FIX: Prevent cascading updates
+        private bool isUpdating = false;
+        private static bool isBatchUpdate = false;
 
         private void Awake()
         {
@@ -38,20 +38,25 @@ namespace RTS.Buildings
             if (!enableConnections) return;
 
             // Register this wall
-            allWalls.Add(this);
+            RegisterWall();
 
             // Subscribe to building events
             EventBus.Subscribe<BuildingPlacedEvent>(OnBuildingPlaced);
             EventBus.Subscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
-            // Initial update
+            // ✅ FIX: Delay initial update to avoid Start() race conditions
+            Invoke(nameof(DelayedInitialUpdate), 0.1f);
+        }
+
+        private void DelayedInitialUpdate()
+        {
             UpdateConnections();
         }
 
         private void OnDestroy()
         {
             // Unregister this wall
-            allWalls.Remove(this);
+            UnregisterWall();
 
             // Unsubscribe from events
             EventBus.Unsubscribe<BuildingPlacedEvent>(OnBuildingPlaced);
@@ -60,6 +65,28 @@ namespace RTS.Buildings
             // Update neighbors when this wall is destroyed
             UpdateNearbyWalls();
         }
+
+        #region Registration
+
+        private void RegisterWall()
+        {
+            if (!isRegistered && !allWalls.Contains(this))
+            {
+                allWalls.Add(this);
+                isRegistered = true;
+            }
+        }
+
+        private void UnregisterWall()
+        {
+            if (isRegistered && allWalls.Contains(this))
+            {
+                allWalls.Remove(this);
+                isRegistered = false;
+            }
+        }
+
+        #endregion
 
         #region Connection Detection
 
@@ -70,41 +97,75 @@ namespace RTS.Buildings
         {
             if (!enableConnections) return;
 
-            // Clear old connections
-            connectedWalls.Clear();
+            // ✅ FIX: Prevent recursive updates
+            if (isUpdating) return;
+            isUpdating = true;
 
-            // Find nearby walls within connection distance
-            Vector3 myPos = transform.position;
-            foreach (var otherWall in allWalls)
+            try
             {
-                if (otherWall == this || otherWall == null) continue;
+                // Clear old connections
+                connectedWalls.Clear();
 
-                float distance = Vector3.Distance(myPos, otherWall.transform.position);
-                if (distance <= connectionDistance)
+                // Find nearby walls within connection distance
+                Vector3 myPos = transform.position;
+                foreach (var otherWall in allWalls)
                 {
-                    connectedWalls.Add(otherWall);
-                }
-            }
+                    if (otherWall == this || otherWall == null) continue;
 
-            // Update visual based on connections
-            UpdateVisual();
+                    float distance = Vector3.Distance(myPos, otherWall.transform.position);
+                    if (distance <= connectionDistance)
+                    {
+                        connectedWalls.Add(otherWall);
+                    }
+                }
+
+                // Update visual based on connections (implement your visual logic here)
+                // UpdateVisualMesh();
+            }
+            finally
+            {
+                isUpdating = false;
+            }
         }
 
         /// <summary>
-        /// Update all nearby walls' connections
+        /// Update all nearby walls' connections - with protection against cascading
         /// </summary>
         private void UpdateNearbyWalls()
         {
+            // ✅ FIX: Prevent cascading updates during batch operations
+            if (isBatchUpdate) return;
+
             Vector3 myPos = transform.position;
+            List<WallConnectionSystem> wallsToUpdate = new List<WallConnectionSystem>();
+
+            // Collect walls to update
             foreach (var wall in allWalls)
             {
                 if (wall == this || wall == null) continue;
 
                 float distance = Vector3.Distance(myPos, wall.transform.position);
-                if (distance <= connectionDistance * 2f) // Update walls within double connection distance
+                if (distance <= connectionDistance * 2f)
                 {
-                    wall.UpdateConnections();
+                    wallsToUpdate.Add(wall);
                 }
+            }
+
+            // ✅ FIX: Update in batch mode to prevent cascading
+            isBatchUpdate = true;
+            try
+            {
+                foreach (var wall in wallsToUpdate)
+                {
+                    if (wall != null)
+                    {
+                        wall.UpdateConnections();
+                    }
+                }
+            }
+            finally
+            {
+                isBatchUpdate = false;
             }
         }
 
@@ -114,72 +175,13 @@ namespace RTS.Buildings
 
         /// <summary>
         /// Update visual mesh - activates/deactivates mesh variants based on connections
+        /// Override this in derived classes or implement your visual logic
         /// </summary>
-        private void UpdateVisual()
+        private void UpdateVisualMesh()
         {
-            if (meshVariants == null || meshVariants.Length != 16)
-            {
-                // No variants configured, skip visual update
-                return;
-            }
-
-            // Calculate connection bitmask
-            int connectionBitmask = CalculateConnectionBitmask();
-
-            // Deactivate all variants
-            for (int i = 0; i < meshVariants.Length; i++)
-            {
-                if (meshVariants[i] != null)
-                {
-                    meshVariants[i].SetActive(false);
-                }
-            }
-
-            // Activate the correct variant based on bitmask
-            if (connectionBitmask >= 0 && connectionBitmask < meshVariants.Length)
-            {
-                if (meshVariants[connectionBitmask] != null)
-                {
-                    meshVariants[connectionBitmask].SetActive(true);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Calculate connection bitmask based on nearby walls
-        /// North=1, East=2, South=4, West=8
-        /// </summary>
-        private int CalculateConnectionBitmask()
-        {
-            int bitmask = 0;
-
-            foreach (var wall in connectedWalls)
-            {
-                if (wall == null) continue;
-
-                Vector3 direction = wall.transform.position - transform.position;
-                direction.y = 0; // Ignore vertical difference
-
-                // Determine which direction the wall is in
-                if (Mathf.Abs(direction.x) > Mathf.Abs(direction.z))
-                {
-                    // East or West
-                    if (direction.x > 0)
-                        bitmask |= 2; // East
-                    else
-                        bitmask |= 8; // West
-                }
-                else
-                {
-                    // North or South
-                    if (direction.z > 0)
-                        bitmask |= 1; // North
-                    else
-                        bitmask |= 4; // South
-                }
-            }
-
-            return bitmask;
+            // TODO: Implement your visual mesh update logic here
+            // Example: Activate/deactivate mesh variants based on connection count
+            // Example: Rotate or scale based on connection directions
         }
 
         #endregion
@@ -188,18 +190,18 @@ namespace RTS.Buildings
 
         private void OnBuildingPlaced(BuildingPlacedEvent evt)
         {
-            // Check if the placed building is a wall nearby
+            // ✅ FIX: Only process if this is a wall and it's nearby
             if (evt.Building == null) return;
 
             var wallSystem = evt.Building.GetComponent<WallConnectionSystem>();
-            if (wallSystem != null)
+            if (wallSystem == null) return;
+
+            // Check if nearby
+            float distance = Vector3.Distance(transform.position, evt.Position);
+            if (distance <= connectionDistance * 2f)
             {
-                // Update if nearby
-                float distance = Vector3.Distance(transform.position, evt.Position);
-                if (distance <= connectionDistance * 2f)
-                {
-                    UpdateConnections();
-                }
+                // ✅ FIX: Use delayed update to prevent immediate cascade
+                Invoke(nameof(UpdateConnections), 0.05f);
             }
         }
 
@@ -241,12 +243,26 @@ namespace RTS.Buildings
         private void DebugPrintConnections()
         {
             Debug.Log($"Wall at {transform.position}: {connectedWalls.Count} connections");
+            foreach (var wall in connectedWalls)
+            {
+                if (wall != null)
+                {
+                    Debug.Log($"  - Connected to wall at {wall.transform.position}");
+                }
+            }
         }
 
         [ContextMenu("Print All Walls")]
         private void DebugPrintAllWalls()
         {
-            Debug.Log($"Total walls: {allWalls.Count}");
+            Debug.Log($"Total walls in scene: {allWalls.Count}");
+            foreach (var wall in allWalls)
+            {
+                if (wall != null)
+                {
+                    Debug.Log($"  - Wall at {wall.transform.position}");
+                }
+            }
         }
 
         #endregion
@@ -261,28 +277,41 @@ namespace RTS.Buildings
         /// <summary>
         /// Get list of connected walls
         /// </summary>
-        public List<WallConnectionSystem> GetConnectedWalls() => connectedWalls;
+        public List<WallConnectionSystem> GetConnectedWalls() => new List<WallConnectionSystem>(connectedWalls);
 
         /// <summary>
-        /// Check if this wall is connected in a specific direction.
+        /// Check if connected to a specific wall
         /// </summary>
-        public bool IsConnected(WallDirection direction)
+        public bool IsConnectedTo(WallConnectionSystem otherWall)
         {
-            int bitmask = CalculateConnectionBitmask();
-            return (bitmask & (int)direction) != 0;
+            return connectedWalls.Contains(otherWall);
+        }
+
+        /// <summary>
+        /// Get connection direction to another wall (normalized vector)
+        /// </summary>
+        public Vector3 GetConnectionDirection(WallConnectionSystem otherWall)
+        {
+            if (otherWall == null) return Vector3.zero;
+            return (otherWall.transform.position - transform.position).normalized;
+        }
+
+        /// <summary>
+        /// Static method to get all walls in the scene
+        /// </summary>
+        public static List<WallConnectionSystem> GetAllWalls()
+        {
+            return new List<WallConnectionSystem>(allWalls);
+        }
+
+        /// <summary>
+        /// Static method to clear all wall registrations (useful for scene transitions)
+        /// </summary>
+        public static void ClearAllWalls()
+        {
+            allWalls.Clear();
         }
 
         #endregion
-    }
-
-    /// <summary>
-    /// Wall connection directions.
-    /// </summary>
-    public enum WallDirection
-    {
-        North = 1,
-        East = 2,
-        South = 4,
-        West = 8
     }
 }

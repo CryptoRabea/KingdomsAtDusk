@@ -1,0 +1,20 @@
+{
+    "asset": "c13cb0b2fc8bbd14a8ce19908f26654d",
+    "fileName": "019a7eb5-30f4-7eeb-8ce2-4e17fea3523b.png",
+    "prompt": "2d ui real time strategy HUD icon\n",
+    "negativePrompt": "",
+    "model": "5b5b2af1-6ea4-4266-b087-cc9f3bf4f450",
+    "modelName": "Flux.1 Dev",
+    "customSeed": -1,
+    "w3CTraceId": "576522a775e77772dd06a15f485f19a1",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

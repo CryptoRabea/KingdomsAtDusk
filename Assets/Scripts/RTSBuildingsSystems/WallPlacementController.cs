@@ -7,8 +7,19 @@ using System.Collections.Generic;
 namespace RTS.Buildings
 {
     /// <summary>
-    /// Handles pole-to-pole wall placement with preview and resource counting.
-    /// First click places a pole, second click places all wall segments between poles.
+    /// Which axis represents the wall's length (the direction walls connect).
+    /// </summary>
+    public enum WallLengthAxis
+    {
+        X,  // Width/Side-to-side
+        Y,  // Height/Up-down (rare)
+        Z   // Depth/Forward-back
+    }
+
+    /// <summary>
+    /// Handles pole-to-pole wall placement with perfect mesh-based fitting.
+    /// Walls are placed end-to-end using actual mesh dimensions.
+    /// Last segment scales to fit remaining distance perfectly - NO GAPS, NO OVERLAPS!
     /// </summary>
     public class WallPlacementController : MonoBehaviour
     {
@@ -25,11 +36,23 @@ namespace RTS.Buildings
         [SerializeField] private Color invalidLineColor = Color.red;
 
         [Header("Placement Settings")]
-        [SerializeField] private float wallSpacing = 1f;
         [SerializeField] private bool useGridSnapping = false;
+        [SerializeField] private float gridSize = 1f;
+        [SerializeField] private float wallSnapDistance = 2f;
+        [SerializeField] private bool autoCompleteOnSnap = true;
+        [SerializeField] private float minParallelOverlap = 0.5f;
+
+
+        [Header("Mesh-Based Placement")]
+        [Tooltip("Minimum scale for last segment (0.3 = 30% of original size minimum)")]
+        [SerializeField] private float minScaleFactor = 0.3f;
+        [Tooltip("Use mesh bounds for automatic wall sizing")]
+        [SerializeField] private bool useAutoMeshSize = true;
+        [Tooltip("Which axis represents the wall's length (the direction walls connect)")]
+        [SerializeField] private WallLengthAxis wallLengthAxis = WallLengthAxis.X;
 
         [Header("Pole Settings")]
-        [SerializeField] private GameObject polePrefab; // Pole visual prefab
+        [SerializeField] private GameObject polePrefab;
         [SerializeField] private float poleHeight = 2f;
 
         // State
@@ -39,6 +62,14 @@ namespace RTS.Buildings
         private GameObject firstPoleVisual;
         private GameObject currentPolePreview;
         private List<GameObject> wallSegmentPreviews = new List<GameObject>();
+
+        // Track placed walls
+        private List<PlacedWallSegment> placedWallSegments = new List<PlacedWallSegment>();
+        private bool isSnappedToWall = false;
+        private Vector3 snappedWallPosition;
+
+        // Mesh-based sizing
+        private float wallMeshLength = 1f; // Auto-detected from mesh
 
         // Current building data
         private BuildingDataSO currentWallData;
@@ -55,6 +86,155 @@ namespace RTS.Buildings
         private Dictionary<ResourceType, int> totalCost = new Dictionary<ResourceType, int>();
         private bool canAfford = false;
 
+        // Current wall direction for rotation
+        private Quaternion currentWallRotation = Quaternion.identity;
+
+        private List<Vector3> placedWallPositions = new List<Vector3>();
+
+        /// <summary>
+        /// Checks if a wall segment placed between (start→end) would overlap an existing wall.
+        /// Allows connecting EXACTLY at endpoints, but blocks overlapping the body.
+        /// </summary>
+        private bool WouldOverlapExistingWall(Vector3 start, Vector3 end)
+        {
+            foreach (var seg in placedWallSegments)
+            {
+                Vector3 existingStart = seg.GetStartPosition(wallLengthAxis);
+                Vector3 existingEnd = seg.GetEndPosition(wallLengthAxis);
+
+                // 1. If connecting exactly to endpoints → allowed
+                if (Vector3.Distance(start, existingStart) < 0.01f ||
+                    Vector3.Distance(start, existingEnd) < 0.01f ||
+                    Vector3.Distance(end, existingStart) < 0.01f ||
+                    Vector3.Distance(end, existingEnd) < 0.01f)
+                {
+                    continue; // endpoint connections allowed
+                }
+
+                // 2. Check segment intersection in 2D (X/Z)
+                if (SegmentsIntersect2D(start, end, existingStart, existingEnd))
+                {
+                    return true; // Overlap or crossing detected
+                }
+
+                // 3. Check if new segment lies on top of an existing one (collinear & overlapping)
+                if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool SegmentsIntersect2D(Vector3 a1, Vector3 a2, Vector3 b1, Vector3 b2)
+        {
+            if (ShareEndpoint(a1, a2, b1, b2))
+                return false; // touching is allowed
+
+            Vector2 A1 = new Vector2(a1.x, a1.z);
+            Vector2 A2 = new Vector2(a2.x, a2.z);
+            Vector2 B1 = new Vector2(b1.x, b1.z);
+            Vector2 B2 = new Vector2(b2.x, b2.z);
+
+            // Direction vectors
+            Vector2 dA = (A2 - A1).normalized;
+            Vector2 dB = (B2 - B1).normalized;
+
+            // 1. If they are parallel → NOT intersecting
+            float cross = dA.x * dB.y - dA.y * dB.x;
+            if (Mathf.Abs(cross) < 0.0001f)
+                return false; // Parallel or nearly parallel → allowed
+
+            // 2. Standard intersection only if not parallel
+            bool ccw(Vector2 p1, Vector2 p2, Vector2 p3) =>
+                (p3.y - p1.y) * (p2.x - p1.x) > (p2.y - p1.y) * (p3.x - p1.x);
+
+            return (ccw(A1, B1, B2) != ccw(A2, B1, B2)) &&
+                   (ccw(A1, A2, B1) != ccw(A1, A2, B2));
+        }
+
+
+        private bool AreCollinearAndOverlapping(Vector3 a1, Vector3 a2, Vector3 b1, Vector3 b2)
+        {
+            // If they only touch at endpoints, this is allowed
+            if (ShareEndpoint(a1, a2, b1, b2))
+                return false;
+
+            // Convert to 2D
+            Vector2 A1 = new Vector2(a1.x, a1.z);
+            Vector2 A2 = new Vector2(a2.x, a2.z);
+            Vector2 B1 = new Vector2(b1.x, b1.z);
+            Vector2 B2 = new Vector2(b2.x, b2.z);
+
+            // Check collinearity (cross product == 0)
+            Vector2 dirA = (A2 - A1).normalized;
+            Vector2 dirB = (B2 - B1).normalized;
+
+            if (Mathf.Abs(Vector2.Perpendicular(dirA).x * dirB.x + Vector2.Perpendicular(dirA).y * dirB.y) > 0.01f)
+                return false; // Not collinear
+
+            // Project B onto A line
+            float aMin = Vector2.Dot(A1, dirA);
+            float aMax = Vector2.Dot(A2, dirA);
+
+            float bMin = Vector2.Dot(B1, dirA);
+            float bMax = Vector2.Dot(B2, dirA);
+
+            float overlap = Mathf.Min(aMax, bMax) - Mathf.Max(aMin, bMin);
+
+            // No overlap
+            if (overlap <= 0)
+                return false;
+
+            // 🔥 NEW RULE — ignore tiny overlaps
+            if (overlap < minParallelOverlap)
+                return false;
+
+            return true; // Real overlap → block building
+        }
+
+
+
+        private struct PlacedWallSegment
+        {
+            public Vector3 center;
+            public float length; // along the wall axis
+            public Quaternion rotation;
+
+            public PlacedWallSegment(Vector3 c, float l, Quaternion rot)
+            {
+                center = c;
+                length = l;
+                rotation = rot;
+            }
+
+            public Vector3 GetStartPosition(WallLengthAxis axis)
+            {
+                Vector3 dir = rotation * Vector3.forward;
+                switch (axis)
+                {
+                    case WallLengthAxis.X: dir = rotation * Vector3.right; break;
+                    case WallLengthAxis.Y: dir = rotation * Vector3.up; break;
+                    case WallLengthAxis.Z: dir = rotation * Vector3.forward; break;
+                }
+                return center - dir * (length / 2f);
+            }
+
+            public Vector3 GetEndPosition(WallLengthAxis axis)
+            {
+                Vector3 dir = rotation * Vector3.forward;
+                switch (axis)
+                {
+                    case WallLengthAxis.X: dir = rotation * Vector3.right; break;
+                    case WallLengthAxis.Y: dir = rotation * Vector3.up; break;
+                    case WallLengthAxis.Z: dir = rotation * Vector3.forward; break;
+                }
+                return center + dir * (length / 2f);
+            }
+
+        }
+
         private void Awake()
         {
             if (mainCamera == null)
@@ -63,7 +243,6 @@ namespace RTS.Buildings
             mouse = Mouse.current;
             keyboard = Keyboard.current;
 
-            // Setup line renderer
             SetupLineRenderer();
         }
 
@@ -106,9 +285,6 @@ namespace RTS.Buildings
 
         #region Public API
 
-        /// <summary>
-        /// Start placing walls with pole-to-pole system.
-        /// </summary>
         public void StartPlacingWalls(BuildingDataSO wallData)
         {
             if (wallData == null || wallData.buildingPrefab == null)
@@ -117,39 +293,41 @@ namespace RTS.Buildings
                 return;
             }
 
-            // Cancel any existing placement
             CancelWallPlacement();
 
             currentWallData = wallData;
             isPlacingWall = true;
             firstPoleSet = false;
 
-            // Create current pole preview
+            // ✅ Auto-detect wall mesh length
+            if (useAutoMeshSize)
+            {
+                wallMeshLength = DetectWallMeshLength(wallData.buildingPrefab);
+                Debug.Log($"Auto-detected wall mesh length: {wallMeshLength}");
+            }
+
+            placedWallPositions.Clear();
+            isSnappedToWall = false;
+
             CreatePolePreview();
 
             Debug.Log($"Started placing walls: {wallData.buildingName}");
         }
 
-        /// <summary>
-        /// Cancel current wall placement.
-        /// </summary>
         public void CancelWallPlacement()
         {
-            // Destroy first pole visual
             if (firstPoleVisual != null)
             {
                 Destroy(firstPoleVisual);
                 firstPoleVisual = null;
             }
 
-            // Destroy pole preview
             if (currentPolePreview != null)
             {
                 Destroy(currentPolePreview);
                 currentPolePreview = null;
             }
 
-            // Destroy all wall segment previews
             foreach (var preview in wallSegmentPreviews)
             {
                 if (preview != null)
@@ -157,7 +335,6 @@ namespace RTS.Buildings
             }
             wallSegmentPreviews.Clear();
 
-            // Hide line renderer
             if (linePreviewRenderer != null)
                 linePreviewRenderer.enabled = false;
 
@@ -166,22 +343,74 @@ namespace RTS.Buildings
             currentWallData = null;
             requiredSegments = 0;
             totalCost.Clear();
+            isSnappedToWall = false;
         }
 
-        /// <summary>
-        /// Check if currently placing walls.
-        /// </summary>
         public bool IsPlacingWalls => isPlacingWall;
-
-        /// <summary>
-        /// Get the total cost for the current wall segments.
-        /// </summary>
         public Dictionary<ResourceType, int> GetTotalCost() => new Dictionary<ResourceType, int>(totalCost);
+        public int GetRequiredSegments() => requiredSegments;
+
+        #endregion
+
+        #region Mesh Detection
 
         /// <summary>
-        /// Get the number of required segments.
+        /// ✅ Detect the actual length of the wall mesh along the configured axis.
+        /// This is used to place walls end-to-end perfectly.
         /// </summary>
-        public int GetRequiredSegments() => requiredSegments;
+        private float DetectWallMeshLength(GameObject wallPrefab)
+        {
+            // Try to get mesh from MeshFilter
+            MeshFilter meshFilter = wallPrefab.GetComponentInChildren<MeshFilter>();
+            if (meshFilter != null && meshFilter.sharedMesh != null)
+            {
+                Bounds bounds = meshFilter.sharedMesh.bounds;
+                Transform meshTransform = meshFilter.transform;
+
+                // ✅ Get the length along the configured axis
+                float boundsSize = 0f;
+                float meshScale = 1f;
+                float prefabScale = 1f;
+
+                switch (wallLengthAxis)
+                {
+                    case WallLengthAxis.X:
+                        boundsSize = bounds.size.x;
+                        meshScale = meshTransform.localScale.x;
+                        prefabScale = wallPrefab.transform.localScale.x;
+                        break;
+                    case WallLengthAxis.Y:
+                        boundsSize = bounds.size.y;
+                        meshScale = meshTransform.localScale.y;
+                        prefabScale = wallPrefab.transform.localScale.y;
+                        break;
+                    case WallLengthAxis.Z:
+                        boundsSize = bounds.size.z;
+                        meshScale = meshTransform.localScale.z;
+                        prefabScale = wallPrefab.transform.localScale.z;
+                        break;
+                }
+
+                float length = boundsSize * meshScale * prefabScale;
+                return Mathf.Max(length, 0.1f); // Minimum 0.1 to avoid issues
+            }
+
+            // Fallback: try collider
+            Collider collider = wallPrefab.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Bounds bounds = collider.bounds;
+                float size = wallLengthAxis == WallLengthAxis.X ? bounds.size.x :
+                            (wallLengthAxis == WallLengthAxis.Y ? bounds.size.y : bounds.size.z);
+                return Mathf.Max(size, 0.1f);
+            }
+
+            // Last resort: use scale
+            Debug.LogWarning($"Could not detect wall mesh length, using transform scale {wallLengthAxis}");
+            float scaleValue = wallLengthAxis == WallLengthAxis.X ? wallPrefab.transform.localScale.x :
+                              (wallLengthAxis == WallLengthAxis.Y ? wallPrefab.transform.localScale.y : wallPrefab.transform.localScale.z);
+            return Mathf.Max(scaleValue, 1f);
+        }
 
         #endregion
 
@@ -195,12 +424,10 @@ namespace RTS.Buildings
             }
             else
             {
-                // Create a simple pole if no prefab is provided
                 currentPolePreview = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 currentPolePreview.transform.localScale = new Vector3(0.3f, poleHeight / 2f, 0.3f);
             }
 
-            // Disable collider on preview
             var collider = currentPolePreview.GetComponent<Collider>();
             if (collider != null)
                 Destroy(collider);
@@ -215,12 +442,17 @@ namespace RTS.Buildings
             Vector3 mouseWorldPos = GetMouseWorldPosition();
             if (mouseWorldPos == Vector3.zero) return;
 
-            // Snap to grid
             Vector3 snappedPos = SnapToGrid(mouseWorldPos);
+
+            isSnappedToWall = TrySnapToNearbyWall(snappedPos, out Vector3 wallSnappedPos);
+            if (isSnappedToWall)
+            {
+                snappedPos = wallSnappedPos;
+                snappedWallPosition = wallSnappedPos;
+            }
 
             if (!firstPoleSet)
             {
-                // Update current pole preview position
                 if (currentPolePreview != null)
                 {
                     currentPolePreview.transform.position = snappedPos + Vector3.up * (poleHeight / 2f);
@@ -228,87 +460,147 @@ namespace RTS.Buildings
             }
             else
             {
-                // Update second pole position and show wall preview
                 UpdateWallPreview(snappedPos);
             }
         }
 
         private void UpdateWallPreview(Vector3 secondPolePos)
         {
-            // Update current pole preview
+
+            Color lineColor = isSnappedToWall ? Color.cyan : (canAfford ? validLineColor : invalidLineColor);
+            linePreviewRenderer.startColor = lineColor;
+            linePreviewRenderer.endColor = lineColor;
+
+            Material previewMat = canAfford ? validPreviewMaterial : invalidPreviewMaterial;
+            bool overlaps = WouldOverlapExistingWall(firstPolePosition, secondPolePos);
+
+            if (overlaps)
+            {
+                canAfford = false; // force preview to red
+            }
             if (currentPolePreview != null)
             {
                 currentPolePreview.transform.position = secondPolePos + Vector3.up * (poleHeight / 2f);
             }
 
-            // Calculate wall segments needed
-            List<Vector3> segmentPositions = CalculateWallSegments(firstPolePosition, secondPolePos);
-            requiredSegments = segmentPositions.Count;
+            currentWallRotation = CalculateWallRotation(firstPolePosition, secondPolePos);
 
-            // Update line preview
+            // ✅ Calculate segments with perfect mesh-based fitting
+            List<WallSegmentData> segmentData = CalculateWallSegmentsWithScaling(firstPolePosition, secondPolePos);
+            requiredSegments = segmentData.Count;
+
             UpdateLinePreview(firstPolePosition, secondPolePos);
-
-            // Update wall segment previews
-            UpdateWallSegmentPreviews(segmentPositions);
-
-            // Calculate total cost
+            UpdateWallSegmentPreviews(segmentData);
             CalculateTotalCost();
 
-            // Check if player can afford it
             canAfford = resourceService != null && resourceService.CanAfford(totalCost);
 
-            // Update visual based on affordability
-            Color lineColor = canAfford ? validLineColor : invalidLineColor;
-            linePreviewRenderer.startColor = lineColor;
-            linePreviewRenderer.endColor = lineColor;
-
-            Material previewMat = canAfford ? validPreviewMaterial : invalidPreviewMaterial;
             SetPreviewMaterial(currentPolePreview, previewMat);
             foreach (var preview in wallSegmentPreviews)
             {
                 SetPreviewMaterial(preview, previewMat);
             }
+
+           
+
         }
 
-        private List<Vector3> CalculateWallSegments(Vector3 start, Vector3 end)
+        /// <summary>
+        /// Helper struct to store position AND scale for each wall segment.
+        /// </summary>
+        private struct WallSegmentData
         {
-            List<Vector3> segments = new List<Vector3>();
+            public Vector3 position;
+            public Vector3 scale;
+            public float length; // world-space length along the wall axis
 
-            // Calculate direction and distance
-            Vector3 direction = end - start;
-            float distance = direction.magnitude;
-
-            // Determine if wall is horizontal or vertical based on dominant axis
-            bool isHorizontal = Mathf.Abs(direction.x) > Mathf.Abs(direction.z);
-
-            if (isHorizontal)
+            public WallSegmentData(Vector3 pos, Vector3 scl, float len)
             {
-                // Horizontal wall (along X axis)
-                int startX = Mathf.RoundToInt(start.x / wallSpacing);
-                int endX = Mathf.RoundToInt(end.x / wallSpacing);
-                int step = startX < endX ? 1 : -1;
-
-                for (int x = startX; x != endX + step; x += step)
-                {
-                    Vector3 segmentPos = new Vector3(x * wallSpacing, start.y, start.z);
-                    segments.Add(segmentPos);
-                }
+                position = pos;
+                scale = scl;
+                length = len;
             }
-            else
-            {
-                // Vertical wall (along Z axis)
-                int startZ = Mathf.RoundToInt(start.z / wallSpacing);
-                int endZ = Mathf.RoundToInt(end.z / wallSpacing);
-                int step = startZ < endZ ? 1 : -1;
+        }
 
-                for (int z = startZ; z != endZ + step; z += step)
-                {
-                    Vector3 segmentPos = new Vector3(start.x, start.y, z * wallSpacing);
-                    segments.Add(segmentPos);
-                }
+        /// <summary>
+        /// ✅ Calculate wall segments with perfect end-to-end placement and adaptive scaling.
+        /// Last segment scales to fill remaining distance exactly.
+        /// </summary>
+        private List<WallSegmentData> CalculateWallSegmentsWithScaling(Vector3 start, Vector3 end)
+        {
+            List<WallSegmentData> segments = new List<WallSegmentData>();
+
+            Vector3 diff = end - start;
+            float totalDistance = diff.magnitude;
+
+            if (totalDistance < wallMeshLength * minScaleFactor)
+                return segments; // Too short for even a minimum scaled piece
+
+            Vector3 direction = diff.normalized;
+
+            // Original prefab scale (we only scale the length axis)
+            Vector3 baseScale = currentWallData.buildingPrefab.transform.localScale;
+
+            // Number of full-size segments that fit
+            int fullCount = Mathf.FloorToInt(totalDistance / wallMeshLength);
+
+            float used = fullCount * wallMeshLength;
+            float remaining = totalDistance - used;
+
+            // Determine which axis we scale
+            int axisIndex = 0;
+            switch (wallLengthAxis)
+            {
+                case WallLengthAxis.X: axisIndex = 0; break;
+                case WallLengthAxis.Y: axisIndex = 1; break;
+                case WallLengthAxis.Z: axisIndex = 2; break;
+            }
+
+            // 1) Place all full-size segments
+            for (int i = 0; i < fullCount; i++)
+            {
+                float centerOffset = (i * wallMeshLength) + (wallMeshLength * 0.5f);
+                Vector3 pos = start + direction * centerOffset;
+
+                // full-size: scale stays as baseScale, length is wallMeshLength (world units)
+                segments.Add(new WallSegmentData(pos, baseScale, wallMeshLength));
+            }
+
+            // 2) Handle final SCALING segment
+            if (remaining > wallMeshLength * minScaleFactor)
+            {
+                float scaleFactor = remaining / wallMeshLength;
+
+                float centerOffset = used + (remaining * 0.5f);
+                Vector3 pos = start + direction * centerOffset;
+
+                Vector3 scaled = baseScale;
+                scaled[axisIndex] = baseScale[axisIndex] * scaleFactor;
+
+                // length is remaining (world units)
+                segments.Add(new WallSegmentData(pos, scaled, remaining));
             }
 
             return segments;
+        }
+
+
+        private Quaternion CalculateWallRotation(Vector3 start, Vector3 end)
+        {
+            Vector3 direction = end - start;
+
+            if (direction.sqrMagnitude < 0.01f)
+                return Quaternion.identity;
+
+            direction.y = 0;
+            direction.Normalize();
+
+            if (direction != Vector3.zero)
+            {
+                return Quaternion.LookRotation(direction);
+            }
+
+            return Quaternion.identity;
         }
 
         private void UpdateLinePreview(Vector3 start, Vector3 end)
@@ -321,44 +613,49 @@ namespace RTS.Buildings
             linePreviewRenderer.SetPosition(1, end + Vector3.up * 0.5f);
         }
 
-        private void UpdateWallSegmentPreviews(List<Vector3> segmentPositions)
+        private void UpdateWallSegmentPreviews(List<WallSegmentData> segmentData)
         {
-            // Remove excess previews
-            while (wallSegmentPreviews.Count > segmentPositions.Count)
+            while (wallSegmentPreviews.Count > segmentData.Count)
             {
                 int lastIndex = wallSegmentPreviews.Count - 1;
-                if (wallSegmentPreviews[lastIndex] != null)
-                    Destroy(wallSegmentPreviews[lastIndex]);
+                if (wallSegmentPreviews[lastIndex] != null) Destroy(wallSegmentPreviews[lastIndex]);
                 wallSegmentPreviews.RemoveAt(lastIndex);
             }
 
-            // Add or update previews
-            for (int i = 0; i < segmentPositions.Count; i++)
+            if (currentWallData == null || currentWallData.buildingPrefab == null) return;
+
+            Vector3 prefabEulerOffset = currentWallData.buildingPrefab.transform.localEulerAngles;
+            Vector3 baseEuler = currentWallRotation.eulerAngles;
+            Quaternion finalRotation = Quaternion.Euler(baseEuler + prefabEulerOffset);
+
+            for (int i = 0; i < segmentData.Count; i++)
             {
+                WallSegmentData data = segmentData[i];
                 if (i < wallSegmentPreviews.Count)
                 {
-                    // Update existing preview
-                    wallSegmentPreviews[i].transform.position = segmentPositions[i];
+                    var preview = wallSegmentPreviews[i];
+                    if (preview != null)
+                    {
+                        preview.transform.position = data.position;
+                        preview.transform.rotation = finalRotation;
+                        preview.transform.localScale = data.scale;
+                    }
                 }
                 else
                 {
-                    // Create new preview
-                    GameObject preview = Instantiate(currentWallData.buildingPrefab, segmentPositions[i], Quaternion.identity);
+                    GameObject preview = Instantiate(currentWallData.buildingPrefab, data.position, finalRotation, this.transform);
+                    preview.transform.localScale = data.scale;
 
-                    // Disable scripts on preview
                     var building = preview.GetComponent<Building>();
-                    if (building != null)
-                        building.enabled = false;
+                    if (building != null) building.enabled = false;
 
                     var wallSystem = preview.GetComponent<WallConnectionSystem>();
-                    if (wallSystem != null)
-                        wallSystem.enabled = false;
+                    if (wallSystem != null) wallSystem.enabled = false;
 
-                    // Disable colliders
-                    var colliders = preview.GetComponentsInChildren<Collider>();
-                    foreach (var col in colliders)
+                    foreach (var col in preview.GetComponentsInChildren<Collider>())
                         col.enabled = false;
 
+                    SetPreviewMaterial(preview, canAfford ? validPreviewMaterial : invalidPreviewMaterial);
                     wallSegmentPreviews.Add(preview);
                 }
             }
@@ -382,17 +679,14 @@ namespace RTS.Buildings
         {
             if (mouse == null) return;
 
-            // Left click to place pole or confirm wall placement
             if (mouse.leftButton.wasPressedThisFrame)
             {
                 if (!firstPoleSet)
                 {
-                    // Place first pole
                     PlaceFirstPole();
                 }
                 else
                 {
-                    // Place all wall segments
                     if (canAfford)
                     {
                         PlaceWallSegments();
@@ -411,20 +705,11 @@ namespace RTS.Buildings
                 }
             }
 
-            // Right click or ESC to cancel
             if (mouse.rightButton.wasPressedThisFrame ||
                 (keyboard != null && keyboard.escapeKey.wasPressedThisFrame))
             {
-                if (firstPoleSet)
-                {
-                    // Cancel second pole, go back to first pole placement
-                    ResetToFirstPole();
-                }
-                else
-                {
-                    // Cancel entire wall placement
-                    CancelWallPlacement();
-                }
+                CancelWallPlacement();
+                Debug.Log("Wall placement canceled");
             }
         }
 
@@ -436,7 +721,6 @@ namespace RTS.Buildings
             firstPolePosition = SnapToGrid(mouseWorldPos);
             firstPoleSet = true;
 
-            // Create visual pole at first position
             if (polePrefab != null)
             {
                 firstPoleVisual = Instantiate(polePrefab, firstPolePosition + Vector3.up * (poleHeight / 2f), Quaternion.identity);
@@ -448,7 +732,6 @@ namespace RTS.Buildings
                 firstPoleVisual.transform.localScale = new Vector3(0.3f, poleHeight / 2f, 0.3f);
             }
 
-            // Disable collider on pole
             var collider = firstPoleVisual.GetComponent<Collider>();
             if (collider != null)
                 Destroy(collider);
@@ -456,43 +739,16 @@ namespace RTS.Buildings
             Debug.Log($"First pole placed at {firstPolePosition}");
         }
 
-        private void ResetToFirstPole()
-        {
-            // Remove first pole visual
-            if (firstPoleVisual != null)
-            {
-                Destroy(firstPoleVisual);
-                firstPoleVisual = null;
-            }
-
-            // Clear wall previews
-            foreach (var preview in wallSegmentPreviews)
-            {
-                if (preview != null)
-                    Destroy(preview);
-            }
-            wallSegmentPreviews.Clear();
-
-            // Hide line renderer
-            if (linePreviewRenderer != null)
-                linePreviewRenderer.enabled = false;
-
-            firstPoleSet = false;
-            requiredSegments = 0;
-            totalCost.Clear();
-
-            Debug.Log("Reset to first pole placement");
-        }
-
         private void PlaceWallSegments()
         {
+
+
             if (!canAfford || requiredSegments == 0 || currentWallData == null)
             {
                 Debug.Log("Cannot place walls!");
                 return;
             }
 
-            // Spend resources
             bool success = resourceService.SpendResources(totalCost);
             if (!success)
             {
@@ -500,28 +756,66 @@ namespace RTS.Buildings
                 return;
             }
 
-            // Calculate wall segments
-            List<Vector3> segmentPositions = CalculateWallSegments(firstPolePosition, SnapToGrid(GetMouseWorldPosition()));
-
-            // Place all wall segments
-            foreach (var position in segmentPositions)
+            Vector3 mouseWorld = GetMouseWorldPosition();
+            if (mouseWorld == Vector3.zero)
             {
-                GameObject newWall = Instantiate(currentWallData.buildingPrefab, position, Quaternion.identity);
+                Debug.LogWarning("PlaceWallSegments: mouse world position invalid.");
+                return;
+            }
 
-                // Set data reference
-                var buildingComponent = newWall.GetComponent<Building>();
-                if (buildingComponent != null)
+            Vector3 secondPolePos = SnapToGrid(mouseWorld);
+            bool snappedToExistingWall = TrySnapToNearbyWall(secondPolePos, out Vector3 finalSecondPolePos);
+            secondPolePos = finalSecondPolePos;
+
+
+            if (WouldOverlapExistingWall(firstPolePosition, secondPolePos))
+            {
+                Debug.LogWarning("❌ Cannot place wall: overlaps existing wall.");
+                return;
+            }
+
+            Quaternion baseRotation = CalculateWallRotation(firstPolePosition, secondPolePos);
+            Vector3 baseEuler = baseRotation.eulerAngles;
+            Vector3 prefabEulerOffset = currentWallData.buildingPrefab.transform.localEulerAngles;
+            Vector3 finalEuler = baseEuler + prefabEulerOffset;
+            Quaternion finalRotation = Quaternion.Euler(finalEuler);
+
+            // ✅ Calculate segments with perfect scaling
+            List<WallSegmentData> segmentData = CalculateWallSegmentsWithScaling(firstPolePosition, secondPolePos);
+
+            float totalDist = Vector3.Distance(firstPolePosition, secondPolePos);
+            Debug.Log($"[PlaceWalls] Distance: {totalDist:F2}m, Segments: {segmentData.Count}, Mesh Length: {wallMeshLength:F2}m");
+
+            // Instantiate walls with proper scaling
+            foreach (var data in segmentData)
+            {
+                GameObject newWall = Instantiate(currentWallData.buildingPrefab, data.position, finalRotation);
+                newWall.transform.localScale = data.scale; // ✅ Apply scale
+
+                if (newWall.TryGetComponent(out Building buildingComponent))
                 {
                     buildingComponent.SetData(currentWallData);
                 }
 
-                // Publish placement event for each segment
-                EventBus.Publish(new BuildingPlacedEvent(newWall, position));
+                placedWallPositions.Add(data.position);
             }
 
-            Debug.Log($"✅ Placed {segmentPositions.Count} wall segments. Total cost: {string.Join(", ", totalCost)}");
+            // Publish events
+            foreach (var data in segmentData)
+            {
+                Collider[] hits = Physics.OverlapSphere(data.position, 0.1f);
+                foreach (var hit in hits)
+                {
+                    if (hit.GetComponent<WallConnectionSystem>() != null)
+                    {
+                        EventBus.Publish(new BuildingPlacedEvent(hit.gameObject, data.position));
+                        break;
+                    }
+                }
+            }
 
-            // Publish resource spent event
+            Debug.Log($"✅ Placed {segmentData.Count} wall segments with perfect fit!");
+
             EventBus.Publish(new ResourcesSpentEvent(
                 totalCost.GetValueOrDefault(ResourceType.Wood, 0),
                 totalCost.GetValueOrDefault(ResourceType.Food, 0),
@@ -530,13 +824,87 @@ namespace RTS.Buildings
                 true
             ));
 
-            // Reset for next wall placement
-            ResetToFirstPole();
+            if (snappedToExistingWall && autoCompleteOnSnap)
+            {
+                Debug.Log("🔒 Wall loop completed! Auto-canceling placement.");
+                CancelWallPlacement();
+            }
+            else
+            {
+                ContinueWallChain(secondPolePos);
+            }
+
+            for (int i = 0; i < segmentData.Count; i++)
+            {
+                var data = segmentData[i];
+                GameObject newWall = Instantiate(currentWallData.buildingPrefab, data.position, finalRotation);
+                newWall.transform.localScale = data.scale; // Apply scale
+
+                if (newWall.TryGetComponent(out Building buildingComponent))
+                {
+                    buildingComponent.SetData(currentWallData);
+                }
+
+                // Compute the placed segment's rotation (finalRotation) and use the world-space length stored in data.length
+                placedWallSegments.Add(new PlacedWallSegment(data.position, data.length, finalRotation));
+
+                placedWallPositions.Add(data.position); // debug / gizmos
+            }
+        }
+
+        private void ContinueWallChain(Vector3 newFirstPolePos)
+        {
+            if (firstPoleVisual != null)
+            {
+                Destroy(firstPoleVisual);
+                firstPoleVisual = null;
+            }
+
+            foreach (var preview in wallSegmentPreviews)
+            {
+                if (preview != null)
+                    Destroy(preview);
+            }
+            wallSegmentPreviews.Clear();
+
+            if (linePreviewRenderer != null)
+                linePreviewRenderer.enabled = false;
+
+            firstPolePosition = newFirstPolePos;
+
+            if (polePrefab != null)
+            {
+                firstPoleVisual = Instantiate(polePrefab, firstPolePosition + Vector3.up * (poleHeight / 2f), Quaternion.identity);
+            }
+            else
+            {
+                firstPoleVisual = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                firstPoleVisual.transform.position = firstPolePosition + Vector3.up * (poleHeight / 2f);
+                firstPoleVisual.transform.localScale = new Vector3(0.3f, poleHeight / 2f, 0.3f);
+            }
+
+            var collider = firstPoleVisual.GetComponent<Collider>();
+            if (collider != null)
+                Destroy(collider);
+
+            firstPoleSet = true;
+            requiredSegments = 0;
+            totalCost.Clear();
+
+            Debug.Log($"Continuing wall chain from {firstPolePosition}");
         }
 
         #endregion
 
         #region Helper Methods
+        private bool ShareEndpoint(Vector3 a1, Vector3 a2, Vector3 b1, Vector3 b2)
+        {
+            return
+                Vector3.Distance(a1, b1) < 0.05f ||
+                Vector3.Distance(a1, b2) < 0.05f ||
+                Vector3.Distance(a2, b1) < 0.05f ||
+                Vector3.Distance(a2, b2) < 0.05f;
+        }
 
         private Vector3 GetMouseWorldPosition()
         {
@@ -557,10 +925,59 @@ namespace RTS.Buildings
         {
             if (!useGridSnapping) return position;
 
-            position.x = Mathf.Round(position.x / wallSpacing) * wallSpacing;
-            position.z = Mathf.Round(position.z / wallSpacing) * wallSpacing;
+            position.x = Mathf.Round(position.x / gridSize) * gridSize;
+            position.z = Mathf.Round(position.z / gridSize) * gridSize;
             return position;
         }
+
+        private bool TrySnapToNearbyWall(Vector3 position, out Vector3 snappedPosition)
+        {
+            snappedPosition = position;
+            if (placedWallSegments.Count == 0)
+                return false;
+
+            float closestDistance = float.MaxValue;
+            bool found = false;
+
+            foreach (var seg in placedWallSegments)
+            {
+                Vector3 start = seg.GetStartPosition(wallLengthAxis);
+                Vector3 end = seg.GetEndPosition(wallLengthAxis);
+
+                float distStart = Vector3.Distance(position, start);
+                float distEnd = Vector3.Distance(position, end);
+
+                // 2️⃣ NEW: Midpoint snapping
+                Vector3 midpoint = (start + end) * 0.5f;
+                float distMid = Vector3.Distance(position, midpoint);
+              
+
+                if (distStart < wallSnapDistance && distStart < closestDistance)
+                {
+                    closestDistance = distStart;
+                    snappedPosition = start;
+                    found = true;
+                }
+
+                if (distEnd < wallSnapDistance && distEnd < closestDistance)
+                {
+                    closestDistance = distEnd;
+                    snappedPosition = end;
+                    found = true;
+                }
+
+                if (distMid < wallSnapDistance && distMid < closestDistance)
+                {
+                    closestDistance = distMid;
+                    snappedPosition = midpoint;
+                    found = true;
+                }
+            }
+
+            return found;
+        }
+
+
 
         private void SetPreviewMaterial(GameObject obj, Material material)
         {
@@ -584,14 +1001,12 @@ namespace RTS.Buildings
         {
             if (!isPlacingWall) return;
 
-            // Draw first pole position
             if (firstPoleSet)
             {
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawWireSphere(firstPolePosition + Vector3.up * 0.5f, 0.3f);
             }
 
-            // Draw wall segment positions
             if (wallSegmentPreviews.Count > 0)
             {
                 Gizmos.color = canAfford ? Color.green : Color.red;
@@ -599,9 +1014,22 @@ namespace RTS.Buildings
                 {
                     if (preview != null)
                     {
-                        Gizmos.DrawWireCube(preview.transform.position, Vector3.one * 0.5f);
+                        Gizmos.DrawWireCube(preview.transform.position, preview.transform.localScale);
                     }
                 }
+            }
+
+            Gizmos.color = Color.blue;
+            foreach (var wallPos in placedWallPositions)
+            {
+                Gizmos.DrawSphere(wallPos + Vector3.up * 0.5f, 0.15f);
+            }
+
+            if (isSnappedToWall)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireSphere(snappedWallPosition + Vector3.up * 0.5f, 0.5f);
+                Gizmos.DrawLine(snappedWallPosition, snappedWallPosition + Vector3.up * 2f);
             }
         }
 

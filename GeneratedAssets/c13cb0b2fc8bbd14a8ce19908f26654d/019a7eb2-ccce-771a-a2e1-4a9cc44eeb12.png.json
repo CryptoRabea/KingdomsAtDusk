@@ -1,0 +1,20 @@
+{
+    "asset": "c13cb0b2fc8bbd14a8ce19908f26654d",
+    "fileName": "019a7eb2-ccce-771a-a2e1-4a9cc44eeb12.png",
+    "prompt": "2D UI icon of a hammer",
+    "negativePrompt": "",
+    "model": "5b5b2af1-6ea4-4266-b087-cc9f3bf4f450",
+    "modelName": "Flux.1 Dev",
+    "customSeed": -1,
+    "w3CTraceId": "07c514f8cec6c3d1f4d9ff58817dc2e7",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

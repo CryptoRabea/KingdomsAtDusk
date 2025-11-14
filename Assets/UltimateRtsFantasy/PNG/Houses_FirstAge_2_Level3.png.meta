@@ -21,7 +21,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -44,16 +44,16 @@ TextureImporter:
   lightmap: 0
   compressionQuality: 50
   spriteMode: 1
-  spriteExtrude: 1
-  spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  spriteExtrude: 0
+  spriteMeshType: 0
+  alignment: 9
+  spritePivot: {x: 0.55971104, y: 0.38461214}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 1
+  spriteBorder: {x: 288, y: 133, z: 201, w: 376}
+  spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationDetail: -1
+  spriteTessellationDetail: 0
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -108,21 +108,68 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
-    outline: []
+    sprites:
+    - serializedVersion: 2
+      name: Houses_FirstAge_2_Level3_0
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 142
+        width: 534
+        height: 501
+      alignment: 9
+      pivot: {x: 0.5015474, y: 0.5049476}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a287b60926342443a069cad25216dc5
+      internalID: -25461711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline:
+    - - {x: 312, y: -329}
+      - {x: 312, y: 107}
+      - {x: 219, y: 133}
+      - {x: 79, y: 133}
+      - {x: -224, y: -93}
+      - {x: -226, y: -98}
+      - {x: -226, y: -127}
+      - {x: -223, y: -194}
+      - {x: 74, y: -372}
+      - {x: 217, y: -372}
     customData: 
-    physicsShape: []
+    physicsShape:
+    - - {x: 309, y: -255}
+      - {x: 310, y: -212}
+      - {x: 310, y: -96}
+      - {x: 295, y: -81}
+      - {x: 249, y: 64}
+      - {x: 151, y: 132}
+      - {x: 90, y: 132}
+      - {x: -225, y: -83}
+      - {x: -225, y: -151}
+      - {x: -213, y: -193}
+      - {x: 85, y: -371}
+      - {x: 172, y: -371}
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 0
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
-    nameFileIdTable: {}
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      Houses_FirstAge_2_Level3_0: -25461711
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

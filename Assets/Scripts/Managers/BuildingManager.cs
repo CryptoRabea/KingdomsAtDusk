@@ -213,6 +213,9 @@ namespace RTS.Managers
                     position.z = Mathf.Round(position.z / gridSize) * gridSize;
                 }
 
+                // ✅ FIX: Adjust Y position to place building bottom on ground (not pivot)
+                position.y = hit.point.y + GetBuildingGroundOffset(previewBuilding);
+
                 previewBuilding.transform.position = position;
 
                 // Check if placement is valid
@@ -421,6 +424,26 @@ namespace RTS.Managers
             // Check if height difference is acceptable
             float heightDifference = maxHeight - minHeight;
             return heightDifference <= maxHeightDifference;
+        }
+
+        /// <summary>
+        /// Calculate the Y offset needed to place building bottom on ground.
+        /// Returns the distance from pivot to bottom of the building.
+        /// </summary>
+        private float GetBuildingGroundOffset(GameObject building)
+        {
+            if (building == null) return 0f;
+
+            Bounds bounds = GetBuildingBounds(building);
+
+            // Calculate offset: distance from building pivot to bottom of bounds
+            // If pivot is at center, this will be bounds.extents.y (half height)
+            // If pivot is at bottom, this will be near 0
+            float pivotY = building.transform.position.y;
+            float bottomY = bounds.min.y;
+            float offset = pivotY - bottomY;
+
+            return offset;
         }
 
         /// <summary>
