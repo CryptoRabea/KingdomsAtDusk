@@ -5,6 +5,7 @@ using RTS.Managers;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -100,6 +101,9 @@ namespace RTS.UI
 
             // Update placement info panel
             UpdatePlacementInfoPanel();
+
+            // Check for clicks outside the building panel
+            HandleOutsideClick();
         }
 
         #region Initialization
@@ -238,6 +242,9 @@ namespace RTS.UI
             // Start placing building through BuildingManager
             buildingManager.StartPlacingBuilding(buildingIndex);
             Debug.Log($"Started placing: {buildingData.buildingName}");
+
+            // Close the building panel when a building is chosen
+            SetPanelVisible(false);
         }
 
         private void HandleHotkeys()
@@ -306,6 +313,56 @@ namespace RTS.UI
                 "0" => Key.Digit0,
                 _ => Key.None
             };
+        }
+
+        private void HandleOutsideClick()
+        {
+            // Only check if panel is visible
+            if (buildingPanel == null || !buildingPanel.activeSelf)
+            {
+                return;
+            }
+
+            // Check for mouse click
+            var mouse = Mouse.current;
+            if (mouse == null || !mouse.leftButton.wasPressedThisFrame)
+            {
+                return;
+            }
+
+            // Check if we clicked on UI
+            if (EventSystem.current == null)
+            {
+                return;
+            }
+
+            // Get pointer data
+            PointerEventData pointerData = new PointerEventData(EventSystem.current)
+            {
+                position = mouse.position.ReadValue()
+            };
+
+            // Raycast to check what UI element was clicked
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            // Check if any of the results are the building panel or its children
+            bool clickedOnPanel = false;
+            foreach (RaycastResult result in results)
+            {
+                if (result.gameObject == buildingPanel || result.gameObject.transform.IsChildOf(buildingPanel.transform))
+                {
+                    clickedOnPanel = true;
+                    break;
+                }
+            }
+
+            // If clicked outside the panel, close it
+            if (!clickedOnPanel && results.Count > 0)
+            {
+                // Only close if we clicked on some other UI element or nothing
+                SetPanelVisible(false);
+            }
         }
 
         #endregion
