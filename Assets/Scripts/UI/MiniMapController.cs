@@ -38,7 +38,6 @@ namespace RTS.UI
 
         [Header("Camera Viewport Indicator")]
         [SerializeField] private RectTransform viewportIndicator;
-        [SerializeField] private Image viewportImage;
         [SerializeField] private Color viewportColor = new Color(1f, 1f, 1f, 0.3f);
 
         [Header("Building Markers")]
@@ -79,9 +78,13 @@ namespace RTS.UI
             }
 
             // Setup viewport indicator
-            if (viewportIndicator != null && viewportImage != null)
+            if (viewportIndicator != null)
             {
-                viewportImage.color = viewportColor;
+                Image img = viewportIndicator.GetComponent<Image>();
+                if (img != null)
+                {
+                    img.color = viewportColor;
+                }
             }
 
             // Create containers if they don't exist

@@ -71,8 +71,7 @@ The mini-map displays the entire playable area (2000x2000 units) and allows you 
    - `Movement Curve`: Default EaseInOut curve (you can customize in the curve editor)
 
    **Camera Viewport Indicator:**
-   - `Viewport Indicator`: Drag the ViewportIndicator Image here
-   - `Viewport Image`: Drag the ViewportIndicator Image here
+   - `Viewport Indicator`: Drag the ViewportIndicator Image object here
    - `Viewport Color`: White with alpha ~0.3
 
    **Building Markers:**
