@@ -252,9 +252,6 @@ namespace RTS.UI
                     (localPoint.y + miniMapRect.rect.height * 0.5f) / miniMapRect.rect.height
                 );
 
-                // Flip Y to account for RenderTexture coordinate system
-                normalizedPos.y = 1f - normalizedPos.y;
-
                 // Convert normalized position to world position
                 Vector3 worldPos = new Vector3(
                     Mathf.Lerp(worldMin.x, worldMax.x, normalizedPos.x),
@@ -326,9 +323,6 @@ namespace RTS.UI
                 Mathf.InverseLerp(worldMin.x, worldMax.x, camPos.x),
                 Mathf.InverseLerp(worldMin.y, worldMax.y, camPos.z)
             );
-
-            // Flip Y to account for RenderTexture coordinate system
-            normalizedPos.y = 1f - normalizedPos.y;
 
             // Convert to local mini-map coordinates
             Vector2 localPos = new Vector2(
@@ -532,9 +526,6 @@ namespace RTS.UI
                 Mathf.InverseLerp(worldMin.x, worldMax.x, worldPosition.x),
                 Mathf.InverseLerp(worldMin.y, worldMax.y, worldPosition.z)
             );
-
-            // Flip Y to account for RenderTexture coordinate system
-            normalizedPos.y = 1f - normalizedPos.y;
 
             // Convert to local mini-map coordinates
             Vector2 localPos = new Vector2(
