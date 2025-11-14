@@ -151,14 +151,27 @@ namespace RTS.UI
 
         private void SetupMiniMapCamera()
         {
-            // Create render texture
-            miniMapRenderTexture = new RenderTexture(renderTextureSize, renderTextureSize, 16);
+            // Create render texture with URP-compatible settings
+            miniMapRenderTexture = new RenderTexture(renderTextureSize, renderTextureSize, 24, RenderTextureFormat.ARGB32);
             miniMapRenderTexture.name = "MiniMapRenderTexture";
+            miniMapRenderTexture.antiAliasing = 1; // Disable MSAA for better compatibility
+            miniMapRenderTexture.autoGenerateMips = false;
+            miniMapRenderTexture.useMipMap = false;
+            miniMapRenderTexture.Create();
 
             // Assign to raw image
             if (miniMapImage != null)
             {
                 miniMapImage.texture = miniMapRenderTexture;
+
+                // Ensure UV rect is correct (sometimes this can cause display issues)
+                miniMapImage.uvRect = new Rect(0, 0, 1, 1);
+
+                Debug.Log($"MiniMap RawImage configured: {miniMapImage.texture.width}x{miniMapImage.texture.height}");
+            }
+            else
+            {
+                Debug.LogError("MiniMap RawImage is null! Please assign it in the inspector.");
             }
 
             // Setup camera
@@ -199,6 +212,11 @@ namespace RTS.UI
                 cameraData.renderType = CameraRenderType.Base; // This camera renders independently
                 cameraData.requiresColorOption = CameraOverrideOption.On;
                 cameraData.requiresDepthOption = CameraOverrideOption.On;
+                Debug.Log("MiniMap: UniversalAdditionalCameraData configured successfully");
+            }
+            else
+            {
+                Debug.LogError("MiniMap: Failed to get UniversalAdditionalCameraData! Make sure URP is properly installed.");
             }
 
             // Disable audio listener if it has one
@@ -209,6 +227,7 @@ namespace RTS.UI
             }
 
             Debug.Log($"Mini-map camera setup complete. Rendering {worldSize.x}x{worldSize.y} world area.");
+            Debug.Log($"MiniMap Camera: pos={miniMapCamera.transform.position}, targetTexture={miniMapCamera.targetTexture != null}, cullingMask={miniMapCamera.cullingMask.value}");
         }
 
         #endregion
@@ -587,6 +606,46 @@ namespace RTS.UI
                     Destroy(marker.gameObject);
             }
             unitMarkers.Clear();
+        }
+
+        /// <summary>
+        /// Debug method to verify minimap setup. Call this from Unity Editor or at runtime.
+        /// </summary>
+        public void VerifySetup()
+        {
+            Debug.Log("=== MiniMap Setup Verification ===");
+            Debug.Log($"MiniMap RawImage: {(miniMapImage != null ? "OK" : "MISSING")}");
+            Debug.Log($"RenderTexture: {(miniMapRenderTexture != null ? $"OK ({miniMapRenderTexture.width}x{miniMapRenderTexture.height})" : "MISSING")}");
+            Debug.Log($"MiniMap Camera: {(miniMapCamera != null ? "OK" : "MISSING")}");
+
+            if (miniMapCamera != null)
+            {
+                Debug.Log($"  - Target Texture: {(miniMapCamera.targetTexture != null ? "OK" : "MISSING")}");
+                Debug.Log($"  - Enabled: {miniMapCamera.enabled}");
+                Debug.Log($"  - Position: {miniMapCamera.transform.position}");
+                Debug.Log($"  - Rotation: {miniMapCamera.transform.rotation.eulerAngles}");
+                Debug.Log($"  - Orthographic Size: {miniMapCamera.orthographicSize}");
+                Debug.Log($"  - Culling Mask: {miniMapCamera.cullingMask.value}");
+
+                var cameraData = miniMapCamera.GetUniversalAdditionalCameraData();
+                if (cameraData != null)
+                {
+                    Debug.Log($"  - URP Camera Data: OK (RenderType: {cameraData.renderType})");
+                }
+                else
+                {
+                    Debug.LogError("  - URP Camera Data: MISSING!");
+                }
+            }
+
+            if (miniMapImage != null && miniMapImage.texture != null)
+            {
+                Debug.Log($"RawImage Texture: {miniMapImage.texture.width}x{miniMapImage.texture.height}");
+                Debug.Log($"RawImage UV Rect: {miniMapImage.uvRect}");
+                Debug.Log($"RawImage Color: {miniMapImage.color}");
+                Debug.Log($"RawImage Enabled: {miniMapImage.enabled}");
+            }
+            Debug.Log("=================================");
         }
 
         #endregion
