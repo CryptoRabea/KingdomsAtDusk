@@ -35,6 +35,7 @@ namespace RTS.Buildings
         [Header("Training Settings")]
         [SerializeField] private int maxQueueSize = 5;
         [SerializeField] private Transform spawnPoint;
+        [SerializeField] private Transform rallyPoint;
 
         [Header("Debug")]
         [SerializeField] private bool showDebugInfo = true;
@@ -61,6 +62,15 @@ namespace RTS.Buildings
                 spawnObj.transform.SetParent(transform);
                 spawnObj.transform.localPosition = Vector3.forward * 3f; // 3 units in front
                 spawnPoint = spawnObj.transform;
+            }
+
+            if (rallyPoint == null)
+            {
+                // Create a rally point (initially at spawn point position)
+                GameObject rallyObj = new GameObject("RallyPoint");
+                rallyObj.transform.SetParent(transform);
+                rallyObj.transform.position = spawnPoint.position;
+                rallyPoint = rallyObj.transform;
             }
         }
 
@@ -166,12 +176,26 @@ namespace RTS.Buildings
                 return;
             }
 
-            // Spawn the unit
+            // Spawn the unit at the spawn point
             GameObject spawnedUnit = Instantiate(
                 currentTraining.unitData.unitConfig.unitPrefab,
                 spawnPoint.position,
                 Quaternion.identity
             );
+
+            // Send unit to rally point if it's different from spawn point
+            if (rallyPoint != null && Vector3.Distance(rallyPoint.position, spawnPoint.position) > 0.5f)
+            {
+                UnitMovement unitMovement = spawnedUnit.GetComponent<UnitMovement>();
+                if (unitMovement != null)
+                {
+                    unitMovement.SetDestination(rallyPoint.position);
+                    if (showDebugInfo)
+                    {
+                        Debug.Log($"Unit moving to rally point at {rallyPoint.position}");
+                    }
+                }
+            }
 
             // Publish events
             EventBus.Publish(new UnitTrainingCompletedEvent(
@@ -227,35 +251,58 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Set spawn point position
+        /// Set rally point position (where units go after spawning)
         /// </summary>
-        public void SetSpawnPointPosition(Vector3 position)
+        public void SetRallyPointPosition(Vector3 position)
         {
-            if (spawnPoint != null)
+            if (rallyPoint != null)
             {
-                spawnPoint.position = position;
+                rallyPoint.position = position;
                 if (showDebugInfo)
                 {
-                    Debug.Log($"Spawn point set to {position}");
+                    Debug.Log($"Rally point set to {position}");
                 }
             }
         }
 
         /// <summary>
-        /// Get the spawn point transform
+        /// Get the spawn point transform (where units spawn)
         /// </summary>
         public Transform GetSpawnPoint()
         {
             return spawnPoint;
         }
 
+        /// <summary>
+        /// Get the rally point transform (where units go after spawning)
+        /// </summary>
+        public Transform GetRallyPoint()
+        {
+            return rallyPoint;
+        }
+
         private void OnDrawGizmosSelected()
         {
+            // Draw spawn point (where units spawn)
             if (spawnPoint != null)
             {
                 Gizmos.color = Color.blue;
                 Gizmos.DrawWireSphere(spawnPoint.position, 0.5f);
                 Gizmos.DrawLine(transform.position, spawnPoint.position);
+            }
+
+            // Draw rally point (where units go after spawning)
+            if (rallyPoint != null)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(rallyPoint.position, 0.5f);
+
+                // Draw line from spawn point to rally point if they're different
+                if (spawnPoint != null && Vector3.Distance(rallyPoint.position, spawnPoint.position) > 0.5f)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawLine(spawnPoint.position, rallyPoint.position);
+                }
             }
         }
     }
