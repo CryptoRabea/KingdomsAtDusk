@@ -20,8 +20,7 @@ namespace RTS.UI
     public class BuildingHUD : MonoBehaviour
     {
 
-        [Header("Input Actions")]
-        [SerializeField] private InputActionReference clickAction; // New click action
+       
 
         [Header("References")]
         [SerializeField] private Transform buildingButtonContainer;
