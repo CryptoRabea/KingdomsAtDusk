@@ -36,13 +36,13 @@ namespace RTS.UI
 
         [Header("Building Markers")]
         [SerializeField] private GameObject buildingMarkerPrefab;
-        [SerializeField] private Transform buildingMarkersContainer;
+        [SerializeField] private RectTransform buildingMarkersContainer;
         [SerializeField] private Color friendlyBuildingColor = Color.blue;
         [SerializeField] private float buildingMarkerSize = 5f;
 
         [Header("Unit Markers")]
         [SerializeField] private GameObject unitMarkerPrefab;
-        [SerializeField] private Transform unitMarkersContainer;
+        [SerializeField] private RectTransform unitMarkersContainer;
         [SerializeField] private Color friendlyUnitColor = Color.green;
         [SerializeField] private Color enemyUnitColor = Color.red;
         [SerializeField] private float unitMarkerSize = 3f;
@@ -61,7 +61,7 @@ namespace RTS.UI
             // Auto-find camera controller if not set
             if (cameraController == null)
             {
-                cameraController = FindObjectOfType<RTSCameraController>();
+                cameraController = FindFirstObjectByType<RTSCameraController>();
             }
 
             // Setup viewport indicator
@@ -74,10 +74,8 @@ namespace RTS.UI
             if (buildingMarkersContainer == null)
             {
                 GameObject container = new GameObject("BuildingMarkers");
-                container.transform.SetParent(miniMapRect);
-                buildingMarkersContainer = container.GetComponent<RectTransform>();
-                if (buildingMarkersContainer == null)
-                    buildingMarkersContainer = container.AddComponent<RectTransform>();
+                buildingMarkersContainer = container.AddComponent<RectTransform>();
+                buildingMarkersContainer.SetParent(miniMapRect, false);
                 buildingMarkersContainer.anchorMin = Vector2.zero;
                 buildingMarkersContainer.anchorMax = Vector2.one;
                 buildingMarkersContainer.offsetMin = Vector2.zero;
@@ -87,10 +85,8 @@ namespace RTS.UI
             if (unitMarkersContainer == null)
             {
                 GameObject container = new GameObject("UnitMarkers");
-                container.transform.SetParent(miniMapRect);
-                unitMarkersContainer = container.GetComponent<RectTransform>();
-                if (unitMarkersContainer == null)
-                    unitMarkersContainer = container.AddComponent<RectTransform>();
+                unitMarkersContainer = container.AddComponent<RectTransform>();
+                unitMarkersContainer.SetParent(miniMapRect, false);
                 unitMarkersContainer.anchorMin = Vector2.zero;
                 unitMarkersContainer.anchorMax = Vector2.one;
                 unitMarkersContainer.offsetMin = Vector2.zero;
@@ -257,14 +253,13 @@ namespace RTS.UI
             {
                 // Create simple square marker
                 marker = new GameObject($"BuildingMarker_{building.name}");
-                marker.transform.SetParent(buildingMarkersContainer);
                 Image img = marker.AddComponent<Image>();
                 img.color = friendlyBuildingColor;
+                // Image component automatically adds RectTransform
             }
 
             RectTransform markerRect = marker.GetComponent<RectTransform>();
-            if (markerRect == null)
-                markerRect = marker.AddComponent<RectTransform>();
+            markerRect.SetParent(buildingMarkersContainer, false);
 
             markerRect.sizeDelta = new Vector2(buildingMarkerSize, buildingMarkerSize);
 
@@ -346,17 +341,16 @@ namespace RTS.UI
             {
                 // Create simple circle marker
                 marker = new GameObject($"UnitMarker_{unit.name}");
-                marker.transform.SetParent(unitMarkersContainer);
                 Image img = marker.AddComponent<Image>();
                 img.color = isEnemy ? enemyUnitColor : friendlyUnitColor;
 
                 // Make it circular
                 img.sprite = CreateCircleSprite();
+                // Image component automatically adds RectTransform
             }
 
             RectTransform markerRect = marker.GetComponent<RectTransform>();
-            if (markerRect == null)
-                markerRect = marker.AddComponent<RectTransform>();
+            markerRect.SetParent(unitMarkersContainer, false);
 
             markerRect.sizeDelta = new Vector2(unitMarkerSize, unitMarkerSize);
 
