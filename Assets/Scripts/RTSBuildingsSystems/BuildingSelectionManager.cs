@@ -26,7 +26,7 @@ namespace RTS.Buildings
         [SerializeField] private bool enableDebugLogs = true;
 
         private BuildingSelectable currentlySelected;
-        private bool isRallyPointMode = false;
+        private bool isSpawnPointMode = false;
 
         public BuildingSelectable CurrentlySelectedBuilding => currentlySelected;
 
@@ -90,12 +90,12 @@ namespace RTS.Buildings
             if (enableDebugLogs)
                 Debug.Log($"BuildingSelectionManager: Click detected at {mousePosition}");
 
-            // If in rally point mode, set rally point on left click
-            if (isRallyPointMode)
+            // If in spawn point mode, set spawn point on left click
+            if (isSpawnPointMode)
             {
-                TrySetRallyPoint(mousePosition);
-                // Auto-exit rally point mode after setting
-                isRallyPointMode = false;
+                TrySetSpawnPoint(mousePosition);
+                // Auto-exit spawn point mode after setting
+                isSpawnPointMode = false;
             }
             else
             {
@@ -209,10 +209,10 @@ namespace RTS.Buildings
             }
 
             Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
-            TrySetRallyPoint(mousePosition);
+            TrySetSpawnPoint(mousePosition);
         }
 
-        private void TrySetRallyPoint(Vector2 screenPosition)
+        private void TrySetSpawnPoint(Vector2 screenPosition)
         {
             if (currentlySelected == null) return;
 
@@ -230,23 +230,23 @@ namespace RTS.Buildings
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, groundLayer))
             {
                 if (enableDebugLogs)
-                    Debug.Log($"BuildingSelectionManager: Setting rally point at {hit.point}");
+                    Debug.Log($"BuildingSelectionManager: Setting spawn point at {hit.point}");
 
                 // Get UnitTrainingQueue component
                 var trainingQueue = currentlySelected.GetComponent<UnitTrainingQueue>();
                 if (trainingQueue != null)
                 {
-                    trainingQueue.SetRallyPointPosition(hit.point);
+                    trainingQueue.SetSpawnPointPosition(hit.point);
 
                     // Update flag position if present
-                    var rallyFlag = currentlySelected.GetComponent<RallyPointFlag>();
-                    if (rallyFlag != null)
+                    var spawnFlag = currentlySelected.GetComponent<SpawnPointFlag>();
+                    if (spawnFlag != null)
                     {
-                        rallyFlag.SetRallyPointPosition(hit.point);
+                        spawnFlag.SetSpawnPointPosition(hit.point);
                     }
 
                     if (enableDebugLogs)
-                        Debug.Log($"✅ Rally point set for {currentlySelected.gameObject.name}");
+                        Debug.Log($"✅ Spawn point set for {currentlySelected.gameObject.name}");
                 }
                 else
                 {
@@ -262,25 +262,25 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Enable or disable rally point setting mode.
-        /// When enabled, left-clicking on ground sets rally point instead of selecting buildings.
+        /// Enable or disable spawn point setting mode.
+        /// When enabled, left-clicking on ground sets spawn point instead of selecting buildings.
         /// </summary>
-        public void SetRallyPointMode(bool enabled)
+        public void SetSpawnPointMode(bool enabled)
         {
-            isRallyPointMode = enabled;
+            isSpawnPointMode = enabled;
 
             if (enableDebugLogs)
             {
-                Debug.Log($"Rally point mode: {(enabled ? "ENABLED" : "DISABLED")}");
+                Debug.Log($"Spawn point mode: {(enabled ? "ENABLED" : "DISABLED")}");
             }
         }
 
         /// <summary>
-        /// Check if currently in rally point setting mode
+        /// Check if currently in spawn point setting mode
         /// </summary>
-        public bool IsRallyPointMode()
+        public bool IsSpawnPointMode()
         {
-            return isRallyPointMode;
+            return isSpawnPointMode;
         }
     }
 }
