@@ -4,10 +4,11 @@ using RTS.Core.Events;
 namespace RTS.Buildings
 {
     /// <summary>
-    /// Manages the spawn point flag visualization for buildings.
+    /// Manages the rally point flag visualization for buildings.
     /// The flag is only visible when the building is selected.
+    /// Rally points are where units go after spawning.
     /// </summary>
-    public class SpawnPointFlag : MonoBehaviour
+    public class RallyPointFlag : MonoBehaviour
     {
         [Header("Flag Settings")]
         [SerializeField] private GameObject flagVisual;
@@ -17,7 +18,7 @@ namespace RTS.Buildings
         [SerializeField] private float flagSize = 0.5f;
 
         [Header("References")]
-        [SerializeField] private Transform spawnPoint;
+        [SerializeField] private Transform rallyPoint;
 
         [Header("Auto-Create Flag")]
         [SerializeField] private bool autoCreateFlag = true;
@@ -31,10 +32,10 @@ namespace RTS.Buildings
             buildingSelectable = GetComponent<BuildingSelectable>();
             trainingQueue = GetComponent<UnitTrainingQueue>();
 
-            // Get spawn point from training queue if not set
-            if (spawnPoint == null && trainingQueue != null)
+            // Get rally point from training queue if not set
+            if (rallyPoint == null && trainingQueue != null)
             {
-                spawnPoint = trainingQueue.GetSpawnPoint();
+                rallyPoint = trainingQueue.GetRallyPoint();
             }
 
             // Auto-create flag visual if not assigned
@@ -79,11 +80,11 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Show the spawn point flag
+        /// Show the rally point flag
         /// </summary>
         public void ShowFlag()
         {
-            if (flagVisual != null && spawnPoint != null)
+            if (flagVisual != null && rallyPoint != null)
             {
                 isVisible = true;
                 flagVisual.SetActive(true);
@@ -92,7 +93,7 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Hide the spawn point flag
+        /// Hide the rally point flag
         /// </summary>
         public void HideFlag()
         {
@@ -104,22 +105,22 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Update flag position to match spawn point
+        /// Update flag position to match rally point
         /// </summary>
         public void UpdateFlagPosition()
         {
-            if (flagVisual != null && spawnPoint != null)
+            if (flagVisual != null && rallyPoint != null)
             {
-                flagVisual.transform.position = spawnPoint.position;
+                flagVisual.transform.position = rallyPoint.position;
             }
         }
 
         /// <summary>
-        /// Set the spawn point transform
+        /// Set the rally point transform
         /// </summary>
-        public void SetSpawnPoint(Transform newSpawnPoint)
+        public void SetRallyPoint(Transform newRallyPoint)
         {
-            spawnPoint = newSpawnPoint;
+            rallyPoint = newRallyPoint;
             if (isVisible)
             {
                 UpdateFlagPosition();
@@ -127,21 +128,21 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Update spawn point position
+        /// Update rally point position
         /// </summary>
-        public void SetSpawnPointPosition(Vector3 position)
+        public void SetRallyPointPosition(Vector3 position)
         {
-            if (spawnPoint != null)
+            if (rallyPoint != null)
             {
-                spawnPoint.position = position;
+                rallyPoint.position = position;
                 UpdateFlagPosition();
             }
         }
 
         private void Update()
         {
-            // Keep flag position synchronized with spawn point
-            if (isVisible && spawnPoint != null)
+            // Keep flag position synchronized with rally point
+            if (isVisible && rallyPoint != null)
             {
                 UpdateFlagPosition();
             }
@@ -153,7 +154,7 @@ namespace RTS.Buildings
         private void CreateFlagVisual()
         {
             // Create parent object
-            GameObject flagParent = new GameObject("FlagVisual");
+            GameObject flagParent = new GameObject("RallyFlagVisual");
             flagParent.transform.SetParent(transform);
 
             // Create pole (cylinder)
@@ -199,15 +200,15 @@ namespace RTS.Buildings
 
         private void OnDrawGizmosSelected()
         {
-            if (spawnPoint != null)
+            if (rallyPoint != null)
             {
-                // Draw a green sphere at spawn point location
+                // Draw a green sphere at rally point location
                 Gizmos.color = Color.green;
-                Gizmos.DrawWireSphere(spawnPoint.position, 0.3f);
+                Gizmos.DrawWireSphere(rallyPoint.position, 0.3f);
 
-                // Draw line from building to spawn point
+                // Draw line from building to rally point
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawLine(transform.position, spawnPoint.position);
+                Gizmos.DrawLine(transform.position, rallyPoint.position);
             }
         }
     }
