@@ -51,6 +51,9 @@ namespace RTS.Managers
         // Services
         private IResourcesService resourceService;
 
+        // Selection Manager
+        private RTS.Buildings.BuildingSelectionManager buildingSelectionManager;
+
         private void Awake()
         {
             if (mainCamera == null)
@@ -68,6 +71,9 @@ namespace RTS.Managers
             {
                 Debug.LogError("BuildingManager: ResourceService not available!");
             }
+
+            // Find BuildingSelectionManager
+            buildingSelectionManager = FindObjectOfType<RTS.Buildings.BuildingSelectionManager>();
 
             // Validate building data
             ValidateBuildingData();
@@ -117,6 +123,12 @@ namespace RTS.Managers
 
             // Cancel any existing placement
             CancelPlacement();
+
+            // Deselect any currently selected building to prevent UI interference
+            if (buildingSelectionManager != null)
+            {
+                buildingSelectionManager.DeselectBuilding();
+            }
 
             // Check if this is a wall and should use wall placement controller
             bool isWall = buildingData.buildingType == BuildingType.Defensive &&
