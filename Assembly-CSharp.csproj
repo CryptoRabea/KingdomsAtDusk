@@ -75,7 +75,6 @@
     <Compile Include="Assets\Scripts\Units\AI\Specialized\SoldierAI.cs" />
     <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\DeadState.cs" />
-    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallSegmentConstructor.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
@@ -94,7 +93,6 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingTooltip.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
-    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionMode.cs" />
     <Compile Include="Assets\Scripts\UI\NotificationUI.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />

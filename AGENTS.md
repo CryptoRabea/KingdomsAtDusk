@@ -2,7 +2,7 @@
 - Project name: KingdomsAtDusk
 - Unity version: Unity 6000.2.10f1
 - Active game object:
-  - Name: Wall_1Prefab
+  - Name: WText
   - Tag: Untagged
-  - Layer: Building
+  - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->

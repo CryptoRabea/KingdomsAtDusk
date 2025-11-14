@@ -4,7 +4,9 @@ using RTS.Core.Services;
 using RTS.Managers;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -17,6 +19,10 @@ namespace RTS.UI
     /// </summary>
     public class BuildingHUD : MonoBehaviour
     {
+
+        [Header("Input Actions")]
+        [SerializeField] private InputActionReference clickAction; // New click action
+
         [Header("References")]
         [SerializeField] private Transform buildingButtonContainer;
         [SerializeField] private GameObject buildingButtonPrefab;
@@ -31,8 +37,10 @@ namespace RTS.UI
 
         [Header("Hotkeys (Optional)")]
         [SerializeField] private bool enableHotkeys = true;
-        [SerializeField]
-        private string[] buildingHotkeyStrings = new string[]
+        [SerializeField]private string[] buildingHotkeyStrings = new string[]
+
+
+
         {
             "b", "h", "f", "t", "w", "g", "c", "m"
         };
@@ -74,6 +82,9 @@ namespace RTS.UI
             {
                 hotkeyAction.action.Enable();
             }
+
+
+
         }
 
         private void OnDisable()
@@ -83,6 +94,8 @@ namespace RTS.UI
             {
                 hotkeyAction.action.Disable();
             }
+
+
         }
 
         private void OnDestroy()
@@ -98,9 +111,11 @@ namespace RTS.UI
                 HandleHotkeys();
             }
 
-            // Update placement info panel
             UpdatePlacementInfoPanel();
         }
+
+
+       
 
         #region Initialization
 
@@ -365,6 +380,8 @@ namespace RTS.UI
             if (buildingPanel != null)
             {
                 buildingPanel.SetActive(visible);
+
+              
             }
         }
 
