@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering.Universal;
 using RTS.Core.Events;
 using System.Collections;
 using System.Collections.Generic;
@@ -190,6 +191,15 @@ namespace RTS.UI
             miniMapCamera.clearFlags = CameraClearFlags.SolidColor;
             miniMapCamera.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 1f); // Dark background
             miniMapCamera.depth = -10; // Render before main camera
+
+            // URP-specific setup: Add UniversalAdditionalCameraData component
+            var cameraData = miniMapCamera.GetUniversalAdditionalCameraData();
+            if (cameraData != null)
+            {
+                cameraData.renderType = CameraRenderType.Base; // This camera renders independently
+                cameraData.requiresColorOption = CameraOverrideOption.On;
+                cameraData.requiresDepthOption = CameraOverrideOption.On;
+            }
 
             // Disable audio listener if it has one
             AudioListener listener = miniMapCamera.GetComponent<AudioListener>();
