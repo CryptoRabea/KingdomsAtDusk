@@ -46,8 +46,20 @@ namespace RTS.UI
 
         public void TogglePanel()
         {
+            // Sync with actual panel state before toggling
+            SyncPanelState();
+
             isPanelOpen = !isPanelOpen;
             UpdatePanelVisibility(true);
+        }
+
+        private void SyncPanelState()
+        {
+            // Check the actual panel state to ensure we're in sync
+            if (panelToToggle != null)
+            {
+                isPanelOpen = panelToToggle.activeSelf;
+            }
         }
 
         public void ShowPanel()
