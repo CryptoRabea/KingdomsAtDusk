@@ -78,6 +78,7 @@
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
+    <Compile Include="Assets\Scripts\UI\MiniMapController.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingButton.cs" />
