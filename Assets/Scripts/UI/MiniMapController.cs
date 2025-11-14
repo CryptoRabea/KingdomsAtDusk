@@ -159,6 +159,9 @@ namespace RTS.UI
             if (miniMapImage != null)
             {
                 miniMapImage.texture = miniMapRenderTexture;
+                // Flip the texture vertically to match Unity's RenderTexture orientation
+                // This ensures clicks on the minimap correspond to the correct world positions
+                miniMapImage.uvRect = new Rect(0, 1, 1, -1);
             }
 
             // Setup camera
