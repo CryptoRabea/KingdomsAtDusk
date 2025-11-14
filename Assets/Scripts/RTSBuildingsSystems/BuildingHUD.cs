@@ -372,9 +372,8 @@ namespace RTS.UI
             }
 
             // If clicked outside the panel, close it
-            if (!clickedOnPanel && results.Count > 0)
+            if (!clickedOnPanel)
             {
-                // Only close if we clicked on some other UI element or nothing
                 SetPanelVisible(false);
             }
         }
