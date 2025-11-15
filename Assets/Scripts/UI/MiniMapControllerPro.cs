@@ -48,6 +48,10 @@ namespace RTS.UI
         [Header("Performance Monitoring")]
         [SerializeField] private bool showDebugStats = false;
 
+        [Header("Entity Detection")]
+        [Tooltip("Method to detect entity ownership (friendly/enemy). Auto tries Component > Tag > Layer")]
+        [SerializeField] private MinimapEntityDetector.DetectionMethod detectionMethod = MinimapEntityDetector.DetectionMethod.Auto;
+
         // Marker managers
         private MinimapBuildingMarkerManager buildingMarkerManager;
         private MinimapUnitMarkerManager unitMarkerManager;
@@ -432,8 +436,8 @@ namespace RTS.UI
         {
             if (evt.Building == null) return;
 
-            // Determine if enemy based on layer
-            bool isEnemy = evt.Building.layer == LayerMask.NameToLayer("Enemy");
+            // Determine if enemy using flexible detection system
+            bool isEnemy = MinimapEntityDetector.IsEnemy(evt.Building, detectionMethod);
 
             buildingMarkerManager.AddMarker(evt.Building, evt.Position, isEnemy);
         }
@@ -449,8 +453,8 @@ namespace RTS.UI
         {
             if (evt.Unit == null) return;
 
-            // Determine if enemy based on layer
-            bool isEnemy = evt.Unit.layer == LayerMask.NameToLayer("Enemy");
+            // Determine if enemy using flexible detection system
+            bool isEnemy = MinimapEntityDetector.IsEnemy(evt.Unit, detectionMethod);
 
             unitMarkerManager.AddMarker(evt.Unit, evt.Position, isEnemy);
         }

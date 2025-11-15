@@ -2,6 +2,22 @@
 
 A modular, high-performance minimap system for RTS games with object pooling, batched updates, and professional click-to-world positioning.
 
+## 🆕 New Features
+
+### Enhanced Ownership Detection
+- ✅ **Flexible Detection Methods** - Component, Tag, Layer, or Auto
+- ✅ **Multi-Faction Support** - Friendly, Enemy, Neutral, Ally, Player1-4
+- ✅ **Multiplayer Ready** - Player ID based ownership
+- ✅ **Backward Compatible** - Old layer-based system still works
+
+### Drag-to-Move Camera
+- ✅ **Drag on Minimap** - Drag anywhere to move camera
+- ✅ **Configurable Threshold** - Prevent accidental drags
+- ✅ **Continuous Drag** - Smooth camera following while dragging
+- ✅ **Easy Setup** - Just add MinimapDragHandler component
+
+📖 **See [OWNERSHIP_AND_DRAG_GUIDE.md](OWNERSHIP_AND_DRAG_GUIDE.md) for detailed instructions**
+
 ## Features
 
 ### Core Features
