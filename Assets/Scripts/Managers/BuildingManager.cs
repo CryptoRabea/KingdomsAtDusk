@@ -33,6 +33,11 @@ namespace RTS.Managers
         [SerializeField] private WallPlacementController wallPlacementController;
         [SerializeField] private bool useWallPlacementForWalls = true; // Use pole-to-pole placement for walls
 
+        [Header("Tower Placement")]
+        [SerializeField] private TowerPlacementHelper towerPlacementHelper;
+        [SerializeField] private bool enableTowerWallSnapping = true; // Enable tower snapping to walls
+        [SerializeField] private bool autoReplaceWalls = true; // Automatically replace walls when placing towers
+
         [Header("Building Data - SOURCE OF TRUTH")]
         [Tooltip("Assign BuildingDataSO assets here, NOT prefabs!")]
         [SerializeField] private BuildingDataSO[] buildingDataArray; // ✅ USE DATA, NOT PREFABS
@@ -43,6 +48,12 @@ namespace RTS.Managers
         private bool isPlacingBuilding = false;
         private Material[] originalMaterials;
         private bool canPlace = false;
+
+        // Tower placement state
+        private bool isPlacingTower = false;
+        private TowerDataSO currentTowerData;
+        private GameObject wallToReplace;
+        private bool isSnappedToWall = false;
 
         // Input
         private Mouse mouse;
@@ -146,6 +157,19 @@ namespace RTS.Managers
                 currentBuildingData = buildingData;  // ✅ Store the data
                 isPlacingBuilding = true;
 
+                // Check if this is a tower
+                if (buildingData is TowerDataSO towerData)
+                {
+                    isPlacingTower = true;
+                    currentTowerData = towerData;
+                    Debug.Log($"Started placing tower: {buildingData.buildingName} (Type: {towerData.towerType})");
+                }
+                else
+                {
+                    isPlacingTower = false;
+                    currentTowerData = null;
+                }
+
                 // Create preview from the prefab referenced in the data
                 CreateBuildingPreview();
 
@@ -174,6 +198,12 @@ namespace RTS.Managers
             currentBuildingData = null;
             isPlacingBuilding = false;
             originalMaterials = null;
+
+            // Clear tower-specific state
+            isPlacingTower = false;
+            currentTowerData = null;
+            wallToReplace = null;
+            isSnappedToWall = false;
         }
 
         #endregion
@@ -225,6 +255,22 @@ namespace RTS.Managers
                     position.z = Mathf.Round(position.z / gridSize) * gridSize;
                 }
 
+                // ✅ TOWER: Check for wall snapping
+                if (isPlacingTower && currentTowerData != null && enableTowerWallSnapping && towerPlacementHelper != null)
+                {
+                    if (towerPlacementHelper.TrySnapToWall(position, currentTowerData, out Vector3 wallSnapPos, out GameObject wall))
+                    {
+                        position = wallSnapPos;
+                        wallToReplace = wall;
+                        isSnappedToWall = true;
+                    }
+                    else
+                    {
+                        wallToReplace = null;
+                        isSnappedToWall = false;
+                    }
+                }
+
                 // ✅ FIX: Adjust Y position to place building bottom on ground (not pivot)
                 position.y = hit.point.y + GetBuildingGroundOffset(previewBuilding);
 
@@ -233,8 +279,14 @@ namespace RTS.Managers
                 // Check if placement is valid
                 canPlace = IsValidPlacement(position);
 
-                // Update preview material
-                SetPreviewMaterial(canPlace ? validPlacementMaterial : invalidPlacementMaterial);
+                // Update preview material (cyan if snapped to wall, green/red otherwise)
+                Material previewMat = canPlace ? validPlacementMaterial : invalidPlacementMaterial;
+                if (isSnappedToWall && canPlace && wallToReplace != null)
+                {
+                    // Optional: Use different color for wall replacement (you can create a third material)
+                    // For now, just use valid material
+                }
+                SetPreviewMaterial(previewMat);
             }
         }
 
@@ -308,6 +360,14 @@ namespace RTS.Managers
                 Debug.LogWarning("ResourceService not available, placing building anyway!");
             }
 
+            // ✅ TOWER: Replace wall if snapped to one
+            if (isPlacingTower && wallToReplace != null && autoReplaceWalls && isSnappedToWall)
+            {
+                Debug.Log($"Replacing wall at {wallToReplace.transform.position} with tower {currentTowerData.buildingName}");
+                Destroy(wallToReplace);
+                wallToReplace = null;
+            }
+
             // ✅ PLACE THE ACTUAL BUILDING (from data's prefab)
             GameObject newBuilding = Instantiate(currentBuildingData.buildingPrefab, position, rotation);
 
@@ -321,6 +381,17 @@ namespace RTS.Managers
             else
             {
                 Debug.LogWarning($"Building prefab for {currentBuildingData.buildingName} doesn't have Building component!");
+            }
+
+            // ✅ TOWER: Set tower-specific data
+            if (isPlacingTower)
+            {
+                var towerComponent = newBuilding.GetComponent<Tower>();
+                if (towerComponent != null && currentTowerData != null)
+                {
+                    towerComponent.SetTowerData(currentTowerData);
+                    Debug.Log($"✅ Assigned {currentTowerData.buildingName} tower data (Type: {currentTowerData.towerType})");
+                }
             }
 
             // Publish success event
