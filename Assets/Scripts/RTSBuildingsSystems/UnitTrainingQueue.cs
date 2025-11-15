@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using RTS.Core.Events;
 using RTS.Core.Services;
@@ -199,30 +200,10 @@ namespace RTS.Buildings
                 Debug.Log($"✅ UnitTrainingQueue: Unit spawned - {spawnedUnit.name}. Rally point null? {rallyPoint == null}");
             }
 
-            // Move to rally point if set
+            // Move to rally point if set - use coroutine to wait for NavMeshAgent to initialize
             if (rallyPoint != null)
             {
-                if (showDebugInfo)
-                {
-                    Debug.Log($"🚩 UnitTrainingQueue: Rally point exists at {rallyPoint.position}, attempting to move unit...");
-                }
-
-                var unitMovement = spawnedUnit.GetComponent<UnitMovement>();
-                if (unitMovement != null)
-                {
-                    unitMovement.SetDestination(rallyPoint.position);
-                    if (showDebugInfo)
-                    {
-                        Debug.Log($"✅ UnitTrainingQueue: Unit {spawnedUnit.name} commanded to move from {spawnPoint.position} to rally point at {rallyPoint.position}");
-                    }
-                }
-                else
-                {
-                    if (showDebugInfo)
-                    {
-                        Debug.LogError($"❌ UnitTrainingQueue: Spawned unit {spawnedUnit.name} has no UnitMovement component - cannot move to rally point!");
-                    }
-                }
+                StartCoroutine(MoveUnitToRallyPoint(spawnedUnit, rallyPoint.position));
             }
             else
             {
@@ -358,6 +339,46 @@ namespace RTS.Buildings
                     DestroyImmediate(rallyPoint.gameObject);
                 }
                 rallyPoint = null;
+            }
+        }
+
+        /// <summary>
+        /// Coroutine to move unit to rally point after NavMeshAgent initializes
+        /// </summary>
+        private IEnumerator MoveUnitToRallyPoint(GameObject unit, Vector3 destination)
+        {
+            if (showDebugInfo)
+            {
+                Debug.Log($"🚩 UnitTrainingQueue: Rally point exists at {destination}, waiting for NavMeshAgent to initialize...");
+            }
+
+            // Wait a frame for the unit to fully initialize
+            yield return null;
+
+            if (unit == null)
+            {
+                Debug.LogError($"❌ UnitTrainingQueue: Unit destroyed before it could move to rally point!");
+                yield break;
+            }
+
+            var unitMovement = unit.GetComponent<UnitMovement>();
+            if (unitMovement != null)
+            {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"🎯 UnitTrainingQueue: Issuing move command to {unit.name} to go to {destination}");
+                }
+
+                unitMovement.SetDestination(destination);
+
+                if (showDebugInfo)
+                {
+                    Debug.Log($"✅ UnitTrainingQueue: Unit {unit.name} commanded to move to rally point at {destination}");
+                }
+            }
+            else
+            {
+                Debug.LogError($"❌ UnitTrainingQueue: Spawned unit {unit.name} has no UnitMovement component - cannot move to rally point!");
             }
         }
 
