@@ -43,6 +43,11 @@ namespace RTS.Units
                 selectionBoxRect = selectionBoxUI.GetComponent<RectTransform>();
                 selectionBoxUI.color = selectionBoxColor;
                 selectionBoxUI.gameObject.SetActive(false);
+
+                // Ensure pivot and anchors are at bottom-left (0, 0) for proper corner-to-corner scaling
+                selectionBoxRect.pivot = new Vector2(0, 0);
+                selectionBoxRect.anchorMin = new Vector2(0, 0);
+                selectionBoxRect.anchorMax = new Vector2(0, 0);
             }
         }
 
