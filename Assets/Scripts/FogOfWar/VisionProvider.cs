@@ -75,7 +75,7 @@ namespace KingdomsAtDusk.FogOfWar
             }
 
             // Try to get from Building (they might have a different system)
-            if (TryGetComponent<RTSBuildingsSystems.Building>(out var building))
+            if (TryGetComponent<RTS.Buildings.Building>(out var building))
             {
                 // Buildings get a larger vision radius by default
                 visionRadius = 20f;

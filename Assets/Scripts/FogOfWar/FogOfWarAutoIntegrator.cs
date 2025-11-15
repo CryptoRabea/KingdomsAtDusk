@@ -50,7 +50,7 @@ namespace KingdomsAtDusk.FogOfWar
                 var minimapEntity = evt.Unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
                 if (minimapEntity != null)
                 {
-                    int ownerId = minimapEntity.Ownership == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
+                    int ownerId = minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
                     visionProvider.SetOwnerId(ownerId);
 
                     Debug.Log($"[FogOfWarAutoIntegrator] Added VisionProvider to unit: {evt.Unit.name} (Owner: {ownerId})");
@@ -117,7 +117,7 @@ namespace KingdomsAtDusk.FogOfWar
             // Determine if player-owned
             var minimapEntity = unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
             bool isPlayerOwned = minimapEntity != null &&
-                               minimapEntity.Ownership == RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
+                               minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
 
             visibility.SetPlayerOwned(isPlayerOwned);
 
