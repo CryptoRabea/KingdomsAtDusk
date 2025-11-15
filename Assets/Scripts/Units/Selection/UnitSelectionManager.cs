@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using RTS.Core.Events;
 
@@ -150,6 +151,12 @@ namespace RTS.Units
 
         private void OnClickStarted(InputAction.CallbackContext context)
         {
+            // Don't start selection if clicking on UI
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
 
             // Start tracking for potential drag or click
@@ -163,6 +170,19 @@ namespace RTS.Units
         {
             if (isDragging)
             {
+                // Don't complete selection if releasing over UI
+                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                {
+                    // Clear drag highlights and reset state
+                    ClearDragHighlights();
+                    isDragging = false;
+                    if (selectionBoxUI != null)
+                    {
+                        selectionBoxUI.gameObject.SetActive(false);
+                    }
+                    return;
+                }
+
                 Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
                 float dragDistance = Vector2.Distance(dragStartPosition, mousePosition);
 
@@ -464,15 +484,21 @@ namespace RTS.Units
         {
             if (positionAction == null) return;
 
-            Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
-            Ray ray = mainCamera.ScreenPointToRay(mousePosition);
-
             // Clear previous hover
             if (hoveredUnit != null)
             {
                 hoveredUnit.SetHoverHighlight(false, Color.white);
                 hoveredUnit = null;
             }
+
+            // Don't highlight if mouse is over UI
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
+            Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
+            Ray ray = mainCamera.ScreenPointToRay(mousePosition);
 
             // Check for new hover
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, selectableLayer))
