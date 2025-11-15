@@ -175,20 +175,16 @@ namespace RTS.Units
         {
             if (selectionBoxRect == null) return;
 
-            Vector2 boxStart = start;
-            Vector2 boxEnd = end;
+            // Calculate the minimum corner (bottom-left of the selection rectangle)
+            Vector2 min = Vector2.Min(start, end);
+            Vector2 max = Vector2.Max(start, end);
 
-            Vector2 center = (boxStart + boxEnd) / 2f;
-            selectionBoxRect.position = center;
+            // Set position to the minimum corner (this acts as the anchor point)
+            selectionBoxRect.anchoredPosition = min;
 
-            Vector2 size = new Vector2(
-                Mathf.Abs(boxStart.x - boxEnd.x),
-                Mathf.Abs(boxStart.y - boxEnd.y)
-            );
+            // Set size as the difference between max and min
+            Vector2 size = max - min;
             selectionBoxRect.sizeDelta = size;
-
-            Debug.Log($"Box Pos: {selectionBoxRect.position}, Size: {selectionBoxRect.sizeDelta}");
-
         }
 
         private Rect GetScreenRect(Vector2 start, Vector2 end)
