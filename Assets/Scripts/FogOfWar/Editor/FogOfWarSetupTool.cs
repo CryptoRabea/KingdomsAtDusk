@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
-
+using RTS.UI;
+using RTS.Units;
 namespace KingdomsAtDusk.FogOfWar.Editor
 {
     /// <summary>
@@ -189,7 +190,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
             // Add to units
             if (autoAddToUnits)
             {
-                var units = FindObjectsByType<Units.AI.UnitAIController>(FindObjectsSortMode.None);
+                var units = FindObjectsByType<RTS.Units.AI.UnitAIController>(FindObjectsSortMode.None);
                 foreach (var unit in units)
                 {
                     if (unit.GetComponent<VisionProvider>() == null)
@@ -197,11 +198,11 @@ namespace KingdomsAtDusk.FogOfWar.Editor
                         var visionProvider = unit.gameObject.AddComponent<VisionProvider>();
 
                         // Try to detect ownership from MinimapEntity
-                        var minimapEntity = unit.GetComponent<UI.Minimap.MinimapEntity>();
+                        var minimapEntity = unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
                         if (minimapEntity != null)
                         {
                             // Set owner based on ownership (0 for friendly, 1 for enemy, etc.)
-                            int ownerId = minimapEntity.Ownership == UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
+                            int ownerId = minimapEntity.Ownership == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
                             visionProvider.SetOwnerId(ownerId);
                         }
 
@@ -242,13 +243,13 @@ namespace KingdomsAtDusk.FogOfWar.Editor
             int count = 0;
 
             // Add to units
-            var units = FindObjectsByType<Units.AI.UnitAIController>(FindObjectsSortMode.None);
+            var units = FindObjectsByType<RTS.Units.AI.UnitAIController>(FindObjectsSortMode.None);
             foreach (var unit in units)
             {
                 // Check if enemy
-                var minimapEntity = unit.GetComponent<UI.Minimap.MinimapEntity>();
+                var minimapEntity = unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
                 bool isEnemy = minimapEntity != null &&
-                              minimapEntity.Ownership != UI.Minimap.MinimapEntityOwnership.Friendly;
+                              minimapEntity.Ownership != RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
 
                 if (isEnemy && unit.GetComponent<FogOfWarEntityVisibility>() == null)
                 {
@@ -272,7 +273,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
         private void SetupMinimapFog()
         {
             // Find minimap in scene
-            var minimapController = FindFirstObjectByType<UI.MiniMapController>();
+            var minimapController = FindFirstObjectByType<RTS.UI.MiniMapController>();
             if (minimapController == null)
             {
                 EditorUtility.DisplayDialog(
