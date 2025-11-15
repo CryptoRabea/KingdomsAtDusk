@@ -180,16 +180,27 @@ namespace RTS.Units
         {
             if (selectionBoxRect == null) return;
 
-            // Calculate the minimum corner (bottom-left of the selection rectangle)
-            Vector2 min = Vector2.Min(start, end);
-            Vector2 max = Vector2.Max(start, end);
+            // Calculate the difference between start and end
+            Vector2 diff = end - start;
 
-            // Set position to the minimum corner (this acts as the anchor point)
-            selectionBoxRect.anchoredPosition = min;
+            // Determine the actual starting corner based on drag direction
+            // We want the box to always start from the drag start point
+            Vector2 boxStart = new Vector2(
+                diff.x < 0 ? start.x + diff.x : start.x,  // If dragging left, start from end.x
+                diff.y < 0 ? start.y + diff.y : start.y   // If dragging down, start from end.y
+            );
 
-            // Set size as the difference between max and min
-            Vector2 size = max - min;
-            selectionBoxRect.sizeDelta = size;
+            // Size is always positive (absolute values)
+            Vector2 boxSize = new Vector2(
+                Mathf.Abs(diff.x),
+                Mathf.Abs(diff.y)
+            );
+
+            // Set position to the calculated starting corner
+            selectionBoxRect.anchoredPosition = boxStart;
+
+            // Set size (always positive)
+            selectionBoxRect.sizeDelta = boxSize;
         }
 
         private Rect GetScreenRect(Vector2 start, Vector2 end)
