@@ -214,7 +214,12 @@ namespace RTS.Buildings
 
         private void TrySetRallyPoint(Vector2 screenPosition)
         {
-            if (currentlySelected == null) return;
+            if (currentlySelected == null)
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: No building selected, cannot set rally point");
+                return;
+            }
 
             // Don't process if clicking on UI
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
@@ -226,11 +231,14 @@ namespace RTS.Buildings
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
+            if (enableDebugLogs)
+                Debug.Log($"🎯 Attempting to set rally point from screen position {screenPosition} for building {currentlySelected.gameObject.name}");
+
             // Try to hit ground layer
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, groundLayer))
             {
                 if (enableDebugLogs)
-                    Debug.Log($"BuildingSelectionManager: Setting rally point at {hit.point}");
+                    Debug.Log($"✅ Ground hit at world position {hit.point} on object {hit.collider.gameObject.name}");
 
                 // Get UnitTrainingQueue component
                 var trainingQueue = currentlySelected.GetComponent<UnitTrainingQueue>();
@@ -245,20 +253,25 @@ namespace RTS.Buildings
                         rallyFlag.SetRallyPointPosition(hit.point);
                         rallyFlag.ShowFlag(); // Show flag when rally point is set
                     }
+                    else
+                    {
+                        if (enableDebugLogs)
+                            Debug.LogWarning($"⚠️ Building {currentlySelected.gameObject.name} has no RallyPointFlag component - flag will not be shown");
+                    }
 
                     if (enableDebugLogs)
-                        Debug.Log($"✅ Rally point set for {currentlySelected.gameObject.name}");
+                        Debug.Log($"✅ Rally point successfully set for {currentlySelected.gameObject.name} at {hit.point}");
                 }
                 else
                 {
                     if (enableDebugLogs)
-                        Debug.LogWarning($"Building {currentlySelected.gameObject.name} has no UnitTrainingQueue component");
+                        Debug.LogWarning($"❌ Building {currentlySelected.gameObject.name} has no UnitTrainingQueue component - cannot set rally point");
                 }
             }
             else
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Click did not hit ground");
+                    Debug.LogWarning($"❌ Click did not hit ground layer (mask: {groundLayer.value}). Make sure ground has correct layer assigned.");
             }
         }
 
