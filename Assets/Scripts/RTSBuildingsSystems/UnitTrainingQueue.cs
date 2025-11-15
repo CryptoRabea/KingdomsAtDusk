@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RTS.Core.Events;
 using RTS.Core.Services;
 using RTS.Units;
+using RTSBuildingsSystems;
 
 namespace RTS.Buildings
 {
@@ -59,11 +60,23 @@ namespace RTS.Buildings
 
             if (spawnPoint == null)
             {
-                // Create a spawn point in front of the building
-                GameObject spawnObj = new GameObject("SpawnPoint");
-                spawnObj.transform.SetParent(transform);
-                spawnObj.transform.localPosition = Vector3.forward * 3f; // 3 units in front
-                spawnPoint = spawnObj.transform;
+                // First, try to find a BuildingSpawnPoint component in children
+                BuildingSpawnPoint spawnPointComponent = GetComponentInChildren<BuildingSpawnPoint>();
+
+                if (spawnPointComponent != null)
+                {
+                    spawnPoint = spawnPointComponent.Transform;
+                    Debug.Log($"Using BuildingSpawnPoint from prefab at {spawnPoint.localPosition}");
+                }
+                else
+                {
+                    // Fallback: Create a spawn point in front of the building for backward compatibility
+                    GameObject spawnObj = new GameObject("SpawnPoint");
+                    spawnObj.transform.SetParent(transform);
+                    spawnObj.transform.localPosition = Vector3.forward * 3f; // 3 units in front
+                    spawnPoint = spawnObj.transform;
+                    Debug.LogWarning($"No BuildingSpawnPoint found in prefab. Auto-created spawn point. Consider adding a BuildingSpawnPoint component to the building prefab.");
+                }
             }
         }
 

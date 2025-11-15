@@ -29,9 +29,9 @@ namespace RTS.UI
         [SerializeField] private Transform unitButtonContainer;
         [SerializeField] private GameObject trainUnitButtonPrefab;
 
-        [Header("Spawn Point Button")]
-        [SerializeField] private GameObject setSpawnPointButton;
-        [SerializeField] private TextMeshProUGUI setSpawnPointButtonText;
+        [Header("Rally Point Button")]
+        [SerializeField] private GameObject setRallyPointButton;
+        [SerializeField] private TextMeshProUGUI setRallyPointButtonText;
 
         [Header("References")]
         [SerializeField] private BuildingSelectionManager selectionManager;
@@ -43,7 +43,7 @@ namespace RTS.UI
         private Building buildingComponent;
         private UnitTrainingQueue trainingQueue;
         private List<GameObject> spawnedButtons = new List<GameObject>();
-        private bool isSettingSpawnPoint = false;
+        private bool isSettingRallyPoint = false;
 
         private void OnEnable()
         {
@@ -85,15 +85,15 @@ namespace RTS.UI
                 }
             }
 
-            // Set up spawn point button click handler
-            if (setSpawnPointButton != null)
+            // Set up rally point button click handler
+            if (setRallyPointButton != null)
             {
-                var button = setSpawnPointButton.GetComponent<Button>();
+                var button = setRallyPointButton.GetComponent<Button>();
                 if (button != null)
                 {
-                    button.onClick.AddListener(OnSetSpawnPointButtonClicked);
+                    button.onClick.AddListener(OnSetRallyPointButtonClicked);
                 }
-                setSpawnPointButton.SetActive(false); // Hide initially
+                setRallyPointButton.SetActive(false); // Hide initially
             }
 
             HidePanel();
@@ -107,11 +107,11 @@ namespace RTS.UI
                 UpdateTrainingQueueDisplay();
             }
 
-            // Sync spawn point mode with selection manager
-            if (selectionManager != null && isSettingSpawnPoint != selectionManager.IsSpawnPointMode())
+            // Sync rally point mode with selection manager
+            if (selectionManager != null && isSettingRallyPoint != selectionManager.IsSpawnPointMode())
             {
-                isSettingSpawnPoint = selectionManager.IsSpawnPointMode();
-                UpdateSpawnPointButtonText();
+                isSettingRallyPoint = selectionManager.IsSpawnPointMode();
+                UpdateRallyPointButtonText();
             }
         }
 
@@ -221,11 +221,11 @@ namespace RTS.UI
                     trainingQueuePanel.SetActive(true);
                 }
 
-                // Show spawn point button for buildings with training queue
-                if (setSpawnPointButton != null)
+                // Show rally point button for buildings with training queue
+                if (setRallyPointButton != null)
                 {
-                    setSpawnPointButton.SetActive(true);
-                    UpdateSpawnPointButtonText();
+                    setRallyPointButton.SetActive(true);
+                    UpdateRallyPointButtonText();
                 }
             }
             else
@@ -236,10 +236,10 @@ namespace RTS.UI
                     trainingQueuePanel.SetActive(false);
                 }
 
-                // Hide spawn point button for buildings without training queue
-                if (setSpawnPointButton != null)
+                // Hide rally point button for buildings without training queue
+                if (setRallyPointButton != null)
                 {
-                    setSpawnPointButton.SetActive(false);
+                    setRallyPointButton.SetActive(false);
                 }
             }
         }
@@ -334,40 +334,40 @@ namespace RTS.UI
 
             ClearTrainingButtons();
 
-            // Reset spawn point mode when hiding panel
-            if (isSettingSpawnPoint && selectionManager != null)
+            // Reset rally point mode when hiding panel
+            if (isSettingRallyPoint && selectionManager != null)
             {
                 selectionManager.SetSpawnPointMode(false);
-                isSettingSpawnPoint = false;
-                UpdateSpawnPointButtonText();
+                isSettingRallyPoint = false;
+                UpdateRallyPointButtonText();
             }
         }
 
-        private void OnSetSpawnPointButtonClicked()
+        private void OnSetRallyPointButtonClicked()
         {
             if (selectionManager == null)
             {
                 if (enableDebugLogs)
-                    Debug.LogWarning("Cannot set spawn point - BuildingSelectionManager not found!");
+                    Debug.LogWarning("Cannot set rally point - BuildingSelectionManager not found!");
                 return;
             }
 
-            // Toggle spawn point setting mode
-            isSettingSpawnPoint = !isSettingSpawnPoint;
-            selectionManager.SetSpawnPointMode(isSettingSpawnPoint);
-            UpdateSpawnPointButtonText();
+            // Toggle rally point setting mode
+            isSettingRallyPoint = !isSettingRallyPoint;
+            selectionManager.SetSpawnPointMode(isSettingRallyPoint);
+            UpdateRallyPointButtonText();
 
             if (enableDebugLogs)
             {
-                Debug.Log($"Spawn point mode: {(isSettingSpawnPoint ? "ENABLED" : "DISABLED")}");
+                Debug.Log($"Rally point mode: {(isSettingRallyPoint ? "ENABLED" : "DISABLED")}");
             }
         }
 
-        private void UpdateSpawnPointButtonText()
+        private void UpdateRallyPointButtonText()
         {
-            if (setSpawnPointButtonText != null)
+            if (setRallyPointButtonText != null)
             {
-                setSpawnPointButtonText.text = isSettingSpawnPoint ? "Cancel" : "Set Spawn Point";
+                setRallyPointButtonText.text = isSettingRallyPoint ? "Cancel" : "Set Rally Point";
             }
         }
     }
