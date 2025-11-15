@@ -20,8 +20,17 @@ namespace RTS.UI.Minimap
         [Tooltip("Player ID for multiplayer games (0 = local player)")]
         [SerializeField] private int playerId = 0;
 
-        // Cached layer numbers
-        private static readonly int EnemyLayer = LayerMask.NameToLayer("Enemy");
+        // Cached layer numbers - lazy initialized to avoid static constructor issues
+        private static int? _enemyLayer;
+        private static int EnemyLayer
+        {
+            get
+            {
+                if (!_enemyLayer.HasValue)
+                    _enemyLayer = LayerMask.NameToLayer("Enemy");
+                return _enemyLayer.Value;
+            }
+        }
 
         // Ownership mapping for player IDs
         private static readonly MinimapEntityOwnership[] PlayerOwnershipMap =
@@ -67,11 +76,11 @@ namespace RTS.UI.Minimap
         // ----- Ownership Detection -----
         private void DetectOwnership()
         {
-            // Use CompareTag for fastest performance
-            if (CompareTag("Friendly")) { ownership = MinimapEntityOwnership.Friendly; return; }
-            if (CompareTag("Enemy")) { ownership = MinimapEntityOwnership.Enemy; return; }
-            if (CompareTag("Neutral")) { ownership = MinimapEntityOwnership.Neutral; return; }
-            if (CompareTag("Ally")) { ownership = MinimapEntityOwnership.Ally; return; }
+            // Use safe tag checking to avoid "Tag not defined" errors
+            if (SafeCompareTag("Friendly")) { ownership = MinimapEntityOwnership.Friendly; return; }
+            if (SafeCompareTag("Enemy")) { ownership = MinimapEntityOwnership.Enemy; return; }
+            if (SafeCompareTag("Neutral")) { ownership = MinimapEntityOwnership.Neutral; return; }
+            if (SafeCompareTag("Ally")) { ownership = MinimapEntityOwnership.Ally; return; }
 
             // Layer detection fallback
             if (gameObject.layer == EnemyLayer)
@@ -82,6 +91,21 @@ namespace RTS.UI.Minimap
 
             // Default
             ownership = MinimapEntityOwnership.Friendly;
+        }
+
+        /// <summary>
+        /// Safe version of CompareTag that doesn't throw if tag is not defined.
+        /// </summary>
+        private bool SafeCompareTag(string tag)
+        {
+            try
+            {
+                return CompareTag(tag);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         #region Editor Helper
