@@ -15,8 +15,10 @@ namespace RTS.Units
         [SerializeField] private GameObject selectionIndicator;
         [SerializeField] private bool useColorHighlight = true;
         [SerializeField] private Color selectedColor = Color.green;
+        [SerializeField] private GameObject hoverIndicator;
 
         private bool isSelected;
+        private bool isHovered;
         private Renderer[] renderers;
         private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
         // ✅ FIX: Use MaterialPropertyBlock to avoid creating material instances during render pass
@@ -25,6 +27,7 @@ namespace RTS.Units
         private static readonly int BaseColorPropertyID = Shader.PropertyToID("_BaseColor");
 
         public bool IsSelected { get { return isSelected; } }
+        public bool IsHovered { get { return isHovered; } }
 
         private void Awake()
         {
@@ -102,6 +105,49 @@ namespace RTS.Units
             }
 
             EventBus.Publish(new UnitDeselectedEvent(gameObject));
+        }
+
+        /// <summary>
+        /// Sets hover highlight state for this unit.
+        /// </summary>
+        public void SetHoverHighlight(bool hover, Color hoverColor)
+        {
+            // Don't hover highlight selected units
+            if (isSelected)
+                return;
+
+            isHovered = hover;
+
+            // Show/hide hover indicator if present
+            if (hoverIndicator != null)
+            {
+                hoverIndicator.SetActive(hover);
+            }
+
+            // Apply hover color if using color highlight
+            if (useColorHighlight && propertyBlock != null)
+            {
+                foreach (var rend in renderers)
+                {
+                    if (rend != null)
+                    {
+                        rend.GetPropertyBlock(propertyBlock);
+
+                        if (hover)
+                        {
+                            propertyBlock.SetColor(ColorPropertyID, hoverColor);
+                            propertyBlock.SetColor(BaseColorPropertyID, hoverColor);
+                        }
+                        else if (originalColors.TryGetValue(rend, out Color original))
+                        {
+                            propertyBlock.SetColor(ColorPropertyID, original);
+                            propertyBlock.SetColor(BaseColorPropertyID, original);
+                        }
+
+                        rend.SetPropertyBlock(propertyBlock);
+                    }
+                }
+            }
         }
     }
 }

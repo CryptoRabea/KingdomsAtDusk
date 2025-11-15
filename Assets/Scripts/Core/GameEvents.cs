@@ -305,6 +305,54 @@ namespace RTS.Core.Events
         }
     }
 
+    public struct UnitGroupSavedEvent
+    {
+        public int GroupNumber;
+        public int UnitCount;
+
+        public UnitGroupSavedEvent(int groupNumber, int unitCount)
+        {
+            GroupNumber = groupNumber;
+            UnitCount = unitCount;
+        }
+    }
+
+    public struct UnitGroupRecalledEvent
+    {
+        public int GroupNumber;
+        public int UnitCount;
+        public bool WasDoubleTap;
+
+        public UnitGroupRecalledEvent(int groupNumber, int unitCount, bool wasDoubleTap)
+        {
+            GroupNumber = groupNumber;
+            UnitCount = unitCount;
+            WasDoubleTap = wasDoubleTap;
+        }
+    }
+
+    public struct UnitHoveredEvent
+    {
+        public GameObject Unit;
+        public bool IsHovered;
+
+        public UnitHoveredEvent(GameObject unit, bool isHovered)
+        {
+            Unit = unit;
+            IsHovered = isHovered;
+        }
+    }
+
+    public struct AllVisibleUnitsSelectedEvent
+    {
+        public int UnitCount;
+
+        public AllVisibleUnitsSelectedEvent(int unitCount)
+        {
+            UnitCount = unitCount;
+        }
+    }
+
     // ==================== UNIT TRAINING EVENTS ====================
 
     public struct UnitTrainingStartedEvent
