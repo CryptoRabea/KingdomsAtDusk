@@ -1,5 +1,5 @@
+using Unity.AI.Navigation;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace RTS.Buildings
 {
@@ -41,7 +41,7 @@ namespace RTS.Buildings
             // Configure the NavMeshLink
             navMeshLink.bidirectional = bidirectional;
             navMeshLink.area = areaMask;
-            navMeshLink.autoUpdatePositions = false;
+            navMeshLink.autoUpdate = false;
 
             // Set start point (ground level)
             navMeshLink.startPoint = Vector3.zero;
@@ -60,8 +60,7 @@ namespace RTS.Buildings
             if (stairMeshPrefab != null)
             {
                 visualMesh = Instantiate(stairMeshPrefab, transform);
-                visualMesh.transform.localPosition = Vector3.zero;
-                visualMesh.transform.localRotation = Quaternion.identity;
+                visualMesh.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             }
             else if (createDefaultVisual)
             {
@@ -85,8 +84,7 @@ namespace RTS.Buildings
             ramp.transform.localRotation = Quaternion.Euler(-angle, 0, 0);
 
             // Remove collider (NavMeshLink handles navigation)
-            Collider collider = ramp.GetComponent<Collider>();
-            if (collider != null)
+            if (ramp.TryGetComponent<Collider>(out var collider))
             {
                 Destroy(collider);
             }

@@ -31,7 +31,7 @@ namespace RTS.Buildings
         public bool IsConstructed => isConstructed;
         public float ConstructionProgress => constructionProgress / constructionTime;
 
-        private void Start()
+        public void Start()
         {
             happinessService = ServiceLocator.TryGet<IHappinessService>();
             resourceService = ServiceLocator.TryGet<IResourcesService>();
@@ -136,7 +136,7 @@ namespace RTS.Buildings
             ));
         }
 
-        private void OnDestroy()
+        public void OnDestroy()
         {
             // Remove happiness bonus when destroyed
             if (isConstructed && data != null && happinessService != null && data.happinessBonus != 0)

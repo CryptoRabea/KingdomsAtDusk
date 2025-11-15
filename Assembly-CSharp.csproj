@@ -61,121 +61,171 @@
     <Analyzer Include="D:\Work\UnityEditors\6000.2.10f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\FogOfWar\IVisionProvider.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerProjectile.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\Scripts\Core\Utilities\ResourceDisplayUtility.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\IMinimapEntity.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarRenderer.cs" />
     <Compile Include="Assets\Scripts\Core\ServiceLocator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
-    <Compile Include="Assets\RTSAnimation\AnimationSetupHelper.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\RetreatState.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\ResourceWorkerModule.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectable.cs" />
     <Compile Include="Assets\Scripts\Managers\WaveManager.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitHealth.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\SoldierAI.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapUnitMarkerManager.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\CampfireDataSO.cs" />
     <Compile Include="Assets\Scripts\Managers\GameManager.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallStairs.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\DeadState.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSpawnPoint.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
+    <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsPlacement.cs" />
     <Compile Include="Assets\Scripts\UI\MiniMapController.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
+    <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsProgressController.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerDataSO.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\TrainingWorkerModule.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingButton.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
     <Compile Include="Assets\Scripts\UI\WallResourcePreviewUI.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapDragHandler.cs" />
     <Compile Include="Assets\Scripts\Units\AI\AISettingsSO.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\ArcherAI.cs" />
     <Compile Include="Assets\RTSAnimation\AnimationConfigSO.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Building.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEnums.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingTooltip.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarGrid.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapMarkerPool.cs" />
     <Compile Include="Assets\Scripts\UI\NotificationUI.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallPlacementController.cs" />
     <Compile Include="Assets\Scripts\UI\HappinessUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\VisionProvider.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\Scripts\Managers\BuildingManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
+    <Compile Include="Assets\StoneKeep\Scripts\DoorOpen.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\AttackingState.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationController.cs" />
     <Compile Include="Assets\Scripts\Core\GameEvents.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\MovingState.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitSelectable.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\Tower.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationAdvanced.cs" />
     <Compile Include="Assets\Scripts\Managers\HappinessManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapConfig.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
+    <Compile Include="Assets\Scripts\Units\Selection\UnitGroupManager.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarAutoIntegrator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\HealingState.cs" />
+    <Compile Include="Assets\StoneKeep\Scripts\CharacterMovement.cs" />
     <Compile Include="Assets\Scripts\UI\BuildingHUDToggle.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelectionManager.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingNavMeshObstacle.cs" />
     <Compile Include="Assets\Scripts\Units\Data\UnitConfigSO.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\IdleState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
+    <Compile Include="Assets\Scripts\Managers\PopulationManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\BuildingWorkerModule.cs" />
     <Compile Include="Assets\Scripts\UI\BuildingDetailsUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitStateType.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallConnectionSystem.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
+    <Compile Include="Assets\Scripts\UI\MiniMapControllerPro.cs" />
     <Compile Include="Assets\Scripts\InputSystem_Actions.cs" />
     <Compile Include="Assets\Scripts\UI\ResourceUI.cs" />
     <Compile Include="Assets\Scripts\Units\AI\UnitAIController.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\UnitTrainingQueue.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapEntity.cs" />
     <Compile Include="Assets\Scripts\Core\IServices.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingHUD.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\HealerAI.cs" />
+    <Compile Include="Assets\StoneKeep\Scripts\PlayerInteraction.cs" />
+    <Compile Include="Assets\Scripts\Units\Selection\UnitSelection3D.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
+    <Compile Include="Assets\Scripts\Managers\ReputationManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSystemValidator.cs" />
     <Compile Include="Assets\Scripts\Core\EventBus.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEntityVisibility.cs" />
     <Compile Include="Assets\Scripts\Camera\RTSCameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
+    <Compile Include="Assets\StoneKeep\Scripts\MouseLook.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingDataSO.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarMinimapRenderer.cs" />
     <Compile Include="Assets\Scripts\Managers\ResourceManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\Campfire.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\StairPlacementController.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\MouseLook.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TeleType.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallNavMeshObstacle.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingDetailsDiagnostic.cs" />
+    <Compile Include="Assets\Scripts\Managers\PeasantWorkforceManager.cs" />
+    <Compile Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Scripts\PT_Create_Prefab.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PlayerMovement.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapMarkerManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapBuildingMarkerManager.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationEvents.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapEntityDetector.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\RallyPointFlag.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerPlacementHelper.cs" />
     <Compile Include="Assets\Scripts\UI\TrainUnitButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets\ConstructableMedievalHouses\ReadMe.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - License.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Glass_PBR.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader_WebGl.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Unity - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Modular_NPC\Shaders\PT_Modular_NPC_Shader_Toon.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - AFL.txt" />
+    <None Include="Assets\Shaders\FogOfWar.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader.shader" />
+    <None Include="Assets\BigRookGames\_AssetPacks\Stylized Build Panels\Readme.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Shader_PBR.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\SDFFunctions.hlsl" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader.shader" />
@@ -188,15 +238,24 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Flowers_Shader.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Rock_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
+    <None Include="Assets\StoneKeep\Readme.txt" />
     <None Include="Assets\StrategyGameResourceIcons\Docs\readme.txt" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader_VS.shader" />
+    <None Include="Assets\ConstructableMedievalHouses\Art\Shader\BuildingEffect.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Flowers_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Rock_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\VS_indirect.cginc" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Props\Sources\Shaders\PT_Props_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader_VS.shader" />
+    <None Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Modular_NPC\Shaders\PT_Modular_NPC_Shader_PBR.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
   </ItemGroup>
@@ -1253,10 +1312,6 @@
       <HintPath>Library\ScriptAssemblies\Unity.2D.Enhancers.Editor.AIBridge.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.InternalAPIEditorBridge.001">
-      <HintPath>Library\ScriptAssemblies\Unity.InternalAPIEditorBridge.001.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.Splines.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Splines.Editor.dll</HintPath>
       <Private>False</Private>
@@ -1315,6 +1370,10 @@
     </Reference>
     <Reference Include="Unity.PlasticSCM.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.InternalAPIEditorBridge.001">
+      <HintPath>Library\ScriptAssemblies\Unity.InternalAPIEditorBridge.001.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Burst.Editor">
@@ -1531,6 +1590,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="BigRookGames.csproj">
+      <Project>{0E8B82CC-CBD9-3E6E-E288-37F3DA37C449}</Project>
+      <Name>BigRookGames</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

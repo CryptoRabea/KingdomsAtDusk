@@ -47,10 +47,10 @@ namespace KingdomsAtDusk.FogOfWar
                 visionProvider = evt.Unit.AddComponent<VisionProvider>();
 
                 // Try to detect ownership from MinimapEntity
-                var minimapEntity = evt.Unit.GetComponent<UI.Minimap.MinimapEntity>();
+                var minimapEntity = evt.Unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
                 if (minimapEntity != null)
                 {
-                    int ownerId = minimapEntity.Ownership == UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
+                    int ownerId = minimapEntity.Ownership == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
                     visionProvider.SetOwnerId(ownerId);
 
                     Debug.Log($"[FogOfWarAutoIntegrator] Added VisionProvider to unit: {evt.Unit.name} (Owner: {ownerId})");
@@ -100,8 +100,7 @@ namespace KingdomsAtDusk.FogOfWar
             // Buildings are player-owned so they should always be visible
             if (autoAddVisibilityControl)
             {
-                var visibility = building.GetComponent<FogOfWarEntityVisibility>();
-                if (visibility == null)
+                if (!building.TryGetComponent<FogOfWarEntityVisibility>(out var visibility))
                 {
                     visibility = building.AddComponent<FogOfWarEntityVisibility>();
                     visibility.SetPlayerOwned(true); // Buildings are always visible
@@ -111,15 +110,14 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void AddVisibilityControl(GameObject unit)
         {
-            var visibility = unit.GetComponent<FogOfWarEntityVisibility>();
-            if (visibility != null) return;
+            if (unit.TryGetComponent<FogOfWarEntityVisibility>(out var visibility)) return;
 
             visibility = unit.AddComponent<FogOfWarEntityVisibility>();
 
             // Determine if player-owned
-            var minimapEntity = unit.GetComponent<UI.Minimap.MinimapEntity>();
+            var minimapEntity = unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
             bool isPlayerOwned = minimapEntity != null &&
-                               minimapEntity.Ownership == UI.Minimap.MinimapEntityOwnership.Friendly;
+                               minimapEntity.Ownership == RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
 
             visibility.SetPlayerOwned(isPlayerOwned);
 

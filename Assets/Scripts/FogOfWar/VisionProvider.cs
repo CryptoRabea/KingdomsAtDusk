@@ -66,7 +66,7 @@ namespace KingdomsAtDusk.FogOfWar
         private void TryGetUnitDetectionRange()
         {
             // Try to get detection range from UnitAIController
-            var aiController = GetComponent<Units.AI.UnitAIController>();
+            var aiController = GetComponent<RTS.Units.AI.UnitAIController>();
             if (aiController != null && aiController.Config != null)
             {
                 visionRadius = aiController.Config.detectionRange;
@@ -75,8 +75,7 @@ namespace KingdomsAtDusk.FogOfWar
             }
 
             // Try to get from Building (they might have a different system)
-            var building = GetComponent<RTSBuildingsSystems.Building>();
-            if (building != null)
+            if (TryGetComponent<RTSBuildingsSystems.Building>(out var building))
             {
                 // Buildings get a larger vision radius by default
                 visionRadius = 20f;
