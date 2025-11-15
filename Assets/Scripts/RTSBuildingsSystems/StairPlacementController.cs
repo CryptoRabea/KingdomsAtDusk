@@ -235,8 +235,8 @@ namespace RTS.Buildings
             // Check resources
             if (resourceService != null)
             {
-                if (resourceService.GetResourceAmount(ResourceType.Wood) < woodCost ||
-                    resourceService.GetResourceAmount(ResourceType.Stone) < stoneCost)
+                if (resourceService.GetResource(ResourceType.Wood) < woodCost ||
+                    resourceService.GetResource(ResourceType.Stone) < stoneCost)
                 {
                     return false;
                 }
