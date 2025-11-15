@@ -36,6 +36,9 @@ namespace RTS.Buildings
         [SerializeField] private int maxQueueSize = 5;
         [SerializeField] private Transform spawnPoint;
 
+        [Header("Rally Point")]
+        [SerializeField] private Transform rallyPoint;
+
         [Header("Debug")]
         [SerializeField] private bool showDebugInfo = true;
 
@@ -173,6 +176,20 @@ namespace RTS.Buildings
                 Quaternion.identity
             );
 
+            // Move to rally point if set
+            if (rallyPoint != null)
+            {
+                var unitMovement = spawnedUnit.GetComponent<UnitMovement>();
+                if (unitMovement != null)
+                {
+                    unitMovement.SetDestination(rallyPoint.position);
+                    if (showDebugInfo)
+                    {
+                        Debug.Log($"Unit moving to rally point at {rallyPoint.position}");
+                    }
+                }
+            }
+
             // Publish events
             EventBus.Publish(new UnitTrainingCompletedEvent(
                 gameObject,
@@ -249,13 +266,76 @@ namespace RTS.Buildings
             return spawnPoint;
         }
 
+        /// <summary>
+        /// Set rally point position
+        /// </summary>
+        public void SetRallyPointPosition(Vector3 position)
+        {
+            if (rallyPoint == null)
+            {
+                // Create a rally point if it doesn't exist
+                GameObject rallyObj = new GameObject("RallyPoint");
+                rallyObj.transform.SetParent(transform);
+                rallyPoint = rallyObj.transform;
+            }
+
+            rallyPoint.position = position;
+            if (showDebugInfo)
+            {
+                Debug.Log($"Rally point set to {position}");
+            }
+        }
+
+        /// <summary>
+        /// Get the rally point transform
+        /// </summary>
+        public Transform GetRallyPoint()
+        {
+            return rallyPoint;
+        }
+
+        /// <summary>
+        /// Clear the rally point
+        /// </summary>
+        public void ClearRallyPoint()
+        {
+            if (rallyPoint != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(rallyPoint.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(rallyPoint.gameObject);
+                }
+                rallyPoint = null;
+            }
+        }
+
         private void OnDrawGizmosSelected()
         {
+            // Draw spawn point in blue
             if (spawnPoint != null)
             {
                 Gizmos.color = Color.blue;
                 Gizmos.DrawWireSphere(spawnPoint.position, 0.5f);
                 Gizmos.DrawLine(transform.position, spawnPoint.position);
+            }
+
+            // Draw rally point in green
+            if (rallyPoint != null)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(rallyPoint.position, 0.5f);
+                Gizmos.DrawLine(transform.position, rallyPoint.position);
+
+                // Draw line from spawn to rally if both exist
+                if (spawnPoint != null)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawLine(spawnPoint.position, rallyPoint.position);
+                }
             }
         }
     }
