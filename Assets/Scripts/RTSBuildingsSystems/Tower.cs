@@ -125,7 +125,7 @@ namespace RTS.Buildings
     /// <summary>
     /// Event published when a tower is placed.
     /// </summary>
-    public class TowerPlacedEvent
+    public struct TowerPlacedEvent
     {
         public GameObject Tower { get; }
         public Vector3 Position { get; }
@@ -142,7 +142,7 @@ namespace RTS.Buildings
     /// <summary>
     /// Event published when a tower is destroyed.
     /// </summary>
-    public class TowerDestroyedEvent
+    public struct TowerDestroyedEvent
     {
         public GameObject Tower { get; }
         public TowerType Type { get; }
