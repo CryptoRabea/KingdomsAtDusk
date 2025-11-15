@@ -9,8 +9,11 @@ namespace RTS.Buildings
     /// </summary>
     public class RallyPointFlag : MonoBehaviour
     {
-        [Header("Flag Settings")]
-        [SerializeField] private GameObject flagVisual;
+        [Header("Flag Prefab (Optional)")]
+        [Tooltip("Assign a flag prefab here. If assigned, this prefab will be used for all buildings. If null, a simple flag will be created from primitives.")]
+        [SerializeField] private GameObject flagPrefab;
+
+        [Header("Flag Settings (for auto-created flags)")]
         [SerializeField] private Color flagColor = Color.green;
         [SerializeField] private float flagHeight = 2f;
         [SerializeField] private float flagPoleRadius = 0.05f;
@@ -22,6 +25,8 @@ namespace RTS.Buildings
         [Header("Auto-Create Flag")]
         [SerializeField] private bool autoCreateFlag = true;
 
+        private GameObject flagVisual;
+
         private BuildingSelectable buildingSelectable;
         private UnitTrainingQueue trainingQueue;
         private bool isVisible = false;
@@ -31,22 +36,35 @@ namespace RTS.Buildings
             buildingSelectable = GetComponent<BuildingSelectable>();
             trainingQueue = GetComponent<UnitTrainingQueue>();
 
+            Debug.Log($"🏁 RallyPointFlag Awake for {gameObject.name}: autoCreateFlag={autoCreateFlag}, flagPrefab={flagPrefab != null}");
+
             // Get rally point from training queue if not set
             if (rallyPoint == null && trainingQueue != null)
             {
                 rallyPoint = trainingQueue.GetRallyPoint();
+                Debug.Log($"🏁 RallyPointFlag: Got rally point from training queue: {rallyPoint != null}");
             }
 
-            // Auto-create flag visual if not assigned
+            // Auto-create flag visual if needed
             if (flagVisual == null && autoCreateFlag)
             {
+                Debug.Log($"🏁 RallyPointFlag: Creating flag visual for {gameObject.name}...");
                 CreateFlagVisual();
+            }
+            else if (!autoCreateFlag)
+            {
+                Debug.LogWarning($"⚠️ RallyPointFlag: autoCreateFlag is FALSE for {gameObject.name} - flag will not be created!");
             }
 
             // Hide flag initially
             if (flagVisual != null)
             {
                 flagVisual.SetActive(false);
+                Debug.Log($"✅ RallyPointFlag: Flag visual created and hidden for {gameObject.name}");
+            }
+            else
+            {
+                Debug.LogError($"❌ RallyPointFlag: Flag visual is NULL after Awake for {gameObject.name}!");
             }
         }
 
@@ -190,53 +208,72 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Creates a simple flag visual using Unity primitives
+        /// Creates a flag visual - either from prefab or using Unity primitives
         /// </summary>
         private void CreateFlagVisual()
         {
-            // Create parent object - DON'T parent to building to avoid transform issues
-            GameObject flagParent = new GameObject($"RallyFlag_{gameObject.name}");
-
-            // Create pole (cylinder)
-            GameObject pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            pole.name = "FlagPole";
-            pole.transform.SetParent(flagParent.transform);
-            pole.transform.localPosition = Vector3.up * (flagHeight / 2f);
-            pole.transform.localScale = new Vector3(flagPoleRadius, flagHeight / 2f, flagPoleRadius);
-
-            // Remove collider from pole (we don't want it to interfere with clicks)
-            Collider poleCollider = pole.GetComponent<Collider>();
-            if (poleCollider != null)
-                Destroy(poleCollider);
-
-            // Set pole color to dark gray
-            Renderer poleRenderer = pole.GetComponent<Renderer>();
-            if (poleRenderer != null)
+            // Check if a flag prefab is assigned
+            if (flagPrefab != null)
             {
-                poleRenderer.material.color = new Color(0.3f, 0.3f, 0.3f);
+                // Use the prefab - DON'T parent to building to avoid transform issues
+                flagVisual = Instantiate(flagPrefab);
+                flagVisual.name = $"RallyFlag_{gameObject.name}";
+
+                // Remove any colliders to prevent interfering with clicks
+                Collider[] colliders = flagVisual.GetComponentsInChildren<Collider>();
+                foreach (var col in colliders)
+                {
+                    Destroy(col);
+                }
+
+                Debug.Log($"✅ RallyPointFlag: Created flag visual from PREFAB for {gameObject.name}");
             }
-
-            // Create flag (cube stretched and rotated)
-            GameObject flag = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            flag.name = "Flag";
-            flag.transform.SetParent(flagParent.transform);
-            flag.transform.localPosition = new Vector3(flagSize / 2f, flagHeight * 0.85f, 0);
-            flag.transform.localScale = new Vector3(flagSize, flagSize * 0.6f, 0.05f);
-
-            // Remove collider from flag
-            Collider flagCollider = flag.GetComponent<Collider>();
-            if (flagCollider != null)
-                Destroy(flagCollider);
-
-            // Set flag color
-            Renderer flagRenderer = flag.GetComponent<Renderer>();
-            if (flagRenderer != null)
+            else
             {
-                flagRenderer.material.color = flagColor;
-            }
+                // Create from primitives - DON'T parent to building to avoid transform issues
+                GameObject flagParent = new GameObject($"RallyFlag_{gameObject.name}");
 
-            flagVisual = flagParent;
-            Debug.Log($"Created rally point flag visual for {gameObject.name}");
+                // Create pole (cylinder)
+                GameObject pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                pole.name = "FlagPole";
+                pole.transform.SetParent(flagParent.transform);
+                pole.transform.localPosition = Vector3.up * (flagHeight / 2f);
+                pole.transform.localScale = new Vector3(flagPoleRadius, flagHeight / 2f, flagPoleRadius);
+
+                // Remove collider from pole (we don't want it to interfere with clicks)
+                Collider poleCollider = pole.GetComponent<Collider>();
+                if (poleCollider != null)
+                    Destroy(poleCollider);
+
+                // Set pole color to dark gray
+                Renderer poleRenderer = pole.GetComponent<Renderer>();
+                if (poleRenderer != null)
+                {
+                    poleRenderer.material.color = new Color(0.3f, 0.3f, 0.3f);
+                }
+
+                // Create flag (cube stretched and rotated)
+                GameObject flag = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                flag.name = "Flag";
+                flag.transform.SetParent(flagParent.transform);
+                flag.transform.localPosition = new Vector3(flagSize / 2f, flagHeight * 0.85f, 0);
+                flag.transform.localScale = new Vector3(flagSize, flagSize * 0.6f, 0.05f);
+
+                // Remove collider from flag
+                Collider flagCollider = flag.GetComponent<Collider>();
+                if (flagCollider != null)
+                    Destroy(flagCollider);
+
+                // Set flag color
+                Renderer flagRenderer = flag.GetComponent<Renderer>();
+                if (flagRenderer != null)
+                {
+                    flagRenderer.material.color = flagColor;
+                }
+
+                flagVisual = flagParent;
+                Debug.Log($"✅ RallyPointFlag: Created flag visual from PRIMITIVES for {gameObject.name}");
+            }
         }
 
         private void OnDrawGizmosSelected()
