@@ -82,3 +82,13 @@ Assets/VanillaLoopStudio/
 
 
 .vs/
+Assets/Advance Studios/Medieval Castle/Art.meta
+*.meta
+*.anim
+*.wav
+*.pdf
+*.txt
+/Assets/ConstructableMedievalHouses
+*.meta
+/Assets/Polytope Studio
+/Assets/BigRookGames
