@@ -384,6 +384,12 @@ namespace RTS.Managers
                 Debug.LogWarning($"Building prefab for {currentBuildingData.buildingName} doesn't have Building component!");
             }
 
+            // ✅ ADD NAVMESH OBSTACLE FOR NAVIGATION BLOCKING
+            if (newBuilding.GetComponent<BuildingNavMeshObstacle>() == null)
+            {
+                newBuilding.AddComponent<BuildingNavMeshObstacle>();
+            }
+
             // ✅ TOWER: Set tower-specific data
             if (isPlacingTower)
             {
