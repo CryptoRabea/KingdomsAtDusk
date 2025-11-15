@@ -228,7 +228,8 @@ namespace RTS.Managers
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i] != null)
-                    originalMaterials[i] = renderers[i].material;
+                    // ✅ FIX: Use sharedMaterial to avoid creating instances
+                    originalMaterials[i] = renderers[i].sharedMaterial;
             }
 
             // Set to semi-transparent
@@ -566,7 +567,8 @@ namespace RTS.Managers
             {
                 if (renderer != null)
                 {
-                    renderer.material = material;
+                    // ✅ FIX: Use sharedMaterial to avoid creating instances during render pass
+                    renderer.sharedMaterial = material;
                 }
             }
         }

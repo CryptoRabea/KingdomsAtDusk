@@ -988,7 +988,8 @@ namespace RTS.Buildings
             {
                 if (renderer != null)
                 {
-                    renderer.material = material;
+                    // ✅ FIX: Use sharedMaterial to avoid creating instances during render pass
+                    renderer.sharedMaterial = material;
                 }
             }
         }

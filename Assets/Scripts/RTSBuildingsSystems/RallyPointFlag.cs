@@ -249,7 +249,8 @@ namespace RTS.Buildings
                 Renderer poleRenderer = pole.GetComponent<Renderer>();
                 if (poleRenderer != null)
                 {
-                    poleRenderer.material.color = new Color(0.3f, 0.3f, 0.3f);
+                    // ✅ FIX: Use sharedMaterial to avoid creating instances during render pass
+                    poleRenderer.sharedMaterial.color = new Color(0.3f, 0.3f, 0.3f);
                 }
 
                 // Create flag (cube stretched and rotated)
@@ -268,7 +269,8 @@ namespace RTS.Buildings
                 Renderer flagRenderer = flag.GetComponent<Renderer>();
                 if (flagRenderer != null)
                 {
-                    flagRenderer.material.color = flagColor;
+                    // ✅ FIX: Use sharedMaterial to avoid creating instances during render pass
+                    flagRenderer.sharedMaterial.color = flagColor;
                 }
 
                 flagVisual = flagParent;

@@ -19,6 +19,10 @@ namespace RTS.Buildings
         private bool isSelected;
         private Renderer[] renderers;
         private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
+        // ✅ FIX: Use MaterialPropertyBlock to avoid creating material instances during render pass
+        private MaterialPropertyBlock propertyBlock;
+        private static readonly int ColorPropertyID = Shader.PropertyToID("_Color");
+        private static readonly int BaseColorPropertyID = Shader.PropertyToID("_BaseColor");
 
         public bool IsSelected { get { return isSelected; } }
 
@@ -27,11 +31,14 @@ namespace RTS.Buildings
             if (useColorHighlight)
             {
                 renderers = GetComponentsInChildren<Renderer>();
+                propertyBlock = new MaterialPropertyBlock();
+
                 foreach (var rend in renderers)
                 {
-                    if (rend != null && rend.material != null)
+                    if (rend != null && rend.sharedMaterial != null)
                     {
-                        originalColors[rend] = rend.material.color;
+                        // ✅ FIX: Use sharedMaterial instead of material
+                        originalColors[rend] = rend.sharedMaterial.color;
                     }
                 }
             }
@@ -49,13 +56,17 @@ namespace RTS.Buildings
                 selectionIndicator.SetActive(true);
             }
 
-            if (useColorHighlight)
+            if (useColorHighlight && propertyBlock != null)
             {
                 foreach (var rend in renderers)
                 {
-                    if (rend != null && rend.material != null)
+                    if (rend != null)
                     {
-                        rend.material.color = selectedColor;
+                        // ✅ FIX: Use MaterialPropertyBlock to change color without creating instances
+                        rend.GetPropertyBlock(propertyBlock);
+                        propertyBlock.SetColor(ColorPropertyID, selectedColor);
+                        propertyBlock.SetColor(BaseColorPropertyID, selectedColor);
+                        rend.SetPropertyBlock(propertyBlock);
                     }
                 }
             }
@@ -75,13 +86,17 @@ namespace RTS.Buildings
                 selectionIndicator.SetActive(false);
             }
 
-            if (useColorHighlight)
+            if (useColorHighlight && propertyBlock != null)
             {
                 foreach (var rend in renderers)
                 {
                     if (rend != null && originalColors.TryGetValue(rend, out Color original))
                     {
-                        rend.material.color = original;
+                        // ✅ FIX: Use MaterialPropertyBlock to restore original color
+                        rend.GetPropertyBlock(propertyBlock);
+                        propertyBlock.SetColor(ColorPropertyID, original);
+                        propertyBlock.SetColor(BaseColorPropertyID, original);
+                        rend.SetPropertyBlock(propertyBlock);
                     }
                 }
             }
