@@ -165,7 +165,7 @@ namespace RTS.Buildings
         /// <summary>
         /// Get a formatted description including all relevant info.
         /// </summary>
-        public string GetFullDescription()
+        public virtual string GetFullDescription()
         {
             var details = new List<string>();
 
