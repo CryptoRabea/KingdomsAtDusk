@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using RTS.UI;
 using RTS.Units;
+using RTS.Buildings;
 namespace KingdomsAtDusk.FogOfWar.Editor
 {
     /// <summary>
@@ -202,7 +203,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
                         if (minimapEntity != null)
                         {
                             // Set owner based on ownership (0 for friendly, 1 for enemy, etc.)
-                            int ownerId = minimapEntity.Ownership == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
+                            int ownerId = minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
                             visionProvider.SetOwnerId(ownerId);
                         }
 
@@ -215,7 +216,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
             // Add to buildings
             if (autoAddToBuildings)
             {
-                var buildings = FindObjectsByType<RTSBuildingsSystems.Building>(FindObjectsSortMode.None);
+                var buildings = FindObjectsByType<RTS.Buildings.Building>(FindObjectsSortMode.None);
                 foreach (var building in buildings)
                 {
                     if (building.GetComponent<VisionProvider>() == null)
@@ -249,7 +250,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
                 // Check if enemy
                 var minimapEntity = unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
                 bool isEnemy = minimapEntity != null &&
-                              minimapEntity.Ownership != RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
+                              minimapEntity.GetOwnership() != RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
 
                 if (isEnemy && unit.GetComponent<FogOfWarEntityVisibility>() == null)
                 {
