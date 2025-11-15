@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Editor\SceneTemplateGenerator.cs" />
     <Compile Include="Assets\Scripts\Editor\StandaloneSystemExtractor.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\BuildingSpawnPointEditor.cs" />
     <Compile Include="Assets\Scripts\Editor\BuildingTrainingUISetup.cs" />
     <Compile Include="Assets\Scripts\Editor\UISystemGenerator.cs" />
     <Compile Include="Assets\Scripts\Editor\MasterAutomationHub.cs" />
