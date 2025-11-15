@@ -74,7 +74,17 @@ namespace RTS.Units
         /// </summary>
         public void SetDestination(Vector3 destination)
         {
-            if (!isEnabled || agent == null) return;
+            if (!isEnabled)
+            {
+                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - movement is disabled!");
+                return;
+            }
+
+            if (agent == null)
+            {
+                Debug.LogError($"❌ UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is null!");
+                return;
+            }
 
             currentDestination = destination;
             currentTarget = null;
@@ -83,6 +93,11 @@ namespace RTS.Units
             if (agent.enabled)
             {
                 agent.SetDestination(destination);
+                Debug.Log($"✅ UnitMovement: {gameObject.name} moving from {transform.position} to {destination} (distance: {Vector3.Distance(transform.position, destination):F2})");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is disabled!");
             }
         }
 
