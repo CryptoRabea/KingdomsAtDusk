@@ -78,7 +78,7 @@ namespace RTS.UI
             // Find selection manager if not assigned
             if (selectionManager == null)
             {
-                selectionManager = FindObjectOfType<BuildingSelectionManager>();
+                selectionManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
                 if (selectionManager == null && enableDebugLogs)
                 {
                     Debug.LogWarning("BuildingDetailsUI: BuildingSelectionManager not found in scene!");

@@ -139,7 +139,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
-    <Compile Include="Assets\Scripts\RTSBuildingsSystems\SpawnPointFlag.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSystemValidator.cs" />
     <Compile Include="Assets\Scripts\Core\EventBus.cs" />
     <Compile Include="Assets\Scripts\Camera\RTSCameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
@@ -156,6 +156,7 @@
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PlayerMovement.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationEvents.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\RallyPointFlag.cs" />
     <Compile Include="Assets\Scripts\UI\TrainUnitButton.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -73,7 +73,7 @@ namespace RTS.Managers
             }
 
             // Find BuildingSelectionManager
-            buildingSelectionManager = FindObjectOfType<RTS.Buildings.BuildingSelectionManager>();
+            buildingSelectionManager = Object.FindAnyObjectByType<RTS.Buildings.BuildingSelectionManager>();
 
             // Validate building data
             ValidateBuildingData();
@@ -535,7 +535,6 @@ namespace RTS.Managers
                     Debug.LogWarning($"BuildingManager: '{data.buildingName}' prefab doesn't have Building component!");
                 }
 
-                Debug.Log($"✅ Building {i}: {data.buildingName} ({data.buildingType}) - Cost: {data.GetCostString()}");
             }
         }
 

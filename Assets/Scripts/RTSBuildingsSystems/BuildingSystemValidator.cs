@@ -39,7 +39,7 @@ namespace RTS.Buildings
         {
             Debug.Log("\n--- Checking BuildingSelectionManager ---");
 
-            var selectionManager = FindObjectOfType<BuildingSelectionManager>();
+            var selectionManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
             if (selectionManager == null)
             {
                 Debug.LogError("❌ CRITICAL: No BuildingSelectionManager found in scene!");
@@ -201,7 +201,7 @@ namespace RTS.Buildings
         {
             Debug.Log("\n--- Checking BuildingDetailsUI ---");
 
-            var ui = FindObjectOfType<UI.BuildingDetailsUI>();
+            var ui = FindAnyObjectByType<UI.BuildingDetailsUI>();
             if (ui == null)
             {
                 Debug.LogWarning("⚠️ No BuildingDetailsUI found in scene");
@@ -254,14 +254,14 @@ namespace RTS.Buildings
         [MenuItem("Tools/RTS/Validate Building System")]
         public static void ValidateFromMenu()
         {
-            var validator = FindObjectOfType<BuildingSystemValidator>();
+            var validator = Object.FindAnyObjectByType<BuildingSystemValidator>();
             if (validator == null)
             {
                 // Create temporary validator
                 var temp = new GameObject("Temp Validator");
                 validator = temp.AddComponent<BuildingSystemValidator>();
                 validator.ValidateSystem();
-                DestroyImmediate(temp);
+                Object.DestroyImmediate(temp);
             }
             else
             {

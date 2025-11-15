@@ -227,7 +227,6 @@ namespace RTS.UI
             }
 
             Debug.Log($"Mini-map camera setup complete. Rendering {worldSize.x}x{worldSize.y} world area.");
-            Debug.Log($"MiniMap Camera: pos={miniMapCamera.transform.position}, targetTexture={miniMapCamera.targetTexture != null}, cullingMask={miniMapCamera.cullingMask.value}");
         }
 
         #endregion
@@ -536,10 +535,7 @@ namespace RTS.UI
             marker.anchoredPosition = localPos;
 
             // Debug first marker update only to avoid spam
-            if (buildingMarkers.Count == 1 || unitMarkers.Count == 1)
-            {
-                Debug.Log($"Marker Position - World: {worldPosition}, NormalizedPos: {normalizedPos}, LocalPos: {localPos}");
-            }
+           
         }
 
         private Sprite CreateCircleSprite()
@@ -616,7 +612,6 @@ namespace RTS.UI
                 Debug.Log($"  - Position: {miniMapCamera.transform.position}");
                 Debug.Log($"  - Rotation: {miniMapCamera.transform.rotation.eulerAngles}");
                 Debug.Log($"  - Orthographic Size: {miniMapCamera.orthographicSize}");
-                Debug.Log($"  - Culling Mask: {miniMapCamera.cullingMask.value}");
 
                 var cameraData = miniMapCamera.GetUniversalAdditionalCameraData();
                 if (cameraData != null)
