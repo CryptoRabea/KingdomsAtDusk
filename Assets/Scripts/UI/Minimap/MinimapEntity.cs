@@ -94,18 +94,14 @@ namespace RTS.UI.Minimap
         }
 
         /// <summary>
-        /// Safe version of CompareTag that doesn't throw if tag is not defined.
+        /// Safe version of CompareTag that doesn't throw or log warnings if tag is not defined.
+        /// Uses string comparison instead of CompareTag to avoid Unity warnings.
         /// </summary>
         private bool SafeCompareTag(string tag)
         {
-            try
-            {
-                return CompareTag(tag);
-            }
-            catch
-            {
-                return false;
-            }
+            // Use direct string comparison to avoid "Tag not defined" warnings
+            // This is safe and doesn't log warnings for undefined tags
+            return gameObject.tag == tag;
         }
 
         #region Editor Helper
