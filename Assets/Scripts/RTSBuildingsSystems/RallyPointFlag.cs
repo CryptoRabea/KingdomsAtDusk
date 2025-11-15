@@ -99,19 +99,25 @@ namespace RTS.Buildings
         /// </summary>
         public void ShowFlag()
         {
+            // Get the latest rally point reference from training queue
+            if (trainingQueue != null)
+            {
+                rallyPoint = trainingQueue.GetRallyPoint();
+            }
+
             if (flagVisual != null && rallyPoint != null)
             {
                 isVisible = true;
                 flagVisual.SetActive(true);
                 UpdateFlagPosition();
-                Debug.Log($"✅ Showing rally point flag for {gameObject.name} at {rallyPoint.position}");
+                Debug.Log($"✅ RallyPointFlag: Showing flag for {gameObject.name} at {rallyPoint.position}");
             }
             else
             {
                 if (flagVisual == null)
-                    Debug.LogWarning($"⚠️ Cannot show flag for {gameObject.name}: flagVisual is null");
+                    Debug.LogWarning($"⚠️ RallyPointFlag: Cannot show flag for {gameObject.name}: flagVisual is null");
                 if (rallyPoint == null)
-                    Debug.LogWarning($"⚠️ Cannot show flag for {gameObject.name}: rallyPoint is null");
+                    Debug.LogWarning($"⚠️ RallyPointFlag: Cannot show flag for {gameObject.name}: rallyPoint is null (training queue has no rally point set)");
             }
         }
 
@@ -155,15 +161,22 @@ namespace RTS.Buildings
         /// </summary>
         public void SetRallyPointPosition(Vector3 position)
         {
+            // Get the latest rally point reference from training queue
+            // (it might have been created after Awake)
+            if (trainingQueue != null)
+            {
+                rallyPoint = trainingQueue.GetRallyPoint();
+            }
+
             if (rallyPoint != null)
             {
                 rallyPoint.position = position;
                 UpdateFlagPosition();
-                Debug.Log($"✅ Updated rally point position to {position} for {gameObject.name}");
+                Debug.Log($"✅ RallyPointFlag: Updated rally point position to {position} for {gameObject.name}");
             }
             else
             {
-                Debug.LogWarning($"⚠️ Cannot set rally point position for {gameObject.name}: rallyPoint is null");
+                Debug.LogWarning($"⚠️ RallyPointFlag: Cannot set rally point position for {gameObject.name}: rallyPoint is still null even after getting from training queue");
             }
         }
 

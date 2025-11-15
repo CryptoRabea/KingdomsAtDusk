@@ -182,6 +182,11 @@ namespace RTS.Buildings
                 return;
             }
 
+            if (showDebugInfo)
+            {
+                Debug.Log($"🎖️ UnitTrainingQueue: Spawning {currentTraining.unitData.unitConfig.unitName} at {spawnPoint.position}");
+            }
+
             // Spawn the unit
             GameObject spawnedUnit = Instantiate(
                 currentTraining.unitData.unitConfig.unitPrefab,
@@ -189,23 +194,33 @@ namespace RTS.Buildings
                 Quaternion.identity
             );
 
+            if (showDebugInfo)
+            {
+                Debug.Log($"✅ UnitTrainingQueue: Unit spawned - {spawnedUnit.name}. Rally point null? {rallyPoint == null}");
+            }
+
             // Move to rally point if set
             if (rallyPoint != null)
             {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"🚩 UnitTrainingQueue: Rally point exists at {rallyPoint.position}, attempting to move unit...");
+                }
+
                 var unitMovement = spawnedUnit.GetComponent<UnitMovement>();
                 if (unitMovement != null)
                 {
                     unitMovement.SetDestination(rallyPoint.position);
                     if (showDebugInfo)
                     {
-                        Debug.Log($"✅ Unit {spawnedUnit.name} moving from spawn {spawnPoint.position} to rally point at {rallyPoint.position}");
+                        Debug.Log($"✅ UnitTrainingQueue: Unit {spawnedUnit.name} commanded to move from {spawnPoint.position} to rally point at {rallyPoint.position}");
                     }
                 }
                 else
                 {
                     if (showDebugInfo)
                     {
-                        Debug.LogWarning($"⚠️ Spawned unit {spawnedUnit.name} has no UnitMovement component - cannot move to rally point!");
+                        Debug.LogError($"❌ UnitTrainingQueue: Spawned unit {spawnedUnit.name} has no UnitMovement component - cannot move to rally point!");
                     }
                 }
             }
@@ -213,7 +228,7 @@ namespace RTS.Buildings
             {
                 if (showDebugInfo)
                 {
-                    Debug.Log($"No rally point set for {gameObject.name}, unit will stay at spawn position");
+                    Debug.LogWarning($"⚠️ UnitTrainingQueue: No rally point set for {gameObject.name}, unit will stay at spawn position");
                 }
             }
 
@@ -298,20 +313,24 @@ namespace RTS.Buildings
         /// </summary>
         public void SetRallyPointPosition(Vector3 position)
         {
+            // Create rally point on first use if not assigned
             if (rallyPoint == null)
             {
-                // Create a rally point if it doesn't exist
-                // DON'T parent it to the building to avoid transform issues
-                GameObject rallyObj = new GameObject("RallyPoint");
+                GameObject rallyObj = new GameObject($"RallyPoint_{gameObject.name}");
                 rallyPoint = rallyObj.transform;
+
+                if (showDebugInfo)
+                {
+                    Debug.Log($"🚩 UnitTrainingQueue: Created rally point for {gameObject.name}");
+                }
             }
 
-            // Set the world position directly
+            // Set the world position directly (no parenting to avoid transform issues)
             rallyPoint.position = position;
 
             if (showDebugInfo)
             {
-                Debug.Log($"✅ Rally point set to world position {position} for {gameObject.name}");
+                Debug.Log($"✅ UnitTrainingQueue: Rally point set to world position {position} for {gameObject.name}");
             }
         }
 
