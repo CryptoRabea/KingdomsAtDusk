@@ -251,14 +251,15 @@ namespace RTS.Buildings
                     if (rallyFlag != null)
                     {
                         if (enableDebugLogs)
-                            Debug.Log($"🚩 BuildingSelectionManager: Found RallyPointFlag component, updating position and showing flag...");
+                            Debug.Log($"🚩 BuildingSelectionManager: Found RallyPointFlag component on {currentlySelected.gameObject.name}, updating position and showing flag...");
 
                         rallyFlag.SetRallyPointPosition(hit.point);
                         rallyFlag.ShowFlag(); // Show flag when rally point is set
                     }
                     else
                     {
-                        Debug.LogError($"❌ BuildingSelectionManager: Building {currentlySelected.gameObject.name} is MISSING RallyPointFlag component! Add RallyPointFlag component to the building prefab to see the flag visual.");
+                        if (enableDebugLogs)
+                            Debug.LogWarning($"⚠️ BuildingSelectionManager: Building {currentlySelected.gameObject.name} has no RallyPointFlag component - flag will not be shown. This is optional.");
                     }
 
                     if (enableDebugLogs)
