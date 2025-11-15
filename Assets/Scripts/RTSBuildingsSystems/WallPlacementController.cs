@@ -92,6 +92,62 @@ namespace RTS.Buildings
         private List<Vector3> placedWallPositions = new List<Vector3>();
 
         /// <summary>
+        /// Checks if a wall segment placed between (start→end) would overlap any buildings.
+        /// Uses capsule collision detection along the wall path.
+        /// </summary>
+        private bool WouldOverlapBuildings(Vector3 start, Vector3 end)
+        {
+            Vector3 direction = end - start;
+            float distance = direction.magnitude;
+
+            if (distance < 0.01f)
+                return false;
+
+            // Check along the wall path using a capsule collider
+            // Capsule radius should be slightly larger than wall width to ensure proper detection
+            float capsuleRadius = 0.5f; // Adjust based on wall width
+            Vector3 capsulePoint1 = start + Vector3.up * 0.5f;
+            Vector3 capsulePoint2 = end + Vector3.up * 0.5f;
+
+            // Check for overlapping colliders (excluding ground layer)
+            Collider[] colliders = Physics.OverlapCapsule(
+                capsulePoint1,
+                capsulePoint2,
+                capsuleRadius,
+                ~groundLayer // Exclude ground layer
+            );
+
+            foreach (var col in colliders)
+            {
+                // Ignore preview objects
+                if (col.transform.IsChildOf(transform))
+                    continue;
+
+                // Ignore terrain
+                if (col is TerrainCollider)
+                    continue;
+
+                // Check if it's a building
+                Building building = col.GetComponentInParent<Building>();
+                if (building != null)
+                {
+                    Debug.Log($"Wall would overlap building: {col.gameObject.name}");
+                    return true;
+                }
+
+                // Also check for any wall connection system (to catch walls that might not have Building component)
+                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
+                if (wallSystem != null)
+                {
+                    // This is a wall segment, which is handled by WouldOverlapExistingWall
+                    continue;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Checks if a wall segment placed between (start→end) would overlap an existing wall.
         /// Allows connecting EXACTLY at endpoints, but blocks overlapping the body.
         /// </summary>
@@ -472,9 +528,10 @@ namespace RTS.Buildings
             linePreviewRenderer.endColor = lineColor;
 
             Material previewMat = canAfford ? validPreviewMaterial : invalidPreviewMaterial;
-            bool overlaps = WouldOverlapExistingWall(firstPolePosition, secondPolePos);
+            bool overlapsWall = WouldOverlapExistingWall(firstPolePosition, secondPolePos);
+            bool overlapsBuilding = WouldOverlapBuildings(firstPolePosition, secondPolePos);
 
-            if (overlaps)
+            if (overlapsWall || overlapsBuilding)
             {
                 canAfford = false; // force preview to red
             }
@@ -774,6 +831,12 @@ namespace RTS.Buildings
                 return;
             }
 
+            if (WouldOverlapBuildings(firstPolePosition, secondPolePos))
+            {
+                Debug.LogWarning("❌ Cannot place wall: would overlap existing building.");
+                return;
+            }
+
             Quaternion baseRotation = CalculateWallRotation(firstPolePosition, secondPolePos);
             Vector3 baseEuler = baseRotation.eulerAngles;
             Vector3 prefabEulerOffset = currentWallData.buildingPrefab.transform.localEulerAngles;
@@ -797,6 +860,14 @@ namespace RTS.Buildings
                     buildingComponent.SetData(currentWallData);
                 }
 
+                // ✅ Add NavMeshObstacle for navigation blocking
+                if (newWall.GetComponent<WallNavMeshObstacle>() == null)
+                {
+                    newWall.AddComponent<WallNavMeshObstacle>();
+                }
+
+                // Track placed wall segments for overlap detection
+                placedWallSegments.Add(new PlacedWallSegment(data.position, data.length, finalRotation));
                 placedWallPositions.Add(data.position);
             }
 
@@ -832,23 +903,6 @@ namespace RTS.Buildings
             else
             {
                 ContinueWallChain(secondPolePos);
-            }
-
-            for (int i = 0; i < segmentData.Count; i++)
-            {
-                var data = segmentData[i];
-                GameObject newWall = Instantiate(currentWallData.buildingPrefab, data.position, finalRotation);
-                newWall.transform.localScale = data.scale; // Apply scale
-
-                if (newWall.TryGetComponent(out Building buildingComponent))
-                {
-                    buildingComponent.SetData(currentWallData);
-                }
-
-                // Compute the placed segment's rotation (finalRotation) and use the world-space length stored in data.length
-                placedWallSegments.Add(new PlacedWallSegment(data.position, data.length, finalRotation));
-
-                placedWallPositions.Add(data.position); // debug / gizmos
             }
         }
 
