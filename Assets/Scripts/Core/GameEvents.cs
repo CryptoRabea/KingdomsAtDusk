@@ -346,4 +346,80 @@ namespace RTS.Core.Events
             Progress = progress;
         }
     }
+
+    // ==================== POPULATION & PEASANT EVENTS ====================
+
+    public struct PopulationChangedEvent
+    {
+        public int TotalPopulation;
+        public int AvailablePeasants;
+        public int AssignedPeasants;
+        public int HousingCapacity;
+
+        public PopulationChangedEvent(int total, int available, int assigned, int housing)
+        {
+            TotalPopulation = total;
+            AvailablePeasants = available;
+            AssignedPeasants = assigned;
+            HousingCapacity = housing;
+        }
+    }
+
+    public struct PeasantAssignedEvent
+    {
+        public string WorkType; // "Building", "Training", "Resource", etc.
+        public int Amount;
+        public GameObject AssignedTo; // The building/location they're assigned to
+
+        public PeasantAssignedEvent(string workType, int amount, GameObject assignedTo)
+        {
+            WorkType = workType;
+            Amount = amount;
+            AssignedTo = assignedTo;
+        }
+    }
+
+    public struct PeasantReleasedEvent
+    {
+        public string WorkType;
+        public int Amount;
+        public GameObject ReleasedFrom;
+
+        public PeasantReleasedEvent(string workType, int amount, GameObject releasedFrom)
+        {
+            WorkType = workType;
+            Amount = amount;
+            ReleasedFrom = releasedFrom;
+        }
+    }
+
+    public struct CampfireGatheringChangedEvent
+    {
+        public GameObject Campfire;
+        public int PeasantCount;
+        public float HappinessMultiplier;
+
+        public CampfireGatheringChangedEvent(GameObject campfire, int count, float happinessMultiplier)
+        {
+            Campfire = campfire;
+            PeasantCount = count;
+            HappinessMultiplier = happinessMultiplier;
+        }
+    }
+
+    // ==================== REPUTATION EVENTS ====================
+
+    public struct ReputationChangedEvent
+    {
+        public float NewReputation;
+        public float Delta;
+        public string Reason;
+
+        public ReputationChangedEvent(float newReputation, float delta, string reason)
+        {
+            NewReputation = newReputation;
+            Delta = delta;
+            Reason = reason;
+        }
+    }
 }

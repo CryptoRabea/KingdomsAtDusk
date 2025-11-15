@@ -131,4 +131,42 @@ namespace RTS.Core.Services
         Victory
     }
 
+    /// <summary>
+    /// Interface for population and peasant management.
+    /// </summary>
+    public interface IPopulationService
+    {
+        int TotalPopulation { get; }
+        int AvailablePeasants { get; }
+        int AssignedPeasants { get; }
+        int HousingCapacity { get; }
+
+        void AddPopulation(int amount);
+        void RemovePopulation(int amount);
+        void UpdateHousingCapacity(int capacity);
+        bool TryAssignPeasants(int amount, string workType, GameObject assignedTo);
+        void ReleasePeasants(int amount, string workType, GameObject releasedFrom);
+    }
+
+    /// <summary>
+    /// Interface for reputation/fame management.
+    /// </summary>
+    public interface IReputationService
+    {
+        float CurrentReputation { get; }
+        void ModifyReputation(float amount, string reason);
+    }
+
+    /// <summary>
+    /// Interface for peasant workforce allocation (modular).
+    /// Allows different systems to request peasant workers.
+    /// </summary>
+    public interface IPeasantWorkforceService
+    {
+        bool RequestWorkers(string workType, int amount, GameObject requester);
+        void ReleaseWorkers(string workType, int amount, GameObject requester);
+        int GetAssignedWorkers(GameObject requester);
+        bool CanAssignWorkers(int amount);
+    }
+
 }

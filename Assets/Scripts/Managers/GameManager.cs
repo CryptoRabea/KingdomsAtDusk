@@ -16,6 +16,11 @@ namespace RTS.Managers
         [SerializeField] private BuildingManager buildingManager;
         [SerializeField] private ObjectPool objectPool;
 
+        [Header("Campfire System Services (Optional)")]
+        [SerializeField] private PopulationManager populationManager;
+        [SerializeField] private ReputationManager reputationManager;
+        [SerializeField] private PeasantWorkforceManager peasantWorkforceManager;
+
         [Header("Settings")]
         [SerializeField] private bool initializeOnAwake = true;
 
@@ -60,7 +65,12 @@ namespace RTS.Managers
             InitializeResourceManager();
             InitializeHappinessManager();
 
-            // 4. Building management system
+            // 4. Campfire system services (optional)
+            InitializePopulationManager();
+            InitializeReputationManager();
+            InitializePeasantWorkforceManager();
+
+            // 5. Building management system
             InitializeBuildingManager();
 
             Debug.Log("All services initialized successfully!");
@@ -98,6 +108,45 @@ namespace RTS.Managers
             }
 
             ServiceLocator.Register<IHappinessService>(happinessManager);
+        }
+
+        private void InitializePopulationManager()
+        {
+            if (populationManager == null)
+            {
+                // Population manager is optional
+                Debug.Log("PopulationManager not assigned - campfire peasant system disabled");
+                return;
+            }
+
+            ServiceLocator.Register<IPopulationService>(populationManager);
+            Debug.Log("PopulationManager registered as IPopulationService");
+        }
+
+        private void InitializeReputationManager()
+        {
+            if (reputationManager == null)
+            {
+                // Reputation manager is optional
+                Debug.Log("ReputationManager not assigned - reputation system disabled");
+                return;
+            }
+
+            ServiceLocator.Register<IReputationService>(reputationManager);
+            Debug.Log("ReputationManager registered as IReputationService");
+        }
+
+        private void InitializePeasantWorkforceManager()
+        {
+            if (peasantWorkforceManager == null)
+            {
+                // Workforce manager is optional
+                Debug.Log("PeasantWorkforceManager not assigned - worker allocation disabled");
+                return;
+            }
+
+            ServiceLocator.Register<IPeasantWorkforceService>(peasantWorkforceManager);
+            Debug.Log("PeasantWorkforceManager registered as IPeasantWorkforceService");
         }
 
         private void InitializeBuildingManager()
