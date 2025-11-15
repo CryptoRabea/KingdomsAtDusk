@@ -198,8 +198,22 @@ namespace RTS.Buildings
                     unitMovement.SetDestination(rallyPoint.position);
                     if (showDebugInfo)
                     {
-                        Debug.Log($"Unit moving to rally point at {rallyPoint.position}");
+                        Debug.Log($"✅ Unit {spawnedUnit.name} moving from spawn {spawnPoint.position} to rally point at {rallyPoint.position}");
                     }
+                }
+                else
+                {
+                    if (showDebugInfo)
+                    {
+                        Debug.LogWarning($"⚠️ Spawned unit {spawnedUnit.name} has no UnitMovement component - cannot move to rally point!");
+                    }
+                }
+            }
+            else
+            {
+                if (showDebugInfo)
+                {
+                    Debug.Log($"No rally point set for {gameObject.name}, unit will stay at spawn position");
                 }
             }
 
@@ -287,15 +301,17 @@ namespace RTS.Buildings
             if (rallyPoint == null)
             {
                 // Create a rally point if it doesn't exist
+                // DON'T parent it to the building to avoid transform issues
                 GameObject rallyObj = new GameObject("RallyPoint");
-                rallyObj.transform.SetParent(transform);
                 rallyPoint = rallyObj.transform;
             }
 
+            // Set the world position directly
             rallyPoint.position = position;
+
             if (showDebugInfo)
             {
-                Debug.Log($"Rally point set to {position}");
+                Debug.Log($"✅ Rally point set to world position {position} for {gameObject.name}");
             }
         }
 

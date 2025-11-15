@@ -62,6 +62,22 @@ namespace RTS.Buildings
             EventBus.Unsubscribe<BuildingDeselectedEvent>(OnBuildingDeselected);
         }
 
+        private void OnDestroy()
+        {
+            // Clean up flag visual when component is destroyed
+            if (flagVisual != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(flagVisual);
+                }
+                else
+                {
+                    DestroyImmediate(flagVisual);
+                }
+            }
+        }
+
         private void OnBuildingSelected(BuildingSelectedEvent evt)
         {
             if (evt.Building == gameObject)
@@ -88,6 +104,14 @@ namespace RTS.Buildings
                 isVisible = true;
                 flagVisual.SetActive(true);
                 UpdateFlagPosition();
+                Debug.Log($"✅ Showing rally point flag for {gameObject.name} at {rallyPoint.position}");
+            }
+            else
+            {
+                if (flagVisual == null)
+                    Debug.LogWarning($"⚠️ Cannot show flag for {gameObject.name}: flagVisual is null");
+                if (rallyPoint == null)
+                    Debug.LogWarning($"⚠️ Cannot show flag for {gameObject.name}: rallyPoint is null");
             }
         }
 
@@ -135,6 +159,11 @@ namespace RTS.Buildings
             {
                 rallyPoint.position = position;
                 UpdateFlagPosition();
+                Debug.Log($"✅ Updated rally point position to {position} for {gameObject.name}");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ Cannot set rally point position for {gameObject.name}: rallyPoint is null");
             }
         }
 
@@ -152,9 +181,8 @@ namespace RTS.Buildings
         /// </summary>
         private void CreateFlagVisual()
         {
-            // Create parent object
-            GameObject flagParent = new GameObject("FlagVisual");
-            flagParent.transform.SetParent(transform);
+            // Create parent object - DON'T parent to building to avoid transform issues
+            GameObject flagParent = new GameObject($"RallyFlag_{gameObject.name}");
 
             // Create pole (cylinder)
             GameObject pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -195,6 +223,7 @@ namespace RTS.Buildings
             }
 
             flagVisual = flagParent;
+            Debug.Log($"Created rally point flag visual for {gameObject.name}");
         }
 
         private void OnDrawGizmosSelected()
