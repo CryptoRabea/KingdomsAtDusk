@@ -93,7 +93,7 @@ namespace RTS.Buildings
             // If in spawn point mode, set spawn point on left click
             if (isSpawnPointMode)
             {
-                TrySetSpawnPoint(mousePosition);
+                TrySetRallyPoint(mousePosition);
                 // Auto-exit spawn point mode after setting
                 isSpawnPointMode = false;
             }
