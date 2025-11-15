@@ -24,6 +24,7 @@ namespace RTS.Units
         [Header("Drag Selection")]
         [SerializeField] private Image selectionBoxUI;
         [SerializeField] private Color selectionBoxColor = new Color(0, 1, 0, 0.2f);
+        [SerializeField] private float dragThreshold = 5f; // Minimum pixels to count as drag
 
         private List<UnitSelectable> selectedUnits = new List<UnitSelectable>();
         private Vector2 dragStartPosition;
@@ -86,7 +87,17 @@ namespace RTS.Units
             if (isDragging && positionAction != null)
             {
                 Vector2 currentPosition = positionAction.action.ReadValue<Vector2>();
-                UpdateSelectionBox(dragStartPosition, currentPosition);
+                float dragDistance = Vector2.Distance(dragStartPosition, currentPosition);
+
+                // Only show selection box if we've dragged past the threshold
+                if (dragDistance > dragThreshold)
+                {
+                    if (selectionBoxUI != null && !selectionBoxUI.gameObject.activeSelf)
+                    {
+                        selectionBoxUI.gameObject.SetActive(true);
+                    }
+                    UpdateSelectionBox(dragStartPosition, currentPosition);
+                }
             }
         }
 
@@ -94,21 +105,11 @@ namespace RTS.Units
         {
             Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
 
-            // Try single click selection first
-            if (TrySingleSelection(mousePosition))
-            {
-                isDragging = false;
-                return;
-            }
-
-            // Start drag selection
+            // Start tracking for potential drag or click
             dragStartPosition = mousePosition;
             isDragging = true;
 
-            if (selectionBoxUI != null)
-            {
-                selectionBoxUI.gameObject.SetActive(true);
-            }
+            // Don't show selection box yet - wait for drag threshold in Update
         }
 
         private void OnClickReleased(InputAction.CallbackContext context)
@@ -116,8 +117,20 @@ namespace RTS.Units
             if (isDragging)
             {
                 Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
-                PerformDragSelection(dragStartPosition, mousePosition);
-                
+                float dragDistance = Vector2.Distance(dragStartPosition, mousePosition);
+
+                // Determine if this was a drag or a single click
+                if (dragDistance > dragThreshold)
+                {
+                    // Was a drag - perform drag selection
+                    PerformDragSelection(dragStartPosition, mousePosition);
+                }
+                else
+                {
+                    // Was a click - perform single selection
+                    TrySingleSelection(mousePosition);
+                }
+
                 isDragging = false;
                 if (selectionBoxUI != null)
                 {
