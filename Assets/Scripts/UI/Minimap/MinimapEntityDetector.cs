@@ -47,8 +47,8 @@ namespace RTS.UI.Minimap
                         return minimapEntity.GetOwnership() == MinimapEntityOwnership.Enemy;
                     }
 
-                    // Fallback to tag
-                    if (entity.CompareTag("Enemy") || entity.CompareTag("Friendly") || entity.CompareTag("Neutral"))
+                    // Fallback to tag (with safe checking)
+                    if (SafeHasTag(entity, "Enemy") || SafeHasTag(entity, "Friendly") || SafeHasTag(entity, "Neutral"))
                     {
                         return IsEnemyByTag(entity);
                     }
@@ -76,10 +76,10 @@ namespace RTS.UI.Minimap
                     break;
 
                 case DetectionMethod.Tag:
-                    if (entity.CompareTag("Friendly")) return MinimapEntityOwnership.Friendly;
-                    if (entity.CompareTag("Enemy")) return MinimapEntityOwnership.Enemy;
-                    if (entity.CompareTag("Neutral")) return MinimapEntityOwnership.Neutral;
-                    if (entity.CompareTag("Ally")) return MinimapEntityOwnership.Ally;
+                    if (SafeCompareTag(entity, "Friendly")) return MinimapEntityOwnership.Friendly;
+                    if (SafeCompareTag(entity, "Enemy")) return MinimapEntityOwnership.Enemy;
+                    if (SafeCompareTag(entity, "Neutral")) return MinimapEntityOwnership.Neutral;
+                    if (SafeCompareTag(entity, "Ally")) return MinimapEntityOwnership.Ally;
                     break;
 
                 case DetectionMethod.Layer:
@@ -95,11 +95,11 @@ namespace RTS.UI.Minimap
                         return component.GetOwnership();
                     }
 
-                    // Try tag
-                    if (entity.CompareTag("Friendly")) return MinimapEntityOwnership.Friendly;
-                    if (entity.CompareTag("Enemy")) return MinimapEntityOwnership.Enemy;
-                    if (entity.CompareTag("Neutral")) return MinimapEntityOwnership.Neutral;
-                    if (entity.CompareTag("Ally")) return MinimapEntityOwnership.Ally;
+                    // Try tag (with safe checking)
+                    if (SafeCompareTag(entity, "Friendly")) return MinimapEntityOwnership.Friendly;
+                    if (SafeCompareTag(entity, "Enemy")) return MinimapEntityOwnership.Enemy;
+                    if (SafeCompareTag(entity, "Neutral")) return MinimapEntityOwnership.Neutral;
+                    if (SafeCompareTag(entity, "Ally")) return MinimapEntityOwnership.Ally;
 
                     // Fallback to layer
                     if (entity.layer == LayerMask.NameToLayer("Enemy"))
@@ -118,7 +118,7 @@ namespace RTS.UI.Minimap
 
         private static bool IsEnemyByTag(GameObject entity)
         {
-            return entity.CompareTag("Enemy");
+            return SafeCompareTag(entity, "Enemy");
         }
 
         private static bool IsEnemyByComponent(GameObject entity)
@@ -174,6 +174,29 @@ namespace RTS.UI.Minimap
                 default:
                     return Color.white;
             }
+        }
+
+        /// <summary>
+        /// Safe version of CompareTag that doesn't throw if tag is not defined.
+        /// </summary>
+        private static bool SafeCompareTag(GameObject entity, string tag)
+        {
+            try
+            {
+                return entity.CompareTag(tag);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Safe check if entity has a specific tag without throwing.
+        /// </summary>
+        private static bool SafeHasTag(GameObject entity, string tag)
+        {
+            return SafeCompareTag(entity, tag);
         }
     }
 }
