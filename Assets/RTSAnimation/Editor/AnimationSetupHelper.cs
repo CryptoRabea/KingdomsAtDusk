@@ -7,7 +7,7 @@ namespace RTS.Units.Animation
     /// Editor utility to quickly set up animation system on units.
     /// Menu: Tools/RTS/Setup Unit Animation
     /// </summary>
-    public class AnimationSetupHelper : Editor
+    public class AnimationSetupHelper : UnityEditor.Editor
     {
         [MenuItem("Tools/RTS/Setup Unit Animation")]
         static void SetupUnitAnimation()
@@ -204,7 +204,7 @@ namespace RTS.Units.Animation
     /// Shows helpful info and debugging tools.
     /// </summary>
     [CustomEditor(typeof(UnitAnimationController))]
-    public class UnitAnimationControllerEditor : Editor
+    public class UnitAnimationControllerEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
