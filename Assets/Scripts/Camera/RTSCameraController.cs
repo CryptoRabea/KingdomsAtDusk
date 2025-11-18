@@ -119,17 +119,37 @@ public class RTSCameraController : MonoBehaviour
         // Check for Q (rotate left) and E (rotate right) keys directly
         if (Keyboard.current != null)
         {
-            float rotation = 0f;
+            bool shiftHeld = Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
 
-            if (Keyboard.current.qKey.isPressed)
-                rotation -= 1f; // Rotate left (counter-clockwise)
-
-            if (Keyboard.current.eKey.isPressed)
-                rotation += 1f; // Rotate right (clockwise)
-
-            if (Mathf.Abs(rotation) > 0.01f)
+            // Snap rotation 90 degrees with Shift + Q/E
+            if (shiftHeld)
             {
-                transform.Rotate(Vector3.up, rotation * rotationSpeed * Time.deltaTime, Space.World);
+                if (Keyboard.current.qKey.wasPressedThisFrame)
+                {
+                    // Snap 90 degrees left (counter-clockwise)
+                    transform.Rotate(Vector3.up, -90f, Space.World);
+                }
+                else if (Keyboard.current.eKey.wasPressedThisFrame)
+                {
+                    // Snap 90 degrees right (clockwise)
+                    transform.Rotate(Vector3.up, 90f, Space.World);
+                }
+            }
+            else
+            {
+                // Smooth rotation without Shift
+                float rotation = 0f;
+
+                if (Keyboard.current.qKey.isPressed)
+                    rotation -= 1f; // Rotate left (counter-clockwise)
+
+                if (Keyboard.current.eKey.isPressed)
+                    rotation += 1f; // Rotate right (clockwise)
+
+                if (Mathf.Abs(rotation) > 0.01f)
+                {
+                    transform.Rotate(Vector3.up, rotation * rotationSpeed * Time.deltaTime, Space.World);
+                }
             }
 
             // Reset rotation to initial angle when Space is pressed
