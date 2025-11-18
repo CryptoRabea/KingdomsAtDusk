@@ -123,7 +123,13 @@ namespace KingdomsAtDusk.FogOfWar
             if (!visionProviders.Contains(provider))
             {
                 visionProviders.Add(provider);
-                Debug.Log($"[FogOfWarManager] Registered vision provider: {provider.GameObject.name}");
+                Debug.Log($"[FogOfWarManager] Registered vision provider: {provider.GameObject.name} (Owner: {provider.OwnerId}, Radius: {provider.VisionRadius})");
+
+                // Force an immediate vision update when a new provider is registered
+                if (isInitialized)
+                {
+                    UpdateVision();
+                }
             }
         }
 

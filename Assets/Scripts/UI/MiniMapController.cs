@@ -407,6 +407,34 @@ namespace RTS.UI
                     continue;
                 }
 
+                // Check if this is an enemy building (using MinimapEntity or layer)
+                bool isEnemy = false;
+                var minimapEntity = kvp.Key.GetComponent<RTS.UI.Minimap.MinimapEntity>();
+                if (minimapEntity != null)
+                {
+                    isEnemy = minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Enemy;
+                }
+                else
+                {
+                    isEnemy = kvp.Key.layer == LayerMask.NameToLayer("Enemy");
+                }
+
+                // For enemy buildings, only show them if they're in visible or explored fog of war areas
+                if (isEnemy && KingdomsAtDusk.FogOfWar.FogOfWarManager.Instance != null &&
+                    KingdomsAtDusk.FogOfWar.FogOfWarManager.Instance.Grid != null)
+                {
+                    var visionState = KingdomsAtDusk.FogOfWar.FogOfWarManager.Instance.GetVisionState(kvp.Key.transform.position);
+
+                    // Show enemy buildings in visible and explored areas (buildings persist even when not currently visible)
+                    bool shouldBeVisible = visionState != KingdomsAtDusk.FogOfWar.VisionState.Unexplored;
+                    kvp.Value.gameObject.SetActive(shouldBeVisible);
+                }
+                else
+                {
+                    // Friendly buildings are always visible, or fog of war is not active
+                    kvp.Value.gameObject.SetActive(true);
+                }
+
                 UpdateMarkerPosition(kvp.Value, kvp.Key.transform.position);
             }
 
@@ -496,6 +524,25 @@ namespace RTS.UI
                 {
                     toRemove.Add(kvp.Key);
                     continue;
+                }
+
+                // Check if this is an enemy unit
+                bool isEnemy = kvp.Key.layer == LayerMask.NameToLayer("Enemy");
+
+                // For enemy units, only show them if they're in visible fog of war areas
+                if (isEnemy && KingdomsAtDusk.FogOfWar.FogOfWarManager.Instance != null &&
+                    KingdomsAtDusk.FogOfWar.FogOfWarManager.Instance.Grid != null)
+                {
+                    var visionState = KingdomsAtDusk.FogOfWar.FogOfWarManager.Instance.GetVisionState(kvp.Key.transform.position);
+
+                    // Only show enemies in currently visible areas, not explored or unexplored
+                    bool shouldBeVisible = visionState == KingdomsAtDusk.FogOfWar.VisionState.Visible;
+                    kvp.Value.gameObject.SetActive(shouldBeVisible);
+                }
+                else
+                {
+                    // Friendly units are always visible, or fog of war is not active
+                    kvp.Value.gameObject.SetActive(true);
                 }
 
                 UpdateMarkerPosition(kvp.Value, kvp.Key.transform.position);
