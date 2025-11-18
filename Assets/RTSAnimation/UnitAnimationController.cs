@@ -141,12 +141,9 @@ namespace RTS.Units.Animation
             if (combat != null && combat.CurrentTarget != null && combat.IsInAttackRange)
                 return AnimationState.Attack;
 
+            // Trust IsMoving property which handles movement intent and velocity checks
             if (movement != null && movement.IsMoving)
-            {
-                float speed = movement.Velocity.magnitude;
-                if (speed > movementThreshold)
-                    return AnimationState.Walk;
-            }
+                return AnimationState.Walk;
 
             return AnimationState.Idle;
         }
