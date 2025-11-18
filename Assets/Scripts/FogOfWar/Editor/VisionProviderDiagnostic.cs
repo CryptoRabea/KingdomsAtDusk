@@ -67,7 +67,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
                 string typeInfo = "";
                 if (provider.GetComponent<RTS.Buildings.Building>() != null)
                     typeInfo = "[BUILDING]";
-                else if (provider.GetComponent<RTS.Units.UnitAIController>() != null)
+                else if (provider.GetComponent<RTS.Units.AI.UnitAIController>() != null)
                     typeInfo = "[UNIT]";
                 else
                     typeInfo = "[OTHER]";
