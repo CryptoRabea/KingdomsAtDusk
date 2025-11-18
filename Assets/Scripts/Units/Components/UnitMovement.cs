@@ -22,8 +22,9 @@ namespace RTS.Units
         private float pathUpdateTimer;
         private bool hasDestination = false;
         private bool isEnabled = true;
+        private bool hasMovementIntent = false; // Track movement intent before velocity updates
 
-        public bool IsMoving => agent != null && agent.velocity.sqrMagnitude > 0.01f;
+        public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f);
         public bool HasReachedDestination => hasDestination && !agent.pathPending && agent.remainingDistance <= stoppingDistance;
         public float Speed => moveSpeed;
         public Vector3 Velocity => agent != null ? agent.velocity : Vector3.zero;
@@ -54,6 +55,12 @@ namespace RTS.Units
         private void Update()
         {
             if (!isEnabled || agent == null) return;
+
+            // Clear movement intent when destination is reached
+            if (hasMovementIntent && HasReachedDestination)
+            {
+                hasMovementIntent = false;
+            }
 
             // Update path to moving targets periodically
             if (currentTarget != null)
@@ -89,6 +96,7 @@ namespace RTS.Units
             currentDestination = destination;
             currentTarget = null;
             hasDestination = true;
+            hasMovementIntent = true; // Signal movement intent immediately
 
             if (agent.enabled)
             {
@@ -110,6 +118,7 @@ namespace RTS.Units
 
             currentTarget = target;
             hasDestination = true;
+            hasMovementIntent = true; // Signal movement intent immediately
             pathUpdateTimer = pathUpdateInterval; // Update immediately
 
             if (agent.enabled)
@@ -129,9 +138,10 @@ namespace RTS.Units
             {
                 agent.ResetPath();
             }
-            
+
             currentTarget = null;
             hasDestination = false;
+            hasMovementIntent = false; // Clear movement intent when stopped
         }
 
         /// <summary>

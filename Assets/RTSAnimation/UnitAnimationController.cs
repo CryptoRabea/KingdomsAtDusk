@@ -141,12 +141,9 @@ namespace RTS.Units.Animation
             if (combat != null && combat.CurrentTarget != null && combat.IsInAttackRange)
                 return AnimationState.Attack;
 
+            // Trust IsMoving property which handles movement intent and velocity checks
             if (movement != null && movement.IsMoving)
-            {
-                float speed = movement.Velocity.magnitude;
-                if (speed > movementThreshold)
-                    return AnimationState.Walk;
-            }
+                return AnimationState.Walk;
 
             return AnimationState.Idle;
         }
@@ -182,15 +179,15 @@ namespace RTS.Units.Animation
 
             // Update speed parameter
             float speed = 0f;
+            bool isMoving = false;
+
             if (movement != null)
             {
                 speed = movement.Velocity.magnitude;
+                isMoving = movement.IsMoving; // Use IsMoving property which handles intent
             }
 
             animator.SetFloat(SpeedHash, speed, animationTransitionSpeed, Time.deltaTime);
-
-            // Update isMoving boolean
-            bool isMoving = speed > movementThreshold;
             animator.SetBool(IsMovingHash, isMoving);
         }
 
