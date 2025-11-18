@@ -153,6 +153,9 @@ namespace RTS.Buildings
         /// </summary>
         private bool WouldOverlapExistingWall(Vector3 start, Vector3 end)
         {
+            // ✅ Allow closing a square: if we're trying to connect back to our first pole, that's okay!
+            bool closingLoop = firstPoleSet && (Vector3.Distance(end, firstPolePosition) < 0.5f || Vector3.Distance(start, firstPolePosition) < 0.5f);
+
             // First check against walls we're currently placing (placedWallSegments)
             foreach (var seg in placedWallSegments)
             {
@@ -160,18 +163,19 @@ namespace RTS.Buildings
                 Vector3 existingEnd = seg.GetEndPosition(wallLengthAxis);
 
                 // 1. If connecting exactly to endpoints → allowed
-                if (Vector3.Distance(start, existingStart) < 0.01f ||
-                    Vector3.Distance(start, existingEnd) < 0.01f ||
-                    Vector3.Distance(end, existingStart) < 0.01f ||
-                    Vector3.Distance(end, existingEnd) < 0.01f)
+                float endpointTolerance = closingLoop ? 0.5f : 0.01f; // More lenient when closing loops
+                if (Vector3.Distance(start, existingStart) < endpointTolerance ||
+                    Vector3.Distance(start, existingEnd) < endpointTolerance ||
+                    Vector3.Distance(end, existingStart) < endpointTolerance ||
+                    Vector3.Distance(end, existingEnd) < endpointTolerance)
                 {
                     continue; // endpoint connections allowed
                 }
 
                 // 1b. If connecting exactly to midpoint → allowed
                 Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
-                if (Vector3.Distance(start, existingMid) < 0.01f ||
-                    Vector3.Distance(end, existingMid) < 0.01f)
+                if (Vector3.Distance(start, existingMid) < endpointTolerance ||
+                    Vector3.Distance(end, existingMid) < endpointTolerance)
                 {
                     continue; // midpoint connections allowed
                 }
@@ -196,6 +200,13 @@ namespace RTS.Buildings
 
             if (distance < 0.01f)
                 return false;
+
+            // ✅ When closing a loop, we don't need to check physics overlap since we already verified endpoint connections
+            if (closingLoop)
+            {
+                Debug.Log("🔒 Closing loop detected - allowing connection back to first pole");
+                return false;
+            }
 
             // Check along the wall path using capsule collider
             float capsuleRadius = 0.3f; // Slightly smaller than wall width for endpoint connections
@@ -579,19 +590,10 @@ namespace RTS.Buildings
 
         private void UpdateWallPreview(Vector3 secondPolePos)
         {
-
-            Color lineColor = isSnappedToWall ? Color.cyan : (canAfford ? validLineColor : invalidLineColor);
-            linePreviewRenderer.startColor = lineColor;
-            linePreviewRenderer.endColor = lineColor;
-
-            Material previewMat = canAfford ? validPreviewMaterial : invalidPreviewMaterial;
+            // Check for overlaps FIRST
             bool overlapsWall = WouldOverlapExistingWall(firstPolePosition, secondPolePos);
             bool overlapsBuilding = WouldOverlapBuildings(firstPolePosition, secondPolePos);
 
-            if (overlapsWall || overlapsBuilding)
-            {
-                canAfford = false; // force preview to red
-            }
             if (currentPolePreview != null)
             {
                 currentPolePreview.transform.position = secondPolePos + Vector3.up * (poleHeight / 2f);
@@ -607,16 +609,23 @@ namespace RTS.Buildings
             UpdateWallSegmentPreviews(segmentData);
             CalculateTotalCost();
 
+            // Check affordability AFTER calculating costs
             canAfford = resourceService != null && resourceService.CanAfford(totalCost);
+
+            // Determine material: show invalid (red) if overlapping OR can't afford
+            bool isInvalid = overlapsWall || overlapsBuilding || !canAfford;
+            Material previewMat = isInvalid ? invalidPreviewMaterial : validPreviewMaterial;
+
+            // Determine line color: cyan if snapped, red if invalid, green if valid
+            Color lineColor = isSnappedToWall ? Color.cyan : (isInvalid ? invalidLineColor : validLineColor);
+            linePreviewRenderer.startColor = lineColor;
+            linePreviewRenderer.endColor = lineColor;
 
             SetPreviewMaterial(currentPolePreview, previewMat);
             foreach (var preview in wallSegmentPreviews)
             {
                 SetPreviewMaterial(preview, previewMat);
             }
-
-           
-
         }
 
         /// <summary>
@@ -927,10 +936,17 @@ namespace RTS.Buildings
                     buildingComponent.SetData(currentWallData);
                 }
 
-                // ✅ Add NavMeshObstacle for navigation blocking
+                // ✅ Add NavMeshObstacle for navigation blocking (it will calculate bounds from collider before we disable it)
                 if (newWall.GetComponent<WallNavMeshObstacle>() == null)
                 {
                     newWall.AddComponent<WallNavMeshObstacle>();
+                }
+
+                // ✅ Disable colliders on placed walls - they're not needed for gameplay
+                // NavMeshObstacle has already calculated its bounds from the collider
+                foreach (var col in newWall.GetComponentsInChildren<Collider>())
+                {
+                    col.enabled = false;
                 }
 
                 // Track placed wall segments for overlap detection
