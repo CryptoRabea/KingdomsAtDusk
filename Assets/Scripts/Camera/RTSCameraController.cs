@@ -6,6 +6,7 @@ public class RTSCameraController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 15f;
+    public float sprintMultiplier = 2.5f; // Speed multiplier when sprinting
     public float dragSpeed = 0.5f;
     public float edgeScrollSpeed = 20f;
     public float panBorderThickness = 10f;
@@ -21,11 +22,13 @@ public class RTSCameraController : MonoBehaviour
 
     [Header("Rotation")]
     public float rotationSpeed = 60f; // degrees per second
+    private float initialRotation; // Store initial Y rotation for reset
 
     private Camera cam;
     private Vector2 moveInput;
     private float zoomInput;
     private float rotationInput;
+    private bool isSprinting = false;
     private bool isDragging = false;
     private Vector3 lastMousePos;
 
@@ -40,6 +43,9 @@ public class RTSCameraController : MonoBehaviour
             cam = GetComponent<Camera>();
         inputActions = new InputSystem_Actions();
 
+        // Store initial rotation
+        initialRotation = transform.eulerAngles.y;
+
         // WASD / Arrow movement
         inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
@@ -51,6 +57,10 @@ public class RTSCameraController : MonoBehaviour
         // Rotation (Q / E)
         inputActions.Player.Rotate.performed += ctx => rotationInput = ctx.ReadValue<float>();
         inputActions.Player.Rotate.canceled += ctx => rotationInput = 0f;
+
+        // Sprint (Shift)
+        inputActions.Player.Sprint.performed += ctx => isSprinting = true;
+        inputActions.Player.Sprint.canceled += ctx => isSprinting = false;
     }
 
     private void OnEnable() => inputActions.Enable();
@@ -79,9 +89,12 @@ public class RTSCameraController : MonoBehaviour
             if (mousePos.x <= panBorderThickness) dir.x -= 1;
         }
 
-        Vector3 movement = Quaternion.Euler(0, transform.eulerAngles.y, 0) * dir.normalized * moveSpeed * Time.deltaTime;
+        // Apply sprint multiplier when shift is held
+        float currentSpeed = isSprinting ? moveSpeed * sprintMultiplier : moveSpeed;
+
+        Vector3 movement = Quaternion.Euler(0, transform.eulerAngles.y, 0) * dir.normalized * currentSpeed * Time.deltaTime;
         transform.position += movement;
-       
+
         // Clamp position
         transform.position = new Vector3(
             Mathf.Clamp(transform.position.x, minPosition.x, maxPosition.x),
@@ -103,9 +116,28 @@ public class RTSCameraController : MonoBehaviour
 
     private void HandleRotation()
     {
-        if (Mathf.Abs(rotationInput) > 0.01f)
+        // Check for Q (rotate left) and E (rotate right) keys directly
+        if (Keyboard.current != null)
         {
-            transform.Rotate(Vector3.up, rotationInput * rotationSpeed * Time.deltaTime, Space.World);
+            float rotation = 0f;
+
+            if (Keyboard.current.qKey.isPressed)
+                rotation -= 1f; // Rotate left (counter-clockwise)
+
+            if (Keyboard.current.eKey.isPressed)
+                rotation += 1f; // Rotate right (clockwise)
+
+            if (Mathf.Abs(rotation) > 0.01f)
+            {
+                transform.Rotate(Vector3.up, rotation * rotationSpeed * Time.deltaTime, Space.World);
+            }
+
+            // Reset rotation to initial angle when Space is pressed
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                Vector3 currentEuler = transform.eulerAngles;
+                transform.eulerAngles = new Vector3(currentEuler.x, initialRotation, currentEuler.z);
+            }
         }
     }
 
