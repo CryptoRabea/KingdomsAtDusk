@@ -27,10 +27,15 @@ namespace RTS.Buildings
         [Header("Placement Settings")]
         [SerializeField] private float gridSize = 1f;
         [SerializeField] private bool useGridSnapping = true;
+        [SerializeField] private LayerMask wallLayer; // Layer for walls to exclude from overlap check
 
         [Header("Pole Settings")]
         [SerializeField] private GameObject polePrefab; // Pole visual prefab
         [SerializeField] private float poleHeight = 2f;
+
+        [Header("Wall Segment Settings")]
+        [SerializeField] private bool autoCalculateSegmentSize = true;
+        private float wallSegmentSize = 1f; // Calculated from mesh bounds
 
         // State
         private bool isPlacingWall = false;
@@ -124,10 +129,16 @@ namespace RTS.Buildings
             isPlacingWall = true;
             firstPoleSet = false;
 
+            // Calculate wall segment size from mesh bounds
+            if (autoCalculateSegmentSize)
+            {
+                CalculateWallSegmentSize();
+            }
+
             // Create current pole preview
             CreatePolePreview();
 
-            Debug.Log($"Started placing walls: {wallData.buildingName}");
+            Debug.Log($"Started placing walls: {wallData.buildingName} (segment size: {wallSegmentSize})");
         }
 
         /// <summary>
@@ -186,6 +197,44 @@ namespace RTS.Buildings
         #endregion
 
         #region Placement Logic
+
+        private void CalculateWallSegmentSize()
+        {
+            if (currentWallData == null || currentWallData.buildingPrefab == null)
+            {
+                wallSegmentSize = gridSize;
+                return;
+            }
+
+            // Get the mesh bounds to determine the actual size of the wall segment
+            Renderer[] renderers = currentWallData.buildingPrefab.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+
+                // Use the larger of X or Z axis as segment size (walls extend along one axis)
+                wallSegmentSize = Mathf.Max(bounds.size.x, bounds.size.z);
+
+                // Round to nearest grid size
+                wallSegmentSize = Mathf.Round(wallSegmentSize / gridSize) * gridSize;
+
+                // Ensure minimum size
+                if (wallSegmentSize < gridSize)
+                    wallSegmentSize = gridSize;
+
+                Debug.Log($"Wall segment size calculated: {wallSegmentSize} (from bounds: {bounds.size})");
+            }
+            else
+            {
+                // Fallback to grid size
+                wallSegmentSize = gridSize;
+                Debug.LogWarning("No renderers found on wall prefab, using default grid size");
+            }
+        }
 
         private void CreatePolePreview()
         {
@@ -281,29 +330,32 @@ namespace RTS.Buildings
             // Determine if wall is horizontal or vertical based on dominant axis
             bool isHorizontal = Mathf.Abs(direction.x) > Mathf.Abs(direction.z);
 
+            // Use wallSegmentSize for proper spacing
+            float segmentSize = wallSegmentSize;
+
             if (isHorizontal)
             {
                 // Horizontal wall (along X axis)
-                int startX = Mathf.RoundToInt(start.x / gridSize);
-                int endX = Mathf.RoundToInt(end.x / gridSize);
+                int startX = Mathf.RoundToInt(start.x / segmentSize);
+                int endX = Mathf.RoundToInt(end.x / segmentSize);
                 int step = startX < endX ? 1 : -1;
 
-                for (int x = startX; x != endX + step; x += step)
+                for (int x = startX; x != endX; x += step)
                 {
-                    Vector3 segmentPos = new Vector3(x * gridSize, start.y, start.z);
+                    Vector3 segmentPos = new Vector3(x * segmentSize, start.y, start.z);
                     segments.Add(segmentPos);
                 }
             }
             else
             {
                 // Vertical wall (along Z axis)
-                int startZ = Mathf.RoundToInt(start.z / gridSize);
-                int endZ = Mathf.RoundToInt(end.z / gridSize);
+                int startZ = Mathf.RoundToInt(start.z / segmentSize);
+                int endZ = Mathf.RoundToInt(end.z / segmentSize);
                 int step = startZ < endZ ? 1 : -1;
 
-                for (int z = startZ; z != endZ + step; z += step)
+                for (int z = startZ; z != endZ; z += step)
                 {
-                    Vector3 segmentPos = new Vector3(start.x, start.y, z * gridSize);
+                    Vector3 segmentPos = new Vector3(start.x, start.y, z * segmentSize);
                     segments.Add(segmentPos);
                 }
             }
@@ -492,6 +544,28 @@ namespace RTS.Buildings
                 return;
             }
 
+            // Calculate wall segments
+            List<Vector3> segmentPositions = CalculateWallSegments(firstPolePosition, SnapToGrid(GetMouseWorldPosition()));
+
+            // Validate all positions before spending resources
+            List<GameObject> placedWalls = new List<GameObject>();
+            foreach (var position in segmentPositions)
+            {
+                if (!IsValidWallPosition(position, placedWalls))
+                {
+                    Debug.LogWarning($"Cannot place wall at {position} - position is blocked!");
+
+                    // Clean up any walls we already placed
+                    foreach (var wall in placedWalls)
+                    {
+                        if (wall != null)
+                            Destroy(wall);
+                    }
+
+                    return;
+                }
+            }
+
             // Spend resources
             bool success = resourceService.SpendResources(totalCost);
             if (!success)
@@ -499,9 +573,6 @@ namespace RTS.Buildings
                 Debug.LogError("Failed to spend resources!");
                 return;
             }
-
-            // Calculate wall segments
-            List<Vector3> segmentPositions = CalculateWallSegments(firstPolePosition, SnapToGrid(GetMouseWorldPosition()));
 
             // Place all wall segments
             foreach (var position in segmentPositions)
@@ -514,6 +585,8 @@ namespace RTS.Buildings
                 {
                     buildingComponent.SetData(currentWallData);
                 }
+
+                placedWalls.Add(newWall);
 
                 // Publish placement event for each segment
                 EventBus.Publish(new BuildingPlacedEvent(newWall, position));
@@ -532,6 +605,83 @@ namespace RTS.Buildings
 
             // Reset for next wall placement
             ResetToFirstPole();
+        }
+
+        /// <summary>
+        /// Check if a wall can be placed at the given position.
+        /// Excludes other walls from the overlap check.
+        /// </summary>
+        private bool IsValidWallPosition(Vector3 position, List<GameObject> existingWalls)
+        {
+            if (currentWallData == null || currentWallData.buildingPrefab == null)
+                return false;
+
+            // Get bounds from wall prefab
+            Bounds bounds = GetWallBounds(currentWallData.buildingPrefab);
+            bounds.center = position + (bounds.center - currentWallData.buildingPrefab.transform.position);
+
+            // Check for overlapping objects (excluding ground and walls)
+            Collider[] colliders = Physics.OverlapBox(
+                bounds.center,
+                bounds.extents,
+                Quaternion.identity,
+                ~(groundLayer | wallLayer)
+            );
+
+            foreach (var col in colliders)
+            {
+                // Skip if it's one of the walls we just placed
+                bool isExistingWall = false;
+                foreach (var wall in existingWalls)
+                {
+                    if (wall != null && (col.gameObject == wall || col.transform.IsChildOf(wall.transform)))
+                    {
+                        isExistingWall = true;
+                        break;
+                    }
+                }
+
+                if (isExistingWall)
+                    continue;
+
+                // Skip terrain colliders
+                if (col is TerrainCollider)
+                    continue;
+
+                // Found a blocking object
+                Debug.Log($"Wall position blocked by: {col.gameObject.name} at {position}");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Get the bounds of a wall prefab.
+        /// </summary>
+        private Bounds GetWallBounds(GameObject wallPrefab)
+        {
+            // Try to get bounds from collider
+            Collider col = wallPrefab.GetComponent<Collider>();
+            if (col != null)
+            {
+                return col.bounds;
+            }
+
+            // Fallback: Use renderer bounds
+            Renderer[] renderers = wallPrefab.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                for (int i = 1; i < renderers.Length; i++)
+                {
+                    bounds.Encapsulate(renderers[i].bounds);
+                }
+                return bounds;
+            }
+
+            // Last resort: Use transform scale
+            return new Bounds(wallPrefab.transform.position, wallPrefab.transform.localScale);
         }
 
         #endregion
@@ -557,8 +707,10 @@ namespace RTS.Buildings
         {
             if (!useGridSnapping) return position;
 
-            position.x = Mathf.Round(position.x / gridSize) * gridSize;
-            position.z = Mathf.Round(position.z / gridSize) * gridSize;
+            // Snap to wall segment size for proper alignment
+            float snapSize = wallSegmentSize > 0 ? wallSegmentSize : gridSize;
+            position.x = Mathf.Round(position.x / snapSize) * snapSize;
+            position.z = Mathf.Round(position.z / snapSize) * snapSize;
             return position;
         }
 
