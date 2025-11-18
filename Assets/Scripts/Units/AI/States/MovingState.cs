@@ -7,6 +7,10 @@ namespace RTS.Units.AI
         private float pathUpdateTimer;
         private const float PATH_UPDATE_INTERVAL = 0.5f;
 
+        // Chase tracking
+        private float outOfRangeTimer = 0f;
+        private bool targetWasInRangeOnce = false;
+
         public MovingState(UnitAIController aiController) : base(aiController) { }
 
         public override UnitStateType GetStateType() => UnitStateType.Moving;
@@ -14,6 +18,8 @@ namespace RTS.Units.AI
         public override void OnEnter()
         {
             pathUpdateTimer = 0f;
+            outOfRangeTimer = 0f;
+            targetWasInRangeOnce = false;
         }
 
         public override void OnUpdate()
@@ -22,7 +28,18 @@ namespace RTS.Units.AI
 
             if (target == null)
             {
-                controller.ChangeState(new IdleState(controller));
+                // Lost target, return to origin if configured
+                if (controller.Config != null &&
+                    controller.Config.returnToOriginAfterAggro &&
+                    controller.AggroOriginPosition.HasValue)
+                {
+                    controller.ClearTarget();
+                    controller.ChangeState(new ReturningToOriginState(controller));
+                }
+                else
+                {
+                    controller.ChangeState(new IdleState(controller));
+                }
                 return;
             }
 
@@ -30,6 +47,60 @@ namespace RTS.Units.AI
             {
                 controller.ChangeState(new RetreatState(controller));
                 return;
+            }
+
+            // Check if exceeded max chase distance from origin
+            if (controller.HasExceededChaseDistance())
+            {
+                // Too far from origin, abandon chase
+                if (controller.Config != null && controller.Config.returnToOriginAfterAggro)
+                {
+                    controller.ClearTarget();
+                    controller.ChangeState(new ReturningToOriginState(controller));
+                }
+                else
+                {
+                    controller.ClearTarget();
+                    controller.ChangeState(new IdleState(controller));
+                }
+                return;
+            }
+
+            // Check if target is in detection range
+            bool targetInDetectionRange = false;
+            if (controller.Config != null)
+            {
+                float distanceToTarget = Vector3.Distance(controller.transform.position, target.position);
+                targetInDetectionRange = distanceToTarget <= controller.Config.detectionRange;
+
+                // Track if target was ever in range
+                if (targetInDetectionRange)
+                {
+                    targetWasInRangeOnce = true;
+                    outOfRangeTimer = 0f;
+                }
+                else if (targetWasInRangeOnce)
+                {
+                    // Target went out of range after being in range
+                    outOfRangeTimer += Time.deltaTime;
+
+                    // Check if chase timeout exceeded
+                    if (outOfRangeTimer >= controller.Config.chaseTimeout)
+                    {
+                        // Stop chasing, return to origin
+                        if (controller.Config.returnToOriginAfterAggro && controller.AggroOriginPosition.HasValue)
+                        {
+                            controller.ClearTarget();
+                            controller.ChangeState(new ReturningToOriginState(controller));
+                        }
+                        else
+                        {
+                            controller.ClearTarget();
+                            controller.ChangeState(new IdleState(controller));
+                        }
+                        return;
+                    }
+                }
             }
 
             pathUpdateTimer += Time.deltaTime;
@@ -48,6 +119,8 @@ namespace RTS.Units.AI
         public override void OnExit()
         {
             pathUpdateTimer = 0f;
+            outOfRangeTimer = 0f;
+            targetWasInRangeOnce = false;
         }
     }
 }
