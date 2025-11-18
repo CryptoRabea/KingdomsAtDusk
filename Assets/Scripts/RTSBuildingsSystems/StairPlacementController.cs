@@ -104,17 +104,22 @@ namespace RTS.Buildings
 
         private void CreateStairPreview()
         {
+            // Instantiate as INACTIVE to prevent VisionProvider.OnEnable() from running
             stairPreview = Instantiate(stairPrefab);
+            stairPreview.SetActive(false);
+
+            // Destroy VisionProvider on preview to prevent fog of war reveal
+            var visionProvider = stairPreview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
+            if (visionProvider != null)
+                Destroy(visionProvider);
 
             // Disable components for preview
             var stairComponent = stairPreview.GetComponent<WallStairs>();
             if (stairComponent != null)
                 stairComponent.enabled = false;
 
-            // Disable VisionProvider on preview to prevent fog of war reveal at wrong position
-            var visionProvider = stairPreview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
-            if (visionProvider != null)
-                visionProvider.enabled = false;
+            // Reactivate preview now that components are cleaned up
+            stairPreview.SetActive(true);
 
             foreach (var collider in stairPreview.GetComponentsInChildren<Collider>())
                 collider.enabled = false;
