@@ -12,7 +12,7 @@ namespace KingdomsAtDusk.FogOfWar
         [Header("Settings")]
         [SerializeField] private bool isPlayerOwned = false;
         [SerializeField] private float updateInterval = 0.2f;
-        [SerializeField] private bool hideInExplored = true; // Hide in explored (dark) areas
+        [SerializeField] private bool hideInExplored = true; // Hide in explored (dark) areas - only show in currently visible areas
 
         [Header("Visibility Control")]
         [SerializeField] private List<Renderer> renderersToControl = new List<Renderer>();
@@ -55,7 +55,16 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void UpdateVisibility()
         {
-            if (FogOfWarManager.Instance == null) return;
+            // If fog of war isn't active, show everything (don't hide units)
+            if (FogOfWarManager.Instance == null || FogOfWarManager.Instance.Grid == null)
+            {
+                if (!currentlyVisible)
+                {
+                    SetVisible(true);
+                    currentlyVisible = true;
+                }
+                return;
+            }
 
             VisionState state = FogOfWarManager.Instance.GetVisionState(cachedTransform.position);
 

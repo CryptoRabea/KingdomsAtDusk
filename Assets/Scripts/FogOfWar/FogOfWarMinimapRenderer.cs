@@ -54,10 +54,11 @@ namespace KingdomsAtDusk.FogOfWar
 
             texturePixels = new Color[textureSize * textureSize];
 
-            // Initialize all pixels as unexplored (black)
+            // Initialize all pixels as unexplored (slightly less opaque so minimap is still somewhat usable)
+            Color initialColor = new Color(0, 0, 0, 0.85f);
             for (int i = 0; i < texturePixels.Length; i++)
             {
-                texturePixels[i] = manager.Config.unexploredColor;
+                texturePixels[i] = initialColor;
             }
 
             fogTexture.SetPixels(texturePixels);
@@ -78,7 +79,21 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void UpdateMinimapTexture()
         {
-            if (manager == null || manager.Grid == null) return;
+            if (manager == null || manager.Grid == null)
+            {
+                // If fog of war isn't working, make the overlay fully transparent so the minimap is usable
+                if (fogOverlay != null && fogOverlay.color.a > 0.1f)
+                {
+                    fogOverlay.color = new Color(1, 1, 1, 0f);
+                }
+                return;
+            }
+
+            // Ensure overlay is fully opaque when fog is active
+            if (fogOverlay != null && fogOverlay.color.a < 0.9f)
+            {
+                fogOverlay.color = new Color(1, 1, 1, 1f);
+            }
 
             // Map fog of war grid to minimap texture
             float scaleX = (float)textureSize / manager.Grid.Width;
@@ -102,16 +117,16 @@ namespace KingdomsAtDusk.FogOfWar
                     switch (state)
                     {
                         case VisionState.Unexplored:
-                            targetColor = new Color(0, 0, 0, 1f); // Black
+                            targetColor = new Color(0, 0, 0, 0.85f); // Mostly black but not completely opaque
                             break;
                         case VisionState.Explored:
-                            targetColor = new Color(0, 0, 0, 0.5f); // Semi-transparent
+                            targetColor = new Color(0, 0, 0, 0.4f); // Semi-transparent
                             break;
                         case VisionState.Visible:
                             targetColor = new Color(0, 0, 0, 0f); // Fully transparent
                             break;
                         default:
-                            targetColor = Color.black;
+                            targetColor = new Color(0, 0, 0, 0.85f);
                             break;
                     }
 
