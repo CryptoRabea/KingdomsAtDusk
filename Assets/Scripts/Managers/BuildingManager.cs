@@ -214,18 +214,27 @@ namespace RTS.Managers
         {
             if (currentBuildingData == null || currentBuildingData.buildingPrefab == null) return;
 
-            // Instantiate preview from the prefab in the data
+            // Instantiate preview as INACTIVE to prevent OnEnable() from running
+            // This prevents VisionProvider from registering before we can disable it
             previewBuilding = Instantiate(currentBuildingData.buildingPrefab);
+            previewBuilding.SetActive(false);
+
+            // Destroy VisionProvider on preview to prevent fog of war reveal at wrong position
+            // We destroy instead of disable because OnEnable() runs before we can disable it
+            var visionProvider = previewBuilding.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
+            if (visionProvider != null)
+            {
+                Destroy(visionProvider);
+                Debug.Log($"[BuildingManager] Destroyed VisionProvider on preview: {previewBuilding.name}");
+            }
 
             // Disable scripts on preview
             var building = previewBuilding.GetComponent<Building>();
             if (building != null)
                 building.enabled = false;
 
-            // Disable VisionProvider on preview to prevent fog of war reveal at wrong position
-            var visionProvider = previewBuilding.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
-            if (visionProvider != null)
-                visionProvider.enabled = false;
+            // Reactivate preview now that components are cleaned up
+            previewBuilding.SetActive(true);
 
             // Store original materials
             var renderers = previewBuilding.GetComponentsInChildren<Renderer>();
