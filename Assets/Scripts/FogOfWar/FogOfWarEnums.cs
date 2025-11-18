@@ -42,6 +42,10 @@ namespace KingdomsAtDusk.FogOfWar
         [Tooltip("Color for explored but not visible areas")]
         public Color exploredColor = new Color(0f, 0f, 0f, 0.6f);
 
+        [Tooltip("Color for  currently visible areas")]
+        public Color visibleColor = new Color(0f, 0f, 0f, 0f);
+
+
         [Tooltip("Fade speed when transitioning between states")]
         public float fadeSpeed = 2f;
 

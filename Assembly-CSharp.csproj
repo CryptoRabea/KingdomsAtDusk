@@ -89,7 +89,6 @@
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsPlacement.cs" />
-    <Compile Include="Assets\Scripts\UI\MiniMapController.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsProgressController.cs" />

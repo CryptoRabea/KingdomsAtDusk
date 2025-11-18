@@ -55,7 +55,7 @@ namespace KingdomsAtDusk.FogOfWar
             texturePixels = new Color[textureSize * textureSize];
 
             // Initialize all pixels as unexplored (slightly less opaque so minimap is still somewhat usable)
-            Color initialColor = new Color(0, 0, 0, 0.85f);
+            Color initialColor = new Color(0, 0, 0, 1f);
             for (int i = 0; i < texturePixels.Length; i++)
             {
                 texturePixels[i] = initialColor;
@@ -117,30 +117,34 @@ namespace KingdomsAtDusk.FogOfWar
                     switch (state)
                     {
                         case VisionState.Unexplored:
-                            targetColor = new Color(0, 0, 0, 0.85f); // Mostly black but not completely opaque
+                            targetColor = manager.Config.unexploredColor;
                             break;
                         case VisionState.Explored:
-                            targetColor = new Color(0, 0, 0, 0.4f); // Semi-transparent
+                            targetColor = manager.Config.exploredColor;
                             break;
                         case VisionState.Visible:
-                            targetColor = new Color(0, 0, 0, 0f); // Fully transparent
+                            targetColor = manager.Config.visibleColor;
                             break;
                         default:
-                            targetColor = new Color(0, 0, 0, 0.85f);
+                            targetColor = new Color(0, 0, 0, 1f);
                             break;
                     }
 
                     int pixelIndex = ty * textureSize + tx;
 
-                    if (texturePixels[pixelIndex] != targetColor)
+                    Color currentColor = texturePixels[pixelIndex];
+                    Color newColor = Color.Lerp(
+                        currentColor,
+                        targetColor,
+                        Time.deltaTime * manager.Config.fadeSpeed * 2f
+                    );
+
+                    if (currentColor != newColor)
                     {
-                        texturePixels[pixelIndex] = Color.Lerp(
-                            texturePixels[pixelIndex],
-                            targetColor,
-                            Time.deltaTime * manager.Config.fadeSpeed * 2f
-                        );
+                        texturePixels[pixelIndex] = newColor;
                         needsApply = true;
                     }
+
                 }
             }
 

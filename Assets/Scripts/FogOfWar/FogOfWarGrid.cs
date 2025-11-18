@@ -165,7 +165,10 @@ namespace KingdomsAtDusk.FogOfWar
 
                     // Check if cell is within circular radius
                     Vector3 cellWorldPos = GridToWorld(cell);
-                    float distSq = (cellWorldPos - worldCenter).sqrMagnitude;
+                    Vector2 cellXZ = new Vector2(cellWorldPos.x, cellWorldPos.z);
+                    Vector2 centerXZ = new Vector2(worldCenter.x, worldCenter.z);
+                    float distSq = (cellXZ - centerXZ).sqrMagnitude;
+
 
                     if (distSq <= radiusSq)
                     {

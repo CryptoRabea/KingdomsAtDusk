@@ -43,6 +43,7 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void Start()
         {
+
             Initialize();
         }
 
