@@ -25,28 +25,39 @@ A professional fog of war system for Kingdoms at Dusk that provides real-time vi
 5. Click "Setup Minimap Fog of War"
 6. Done! The fog of war system is now active
 
-### Method 2: Manual Setup
+### Method 2: Manual Setup (Recommended for New Projects)
 
-#### Step 1: Create Fog of War Manager
+#### Step 1: Setup Camera Dimming Effect
+
+1. Select your main camera in the scene
+2. Add the `FogOfWarCameraEffect` component
+3. Create a new material:
+   - Right-click in Project window → Create → Material
+   - Name it "FogOfWarCameraEffectMaterial"
+   - Set shader to `KingdomsAtDusk/FogOfWarCameraEffect`
+4. Assign this material to the `FogOfWarCameraEffect` component
+5. Adjust `Dim Strength` slider (0.7 is a good default)
+
+#### Step 2: Create Fog of War Manager
 
 1. Create an empty GameObject in your scene named "FogOfWarManager"
 2. Add the `FogOfWarManager` component
-3. Create child objects for:
-   - **FogRenderer**: Add `FogOfWarRenderer`, `MeshFilter`, and `MeshRenderer`
+3. Create a child object for minimap (optional):
    - **MinimapFogRenderer**: Add `FogOfWarMinimapRenderer`
-4. Assign these references to the FogOfWarManager
-5. Create a material using the `KingdomsAtDusk/FogOfWar` shader and assign it to FogRenderer
+4. Assign the minimap renderer reference to the FogOfWarManager
 
-#### Step 2: Configure Settings
+**Note:** The legacy `FogOfWarRenderer` (mesh-based) is no longer recommended. Use `FogOfWarCameraEffect` instead for better camera compatibility.
+
+#### Step 3: Configure Settings
 
 In the FogOfWarManager component, configure:
 - **Cell Size**: Size of each grid cell (default: 2 units)
 - **World Bounds**: The playable area bounds
 - **Vision Settings**: Default vision radii
-- **Visual Settings**: Colors for unexplored/explored areas
+- **Visual Settings**: Colors for unexplored/explored areas (not used by camera effect)
 - **Performance**: Update intervals and optimization settings
 
-#### Step 3: Add Vision Providers
+#### Step 4: Add Vision Providers
 
 Add the `VisionProvider` component to:
 - All units (friendly and enemy)
@@ -57,7 +68,7 @@ The component will automatically:
 - Register with the FogOfWarManager
 - Determine ownership from MinimapEntity
 
-#### Step 4: Add Visibility Control
+#### Step 5: Add Visibility Control
 
 Add the `FogOfWarEntityVisibility` component to:
 - Enemy units (to hide them in fog)
@@ -65,14 +76,14 @@ Add the `FogOfWarEntityVisibility` component to:
 
 Set `isPlayerOwned` to false for enemies.
 
-#### Step 5: Setup Minimap Fog
+#### Step 6: Setup Minimap Fog (Optional)
 
 1. Find your minimap UI element
 2. Add a child RawImage named "FogOverlay"
 3. Stretch it to fill the minimap (anchor to edges)
 4. Assign this RawImage to the `FogOfWarMinimapRenderer` component
 
-#### Step 6: Add Auto-Integrator (Optional but Recommended)
+#### Step 7: Add Auto-Integrator (Optional but Recommended)
 
 Add the `FogOfWarAutoIntegrator` component to the FogOfWarManager GameObject to automatically add vision components to newly spawned units and buildings.
 
@@ -135,12 +146,38 @@ Controls entity visibility based on fog state.
 
 ### FogOfWarRenderer
 
-Renders fog overlay on the game view using a mesh.
+Renders fog overlay on the game view using a mesh (legacy approach).
 
 **Configuration:**
 - `fogMaterial`: Material with FogOfWar shader
 - `fogHeight`: Height of fog plane
 - `chunksPerUpdate`: Performance tuning
+
+**Note:** For better camera dimming that works with camera rotation and movement, use `FogOfWarCameraEffect` instead.
+
+### FogOfWarCameraEffect (Recommended)
+
+Camera-based post-processing effect that dims non-visible areas. Attaches directly to the camera and uses depth-based world position reconstruction.
+
+**Configuration:**
+- `fogManager`: Reference to FogOfWarManager (auto-detected if null)
+- `fogEffectMaterial`: Material using FogOfWarCameraEffect shader
+- `enableEffect`: Enable/disable the dimming effect
+- `dimStrength`: Strength of dimming (0-1, default: 0.7)
+
+**Advantages over FogOfWarRenderer:**
+- Properly follows camera rotation and movement
+- Works with any camera angle (not just top-down)
+- Uses screen-space rendering for consistent coverage
+- Depth-based world position reconstruction
+- Better performance for dynamic cameras
+
+**Setup:**
+1. Add `FogOfWarCameraEffect` component to your main camera
+2. Create a material using the `KingdomsAtDusk/FogOfWarCameraEffect` shader
+3. Assign the material to the component
+4. The fog manager will be auto-detected
+5. Adjust `dimStrength` to control how dark unexplored areas appear
 
 ### FogOfWarMinimapRenderer
 
@@ -360,7 +397,8 @@ The fog of war uses a custom shader: `KingdomsAtDusk/FogOfWar`
 Assets/Scripts/FogOfWar/
 ├── FogOfWarManager.cs           # Main manager
 ├── FogOfWarGrid.cs              # Grid tracking system
-├── FogOfWarRenderer.cs          # Game view renderer
+├── FogOfWarRenderer.cs          # Game view renderer (legacy mesh-based)
+├── FogOfWarCameraEffect.cs      # Camera effect renderer (recommended)
 ├── FogOfWarMinimapRenderer.cs   # Minimap renderer
 ├── FogOfWarEnums.cs             # Enums and config
 ├── IVisionProvider.cs           # Vision provider interface
@@ -372,7 +410,8 @@ Assets/Scripts/FogOfWar/
 └── README.md                    # This file
 
 Assets/Shaders/
-└── FogOfWar.shader              # Fog of war shader
+├── FogOfWar.shader              # Fog of war shader (legacy)
+└── FogOfWarCameraEffect.shader  # Camera effect shader (recommended)
 ```
 
 ## Future Enhancements
