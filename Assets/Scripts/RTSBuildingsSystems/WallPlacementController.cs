@@ -48,6 +48,10 @@ namespace RTS.Buildings
         [SerializeField] private float minScaleFactor = 0.3f;
         [Tooltip("Use mesh bounds for automatic wall sizing")]
         [SerializeField] private bool useAutoMeshSize = true;
+        [Tooltip("Manual wall length override (only used if useAutoMeshSize is false)")]
+        [SerializeField] private float manualWallLength = 1f;
+        [Tooltip("Ignore prefab scale when detecting mesh size (useful if prefab is pre-scaled)")]
+        [SerializeField] private bool ignorePrefabScale = false;
         [Tooltip("Which axis represents the wall's length (the direction walls connect)")]
         [SerializeField] private WallLengthAxis wallLengthAxis = WallLengthAxis.X;
 
@@ -461,11 +465,16 @@ namespace RTS.Buildings
             isPlacingWall = true;
             firstPoleSet = false;
 
-            // ✅ Auto-detect wall mesh length
+            // ✅ Auto-detect or use manual wall mesh length
             if (useAutoMeshSize)
             {
                 wallMeshLength = DetectWallMeshLength(wallData.buildingPrefab);
                 Debug.Log($"Auto-detected wall mesh length: {wallMeshLength}");
+            }
+            else
+            {
+                wallMeshLength = manualWallLength;
+                Debug.Log($"Using manual wall mesh length: {wallMeshLength}");
             }
 
             placedWallPositions.Clear();
@@ -553,7 +562,8 @@ namespace RTS.Buildings
                         break;
                 }
 
-                float length = boundsSize * meshScale * prefabScale;
+                // Option to ignore prefab scale (useful if prefab is pre-scaled but you want base mesh sizing)
+                float length = ignorePrefabScale ? (boundsSize * meshScale) : (boundsSize * meshScale * prefabScale);
                 return Mathf.Max(length, 0.1f); // Minimum 0.1 to avoid issues
             }
 
@@ -564,14 +574,33 @@ namespace RTS.Buildings
                 Bounds bounds = collider.bounds;
                 float size = wallLengthAxis == WallLengthAxis.X ? bounds.size.x :
                             (wallLengthAxis == WallLengthAxis.Y ? bounds.size.y : bounds.size.z);
-                return Mathf.Max(size, 0.1f);
+
+                // Collider bounds are in world space, already includes prefab scale
+                if (ignorePrefabScale)
+                {
+                    // Divide by prefab scale to get base size
+                    float prefabScale = wallLengthAxis == WallLengthAxis.X ? wallPrefab.transform.localScale.x :
+                                      (wallLengthAxis == WallLengthAxis.Y ? wallPrefab.transform.localScale.y : wallPrefab.transform.localScale.z);
+                    return Mathf.Max(size / prefabScale, 0.1f);
+                }
+                else
+                {
+                    return Mathf.Max(size, 0.1f);
+                }
             }
 
-            // Last resort: use scale
-            Debug.LogWarning($"Could not detect wall mesh length, using transform scale {wallLengthAxis}");
-            float scaleValue = wallLengthAxis == WallLengthAxis.X ? wallPrefab.transform.localScale.x :
-                              (wallLengthAxis == WallLengthAxis.Y ? wallPrefab.transform.localScale.y : wallPrefab.transform.localScale.z);
-            return Mathf.Max(scaleValue, 1f);
+            // Last resort: use scale or default
+            Debug.LogWarning($"Could not detect wall mesh length, using fallback");
+            if (ignorePrefabScale)
+            {
+                return 1f; // Base unit
+            }
+            else
+            {
+                float scaleValue = wallLengthAxis == WallLengthAxis.X ? wallPrefab.transform.localScale.x :
+                                  (wallLengthAxis == WallLengthAxis.Y ? wallPrefab.transform.localScale.y : wallPrefab.transform.localScale.z);
+                return Mathf.Max(scaleValue, 1f);
+            }
         }
 
         #endregion
