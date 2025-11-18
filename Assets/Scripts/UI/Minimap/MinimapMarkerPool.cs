@@ -134,8 +134,8 @@ namespace RTS.UI.Minimap
             }
 
             rect.sizeDelta = new Vector2(markerSize, markerSize);
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.zero;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
 
             markerObj.SetActive(false);
