@@ -375,6 +375,10 @@ namespace RTS.UI
             RectTransform markerRect = marker.GetComponent<RectTransform>();
             markerRect.SetParent(buildingMarkersContainer, false);
 
+            // Set anchors to center to match positioning formula
+            markerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            markerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            markerRect.pivot = new Vector2(0.5f, 0.5f);
             markerRect.sizeDelta = new Vector2(buildingMarkerSize, buildingMarkerSize);
 
             buildingMarkers[building] = markerRect;
@@ -494,6 +498,10 @@ namespace RTS.UI
             RectTransform markerRect = marker.GetComponent<RectTransform>();
             markerRect.SetParent(unitMarkersContainer, false);
 
+            // Set anchors to center to match positioning formula
+            markerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            markerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            markerRect.pivot = new Vector2(0.5f, 0.5f);
             markerRect.sizeDelta = new Vector2(unitMarkerSize, unitMarkerSize);
 
             unitMarkers[unit] = markerRect;
