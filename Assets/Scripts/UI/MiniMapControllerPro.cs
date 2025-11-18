@@ -98,6 +98,13 @@ namespace RTS.UI
             InitializeMarkerManagers();
         }
 
+        private void Start()
+        {
+            // Register existing units and buildings in the scene
+            RegisterExistingUnits();
+            RegisterExistingBuildings();
+        }
+
         private void CreateContainersIfNeeded()
         {
             if (buildingMarkersContainer == null)
@@ -153,6 +160,52 @@ namespace RTS.UI
 
             Debug.Log($"MiniMapControllerPro initialized with object pooling. " +
                       $"Building pool: {config.buildingMarkerPoolSize}, Unit pool: {config.unitMarkerPoolSize}");
+        }
+
+        /// <summary>
+        /// Register existing units in the scene (units placed before runtime)
+        /// </summary>
+        private void RegisterExistingUnits()
+        {
+            // Find all UnitAIController components in the scene
+            var unitControllers = FindObjectsByType<RTS.Units.UnitAIController>(FindObjectsSortMode.None);
+
+            int registeredCount = 0;
+            foreach (var unitController in unitControllers)
+            {
+                if (unitController == null) continue;
+
+                GameObject unit = unitController.gameObject;
+                bool isEnemy = MinimapEntityDetector.IsEnemy(unit, detectionMethod);
+
+                unitMarkerManager.AddMarker(unit, unit.transform.position, isEnemy);
+                registeredCount++;
+            }
+
+            Debug.Log($"MiniMapControllerPro: Registered {registeredCount} existing units");
+        }
+
+        /// <summary>
+        /// Register existing buildings in the scene (buildings placed before runtime)
+        /// </summary>
+        private void RegisterExistingBuildings()
+        {
+            // Find all Building components in the scene
+            var buildings = FindObjectsByType<RTSBuildingsSystems.Building>(FindObjectsSortMode.None);
+
+            int registeredCount = 0;
+            foreach (var building in buildings)
+            {
+                if (building == null) continue;
+
+                GameObject buildingObj = building.gameObject;
+                bool isEnemy = MinimapEntityDetector.IsEnemy(buildingObj, detectionMethod);
+
+                buildingMarkerManager.AddMarker(buildingObj, buildingObj.transform.position, isEnemy);
+                registeredCount++;
+            }
+
+            Debug.Log($"MiniMapControllerPro: Registered {registeredCount} existing buildings");
         }
 
         private void OnEnable()
