@@ -343,6 +343,10 @@ namespace RTS.Buildings
             float bMin = Vector2.Dot(B1, dirA);
             float bMax = Vector2.Dot(B2, dirA);
 
+            // ✅ Sort min/max in case walls are oriented in opposite directions
+            if (aMin > aMax) { float temp = aMin; aMin = aMax; aMax = temp; }
+            if (bMin > bMax) { float temp = bMin; bMin = bMax; bMax = temp; }
+
             float overlap = Mathf.Min(aMax, bMax) - Mathf.Max(aMin, bMin);
 
             // No overlap
