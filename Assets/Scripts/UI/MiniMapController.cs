@@ -459,10 +459,19 @@ namespace RTS.UI
 
         private void OnUnitSpawned(UnitSpawnedEvent evt)
         {
-            if (evt.Unit == null) return;
+            if (evt.Unit == null)
+            {
+                Debug.LogWarning("MiniMapController: UnitSpawnedEvent received with null unit");
+                return;
+            }
+
+            Debug.Log($"🚀 MiniMapController: UnitSpawnedEvent received for {evt.Unit.name} at {evt.Position}");
 
             // Determine if unit is enemy
-            bool isEnemy = evt.Unit.layer == LayerMask.NameToLayer("Enemy");
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            bool isEnemy = evt.Unit.layer == enemyLayer;
+            Debug.Log($"  Unit layer: {evt.Unit.layer}, Enemy layer: {enemyLayer}, isEnemy: {isEnemy}");
+
             CreateUnitMarker(evt.Unit, evt.Position, isEnemy);
         }
 
@@ -475,13 +484,20 @@ namespace RTS.UI
 
         private void CreateUnitMarker(GameObject unit, Vector3 position, bool isEnemy)
         {
-            if (unitMarkers.ContainsKey(unit)) return;
+            if (unitMarkers.ContainsKey(unit))
+            {
+                Debug.LogWarning($"MiniMapController: Marker already exists for {unit.name}");
+                return;
+            }
+
+            Debug.Log($"🎯 MiniMapController: Creating marker for {unit.name}, isEnemy={isEnemy}");
 
             GameObject marker;
 
             if (unitMarkerPrefab != null)
             {
                 marker = Instantiate(unitMarkerPrefab, unitMarkersContainer);
+                Debug.Log($"  Using unitMarkerPrefab");
             }
             else
             {
@@ -492,6 +508,7 @@ namespace RTS.UI
 
                 // Make it circular
                 img.sprite = CreateCircleSprite();
+                Debug.Log($"  Created circle marker with color {img.color}");
                 // Image component automatically adds RectTransform
             }
 
@@ -507,6 +524,7 @@ namespace RTS.UI
             unitMarkers[unit] = markerRect;
 
             UpdateMarkerPosition(markerRect, position);
+            Debug.Log($"  ✓ Marker created at position {markerRect.anchoredPosition}, active={marker.activeSelf}, parent={markerRect.parent?.name}");
         }
 
         private void RemoveUnitMarker(GameObject unit)
@@ -545,11 +563,24 @@ namespace RTS.UI
 
                     // Only show enemies in currently visible areas, not explored or unexplored
                     bool shouldBeVisible = visionState == KingdomsAtDusk.FogOfWar.VisionState.Visible;
+
+                    // Debug log only when visibility changes
+                    if (kvp.Value.gameObject.activeSelf != shouldBeVisible)
+                    {
+                        Debug.Log($"🔍 MiniMapController: Enemy unit {kvp.Key.name} visibility changed to {shouldBeVisible}, vision state: {visionState}");
+                    }
+
                     kvp.Value.gameObject.SetActive(shouldBeVisible);
                 }
                 else
                 {
                     // Friendly units are always visible, or fog of war is not active
+                    // Debug log only once when marker is first made visible
+                    if (!kvp.Value.gameObject.activeSelf)
+                    {
+                        Debug.Log($"✅ MiniMapController: Making friendly unit {kvp.Key.name} visible on minimap");
+                    }
+
                     kvp.Value.gameObject.SetActive(true);
                 }
 

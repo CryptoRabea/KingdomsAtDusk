@@ -451,10 +451,23 @@ namespace RTS.UI
 
         private void OnUnitSpawned(UnitSpawnedEvent evt)
         {
-            if (evt.Unit == null) return;
+            if (evt.Unit == null)
+            {
+                Debug.LogWarning("MiniMapControllerPro: UnitSpawnedEvent received with null unit");
+                return;
+            }
+
+            Debug.Log($"🚀 MiniMapControllerPro: UnitSpawnedEvent received for {evt.Unit.name} at {evt.Position}");
 
             // Determine if enemy using flexible detection system
             bool isEnemy = MinimapEntityDetector.IsEnemy(evt.Unit, detectionMethod);
+            Debug.Log($"  Enemy detection: {isEnemy}, method: {detectionMethod}");
+
+            if (unitMarkerManager == null)
+            {
+                Debug.LogError("  ✗ unitMarkerManager is null!");
+                return;
+            }
 
             unitMarkerManager.AddMarker(evt.Unit, evt.Position, isEnemy);
         }

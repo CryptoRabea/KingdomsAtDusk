@@ -48,12 +48,23 @@ namespace RTS.UI.Minimap
 
         public override void AddMarker(GameObject unit, Vector3 worldPosition, bool isEnemy = false)
         {
-            if (unit == null) return;
-            if (markers.ContainsKey(unit)) return;
+            if (unit == null)
+            {
+                Debug.LogWarning("MinimapUnitMarkerManager: Cannot add marker - unit is null");
+                return;
+            }
+
+            if (markers.ContainsKey(unit))
+            {
+                Debug.LogWarning($"MinimapUnitMarkerManager: Marker already exists for {unit.name}");
+                return;
+            }
 
             // Get marker from appropriate pool
             MinimapMarkerPool pool = isEnemy ? enemyPool : friendlyPool;
             RectTransform marker = pool.Get();
+
+            Debug.Log($"🎯 MinimapUnitMarkerManager: Adding marker for {unit.name} at {worldPosition}, isEnemy={isEnemy}, marker active={marker.gameObject.activeSelf}");
 
             // Ensure marker has correct visual appearance
             Image img = marker.GetComponent<Image>();
@@ -61,16 +72,23 @@ namespace RTS.UI.Minimap
             {
                 img.color = isEnemy ? config.enemyUnitColor : config.friendlyUnitColor;
                 img.sprite = circleSprite;
+                Debug.Log($"  ✓ Set marker color to {img.color}, sprite={circleSprite != null}, enabled={img.enabled}");
+            }
+            else
+            {
+                Debug.LogError($"  ✗ Marker has no Image component!");
             }
 
             // Set size
             marker.sizeDelta = new Vector2(config.unitMarkerSize, config.unitMarkerSize);
+            Debug.Log($"  ✓ Set marker size to {config.unitMarkerSize}x{config.unitMarkerSize}");
 
             // Store marker reference
             markers[unit] = marker;
 
             // Update position
             UpdateMarkerPosition(marker, worldPosition);
+            Debug.Log($"  ✓ Positioned marker at {marker.anchoredPosition}, parent={marker.parent?.name}");
 
             SetDirty();
         }
