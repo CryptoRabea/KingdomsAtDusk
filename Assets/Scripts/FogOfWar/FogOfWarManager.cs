@@ -196,7 +196,9 @@ namespace KingdomsAtDusk.FogOfWar
                     continue;
 
                 // Reveal circular area around the provider
-                grid.RevealCircle(provider.Position, provider.VisionRadius);
+                Vector3 providerPos = provider.Position;
+                Debug.Log($"[FogOfWarManager] Revealing vision for {provider.GameObject.name} at position {providerPos} with radius {provider.VisionRadius}");
+                grid.RevealCircle(providerPos, provider.VisionRadius);
                 activeProviders++;
             }
 

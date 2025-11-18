@@ -79,6 +79,7 @@ namespace KingdomsAtDusk.FogOfWar
         {
             if (FogOfWarManager.Instance != null)
             {
+                Debug.Log($"[VisionProvider] {gameObject.name} - Registering at position {Position} (Owner: {ownerId}, Radius: {visionRadius})");
                 FogOfWarManager.Instance.RegisterVisionProvider(this);
             }
             else
