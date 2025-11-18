@@ -41,6 +41,20 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void OnEnable()
         {
+            // Delay registration by one frame to allow preview cleanup code to destroy this component
+            // This prevents previews from revealing fog of war at instantiation position
+            StartCoroutine(DelayedRegistration());
+        }
+
+        private System.Collections.IEnumerator DelayedRegistration()
+        {
+            // Wait one frame - this gives preview creation code time to destroy this component
+            yield return null;
+
+            // If we've been destroyed (e.g., on a preview), don't register
+            if (this == null || !gameObject.activeInHierarchy)
+                yield break;
+
             RegisterWithManager();
 
             // If manager isn't ready yet, try again in a moment

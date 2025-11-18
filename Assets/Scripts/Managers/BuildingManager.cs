@@ -220,11 +220,11 @@ namespace RTS.Managers
             previewBuilding.SetActive(false);
 
             // Destroy VisionProvider on preview to prevent fog of war reveal at wrong position
-            // We destroy instead of disable because OnEnable() runs before we can disable it
+            // Use DestroyImmediate because Destroy() only marks for deletion at end of frame
             var visionProvider = previewBuilding.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
             if (visionProvider != null)
             {
-                Destroy(visionProvider);
+                DestroyImmediate(visionProvider);
                 Debug.Log($"[BuildingManager] Destroyed VisionProvider on preview: {previewBuilding.name}");
             }
 

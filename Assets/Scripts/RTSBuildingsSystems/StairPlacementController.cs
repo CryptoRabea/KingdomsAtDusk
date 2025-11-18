@@ -109,9 +109,10 @@ namespace RTS.Buildings
             stairPreview.SetActive(false);
 
             // Destroy VisionProvider on preview to prevent fog of war reveal
+            // Use DestroyImmediate because Destroy() only marks for deletion at end of frame
             var visionProvider = stairPreview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
             if (visionProvider != null)
-                Destroy(visionProvider);
+                DestroyImmediate(visionProvider);
 
             // Disable components for preview
             var stairComponent = stairPreview.GetComponent<WallStairs>();
