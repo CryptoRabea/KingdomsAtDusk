@@ -112,6 +112,12 @@ namespace RTS.UI
             }
         }
 
+        private void Start()
+        {
+            // Detect and add markers for existing units and buildings in the scene
+            DetectExistingEntities();
+        }
+
         private void OnEnable()
         {
             // Subscribe to events
@@ -146,6 +152,46 @@ namespace RTS.UI
                 Destroy(miniMapRenderTexture);
             }
         }
+
+        #region Entity Detection
+
+        /// <summary>
+        /// Detect and add markers for units and buildings that already exist in the scene.
+        /// This is needed because events only fire for new entities spawned after the minimap is enabled.
+        /// </summary>
+        private void DetectExistingEntities()
+        {
+            // Find all existing units (objects with UnitHealth component)
+            RTS.Units.UnitHealth[] units = FindObjectsByType<RTS.Units.UnitHealth>(FindObjectsSortMode.None);
+            int unitsDetected = 0;
+
+            foreach (var unitHealth in units)
+            {
+                if (unitHealth != null && unitHealth.gameObject != null && !unitHealth.IsDead)
+                {
+                    bool isEnemy = unitHealth.gameObject.layer == LayerMask.NameToLayer("Enemy");
+                    CreateUnitMarker(unitHealth.gameObject, unitHealth.transform.position, isEnemy);
+                    unitsDetected++;
+                }
+            }
+
+            // Find all existing buildings (objects with BuildingSelectable component)
+            RTSBuildingsSystems.BuildingSelectable[] buildings = FindObjectsByType<RTSBuildingsSystems.BuildingSelectable>(FindObjectsSortMode.None);
+            int buildingsDetected = 0;
+
+            foreach (var building in buildings)
+            {
+                if (building != null && building.gameObject != null)
+                {
+                    CreateBuildingMarker(building.gameObject, building.transform.position);
+                    buildingsDetected++;
+                }
+            }
+
+            Debug.Log($"Minimap: Detected {unitsDetected} existing units and {buildingsDetected} existing buildings");
+        }
+
+        #endregion
 
         #region Mini-Map Camera Setup
 
