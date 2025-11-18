@@ -176,7 +176,7 @@ namespace RTS.UI
             }
 
             // Find all existing buildings (objects with BuildingSelectable component)
-            RTSBuildingsSystems.BuildingSelectable[] buildings = FindObjectsByType<RTSBuildingsSystems.BuildingSelectable>(FindObjectsSortMode.None);
+            RTS.Buildings.BuildingSelectable[] buildings = FindObjectsByType<RTS.Buildings.BuildingSelectable>(FindObjectsSortMode.None);
             int buildingsDetected = 0;
 
             foreach (var building in buildings)
