@@ -149,7 +149,7 @@ namespace RTS.Buildings
 
         /// <summary>
         /// Checks if a wall segment placed between (start→end) would overlap an existing wall.
-        /// Allows connecting EXACTLY at endpoints, but blocks overlapping the body.
+        /// Allows connecting EXACTLY at endpoints or midpoints, but blocks overlapping the body.
         /// </summary>
         private bool WouldOverlapExistingWall(Vector3 start, Vector3 end)
         {
@@ -165,6 +165,14 @@ namespace RTS.Buildings
                     Vector3.Distance(end, existingEnd) < 0.01f)
                 {
                     continue; // endpoint connections allowed
+                }
+
+                // 1b. If connecting exactly to midpoint → allowed
+                Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
+                if (Vector3.Distance(start, existingMid) < 0.01f ||
+                    Vector3.Distance(end, existingMid) < 0.01f)
+                {
+                    continue; // midpoint connections allowed
                 }
 
                 // 2. Check segment intersection in 2D (X/Z)
