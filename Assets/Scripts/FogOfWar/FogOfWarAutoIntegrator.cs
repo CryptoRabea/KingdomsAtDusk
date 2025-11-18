@@ -23,8 +23,8 @@ namespace KingdomsAtDusk.FogOfWar
             // Subscribe to unit spawned events
             EventBus.Subscribe<UnitSpawnedEvent>(OnUnitSpawned);
 
-            // Subscribe to building events
-            EventBus.Subscribe<BuildingPlacedEvent>(OnBuildingPlaced);
+            // Subscribe to building events - only respond to BuildingCompletedEvent
+            // to avoid revealing vision at incorrect positions during construction
             EventBus.Subscribe<BuildingCompletedEvent>(OnBuildingCompleted);
         }
 
@@ -32,7 +32,6 @@ namespace KingdomsAtDusk.FogOfWar
         {
             // Unsubscribe from events
             EventBus.Unsubscribe<UnitSpawnedEvent>(OnUnitSpawned);
-            EventBus.Unsubscribe<BuildingPlacedEvent>(OnBuildingPlaced);
             EventBus.Unsubscribe<BuildingCompletedEvent>(OnBuildingCompleted);
         }
 
@@ -77,18 +76,12 @@ namespace KingdomsAtDusk.FogOfWar
             }
         }
 
-        private void OnBuildingPlaced(BuildingPlacedEvent evt)
-        {
-            if (!autoAddVisionToBuildings || evt.Building == null) return;
-
-            AddBuildingVision(evt.Building);
-        }
-
         private void OnBuildingCompleted(BuildingCompletedEvent evt)
         {
             if (!autoAddVisionToBuildings || evt.Building == null) return;
 
-            // Ensure vision is added (in case it wasn't added during placement)
+            // Add vision when building is completed to ensure it's at the correct position
+            // and avoid revealing vision at (0,0,0) or other temporary positions during construction
             AddBuildingVision(evt.Building);
         }
 
