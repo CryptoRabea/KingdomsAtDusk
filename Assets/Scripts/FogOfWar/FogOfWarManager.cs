@@ -48,20 +48,39 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void Initialize()
         {
-            if (isInitialized) return;
+            if (isInitialized)
+            {
+                Debug.LogWarning("[FogOfWarManager] Already initialized, skipping");
+                return;
+            }
+
+            Debug.Log($"[FogOfWarManager] Starting initialization...");
+            Debug.Log($"[FogOfWarManager] World Bounds: {config.worldBounds}");
+            Debug.Log($"[FogOfWarManager] Cell Size: {config.cellSize}");
 
             // Create the grid
             grid = new FogOfWarGrid(config.worldBounds, config.cellSize);
+            Debug.Log($"[FogOfWarManager] Grid created: {grid.Width}x{grid.Height} cells");
 
             // Initialize renderers
             if (fogRenderer != null)
             {
+                Debug.Log("[FogOfWarManager] Initializing fog renderer...");
                 fogRenderer.Initialize(this);
+            }
+            else
+            {
+                Debug.LogWarning("[FogOfWarManager] No fog renderer assigned!");
             }
 
             if (minimapRenderer != null)
             {
+                Debug.Log("[FogOfWarManager] Initializing minimap renderer...");
                 minimapRenderer.Initialize(this);
+            }
+            else
+            {
+                Debug.LogWarning("[FogOfWarManager] No minimap renderer assigned!");
             }
 
             // Register existing vision providers
@@ -69,7 +88,7 @@ namespace KingdomsAtDusk.FogOfWar
 
             isInitialized = true;
 
-            Debug.Log($"[FogOfWarManager] Initialized with {visionProviders.Count} vision providers");
+            Debug.Log($"[FogOfWarManager] ✓ Initialization complete with {visionProviders.Count} vision providers");
         }
 
         private void Update()
@@ -151,10 +170,16 @@ namespace KingdomsAtDusk.FogOfWar
         /// </summary>
         private void UpdateVision()
         {
-            if (grid == null) return;
+            if (grid == null)
+            {
+                Debug.LogWarning("[FogOfWarManager] UpdateVision called but grid is null!");
+                return;
+            }
 
             // Clear all currently visible cells (they become explored)
             grid.ClearVisibleCells();
+
+            int activeProviders = 0;
 
             // Update vision for each active provider
             foreach (var provider in visionProviders.ToList())
@@ -171,6 +196,13 @@ namespace KingdomsAtDusk.FogOfWar
 
                 // Reveal circular area around the provider
                 grid.RevealCircle(provider.Position, provider.VisionRadius);
+                activeProviders++;
+            }
+
+            // Log warning if no providers are providing vision
+            if (activeProviders == 0 && visionProviders.Count > 0)
+            {
+                Debug.LogWarning($"[FogOfWarManager] No active vision providers for player {localPlayerId}! Total providers: {visionProviders.Count}");
             }
 
             // Notify renderers
@@ -311,6 +343,55 @@ namespace KingdomsAtDusk.FogOfWar
             // Draw world bounds
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(config.worldBounds.center, config.worldBounds.size);
+        }
+
+        /// <summary>
+        /// Debug command to print fog of war status
+        /// </summary>
+        [ContextMenu("Debug: Print Fog of War Status")]
+        public void DebugPrintStatus()
+        {
+            Debug.Log("=== FOG OF WAR STATUS ===");
+            Debug.Log($"Initialized: {isInitialized}");
+            Debug.Log($"Grid: {(grid != null ? $"{grid.Width}x{grid.Height}" : "NULL")}");
+            Debug.Log($"Vision Providers: {visionProviders.Count}");
+            Debug.Log($"Local Player ID: {localPlayerId}");
+
+            int friendlyProviders = 0;
+            int enemyProviders = 0;
+
+            foreach (var provider in visionProviders)
+            {
+                if (provider == null) continue;
+                if (provider.OwnerId == localPlayerId)
+                    friendlyProviders++;
+                else
+                    enemyProviders++;
+            }
+
+            Debug.Log($"Friendly Providers: {friendlyProviders}");
+            Debug.Log($"Enemy Providers: {enemyProviders}");
+            Debug.Log($"Fog Renderer: {(fogRenderer != null ? "Present" : "NULL")}");
+            Debug.Log($"Minimap Renderer: {(minimapRenderer != null ? "Present" : "NULL")}");
+            Debug.Log("========================");
+        }
+
+        /// <summary>
+        /// Debug command to reveal entire map
+        /// </summary>
+        [ContextMenu("Debug: Reveal All")]
+        public void DebugRevealAll()
+        {
+            RevealAll();
+        }
+
+        /// <summary>
+        /// Debug command to hide entire map
+        /// </summary>
+        [ContextMenu("Debug: Hide All")]
+        public void DebugHideAll()
+        {
+            HideAll();
         }
     }
 }

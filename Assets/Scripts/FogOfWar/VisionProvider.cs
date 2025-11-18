@@ -35,11 +35,39 @@ namespace KingdomsAtDusk.FogOfWar
             {
                 TryGetUnitDetectionRange();
             }
+
+            Debug.Log($"[VisionProvider] {gameObject.name} - Awake (Owner: {ownerId}, Radius: {visionRadius})");
         }
 
         private void OnEnable()
         {
             RegisterWithManager();
+
+            // If manager isn't ready yet, try again in a moment
+            if (FogOfWarManager.Instance == null)
+            {
+                StartCoroutine(RetryRegistration());
+            }
+        }
+
+        private System.Collections.IEnumerator RetryRegistration()
+        {
+            int attempts = 0;
+            while (FogOfWarManager.Instance == null && attempts < 50)
+            {
+                yield return new WaitForSeconds(0.1f);
+                attempts++;
+            }
+
+            if (FogOfWarManager.Instance != null)
+            {
+                RegisterWithManager();
+                Debug.Log($"[VisionProvider] {gameObject.name} - Successfully registered after retry");
+            }
+            else
+            {
+                Debug.LogError($"[VisionProvider] {gameObject.name} - Failed to register: FogOfWarManager not found after 5 seconds!");
+            }
         }
 
         private void OnDisable()
@@ -52,6 +80,10 @@ namespace KingdomsAtDusk.FogOfWar
             if (FogOfWarManager.Instance != null)
             {
                 FogOfWarManager.Instance.RegisterVisionProvider(this);
+            }
+            else
+            {
+                Debug.LogWarning($"[VisionProvider] {gameObject.name} - FogOfWarManager.Instance is null! Cannot register.");
             }
         }
 
