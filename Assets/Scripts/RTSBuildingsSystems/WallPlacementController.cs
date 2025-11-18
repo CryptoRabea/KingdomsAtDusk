@@ -717,6 +717,10 @@ namespace RTS.Buildings
                     var wallSystem = preview.GetComponent<WallConnectionSystem>();
                     if (wallSystem != null) wallSystem.enabled = false;
 
+                    // Disable VisionProvider on preview to prevent fog of war reveal at wrong position
+                    var visionProvider = preview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
+                    if (visionProvider != null) visionProvider.enabled = false;
+
                     foreach (var col in preview.GetComponentsInChildren<Collider>())
                         col.enabled = false;
 

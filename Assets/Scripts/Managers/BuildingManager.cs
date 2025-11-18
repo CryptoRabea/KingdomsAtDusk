@@ -222,6 +222,11 @@ namespace RTS.Managers
             if (building != null)
                 building.enabled = false;
 
+            // Disable VisionProvider on preview to prevent fog of war reveal at wrong position
+            var visionProvider = previewBuilding.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
+            if (visionProvider != null)
+                visionProvider.enabled = false;
+
             // Store original materials
             var renderers = previewBuilding.GetComponentsInChildren<Renderer>();
             originalMaterials = new Material[renderers.Length];
