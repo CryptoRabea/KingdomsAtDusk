@@ -40,6 +40,8 @@ namespace KingdomsAtDusk.FogOfWar
         {
             if (!autoAddVisionToUnits || evt.Unit == null) return;
 
+            Debug.Log($"[FogOfWarAutoIntegrator] Unit spawned: {evt.Unit.name}");
+
             // Add VisionProvider if not already present
             var visionProvider = evt.Unit.GetComponent<VisionProvider>();
             if (visionProvider == null)
@@ -53,14 +55,19 @@ namespace KingdomsAtDusk.FogOfWar
                     int ownerId = minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Friendly ? 0 : 1;
                     visionProvider.SetOwnerId(ownerId);
 
-                    Debug.Log($"[FogOfWarAutoIntegrator] Added VisionProvider to unit: {evt.Unit.name} (Owner: {ownerId})");
+                    Debug.Log($"[FogOfWarAutoIntegrator] ✓ Added VisionProvider to unit: {evt.Unit.name} (Owner: {ownerId}, Ownership: {minimapEntity.GetOwnership()})");
                 }
                 else
                 {
-                    // Default to player-owned
-                    visionProvider.SetOwnerId(0);
-                    Debug.Log($"[FogOfWarAutoIntegrator] Added VisionProvider to unit: {evt.Unit.name} (Default Owner: 0)");
+                    // Try to detect from layer
+                    int ownerId = evt.Unit.layer == LayerMask.NameToLayer("Enemy") ? 1 : 0;
+                    visionProvider.SetOwnerId(ownerId);
+                    Debug.Log($"[FogOfWarAutoIntegrator] ✓ Added VisionProvider to unit: {evt.Unit.name} (Owner from layer: {ownerId}, Layer: {evt.Unit.layer})");
                 }
+            }
+            else
+            {
+                Debug.Log($"[FogOfWarAutoIntegrator] Unit {evt.Unit.name} already has VisionProvider (Owner: {visionProvider.OwnerId})");
             }
 
             // Add visibility control if enabled
@@ -110,18 +117,31 @@ namespace KingdomsAtDusk.FogOfWar
 
         private void AddVisibilityControl(GameObject unit)
         {
-            if (unit.TryGetComponent<FogOfWarEntityVisibility>(out var visibility)) return;
+            if (unit.TryGetComponent<FogOfWarEntityVisibility>(out var visibility))
+            {
+                Debug.Log($"[FogOfWarAutoIntegrator] Unit {unit.name} already has FogOfWarEntityVisibility");
+                return;
+            }
 
             visibility = unit.AddComponent<FogOfWarEntityVisibility>();
 
             // Determine if player-owned
             var minimapEntity = unit.GetComponent<RTS.UI.Minimap.MinimapEntity>();
-            bool isPlayerOwned = minimapEntity != null &&
-                               minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
+            bool isPlayerOwned = false;
+
+            if (minimapEntity != null)
+            {
+                isPlayerOwned = minimapEntity.GetOwnership() == RTS.UI.Minimap.MinimapEntityOwnership.Friendly;
+            }
+            else
+            {
+                // Fallback to layer check
+                isPlayerOwned = unit.layer != LayerMask.NameToLayer("Enemy");
+            }
 
             visibility.SetPlayerOwned(isPlayerOwned);
 
-            Debug.Log($"[FogOfWarAutoIntegrator] Added FogOfWarEntityVisibility to unit: {unit.name} (Player Owned: {isPlayerOwned})");
+            Debug.Log($"[FogOfWarAutoIntegrator] ✓ Added FogOfWarEntityVisibility to unit: {unit.name} (Player Owned: {isPlayerOwned})");
         }
     }
 }
