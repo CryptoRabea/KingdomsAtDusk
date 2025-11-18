@@ -153,6 +153,7 @@ namespace RTS.Buildings
         /// </summary>
         private bool WouldOverlapExistingWall(Vector3 start, Vector3 end)
         {
+            // First check against walls we're currently placing (placedWallSegments)
             foreach (var seg in placedWallSegments)
             {
                 Vector3 existingStart = seg.GetStartPosition(wallLengthAxis);
@@ -184,6 +185,54 @@ namespace RTS.Buildings
                 // 3. Check if new segment lies on top of an existing one (collinear & overlapping)
                 if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
                 {
+                    return true;
+                }
+            }
+
+            // Also check against existing walls in the scene (not just from current session)
+            // Use physics overlap to find any walls along this path
+            Vector3 direction = end - start;
+            float distance = direction.magnitude;
+
+            if (distance < 0.01f)
+                return false;
+
+            // Check along the wall path using capsule collider
+            float capsuleRadius = 0.3f; // Slightly smaller than wall width for endpoint connections
+            Vector3 capsulePoint1 = start + Vector3.up * 0.5f;
+            Vector3 capsulePoint2 = end + Vector3.up * 0.5f;
+
+            Collider[] colliders = Physics.OverlapCapsule(
+                capsulePoint1,
+                capsulePoint2,
+                capsuleRadius,
+                ~groundLayer
+            );
+
+            foreach (var col in colliders)
+            {
+                // Ignore preview objects
+                if (col.transform.IsChildOf(transform))
+                    continue;
+
+                // Ignore terrain
+                if (col is TerrainCollider)
+                    continue;
+
+                // Check if it's a wall
+                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
+                if (wallSystem != null)
+                {
+                    // Found an existing wall - check if it's at an endpoint (allowed) or overlapping (not allowed)
+                    Vector3 wallPos = wallSystem.transform.position;
+
+                    // Allow connection at endpoints (within tolerance)
+                    if (Vector3.Distance(start, wallPos) < 0.5f || Vector3.Distance(end, wallPos) < 0.5f)
+                    {
+                        continue; // Connection at endpoint is allowed
+                    }
+
+                    Debug.Log($"Wall would overlap existing wall: {col.gameObject.name} at {wallPos}");
                     return true;
                 }
             }
@@ -1005,12 +1054,10 @@ namespace RTS.Buildings
         private bool TrySnapToNearbyWall(Vector3 position, out Vector3 snappedPosition)
         {
             snappedPosition = position;
-            if (placedWallSegments.Count == 0)
-                return false;
-
             float closestDistance = float.MaxValue;
             bool found = false;
 
+            // Check against walls we're currently placing (placedWallSegments)
             foreach (var seg in placedWallSegments)
             {
                 Vector3 start = seg.GetStartPosition(wallLengthAxis);
@@ -1019,10 +1066,9 @@ namespace RTS.Buildings
                 float distStart = Vector3.Distance(position, start);
                 float distEnd = Vector3.Distance(position, end);
 
-                // 2️⃣ NEW: Midpoint snapping
+                // Midpoint snapping
                 Vector3 midpoint = (start + end) * 0.5f;
                 float distMid = Vector3.Distance(position, midpoint);
-              
 
                 if (distStart < wallSnapDistance && distStart < closestDistance)
                 {
@@ -1043,6 +1089,35 @@ namespace RTS.Buildings
                     closestDistance = distMid;
                     snappedPosition = midpoint;
                     found = true;
+                }
+            }
+
+            // Also check for existing walls in the scene (not just current placement)
+            Collider[] nearbyColliders = Physics.OverlapSphere(position, wallSnapDistance, ~groundLayer);
+
+            foreach (var col in nearbyColliders)
+            {
+                // Ignore preview objects
+                if (col.transform.IsChildOf(transform))
+                    continue;
+
+                // Ignore terrain
+                if (col is TerrainCollider)
+                    continue;
+
+                // Check if it's a wall
+                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
+                if (wallSystem != null)
+                {
+                    Vector3 wallPos = wallSystem.transform.position;
+                    float dist = Vector3.Distance(position, wallPos);
+
+                    if (dist < wallSnapDistance && dist < closestDistance)
+                    {
+                        closestDistance = dist;
+                        snappedPosition = wallPos;
+                        found = true;
+                    }
                 }
             }
 
