@@ -708,8 +708,14 @@ namespace RTS.Buildings
                 }
                 else
                 {
+                    // Instantiate as INACTIVE to prevent VisionProvider.OnEnable() from running
                     GameObject preview = Instantiate(currentWallData.buildingPrefab, data.position, finalRotation, this.transform);
+                    preview.SetActive(false);
                     preview.transform.localScale = data.scale;
+
+                    // Destroy VisionProvider on preview to prevent fog of war reveal
+                    var visionProvider = preview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
+                    if (visionProvider != null) Destroy(visionProvider);
 
                     var building = preview.GetComponent<Building>();
                     if (building != null) building.enabled = false;
@@ -717,9 +723,8 @@ namespace RTS.Buildings
                     var wallSystem = preview.GetComponent<WallConnectionSystem>();
                     if (wallSystem != null) wallSystem.enabled = false;
 
-                    // Disable VisionProvider on preview to prevent fog of war reveal at wrong position
-                    var visionProvider = preview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
-                    if (visionProvider != null) visionProvider.enabled = false;
+                    // Reactivate preview now that components are cleaned up
+                    preview.SetActive(true);
 
                     foreach (var col in preview.GetComponentsInChildren<Collider>())
                         col.enabled = false;
