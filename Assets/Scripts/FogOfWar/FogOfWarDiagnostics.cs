@@ -98,7 +98,7 @@ namespace KingdomsAtDusk.FogOfWar
         {
             Debug.Log("--- CHECKING MINIMAP SETUP ---");
 
-            var minimapController = FindFirstObjectByType<RTS.UI.MiniMapController>();
+            var minimapController = FindFirstObjectByType<RTS.UI.MiniMapControllerPro>();
 
             if (minimapController == null)
             {

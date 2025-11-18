@@ -274,7 +274,7 @@ namespace KingdomsAtDusk.FogOfWar.Editor
         private void SetupMinimapFog()
         {
             // Find minimap in scene
-            var minimapController = FindFirstObjectByType<RTS.UI.MiniMapController>();
+            var minimapController = FindFirstObjectByType<RTS.UI.MiniMapControllerPro>();
             if (minimapController == null)
             {
                 EditorUtility.DisplayDialog(

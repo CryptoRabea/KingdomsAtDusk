@@ -5,7 +5,6 @@ using UnityEngine.Rendering.Universal;
 using RTS.Core.Events;
 using RTS.UI.Minimap;
 using System.Collections;
-
 namespace RTS.UI
 {
     /// <summary>
@@ -168,7 +167,7 @@ namespace RTS.UI
         private void RegisterExistingUnits()
         {
             // Find all UnitAIController components in the scene
-            var unitControllers = FindObjectsByType<RTS.Units.UnitAIController>(FindObjectsSortMode.None);
+            var unitControllers = FindObjectsByType<RTS.Units.AI.UnitAIController>(FindObjectsSortMode.None);
 
             int registeredCount = 0;
             foreach (var unitController in unitControllers)
@@ -191,7 +190,7 @@ namespace RTS.UI
         private void RegisterExistingBuildings()
         {
             // Find all Building components in the scene
-            var buildings = FindObjectsByType<RTSBuildingsSystems.Building>(FindObjectsSortMode.None);
+            var buildings = FindObjectsByType<RTS.Buildings.Building>(FindObjectsSortMode.None);
 
             int registeredCount = 0;
             foreach (var building in buildings)
