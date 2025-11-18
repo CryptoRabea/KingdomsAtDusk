@@ -111,6 +111,11 @@ namespace RTS.Buildings
             if (stairComponent != null)
                 stairComponent.enabled = false;
 
+            // Disable VisionProvider on preview to prevent fog of war reveal at wrong position
+            var visionProvider = stairPreview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
+            if (visionProvider != null)
+                visionProvider.enabled = false;
+
             foreach (var collider in stairPreview.GetComponentsInChildren<Collider>())
                 collider.enabled = false;
 
