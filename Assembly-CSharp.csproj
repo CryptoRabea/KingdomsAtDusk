@@ -155,6 +155,7 @@
     <Compile Include="Assets\Scripts\Units\AI\States\UnitStateType.cs" />
     <Compile Include="Assets\SimpleToon\Model\Kawaii Slimes\Cameras\Scripts\AbstractTargetFollower.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallConnectionSystem.cs" />
+    <Compile Include="Assets\NewMonoBehaviourScript.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\UI\MiniMapControllerPro.cs" />
@@ -214,7 +215,6 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\ConstructableMedievalHouses\ReadMe.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - License.txt" />
-    <None Include="Assets\Shaders\FogOfWarCameraEffect.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Glass_PBR.shader" />
     <None Include="Assets\SimpleToon\Shader\ToonLightBase.shader" />
@@ -260,6 +260,7 @@
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\VS_indirect.cginc" />
     <None Include="Assets\Polytope Studio\Lowpoly_Props\Sources\Shaders\PT_Props_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
+    <None Include="Assets\Shaders\FogOfWarCameraEffect.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader_VS.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Modular_NPC\Shaders\PT_Modular_NPC_Shader_PBR.shader" />

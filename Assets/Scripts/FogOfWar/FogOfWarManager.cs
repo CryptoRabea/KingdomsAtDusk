@@ -143,7 +143,6 @@ namespace KingdomsAtDusk.FogOfWar
             if (!visionProviders.Contains(provider))
             {
                 visionProviders.Add(provider);
-                Debug.Log($"[FogOfWarManager] Registered vision provider: {provider.GameObject.name} (Owner: {provider.OwnerId}, Radius: {provider.VisionRadius})");
 
                 // Force an immediate vision update when a new provider is registered
                 if (isInitialized)
@@ -162,7 +161,6 @@ namespace KingdomsAtDusk.FogOfWar
 
             if (visionProviders.Remove(provider))
             {
-                Debug.Log($"[FogOfWarManager] Unregistered vision provider: {provider.GameObject.name}");
             }
         }
 
@@ -197,7 +195,6 @@ namespace KingdomsAtDusk.FogOfWar
 
                 // Reveal circular area around the provider
                 Vector3 providerPos = provider.Position;
-                Debug.Log($"[FogOfWarManager] Revealing vision for {provider.GameObject.name} at position {providerPos} with radius {provider.VisionRadius}");
                 grid.RevealCircle(providerPos, provider.VisionRadius);
                 activeProviders++;
             }
@@ -205,7 +202,6 @@ namespace KingdomsAtDusk.FogOfWar
             // Log warning if no providers are providing vision
             if (activeProviders == 0 && visionProviders.Count > 0)
             {
-                Debug.LogWarning($"[FogOfWarManager] No active vision providers for player {localPlayerId}! Total providers: {visionProviders.Count}");
             }
 
             // Notify renderers
