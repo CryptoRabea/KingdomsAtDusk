@@ -183,6 +183,17 @@ namespace RTS.Units.Animation
 
             if (movement != null)
             {
+                isMoving = movement.IsMoving; // Use IsMoving property which handles intent
+
+                // If we have movement intent, use the configured speed even if velocity hasn't updated yet
+                if (isMoving)
+                {
+                    speed = Mathf.Max(movement.Velocity.magnitude, movement.Speed);
+                }
+                else
+                {
+                    speed = movement.Velocity.magnitude;
+                }
                 speed = movement.Velocity.magnitude;
                 isMoving = movement.IsMoving; // Use IsMoving property which handles intent
             }
