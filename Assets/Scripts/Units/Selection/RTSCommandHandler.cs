@@ -101,10 +101,17 @@ namespace RTS.Units
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
-            // Move all selected units
+            // Move all selected units (they will resume aggro when reaching destination)
             foreach (var unit in selectionManager.SelectedUnits)
             {
                 if (unit == null) continue;
+
+                // Set as forced move with destination so unit can resume aggro when it arrives
+                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
+                if (aiController != null)
+                {
+                    aiController.SetForcedMove(true, destination);
+                }
 
                 var movement = unit.GetComponent<UnitMovement>();
                 if (movement != null)
@@ -141,16 +148,16 @@ namespace RTS.Units
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
-            // Force move all selected units (ignore combat/aggro)
+            // Force move all selected units (ignore combat/aggro, resume when reaching destination)
             foreach (var unit in selectionManager.SelectedUnits)
             {
                 if (unit == null) continue;
 
-                // Clear AI target and set forced move flag
+                // Clear AI target and set forced move flag with destination
                 var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
                 if (aiController != null)
                 {
-                    aiController.SetForcedMove(true);
+                    aiController.SetForcedMove(true, destination);
                 }
 
                 var movement = unit.GetComponent<UnitMovement>();

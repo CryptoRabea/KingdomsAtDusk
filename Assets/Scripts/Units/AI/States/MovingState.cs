@@ -103,6 +103,13 @@ namespace RTS.Units.AI
                 }
             }
 
+            // Check if unit reached forced move destination
+            if (controller.IsOnForcedMove && controller.HasReachedForcedMoveDestination())
+            {
+                // Reached destination, clear forced move and allow aggro
+                controller.SetForcedMove(false);
+            }
+
             pathUpdateTimer += Time.deltaTime;
             if (pathUpdateTimer >= PATH_UPDATE_INTERVAL)
             {
