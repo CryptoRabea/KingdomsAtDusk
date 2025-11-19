@@ -22,10 +22,19 @@ namespace RTS.Units.AI
         {
             idleTimer += Time.deltaTime;
 
-            // Clear forced move flag after being idle for a while
-            if (controller.IsOnForcedMove && idleTimer >= FORCED_MOVE_CLEAR_TIME)
+            // Clear forced move flag if we've reached the destination
+            if (controller.IsOnForcedMove)
             {
-                controller.SetForcedMove(false);
+                if (controller.HasReachedForcedMoveDestination())
+                {
+                    // Reached destination, resume normal aggro behavior
+                    controller.SetForcedMove(false);
+                }
+                else if (idleTimer >= FORCED_MOVE_CLEAR_TIME)
+                {
+                    // Been idle for a while without reaching destination, clear anyway
+                    controller.SetForcedMove(false);
+                }
             }
 
             if (idleTimer >= scanInterval)

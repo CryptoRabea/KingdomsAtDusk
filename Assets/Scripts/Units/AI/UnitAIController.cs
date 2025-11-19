@@ -31,6 +31,8 @@ namespace RTS.Units.AI
         // Aggro tracking
         private Vector3? aggroOriginPosition = null;
         private bool isOnForcedMove = false;
+        private Vector3? forcedMoveDestination = null;
+        private const float DESTINATION_REACHED_DISTANCE = 2f; // Distance to consider destination reached
 
         // Public accessors
         public UnitHealth Health => healthComponent;
@@ -42,6 +44,7 @@ namespace RTS.Units.AI
         public AISettingsSO AISettings => aiSettings;
         public Vector3? AggroOriginPosition => aggroOriginPosition;
         public bool IsOnForcedMove => isOnForcedMove;
+        public Vector3? ForcedMoveDestination => forcedMoveDestination;
 
         private void Awake()
         {
@@ -157,14 +160,31 @@ namespace RTS.Units.AI
         /// <summary>
         /// Set forced move flag (player overriding AI behavior)
         /// </summary>
-        public void SetForcedMove(bool forced)
+        public void SetForcedMove(bool forced, Vector3? destination = null)
         {
             isOnForcedMove = forced;
             if (forced)
             {
                 ClearTarget();
                 ClearAggroOrigin();
+                forcedMoveDestination = destination;
             }
+            else
+            {
+                forcedMoveDestination = null;
+            }
+        }
+
+        /// <summary>
+        /// Check if unit has reached its forced move destination
+        /// </summary>
+        public bool HasReachedForcedMoveDestination()
+        {
+            if (!isOnForcedMove || !forcedMoveDestination.HasValue)
+                return false;
+
+            float distance = Vector3.Distance(transform.position, forcedMoveDestination.Value);
+            return distance <= DESTINATION_REACHED_DISTANCE;
         }
 
         /// <summary>
