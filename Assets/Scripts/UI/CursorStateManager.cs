@@ -13,12 +13,16 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Texture2D moveCursor;
         [SerializeField] private Texture2D attackCursor;
         [SerializeField] private Texture2D invalidCursor;
+        [SerializeField] private Texture2D selectUnitCursor;
+        [SerializeField] private Texture2D selectBuildingCursor;
 
         [Header("Cursor Hotspots (pixel offset from top-left)")]
         [SerializeField] private Vector2 normalHotspot = Vector2.zero;
         [SerializeField] private Vector2 moveHotspot = new Vector2(16, 16);
         [SerializeField] private Vector2 attackHotspot = new Vector2(16, 16);
         [SerializeField] private Vector2 invalidHotspot = new Vector2(16, 16);
+        [SerializeField] private Vector2 selectUnitHotspot = new Vector2(16, 16);
+        [SerializeField] private Vector2 selectBuildingHotspot = new Vector2(16, 16);
 
         [Header("References")]
         [SerializeField] private UnitSelectionManager selectionManager;
@@ -37,7 +41,9 @@ namespace KingdomsAtDusk.UI
             Normal,
             Move,
             Attack,
-            Invalid
+            Invalid,
+            SelectUnit,
+            SelectBuilding
         }
 
         private void Start()
@@ -70,18 +76,40 @@ namespace KingdomsAtDusk.UI
 
         private void UpdateCursorState()
         {
-            // If no units selected, use normal cursor
+            // Check what's under the cursor
+            Vector2 mousePosition = mouse.position.ReadValue();
+            Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+
+            // Priority 1: Check for buildings (BuildingSelectable component)
+            if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
+            {
+                GameObject hitObject = hit.collider.gameObject;
+
+                // Check for BuildingSelectable (highest priority)
+                var buildingSelectable = hitObject.GetComponent<RTS.Buildings.BuildingSelectable>();
+                if (buildingSelectable != null)
+                {
+                    SetCursor(CursorState.SelectBuilding);
+                    return;
+                }
+
+                // Check for UnitSelectable
+                var unitSelectable = hitObject.GetComponent<RTS.Units.UnitSelectable>();
+                if (unitSelectable != null)
+                {
+                    SetCursor(CursorState.SelectUnit);
+                    return;
+                }
+            }
+
+            // If no units selected, use normal cursor for everything else
             if (selectionManager.SelectionCount == 0)
             {
                 SetCursor(CursorState.Normal);
                 return;
             }
 
-            // Check what's under the cursor
-            Vector2 mousePosition = mouse.position.ReadValue();
-            Ray ray = mainCamera.ScreenPointToRay(mousePosition);
-
-            // First check for units (higher priority)
+            // Priority 2: Check for units (for attack commands)
             if (Physics.Raycast(ray, out RaycastHit unitHit, raycastDistance, unitLayer))
             {
                 GameObject hitObject = unitHit.collider.gameObject;
@@ -101,15 +129,9 @@ namespace KingdomsAtDusk.UI
                         return;
                     }
                 }
-                else
-                {
-                    // Hovering over friendly/neutral unit
-                    SetCursor(CursorState.Normal);
-                    return;
-                }
             }
 
-            // Then check for ground (lower priority)
+            // Priority 3: Check for ground (move command)
             if (Physics.Raycast(ray, out RaycastHit groundHit, raycastDistance, groundLayer))
             {
                 // Hovering over ground with units selected = move cursor
@@ -169,6 +191,16 @@ namespace KingdomsAtDusk.UI
                 case CursorState.Invalid:
                     texture = invalidCursor;
                     hotspot = invalidHotspot;
+                    break;
+
+                case CursorState.SelectUnit:
+                    texture = selectUnitCursor;
+                    hotspot = selectUnitHotspot;
+                    break;
+
+                case CursorState.SelectBuilding:
+                    texture = selectBuildingCursor;
+                    hotspot = selectBuildingHotspot;
                     break;
 
                 case CursorState.Normal:

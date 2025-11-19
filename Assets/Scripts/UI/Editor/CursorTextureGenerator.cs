@@ -29,6 +29,8 @@ namespace KingdomsAtDusk.UI.Editor
             GenerateMoveCursor(folderPath);
             GenerateAttackCursor(folderPath);
             GenerateInvalidCursor(folderPath);
+            GenerateSelectUnitCursor(folderPath);
+            GenerateSelectBuildingCursor(folderPath);
 
             AssetDatabase.Refresh();
             Debug.Log("Cursor textures generated at: " + folderPath);
@@ -195,6 +197,114 @@ namespace KingdomsAtDusk.UI.Editor
                 SetPixel(pixels, size, i + offset, size - 1 - i + offset, color);
                 SetPixel(pixels, size, i + 1 + offset, size - 1 - i + offset, color);
                 SetPixel(pixels, size, i + offset, size - 2 - i + offset, color);
+            }
+        }
+
+        private static void GenerateSelectUnitCursor(string folder)
+        {
+            int size = 32;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[size * size];
+
+            // Transparent background
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = Color.clear;
+
+            // Draw select unit cursor (hand pointer in cyan)
+            DrawHandPointer(pixels, size, Color.black, 1);
+            DrawHandPointer(pixels, size, Color.cyan, 0);
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+
+            SaveTexture(tex, folder + "/CursorSelectUnit.png");
+        }
+
+        private static void GenerateSelectBuildingCursor(string folder)
+        {
+            int size = 32;
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[size * size];
+
+            // Transparent background
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = Color.clear;
+
+            // Draw select building cursor (house icon in yellow/orange)
+            DrawHouseIcon(pixels, size, Color.black, 1);
+            DrawHouseIcon(pixels, size, new Color(1f, 0.7f, 0f), 0); // Orange
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+
+            SaveTexture(tex, folder + "/CursorSelectBuilding.png");
+        }
+
+        private static void DrawHandPointer(Color[] pixels, int size, Color color, int offset)
+        {
+            int centerX = size / 2 + offset;
+            int centerY = size / 2 + offset;
+
+            // Draw a simple hand pointer (finger pointing up)
+            // Finger
+            for (int y = 4; y < 18; y++)
+            {
+                SetPixel(pixels, size, centerX + offset, y + offset, color);
+                SetPixel(pixels, size, centerX + 1 + offset, y + offset, color);
+            }
+
+            // Thumb
+            for (int x = -2; x <= 2; x++)
+            {
+                SetPixel(pixels, size, centerX + x + offset, 18 + offset, color);
+                SetPixel(pixels, size, centerX + x + offset, 19 + offset, color);
+            }
+
+            // Palm
+            for (int y = 18; y < 24; y++)
+            {
+                for (int x = -2; x <= 2; x++)
+                {
+                    SetPixel(pixels, size, centerX + x + offset, y + offset, color);
+                }
+            }
+        }
+
+        private static void DrawHouseIcon(Color[] pixels, int size, Color color, int offset)
+        {
+            int centerX = size / 2;
+            int centerY = size / 2;
+
+            // Roof (triangle)
+            for (int y = 0; y < 8; y++)
+            {
+                int width = y + 1;
+                for (int x = -width; x <= width; x++)
+                {
+                    SetPixel(pixels, size, centerX + x + offset, 6 + y + offset, color);
+                }
+            }
+
+            // Walls (rectangle)
+            for (int y = 14; y < 26; y++)
+            {
+                for (int x = -6; x <= 6; x++)
+                {
+                    // Outer walls
+                    if (x == -6 || x == 6 || y == 14 || y == 25)
+                    {
+                        SetPixel(pixels, size, centerX + x + offset, y + offset, color);
+                    }
+                }
+            }
+
+            // Door
+            for (int y = 18; y < 26; y++)
+            {
+                for (int x = -2; x <= 2; x++)
+                {
+                    SetPixel(pixels, size, centerX + x + offset, y + offset, color);
+                }
             }
         }
 
