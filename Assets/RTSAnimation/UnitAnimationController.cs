@@ -179,15 +179,15 @@ namespace RTS.Units.Animation
 
             // Update speed parameter
             float speed = 0f;
+            bool isMoving = false;
+
             if (movement != null)
             {
                 speed = movement.Velocity.magnitude;
+                isMoving = movement.IsMoving; // Use IsMoving property which handles intent
             }
 
             animator.SetFloat(SpeedHash, speed, animationTransitionSpeed, Time.deltaTime);
-
-            // Update isMoving boolean
-            bool isMoving = speed > movementThreshold;
             animator.SetBool(IsMovingHash, isMoving);
         }
 
