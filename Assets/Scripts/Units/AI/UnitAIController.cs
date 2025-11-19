@@ -28,6 +28,10 @@ namespace RTS.Units.AI
         private UnitMovement movementComponent;
         private UnitCombat combatComponent;
 
+        // Aggro tracking
+        private Vector3? aggroOriginPosition = null;
+        private bool isOnForcedMove = false;
+
         // Public accessors
         public UnitHealth Health => healthComponent;
         public UnitMovement Movement => movementComponent;
@@ -36,6 +40,8 @@ namespace RTS.Units.AI
         public UnitStateType CurrentStateType => currentState?.GetStateType() ?? UnitStateType.Dead;
         public UnitConfigSO Config => config;
         public AISettingsSO AISettings => aiSettings;
+        public Vector3? AggroOriginPosition => aggroOriginPosition;
+        public bool IsOnForcedMove => isOnForcedMove;
 
         private void Awake()
         {
@@ -123,6 +129,12 @@ namespace RTS.Units.AI
         {
             currentTarget = target;
             combatComponent?.SetTarget(target);
+
+            // Record aggro origin position when first getting a target
+            if (target != null && !aggroOriginPosition.HasValue)
+            {
+                aggroOriginPosition = transform.position;
+            }
         }
 
         /// <summary>
@@ -132,6 +144,39 @@ namespace RTS.Units.AI
         {
             currentTarget = null;
             combatComponent?.ClearTarget();
+        }
+
+        /// <summary>
+        /// Clear aggro origin position (called when returning to origin or getting new orders)
+        /// </summary>
+        public void ClearAggroOrigin()
+        {
+            aggroOriginPosition = null;
+        }
+
+        /// <summary>
+        /// Set forced move flag (player overriding AI behavior)
+        /// </summary>
+        public void SetForcedMove(bool forced)
+        {
+            isOnForcedMove = forced;
+            if (forced)
+            {
+                ClearTarget();
+                ClearAggroOrigin();
+            }
+        }
+
+        /// <summary>
+        /// Check if unit has exceeded max chase distance from aggro origin
+        /// </summary>
+        public bool HasExceededChaseDistance()
+        {
+            if (!aggroOriginPosition.HasValue || config == null)
+                return false;
+
+            float distanceFromOrigin = Vector3.Distance(transform.position, aggroOriginPosition.Value);
+            return distanceFromOrigin > config.maxChaseDistance;
         }
 
         /// <summary>
@@ -290,11 +335,20 @@ namespace RTS.Units.AI
                 UnitStateType.Retreating => Color.cyan,
                 UnitStateType.Healing => Color.green,
                 UnitStateType.Dead => Color.black,
+                UnitStateType.ReturningToOrigin => Color.magenta,
                 _ => Color.white
             };
 
             Gizmos.color = stateColor;
             Gizmos.DrawSphere(transform.position + Vector3.up * 2f, 0.3f);
+
+            // Draw aggro origin position if it exists
+            if (aggroOriginPosition.HasValue)
+            {
+                Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f); // Orange
+                Gizmos.DrawWireSphere(aggroOriginPosition.Value, 0.5f);
+                Gizmos.DrawLine(transform.position, aggroOriginPosition.Value);
+            }
         }
 
         #endregion

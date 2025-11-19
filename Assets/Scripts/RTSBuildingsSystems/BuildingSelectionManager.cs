@@ -27,6 +27,7 @@ namespace RTS.Buildings
 
         private BuildingSelectable currentlySelected;
         private bool isSpawnPointMode = false;
+        private RTS.Managers.BuildingManager buildingManager;
 
         public BuildingSelectable CurrentlySelectedBuilding => currentlySelected;
 
@@ -34,6 +35,9 @@ namespace RTS.Buildings
         {
             if (mainCamera == null)
                 mainCamera = Camera.main;
+
+            // Find BuildingManager to check if in placement mode
+            buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
         }
 
         private void OnEnable()
@@ -82,6 +86,14 @@ namespace RTS.Buildings
             {
                 if (enableDebugLogs)
                     Debug.LogWarning("BuildingSelectionManager: positionAction is null!");
+                return;
+            }
+
+            // Don't process selection clicks if currently placing a building
+            if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: Ignoring click - currently placing building");
                 return;
             }
 

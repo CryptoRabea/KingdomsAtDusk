@@ -32,7 +32,15 @@ namespace RTS.Units
         
         [Header("AI")]
         public float detectionRange = 10f; // how far the unit can see enemies
-        
+
+        [Header("Aggro Settings")]
+        [Tooltip("Maximum distance from origin position the unit will chase a target")]
+        public float maxChaseDistance = 20f;
+        [Tooltip("How long (in seconds) the unit will chase an out-of-range target before giving up")]
+        public float chaseTimeout = 5f;
+        [Tooltip("If true, unit will return to origin position after losing aggro")]
+        public bool returnToOriginAfterAggro = true;
+
         [Header("Visual")]
         public GameObject unitPrefab;
         public Sprite unitIcon;

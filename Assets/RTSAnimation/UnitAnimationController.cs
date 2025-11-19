@@ -194,6 +194,8 @@ namespace RTS.Units.Animation
                 {
                     speed = movement.Velocity.magnitude;
                 }
+                speed = movement.Velocity.magnitude;
+                isMoving = movement.IsMoving; // Use IsMoving property which handles intent
             }
 
             animator.SetFloat(SpeedHash, speed, animationTransitionSpeed, Time.deltaTime);

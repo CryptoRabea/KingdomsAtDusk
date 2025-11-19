@@ -125,12 +125,14 @@
     <Compile Include="Assets\Scripts\Units\AI\States\AttackingState.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationController.cs" />
     <Compile Include="Assets\Scripts\Core\GameEvents.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarCameraEffect.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\MovingState.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitSelectable.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Tower.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationAdvanced.cs" />
     <Compile Include="Assets\Scripts\Managers\HappinessManager.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapConfig.cs" />
+    <Compile Include="Assets\SimpleToon\Model\Kawaii Slimes\Cameras\Scripts\PivotBasedCameraRig.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitGroupManager.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarAutoIntegrator.cs" />
@@ -146,12 +148,15 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\Scripts\Managers\PopulationManager.cs" />
+    <Compile Include="Assets\Scripts\Units\AI\States\ReturningToOriginState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\BuildingWorkerModule.cs" />
     <Compile Include="Assets\Scripts\UI\BuildingDetailsUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitStateType.cs" />
+    <Compile Include="Assets\SimpleToon\Model\Kawaii Slimes\Cameras\Scripts\AbstractTargetFollower.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallConnectionSystem.cs" />
+    <Compile Include="Assets\NewMonoBehaviourScript.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\UI\MiniMapControllerPro.cs" />
@@ -179,6 +184,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\StoneKeep\Scripts\MouseLook.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
+    <Compile Include="Assets\SimpleToon\Scripts\SelfRotation.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingDataSO.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarMinimapRenderer.cs" />
     <Compile Include="Assets\Scripts\Managers\ResourceManager.cs" />
@@ -197,6 +203,7 @@
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PlayerMovement.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapMarkerManager.cs" />
+    <Compile Include="Assets\SimpleToon\Model\Kawaii Slimes\Cameras\Scripts\FreeLookCam.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapBuildingMarkerManager.cs" />
     <Compile Include="Assets\RTSAnimation\UnitAnimationEvents.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapEntityDetector.cs" />
@@ -211,6 +218,7 @@
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - License.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Glass_PBR.shader" />
+    <None Include="Assets\SimpleToon\Shader\ToonLightBase.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader_WebGl.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Unity - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
@@ -253,6 +261,7 @@
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\VS_indirect.cginc" />
     <None Include="Assets\Polytope Studio\Lowpoly_Props\Sources\Shaders\PT_Props_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
+    <None Include="Assets\Shaders\FogOfWarCameraEffect.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader_VS.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Modular_NPC\Shaders\PT_Modular_NPC_Shader_PBR.shader" />

@@ -117,7 +117,6 @@ namespace KingdomsAtDusk.FogOfWar
             if (aiController != null && aiController.Config != null)
             {
                 visionRadius = aiController.Config.detectionRange;
-                Debug.Log($"[VisionProvider] Auto-detected vision radius: {visionRadius} from {gameObject.name}");
                 return;
             }
 
@@ -126,7 +125,6 @@ namespace KingdomsAtDusk.FogOfWar
             {
                 // Buildings get a larger vision radius by default
                 visionRadius = 20f;
-                Debug.Log($"[VisionProvider] Set building vision radius: {visionRadius} for {gameObject.name}");
             }
         }
 

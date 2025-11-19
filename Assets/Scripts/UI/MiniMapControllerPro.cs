@@ -44,8 +44,7 @@ namespace RTS.UI
         [SerializeField] private GameObject buildingMarkerPrefab;
         [SerializeField] private GameObject unitMarkerPrefab;
 
-        [Header("Performance Monitoring")]
-        [SerializeField] private bool showDebugStats = false;
+       
 
         [Header("Entity Detection")]
         [Tooltip("Method to detect entity ownership (friendly/enemy). Auto tries Component > Tag > Layer")]
@@ -61,7 +60,6 @@ namespace RTS.UI
 
         // Performance tracking
         private int frameCounter = 0;
-        private float lastUpdateTime = 0f;
 
         #region Initialization
 
@@ -133,8 +131,7 @@ namespace RTS.UI
         {
             if (viewportIndicator != null)
             {
-                Image img = viewportIndicator.GetComponent<Image>();
-                if (img != null)
+                if (viewportIndicator.TryGetComponent<Image>(out var img))
                 {
                     img.color = config.viewportColor;
                 }
@@ -260,12 +257,7 @@ namespace RTS.UI
                 unitMarkerManager?.UpdateMarkers();
             }
 
-            // Show debug stats
-            if (showDebugStats && Time.time - lastUpdateTime > 1f)
-            {
-                LogDebugStats();
-                lastUpdateTime = Time.time;
-            }
+          
         }
 
         #endregion
@@ -314,8 +306,7 @@ namespace RTS.UI
             // Position camera above world center
             Vector3 worldCenter = config.WorldCenter;
             worldCenter.y = config.minimapCameraHeight;
-            miniMapCamera.transform.position = worldCenter;
-            miniMapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            miniMapCamera.transform.SetPositionAndRotation(worldCenter, Quaternion.Euler(90f, 0f, 0f));
 
             // Set render settings
             miniMapCamera.cullingMask = config.minimapLayers;
@@ -333,8 +324,7 @@ namespace RTS.UI
             }
 
             // Remove audio listener
-            AudioListener listener = miniMapCamera.GetComponent<AudioListener>();
-            if (listener != null)
+            if (miniMapCamera.TryGetComponent<AudioListener>(out var listener))
             {
                 Destroy(listener);
             }
@@ -542,36 +532,7 @@ namespace RTS.UI
         /// <summary>
         /// Get performance statistics.
         /// </summary>
-        public string GetPerformanceStats()
-        {
-            return $"Buildings: {buildingMarkerManager?.MarkerCount ?? 0}, " +
-                   $"Units: {unitMarkerManager?.MarkerCount ?? 0}\n" +
-                   $"{buildingMarkerManager?.GetPoolStats()}\n" +
-                   $"{unitMarkerManager?.GetPoolStats()}";
-        }
-
-        #endregion
-
-        #region Debug
-
-        private void LogDebugStats()
-        {
-            Debug.Log($"=== MiniMapControllerPro Stats ===\n{GetPerformanceStats()}");
-        }
-
-        [ContextMenu("Verify Setup")]
-        public void VerifySetup()
-        {
-            Debug.Log("=== MiniMapControllerPro Setup Verification ===");
-            Debug.Log($"Config: {(config != null ? "OK" : "MISSING")}");
-            Debug.Log($"MiniMap RawImage: {(miniMapImage != null ? "OK" : "MISSING")}");
-            Debug.Log($"RenderTexture: {(miniMapRenderTexture != null ? $"OK ({miniMapRenderTexture.width}x{miniMapRenderTexture.height})" : "MISSING")}");
-            Debug.Log($"MiniMap Camera: {(miniMapCamera != null ? "OK" : "MISSING")}");
-            Debug.Log($"Building Manager: {(buildingMarkerManager != null ? "OK" : "MISSING")}");
-            Debug.Log($"Unit Manager: {(unitMarkerManager != null ? "OK" : "MISSING")}");
-            Debug.Log(GetPerformanceStats());
-            Debug.Log("===========================================");
-        }
+      
 
         #endregion
     }

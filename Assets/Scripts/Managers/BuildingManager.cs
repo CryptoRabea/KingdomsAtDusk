@@ -65,6 +65,9 @@ namespace RTS.Managers
         // Selection Manager
         private RTS.Buildings.BuildingSelectionManager buildingSelectionManager;
 
+        // Public property to check if currently placing a building
+        public bool IsPlacingBuilding => isPlacingBuilding;
+
         private void Awake()
         {
             if (mainCamera == null)
@@ -232,6 +235,11 @@ namespace RTS.Managers
             var building = previewBuilding.GetComponent<Building>();
             if (building != null)
                 building.enabled = false;
+
+            // Disable BuildingSelectable to prevent preview from being selected
+            var buildingSelectable = previewBuilding.GetComponent<BuildingSelectable>();
+            if (buildingSelectable != null)
+                buildingSelectable.enabled = false;
 
             // Reactivate preview now that components are cleaned up
             previewBuilding.SetActive(true);
