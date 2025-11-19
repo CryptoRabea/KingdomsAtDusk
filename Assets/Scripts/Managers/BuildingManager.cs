@@ -65,6 +65,9 @@ namespace RTS.Managers
         // Selection Manager
         private RTS.Buildings.BuildingSelectionManager buildingSelectionManager;
 
+        // Public property to check if currently placing a building
+        public bool IsPlacingBuilding => isPlacingBuilding;
+
         private void Awake()
         {
             if (mainCamera == null)
