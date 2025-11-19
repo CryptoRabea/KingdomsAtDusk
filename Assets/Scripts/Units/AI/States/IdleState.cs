@@ -6,6 +6,7 @@ namespace RTS.Units.AI
     {
         private float idleTimer;
         private float scanInterval = 0.5f;
+        private const float FORCED_MOVE_CLEAR_TIME = 2f; // Clear forced move after 2 seconds of idle
 
         public IdleState(UnitAIController aiController) : base(aiController) { }
 
@@ -21,15 +22,25 @@ namespace RTS.Units.AI
         {
             idleTimer += Time.deltaTime;
 
+            // Clear forced move flag after being idle for a while
+            if (controller.IsOnForcedMove && idleTimer >= FORCED_MOVE_CLEAR_TIME)
+            {
+                controller.SetForcedMove(false);
+            }
+
             if (idleTimer >= scanInterval)
             {
                 idleTimer = 0f;
 
-                Transform target = controller.FindTarget();
-                if (target != null)
+                // Don't auto-target if player has issued a forced move command
+                if (!controller.IsOnForcedMove)
                 {
-                    controller.SetTarget(target);
-                    controller.ChangeState(new MovingState(controller));
+                    Transform target = controller.FindTarget();
+                    if (target != null)
+                    {
+                        controller.SetTarget(target);
+                        controller.ChangeState(new MovingState(controller));
+                    }
                 }
             }
         }
