@@ -148,6 +148,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
     <Compile Include="Assets\Scripts\Managers\PopulationManager.cs" />
+    <Compile Include="Assets\Scripts\Units\AI\States\ReturningToOriginState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\BuildingWorkerModule.cs" />
     <Compile Include="Assets\Scripts\UI\BuildingDetailsUI.cs" />

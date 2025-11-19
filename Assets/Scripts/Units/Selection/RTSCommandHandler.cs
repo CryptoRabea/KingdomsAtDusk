@@ -68,9 +68,9 @@ namespace RTS.Units
             // If double-click, force move even if clicking on enemy
             if (isDoubleClick)
             {
-                if (Physics.Raycast(ray, out RaycastHit hitGround, 1000f, groundLayer))
+                if (Physics.Raycast(ray, out RaycastHit hitGround2, 1000f, groundLayer))
                 {
-                    IssueForcedMoveCommand(hitGround.point);
+                    IssueForcedMoveCommand(hitGround2.point);
                 }
                 return;
             }
