@@ -1139,52 +1139,7 @@ namespace RTS.Buildings
         /// <summary>
         /// Overload that works with GameObject instead of WallConnectionSystem
         /// </summary>
-        private float DetectWallMeshLength(GameObject wallObject)
-        {
-            // Try to get mesh from MeshFilter
-            MeshFilter meshFilter = wallObject.GetComponentInChildren<MeshFilter>();
-            if (meshFilter != null && meshFilter.sharedMesh != null)
-            {
-                Bounds bounds = meshFilter.sharedMesh.bounds;
-                Transform meshTransform = meshFilter.transform;
-
-                float boundsSize = 0f;
-                float meshScale = 1f;
-
-                switch (wallLengthAxis)
-                {
-                    case WallLengthAxis.X:
-                        boundsSize = bounds.size.x;
-                        meshScale = meshTransform.localScale.x;
-                        break;
-                    case WallLengthAxis.Y:
-                        boundsSize = bounds.size.y;
-                        meshScale = meshTransform.localScale.y;
-                        break;
-                    case WallLengthAxis.Z:
-                        boundsSize = bounds.size.z;
-                        meshScale = meshTransform.localScale.z;
-                        break;
-                }
-
-                float length = boundsSize * meshScale;
-                return Mathf.Max(length, 0.1f);
-            }
-
-            // Fallback: try collider
-            Collider collider = wallObject.GetComponent<Collider>();
-            if (collider != null)
-            {
-                Bounds bounds = collider.bounds;
-                float size = wallLengthAxis == WallLengthAxis.X ? bounds.size.x :
-                            (wallLengthAxis == WallLengthAxis.Y ? bounds.size.y : bounds.size.z);
-                return Mathf.Max(size / wallObject.transform.localScale.x, 0.1f);
-            }
-
-            // Last resort: use default
-            return 1f;
-        }
-
+       
         private bool ShareEndpoint(Vector3 a1, Vector3 a2, Vector3 b1, Vector3 b2)
         {
             return
