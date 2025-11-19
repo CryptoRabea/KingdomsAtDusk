@@ -89,6 +89,7 @@
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Debug\BuildingSelectionDebugger.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsPlacement.cs" />
+    <Compile Include="Assets\FogOfWarRendererFeature_Compat.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsProgressController.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Assets\RTSAnimation\AnimationConfigSO.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Building.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEnums.cs" />
+    <Compile Include="Assets\Scripts\UI\CursorStateManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingTooltip.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
@@ -172,6 +174,7 @@
     <Compile Include="Assets\Scripts\Units\AI\Specialized\HealerAI.cs" />
     <Compile Include="Assets\StoneKeep\Scripts\PlayerInteraction.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelection3D.cs" />
+    <Compile Include="Assets\Settings\FogPerCamera.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
@@ -179,6 +182,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSystemValidator.cs" />
     <Compile Include="Assets\Scripts\Core\EventBus.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarDiagnostics.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarRendererFeature.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEntityVisibility.cs" />
     <Compile Include="Assets\Scripts\Camera\RTSCameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
@@ -213,6 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
+    <None Include="Assets\FogOfWar.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets\ConstructableMedievalHouses\ReadMe.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - License.txt" />
@@ -233,6 +238,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Shader_PBR.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
+    <None Include="Assets\Shaders\FogOfWarCameraEffectSimple.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\SDFFunctions.hlsl" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader.shader" />
@@ -260,6 +266,7 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\VS_indirect.cginc" />
     <None Include="Assets\Polytope Studio\Lowpoly_Props\Sources\Shaders\PT_Props_Shader.shader" />
+    <None Include="Assets\Shaders\FogOfWarURP.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\Shaders\FogOfWarCameraEffect.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />

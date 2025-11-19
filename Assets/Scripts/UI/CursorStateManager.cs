@@ -1,3 +1,4 @@
+using RTS.Units;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -56,7 +57,7 @@ namespace KingdomsAtDusk.UI
 
             if (selectionManager == null)
             {
-                selectionManager = FindObjectOfType<UnitSelectionManager>();
+                selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
             }
         }
 

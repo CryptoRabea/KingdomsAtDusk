@@ -5,10 +5,11 @@ using UnityEngine.Rendering.Universal;
 namespace KingdomsAtDusk.FogOfWar
 {
     /// <summary>
-    /// URP Renderer Feature for fog of war camera dimming effect
-    /// Add this to your URP Renderer asset
+    /// COMPATIBILITY MODE: URP Renderer Feature for fog of war
+    /// Use this if you cannot enable Render Graph in your project
+    /// For Unity 6 with Render Graph, use FogOfWarRendererFeature.cs instead
     /// </summary>
-    public class FogOfWarRendererFeature : ScriptableRendererFeature
+    public class FogOfWarRendererFeature_Compat : ScriptableRendererFeature
     {
         [System.Serializable]
         public class Settings
@@ -19,22 +20,22 @@ namespace KingdomsAtDusk.FogOfWar
         }
 
         public Settings settings = new Settings();
-        private FogOfWarRenderPass renderPass;
+        private FogOfWarRenderPass_Compat renderPass;
 
         public override void Create()
         {
-            renderPass = new FogOfWarRenderPass(settings);
+            renderPass = new FogOfWarRenderPass_Compat(settings);
         }
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
             if (settings.fogMaterial == null)
             {
-                Debug.LogWarning("[FogOfWarRendererFeature] Fog material is not assigned!");
+                Debug.LogWarning("[FogOfWarRendererFeature_Compat] Fog material is not assigned!");
                 return;
             }
 
-            renderPass.ConfigureInput(ScriptableRenderPassInput.Color);
+            renderPass.ConfigureInput(ScriptableRenderPassInput.Color | ScriptableRenderPassInput.Depth);
             renderer.EnqueuePass(renderPass);
         }
 
@@ -45,11 +46,11 @@ namespace KingdomsAtDusk.FogOfWar
     }
 
     /// <summary>
-    /// The actual render pass that applies the fog effect
+    /// Compatibility render pass - suppresses obsolete warnings
     /// </summary>
-    public class FogOfWarRenderPass : ScriptableRenderPass
+    public class FogOfWarRenderPass_Compat : ScriptableRenderPass
     {
-        private FogOfWarRendererFeature.Settings settings;
+        private FogOfWarRendererFeature_Compat.Settings settings;
         private RTHandle tempRTHandle;
         private FogOfWarManager fogManager;
         private Texture2D fogTexture;
@@ -58,13 +59,16 @@ namespace KingdomsAtDusk.FogOfWar
         private int frameCount;
 
         private const string PROFILER_TAG = "FogOfWarEffect";
+        private ProfilingSampler profilingSampler;
 
-        public FogOfWarRenderPass(FogOfWarRendererFeature.Settings settings)
+        public FogOfWarRenderPass_Compat(FogOfWarRendererFeature_Compat.Settings settings)
         {
             this.settings = settings;
             this.renderPassEvent = settings.renderPassEvent;
+            profilingSampler = new ProfilingSampler(PROFILER_TAG);
         }
 
+        [System.Obsolete("This rendering path is for compatibility mode only")]
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             // Initialize on first setup
@@ -77,18 +81,29 @@ namespace KingdomsAtDusk.FogOfWar
             var descriptor = renderingData.cameraData.cameraTargetDescriptor;
             descriptor.depthBufferBits = 0;
 
-            RenderingUtils.ReAllocateIfNeeded(ref tempRTHandle, descriptor, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "_TempFogOfWarTexture");
+#pragma warning disable CS0618 // Type or member is obsolete
+            RenderingUtils.ReAllocateHandleIfNeeded(
+                ref tempRTHandle,
+                descriptor,
+                FilterMode.Bilinear,
+                TextureWrapMode.Clamp,
+                name: "_TempFogOfWarTexture"
+            );
+#pragma warning restore CS0618
         }
 
         private void Initialize()
         {
             if (isInitialized) return;
 
-            // Find fog manager
-            fogManager = FogOfWarManager.Instance;
+            // Find fog manager using new API
+#pragma warning disable CS0618 // Type or member is obsolete
+            fogManager = Object.FindFirstObjectByType<FogOfWarManager>();
+#pragma warning restore CS0618
+            
             if (fogManager == null || fogManager.Grid == null)
             {
-                Debug.LogWarning("[FogOfWarRenderPass] FogOfWarManager not found or not initialized");
+                Debug.LogWarning("[FogOfWarRenderPass_Compat] FogOfWarManager not found or not initialized");
                 return;
             }
 
@@ -114,9 +129,10 @@ namespace KingdomsAtDusk.FogOfWar
             fogTexture.Apply();
 
             isInitialized = true;
-            Debug.Log($"[FogOfWarRenderPass] Initialized! Grid: {width}x{height}");
+            Debug.Log($"[FogOfWarRenderPass_Compat] Initialized! Grid: {width}x{height}");
         }
 
+        [System.Obsolete("This rendering path is for compatibility mode only")]
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             if (settings.fogMaterial == null)
@@ -136,8 +152,10 @@ namespace KingdomsAtDusk.FogOfWar
             // Get command buffer
             CommandBuffer cmd = CommandBufferPool.Get(PROFILER_TAG);
 
-            // Get the camera color target
+            // Get the camera color target (compatibility mode)
+#pragma warning disable CS0618 // Type or member is obsolete
             RTHandle cameraColorTarget = renderingData.cameraData.renderer.cameraColorTargetHandle;
+#pragma warning restore CS0618
 
             // Set shader parameters
             if (fogManager != null && fogManager.Config != null)
@@ -150,8 +168,11 @@ namespace KingdomsAtDusk.FogOfWar
             }
 
             // Blit with fog material
-            Blitter.BlitCameraTexture(cmd, cameraColorTarget, tempRTHandle, settings.fogMaterial, 0);
-            Blitter.BlitCameraTexture(cmd, tempRTHandle, cameraColorTarget);
+            using (new ProfilingScope(cmd, profilingSampler))
+            {
+                Blitter.BlitCameraTexture(cmd, cameraColorTarget, tempRTHandle, settings.fogMaterial, 0);
+                Blitter.BlitCameraTexture(cmd, tempRTHandle, cameraColorTarget);
+            }
 
             // Execute and cleanup
             context.ExecuteCommandBuffer(cmd);
