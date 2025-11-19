@@ -234,17 +234,55 @@ namespace RTS.Buildings
                 WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
                 if (wallSystem != null)
                 {
-                    // Found an existing wall - check if it's at an endpoint (allowed) or overlapping (not allowed)
-                    Vector3 wallPos = wallSystem.transform.position;
-
-                    // Allow connection at endpoints (within tolerance)
-                    if (Vector3.Distance(start, wallPos) < 0.5f || Vector3.Distance(end, wallPos) < 0.5f)
+                    // ✅ Calculate actual endpoints considering the wall's scale
+                    if (TryGetWallEndpoints(wallSystem, out Vector3 existingStart, out Vector3 existingEnd))
                     {
-                        continue; // Connection at endpoint is allowed
-                    }
+                        // 1. If connecting exactly to endpoints → allowed
+                        float endpointTolerance = closingLoop ? 0.5f : 0.01f;
+                        if (Vector3.Distance(start, existingStart) < endpointTolerance ||
+                            Vector3.Distance(start, existingEnd) < endpointTolerance ||
+                            Vector3.Distance(end, existingStart) < endpointTolerance ||
+                            Vector3.Distance(end, existingEnd) < endpointTolerance)
+                        {
+                            continue; // endpoint connections allowed
+                        }
 
-                    Debug.Log($"Wall would overlap existing wall: {col.gameObject.name} at {wallPos}");
-                    return true;
+                        // 1b. If connecting exactly to midpoint → allowed
+                        Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
+                        if (Vector3.Distance(start, existingMid) < endpointTolerance ||
+                            Vector3.Distance(end, existingMid) < endpointTolerance)
+                        {
+                            continue; // midpoint connections allowed
+                        }
+
+                        // 2. Check segment intersection in 2D (X/Z)
+                        if (SegmentsIntersect2D(start, end, existingStart, existingEnd))
+                        {
+                            Debug.Log($"Wall would intersect existing wall: {col.gameObject.name}");
+                            return true; // Overlap or crossing detected
+                        }
+
+                        // 3. Check if new segment lies on top of an existing one (collinear & overlapping)
+                        if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
+                        {
+                            Debug.Log($"Wall would overlap existing wall (collinear): {col.gameObject.name}");
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: use center position if we can't calculate endpoints
+                        Vector3 wallPos = wallSystem.transform.position;
+
+                        // Allow connection at endpoints (within tolerance)
+                        if (Vector3.Distance(start, wallPos) < 0.5f || Vector3.Distance(end, wallPos) < 0.5f)
+                        {
+                            continue; // Connection at endpoint is allowed
+                        }
+
+                        Debug.Log($"Wall would overlap existing wall: {col.gameObject.name} at {wallPos}");
+                        return true;
+                    }
                 }
             }
 
@@ -304,6 +342,10 @@ namespace RTS.Buildings
 
             float bMin = Vector2.Dot(B1, dirA);
             float bMax = Vector2.Dot(B2, dirA);
+
+            // ✅ Sort min/max in case walls are oriented in opposite directions
+            if (aMin > aMax) { float temp = aMin; aMin = aMax; aMax = temp; }
+            if (bMin > bMax) { float temp = bMin; bMin = bMax; bMax = temp; }
 
             float overlap = Mathf.Min(aMax, bMax) - Mathf.Max(aMin, bMin);
 
@@ -1034,6 +1076,115 @@ namespace RTS.Buildings
         #endregion
 
         #region Helper Methods
+
+        /// <summary>
+        /// Calculate the actual start and end positions of an existing wall considering its scale.
+        /// This ensures seamless connections even when walls are scaled.
+        /// </summary>
+        private bool TryGetWallEndpoints(WallConnectionSystem wallSystem, out Vector3 startPos, out Vector3 endPos)
+        {
+            startPos = Vector3.zero;
+            endPos = Vector3.zero;
+
+            if (wallSystem == null) return false;
+
+            Transform wallTransform = wallSystem.transform;
+            Vector3 center = wallTransform.position;
+            Quaternion rotation = wallTransform.rotation;
+            Vector3 scale = wallTransform.localScale;
+
+            // Detect the wall's mesh length along the configured axis
+            float meshLength = DetectWallMeshLength(wallTransform.gameObject);
+
+            // Get the scale factor along the wall length axis
+            float scaleFactor = 1f;
+            switch (wallLengthAxis)
+            {
+                case WallLengthAxis.X:
+                    scaleFactor = scale.x;
+                    break;
+                case WallLengthAxis.Y:
+                    scaleFactor = scale.y;
+                    break;
+                case WallLengthAxis.Z:
+                    scaleFactor = scale.z;
+                    break;
+            }
+
+            // Calculate actual world-space length considering scale
+            float worldLength = meshLength * scaleFactor;
+
+            // Calculate direction vector along the wall length axis
+            Vector3 dir = Vector3.forward;
+            switch (wallLengthAxis)
+            {
+                case WallLengthAxis.X:
+                    dir = rotation * Vector3.right;
+                    break;
+                case WallLengthAxis.Y:
+                    dir = rotation * Vector3.up;
+                    break;
+                case WallLengthAxis.Z:
+                    dir = rotation * Vector3.forward;
+                    break;
+            }
+
+            // Calculate endpoints
+            startPos = center - dir * (worldLength / 2f);
+            endPos = center + dir * (worldLength / 2f);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Overload that works with GameObject instead of WallConnectionSystem
+        /// </summary>
+        private float DetectWallMeshLength(GameObject wallObject)
+        {
+            // Try to get mesh from MeshFilter
+            MeshFilter meshFilter = wallObject.GetComponentInChildren<MeshFilter>();
+            if (meshFilter != null && meshFilter.sharedMesh != null)
+            {
+                Bounds bounds = meshFilter.sharedMesh.bounds;
+                Transform meshTransform = meshFilter.transform;
+
+                float boundsSize = 0f;
+                float meshScale = 1f;
+
+                switch (wallLengthAxis)
+                {
+                    case WallLengthAxis.X:
+                        boundsSize = bounds.size.x;
+                        meshScale = meshTransform.localScale.x;
+                        break;
+                    case WallLengthAxis.Y:
+                        boundsSize = bounds.size.y;
+                        meshScale = meshTransform.localScale.y;
+                        break;
+                    case WallLengthAxis.Z:
+                        boundsSize = bounds.size.z;
+                        meshScale = meshTransform.localScale.z;
+                        break;
+                }
+
+                float length = boundsSize * meshScale;
+                return Mathf.Max(length, 0.1f);
+            }
+
+            // Fallback: try collider
+            Collider collider = wallObject.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Bounds bounds = collider.bounds;
+                float size = wallLengthAxis == WallLengthAxis.X ? bounds.size.x :
+                            (wallLengthAxis == WallLengthAxis.Y ? bounds.size.y : bounds.size.z);
+                return Mathf.Max(size / wallObject.transform.localScale.x, 0.1f);
+            }
+
+            // Last resort: use default
+            return 1f;
+        }
+
         private bool ShareEndpoint(Vector3 a1, Vector3 a2, Vector3 b1, Vector3 b2)
         {
             return
@@ -1125,14 +1276,51 @@ namespace RTS.Buildings
                 WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
                 if (wallSystem != null)
                 {
-                    Vector3 wallPos = wallSystem.transform.position;
-                    float dist = Vector3.Distance(position, wallPos);
-
-                    if (dist < wallSnapDistance && dist < closestDistance)
+                    // ✅ Calculate actual endpoints considering the wall's scale
+                    if (TryGetWallEndpoints(wallSystem, out Vector3 wallStart, out Vector3 wallEnd))
                     {
-                        closestDistance = dist;
-                        snappedPosition = wallPos;
-                        found = true;
+                        Vector3 wallCenter = wallSystem.transform.position;
+                        Vector3 wallMidpoint = (wallStart + wallEnd) * 0.5f;
+
+                        // Check distance to start endpoint
+                        float distStart = Vector3.Distance(position, wallStart);
+                        if (distStart < wallSnapDistance && distStart < closestDistance)
+                        {
+                            closestDistance = distStart;
+                            snappedPosition = wallStart;
+                            found = true;
+                        }
+
+                        // Check distance to end endpoint
+                        float distEnd = Vector3.Distance(position, wallEnd);
+                        if (distEnd < wallSnapDistance && distEnd < closestDistance)
+                        {
+                            closestDistance = distEnd;
+                            snappedPosition = wallEnd;
+                            found = true;
+                        }
+
+                        // Check distance to midpoint
+                        float distMid = Vector3.Distance(position, wallMidpoint);
+                        if (distMid < wallSnapDistance && distMid < closestDistance)
+                        {
+                            closestDistance = distMid;
+                            snappedPosition = wallMidpoint;
+                            found = true;
+                        }
+                    }
+                    else
+                    {
+                        // Fallback to center if we can't calculate endpoints
+                        Vector3 wallPos = wallSystem.transform.position;
+                        float dist = Vector3.Distance(position, wallPos);
+
+                        if (dist < wallSnapDistance && dist < closestDistance)
+                        {
+                            closestDistance = dist;
+                            snappedPosition = wallPos;
+                            found = true;
+                        }
                     }
                 }
             }
