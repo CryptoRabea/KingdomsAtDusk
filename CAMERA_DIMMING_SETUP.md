@@ -2,7 +2,26 @@
 
 This guide explains how to set up the camera-based fog of war dimming effect for Kingdoms at Dusk.
 
-## Overview
+## ⚠️ IMPORTANT: Check Your Render Pipeline
+
+**Before starting, determine which render pipeline your project uses:**
+
+### URP (Universal Render Pipeline)
+If your project uses URP, **DO NOT use this guide**. Instead, see:
+📖 **[URP_FOG_OF_WAR_SETUP.md](URP_FOG_OF_WAR_SETUP.md)**
+
+**How to check if you're using URP:**
+1. Go to **Edit → Project Settings → Graphics**
+2. Check **Scriptable Render Pipeline Settings**
+3. If it shows a URP asset (not "None"), you're using URP
+
+### Built-in Render Pipeline
+If **Scriptable Render Pipeline Settings** is set to "None", you're using Built-in RP.
+Continue with this guide.
+
+---
+
+## Overview (Built-in RP Only)
 
 The new `FogOfWarCameraEffect` system provides proper camera view dimming for non-visible areas. It works by:
 

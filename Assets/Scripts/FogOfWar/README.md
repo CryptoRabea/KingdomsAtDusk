@@ -13,10 +13,26 @@ A professional fog of war system for Kingdoms at Dusk that provides real-time vi
 - **Performance Optimized**: Chunked updates, dirty cell tracking, spatial optimization
 - **Team-Based**: Supports multiple players/teams
 - **Configurable**: Extensive configuration options via ScriptableObject-like settings
+- **Render Pipeline Support**: Works with both Built-in RP and URP
+
+## ⚠️ Important: Render Pipeline
+
+This system supports both **Built-in RP** and **URP (Universal Render Pipeline)**:
+
+- **For URP projects**: See **[URP_FOG_OF_WAR_SETUP.md](../../../../URP_FOG_OF_WAR_SETUP.md)** for complete URP setup guide
+- **For Built-in RP projects**: Continue with this README
+
+**How to check your render pipeline:**
+1. **Edit → Project Settings → Graphics**
+2. Check **Scriptable Render Pipeline Settings**
+3. If it shows a URP asset → **Use URP guide**
+4. If it's "None" → Use this guide (Built-in RP)
+
+---
 
 ## Quick Start
 
-### Method 1: Using the Setup Tool (Recommended)
+### Method 1: Using the Setup Tool (Recommended for Built-in RP)
 
 1. Go to `Kingdoms at Dusk > Fog of War > Setup Tool` in the Unity menu
 2. Click "Create Fog of War Manager in Scene"
