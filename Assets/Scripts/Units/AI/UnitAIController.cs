@@ -32,7 +32,7 @@ namespace RTS.Units.AI
         private Vector3? aggroOriginPosition = null;
         private bool isOnForcedMove = false;
         private Vector3? forcedMoveDestination = null;
-        private const float DESTINATION_REACHED_DISTANCE = 2f; // Distance to consider destination reached
+        private const float DESTINATION_REACHED_DISTANCE = 3f; // Distance to consider destination reached
 
         // Public accessors
         public UnitHealth Health => healthComponent;

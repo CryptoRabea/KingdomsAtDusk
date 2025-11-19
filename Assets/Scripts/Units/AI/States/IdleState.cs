@@ -4,9 +4,8 @@ namespace RTS.Units.AI
 {
     public class IdleState : UnitState
     {
-        private float idleTimer;
+        private float scanTimer;
         private float scanInterval = 0.5f;
-        private const float FORCED_MOVE_CLEAR_TIME = 2f; // Clear forced move after 2 seconds of idle
 
         public IdleState(UnitAIController aiController) : base(aiController) { }
 
@@ -15,31 +14,23 @@ namespace RTS.Units.AI
         public override void OnEnter()
         {
             controller.Movement?.Stop();
-            idleTimer = 0f;
+            scanTimer = 0f;
         }
 
         public override void OnUpdate()
         {
-            idleTimer += Time.deltaTime;
-
             // Clear forced move flag if we've reached the destination
-            if (controller.IsOnForcedMove)
+            if (controller.IsOnForcedMove && controller.HasReachedForcedMoveDestination())
             {
-                if (controller.HasReachedForcedMoveDestination())
-                {
-                    // Reached destination, resume normal aggro behavior
-                    controller.SetForcedMove(false);
-                }
-                else if (idleTimer >= FORCED_MOVE_CLEAR_TIME)
-                {
-                    // Been idle for a while without reaching destination, clear anyway
-                    controller.SetForcedMove(false);
-                }
+                // Reached destination, resume normal aggro behavior immediately
+                controller.SetForcedMove(false);
             }
 
-            if (idleTimer >= scanInterval)
+            scanTimer += Time.deltaTime;
+
+            if (scanTimer >= scanInterval)
             {
-                idleTimer = 0f;
+                scanTimer = 0f;
 
                 // Don't auto-target if player has issued a forced move command
                 if (!controller.IsOnForcedMove)
