@@ -1,10 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.Collections.Generic;
-using System;
 using RTS.Core.Events;
 using RTS.Core.Services;
+using System;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace RTS.UI.HUD
 {
@@ -18,7 +18,7 @@ namespace RTS.UI.HUD
         [SerializeField] private bool showResources = true;
         [SerializeField] private bool showMenuButtons = true;
         [SerializeField] private bool showClock = false;
-        [SerializeField] private bool showPopulation = false;
+        [SerializeField] private bool showPopulation = true;
 
         [Header("Resource Display")]
         [SerializeField] private Transform resourceContainer;
@@ -34,7 +34,7 @@ namespace RTS.UI.HUD
         [Header("Clock")]
         [SerializeField] private TextMeshProUGUI clockText;
 
-        [Header("Population (Optional)")]
+        [Header("Population")]
         [SerializeField] private TextMeshProUGUI populationText;
         [SerializeField] private Image populationIcon;
 
@@ -48,7 +48,7 @@ namespace RTS.UI.HUD
 
         private void Awake()
         {
-            // Get services
+            // Get services - ServiceLocator is static, no Instance needed
             resourcesService = ServiceLocator.TryGet<IResourcesService>();
 
             // Subscribe to events
@@ -149,9 +149,8 @@ namespace RTS.UI.HUD
         private void CreateResourceDisplay(ResourceType resourceType, int amount)
         {
             GameObject item = Instantiate(resourceItemPrefab, resourceContainer);
-            var displayItem = item.GetComponent<ResourceDisplayItem>();
 
-            if (displayItem == null)
+            if (!item.TryGetComponent<ResourceDisplayItem>(out var displayItem))
             {
                 displayItem = item.AddComponent<ResourceDisplayItem>();
             }
@@ -204,7 +203,8 @@ namespace RTS.UI.HUD
         {
             if (resourcesService != null)
             {
-                int currentPop = resourcesService.Food; // Using food as population
+                // Using Food as population for now
+                int currentPop = resourcesService.Food;
 
                 // Simple display for now
                 populationText.text = $"Population: {currentPop}";
