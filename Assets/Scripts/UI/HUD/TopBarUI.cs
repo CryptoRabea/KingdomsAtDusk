@@ -1,9 +1,11 @@
 using RTS.Core.Events;
 using RTS.Core.Services;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace RTS.UI.HUD
 {
     /// <summary>
@@ -40,14 +42,14 @@ namespace RTS.UI.HUD
         [SerializeField] private Color resourceChangeColor = Color.yellow;
         [SerializeField] private float colorChangeDuration = 0.5f;
 
-        private Dictionary<string, ResourceDisplayItem> resourceDisplays = new Dictionary<string, ResourceDisplayItem>();
+        private Dictionary<ResourceType, ResourceDisplayItem> resourceDisplays = new Dictionary<ResourceType, ResourceDisplayItem>();
         private IResourcesService resourcesService;
         private float gameTime;
 
         private void Awake()
         {
-            // Get services
-            resourcesService = ServiceLocator.Instance.Get<IResourcesService>();
+            // Get services - ServiceLocator is static, no Instance needed
+            resourcesService = ServiceLocator.TryGet<IResourcesService>();
 
             // Subscribe to events
             EventBus.Subscribe<ResourcesChangedEvent>(OnResourcesChanged);
@@ -133,29 +135,28 @@ namespace RTS.UI.HUD
             }
             resourceDisplays.Clear();
 
-            // Get current resources
-            var resources = resourcesService.GetAllResources();
-
-            foreach (var kvp in resources)
+            // Create displays for all resource types
+            foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
             {
-                CreateResourceDisplay(kvp.Key, kvp.Value);
+                int amount = resourcesService.GetResource(type);
+                CreateResourceDisplay(type, amount);
             }
         }
 
         /// <summary>
         /// Creates a resource display item.
         /// </summary>
-        private void CreateResourceDisplay(string resourceName, int amount)
+        private void CreateResourceDisplay(ResourceType resourceType, int amount)
         {
             GameObject item = Instantiate(resourceItemPrefab, resourceContainer);
-            
+
             if (!item.TryGetComponent<ResourceDisplayItem>(out var displayItem))
             {
                 displayItem = item.AddComponent<ResourceDisplayItem>();
             }
 
-            displayItem.Initialize(resourceName, amount);
-            resourceDisplays[resourceName] = displayItem;
+            displayItem.Initialize(resourceType.ToString(), amount);
+            resourceDisplays[resourceType] = displayItem;
         }
 
         /// <summary>
@@ -202,27 +203,11 @@ namespace RTS.UI.HUD
         {
             if (resourcesService != null)
             {
-                int currentPop = resourcesService.GetResourceAmount("Food"); // Using food as population
-                int maxPop = resourcesService.GetResourceAmount("MaxFood"); // Assuming this exists
+                // Using Food as population for now
+                int currentPop = resourcesService.Food;
 
-                if (maxPop > 0)
-                {
-                    populationText.text = $"{currentPop}/{maxPop}";
-
-                    // Color code based on population
-                    if (currentPop >= maxPop)
-                    {
-                        populationText.color = Color.red;
-                    }
-                    else if (currentPop >= maxPop * 0.8f)
-                    {
-                        populationText.color = Color.yellow;
-                    }
-                    else
-                    {
-                        populationText.color = Color.white;
-                    }
-                }
+                // Simple display for now
+                populationText.text = $"Population: {currentPop}";
             }
         }
 
@@ -231,17 +216,31 @@ namespace RTS.UI.HUD
         /// </summary>
         private void OnResourcesChanged(ResourcesChangedEvent e)
         {
-            foreach (var kvp in e.Resources)
+            if (resourcesService == null) return;
+
+            // Update all resource displays with current values
+            if (e.WoodDelta != 0 && resourceDisplays.ContainsKey(ResourceType.Wood))
             {
-                if (resourceDisplays.ContainsKey(kvp.Key))
-                {
-                    resourceDisplays[kvp.Key].UpdateAmount(kvp.Value, resourceChangeColor, colorChangeDuration);
-                }
-                else
-                {
-                    // Create new display for this resource
-                    CreateResourceDisplay(kvp.Key, kvp.Value);
-                }
+                int newAmount = resourcesService.Wood;
+                resourceDisplays[ResourceType.Wood].UpdateAmount(newAmount, resourceChangeColor, colorChangeDuration);
+            }
+
+            if (e.FoodDelta != 0 && resourceDisplays.ContainsKey(ResourceType.Food))
+            {
+                int newAmount = resourcesService.Food;
+                resourceDisplays[ResourceType.Food].UpdateAmount(newAmount, resourceChangeColor, colorChangeDuration);
+            }
+
+            if (e.GoldDelta != 0 && resourceDisplays.ContainsKey(ResourceType.Gold))
+            {
+                int newAmount = resourcesService.Gold;
+                resourceDisplays[ResourceType.Gold].UpdateAmount(newAmount, resourceChangeColor, colorChangeDuration);
+            }
+
+            if (e.StoneDelta != 0 && resourceDisplays.ContainsKey(ResourceType.Stone))
+            {
+                int newAmount = resourcesService.Stone;
+                resourceDisplays[ResourceType.Stone].UpdateAmount(newAmount, resourceChangeColor, colorChangeDuration);
             }
         }
 
