@@ -1,6 +1,7 @@
+using KingdomsAtDusk.UI;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 namespace RTS.UI.HUD
 {

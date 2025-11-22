@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using RTS.Core.Services;
-
+using KingdomsAtDusk.FogOfWar;
 namespace RTS.Buildings
 {
     /// <summary>
@@ -110,9 +110,14 @@ namespace RTS.Buildings
 
             // Destroy VisionProvider on preview to prevent fog of war reveal
             // Use DestroyImmediate because Destroy() only marks for deletion at end of frame
-            var visionProvider = stairPreview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
-            if (visionProvider != null)
-                DestroyImmediate(visionProvider);
+            if (stairPreview.TryGetComponent<KingdomsAtDusk.FogOfWar.IVisionProvider>(out var visionProvider))
+            {
+                // Cast the interface back to a component
+                var component = visionProvider as Component;
+                if (component != null)
+                    DestroyImmediate(component);
+            }
+
 
             // Disable components for preview
             var stairComponent = stairPreview.GetComponent<WallStairs>();

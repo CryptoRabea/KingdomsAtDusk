@@ -1,13 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using KingdomsAtDusk.FogOfWar;
 
-namespace KingdomsAtDusk.FogOfWar
-{
-    /// <summary>
-    /// Main manager for the fog of war system. Handles vision tracking and updates.
-    /// </summary>
-    public class FogOfWarManager : MonoBehaviour
+
+/// <summary>
+/// Main manager for the fog of war system. Handles vision tracking and updates.
+/// </summary>
+public class FogOfWarManager : MonoBehaviour
     {
         [Header("Configuration")]
         [SerializeField] private FogOfWarConfig config = new FogOfWarConfig();
@@ -393,4 +393,4 @@ namespace KingdomsAtDusk.FogOfWar
             HideAll();
         }
     }
-}
+

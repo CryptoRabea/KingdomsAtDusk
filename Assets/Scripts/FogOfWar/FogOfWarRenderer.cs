@@ -1,12 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
+using KingdomsAtDusk.FogOfWar;
 
-namespace KingdomsAtDusk.FogOfWar
-{
-    /// <summary>
-    /// Renders fog of war overlay on the game view using a mesh-based approach
-    /// </summary>
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+
+/// <summary>
+/// Renders fog of war overlay on the game view using a mesh-based approach
+/// </summary>
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class FogOfWarRenderer : MonoBehaviour
     {
         [Header("Settings")]
@@ -197,4 +197,4 @@ namespace KingdomsAtDusk.FogOfWar
             }
         }
     }
-}
+

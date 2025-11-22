@@ -1,12 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
+using KingdomsAtDusk.FogOfWar;
 
-namespace KingdomsAtDusk.FogOfWar
-{
-    /// <summary>
-    /// Grid-based fog of war tracking system for efficient vision calculations
-    /// </summary>
-    public class FogOfWarGrid
+/// <summary>
+/// Grid-based fog of war tracking system for efficient vision calculations
+/// </summary>
+public class FogOfWarGrid
     {
         private VisionState[,] grid;
         private float[,] visibilityTimer; // For fade effects
@@ -252,4 +251,4 @@ namespace KingdomsAtDusk.FogOfWar
             }
         }
     }
-}
+

@@ -1,7 +1,7 @@
+using KingdomsAtDusk.FogOfWar;
 using UnityEngine;
 
-namespace KingdomsAtDusk.FogOfWar
-{
+
     /// <summary>
     /// Component that provides vision for the fog of war system.
     /// Attach to units, buildings, or any entity that should reveal fog.
@@ -166,4 +166,4 @@ namespace KingdomsAtDusk.FogOfWar
             Gizmos.DrawWireSphere(transform.position, visionRadius);
         }
     }
-}
+

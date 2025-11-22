@@ -815,8 +815,14 @@ namespace RTS.Buildings
 
                     // Destroy VisionProvider on preview to prevent fog of war reveal
                     // Use DestroyImmediate because Destroy() only marks for deletion at end of frame
-                    var visionProvider = preview.GetComponent<KingdomsAtDusk.FogOfWar.VisionProvider>();
-                    if (visionProvider != null) DestroyImmediate(visionProvider);
+                    var providers = preview.GetComponents<MonoBehaviour>();
+
+                    foreach (var c in providers)
+                    {
+                        if (c is KingdomsAtDusk.FogOfWar.IVisionProvider)
+                            DestroyImmediate(c);
+                    }
+
 
                     var building = preview.GetComponent<Building>();
                     if (building != null) building.enabled = false;

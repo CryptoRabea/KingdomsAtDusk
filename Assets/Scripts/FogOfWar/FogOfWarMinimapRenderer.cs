@@ -1,8 +1,8 @@
+using KingdomsAtDusk.FogOfWar;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace KingdomsAtDusk.FogOfWar
-{
+
     /// <summary>
     /// Renders fog of war on the minimap using a texture overlay
     /// </summary>
@@ -178,4 +178,4 @@ namespace KingdomsAtDusk.FogOfWar
             }
         }
     }
-}
+

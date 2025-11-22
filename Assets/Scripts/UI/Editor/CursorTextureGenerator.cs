@@ -33,7 +33,7 @@ namespace KingdomsAtDusk.UI.Editor
             GenerateSelectBuildingCursor(folderPath);
 
             AssetDatabase.Refresh();
-            Debug.Log("Cursor textures generated at: " + folderPath);
+       // Debug.Log("Cursor textures generated at: " + folderPath);
         }
 
         private static void GenerateNormalCursor(string folder)
