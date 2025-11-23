@@ -159,8 +159,7 @@ namespace RTS.FogOfWar
             }
 
             // Get Building component and verify it's enabled
-            var buildingComponent = evt.Building.GetComponent<Building>();
-            if (buildingComponent == null)
+            if (!evt.Building.TryGetComponent<Building>(out var buildingComponent))
             {
                 if (showDebugLogs)
                     Debug.LogWarning($"[FogOfWarView] Building {evt.Building.name} has no Building component!");

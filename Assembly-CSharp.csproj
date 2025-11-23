@@ -154,6 +154,7 @@
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingNavMeshObstacle.cs" />
     <Compile Include="Assets\FogOfWarRendererFeature (1).cs" />
+    <Compile Include="Assets\MinimapFogOfWarIntegration.cs" />
     <Compile Include="Assets\ControlGroupFeedbackUI.cs" />
     <Compile Include="Assets\Scripts\Units\Data\UnitConfigSO.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\IdleState.cs" />
