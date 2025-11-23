@@ -32,7 +32,7 @@ namespace RTS.Units
         
         [Header("AI")]
         public float detectionRange = 10f; // how far the unit can see enemies
-
+        public float visionRevealRange;
         [Header("Aggro Settings")]
         [Tooltip("Maximum distance from origin position the unit will chase a target")]
         public float maxChaseDistance = 20f;

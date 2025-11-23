@@ -93,6 +93,7 @@ namespace RTS.Buildings
         [Header("Additional Properties (Optional)")]
         public int maxHealth = 100;
         public float repairCostMultiplier = 0.5f; // 50% of build cost to repair
+        public float visionRevealRange;
 
         [Header("Unit Training (Optional)")]
         [Tooltip("Can this building train units?")]

@@ -1,7 +1,8 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
 using RTS.Core.Events;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace RTS.Buildings
 {
@@ -31,15 +32,45 @@ namespace RTS.Buildings
 
         public BuildingSelectable CurrentlySelectedBuilding => currentlySelected;
 
+
+        // ✅ Cache these to avoid GC allocations
+        private PointerEventData cachedPointerEventData;
+        private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
+
         private void Awake()
         {
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
+            // ✅ Initialize cached pointer data
+            if (EventSystem.current != null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+
             // Find BuildingManager to check if in placement mode
             buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
         }
+        private bool IsMouseOverUI()
+        {
+            if (EventSystem.current == null)
+                return false;
 
+            // Initialize if needed (in case EventSystem wasn't ready at Awake)
+            if (cachedPointerEventData == null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+
+            // Update position
+            cachedPointerEventData.position = Mouse.current.position.ReadValue();
+
+            // Clear previous results and raycast
+            cachedRaycastResults.Clear();
+            EventSystem.current.RaycastAll(cachedPointerEventData, cachedRaycastResults);
+
+            return cachedRaycastResults.Count > 0;
+        }
         private void OnEnable()
         {
             if (clickAction != null)
@@ -89,6 +120,14 @@ namespace RTS.Buildings
                 return;
             }
 
+            // ✅ CALL IT HERE
+            if (IsMouseOverUI())
+            {
+                if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: Click was over UI, ignoring");
+                return;
+            }
+
             // Don't process selection clicks if currently placing a building
             if (buildingManager != null && buildingManager.IsPlacingBuilding)
             {
@@ -102,11 +141,9 @@ namespace RTS.Buildings
             if (enableDebugLogs)
                 Debug.Log($"BuildingSelectionManager: Click detected at {mousePosition}");
 
-            // If in spawn point mode, set spawn point on left click
             if (isSpawnPointMode)
             {
                 TrySetRallyPoint(mousePosition);
-                // Auto-exit spawn point mode after setting
                 isSpawnPointMode = false;
             }
             else
@@ -199,7 +236,7 @@ namespace RTS.Buildings
             }
 
             // Don't process if clicking on UI
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (IsMouseOverUI())
             {
                 if (enableDebugLogs)
                     Debug.Log("BuildingSelectionManager: Right-click was over UI, ignoring");
@@ -227,7 +264,7 @@ namespace RTS.Buildings
             }
 
             // Don't process if clicking on UI
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (IsMouseOverUI())
             {
                 if (enableDebugLogs)
                     Debug.Log("BuildingSelectionManager: Click was over UI, ignoring");

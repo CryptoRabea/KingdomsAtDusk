@@ -1,4 +1,6 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Camera))]
@@ -34,8 +36,15 @@ public class RTSCameraController : MonoBehaviour
 
     private InputSystem_Actions inputActions;
 
+    private PointerEventData cachedPointerEventData;
+    private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
     private void Awake()
     {
+        if (EventSystem.current != null)
+        {
+            cachedPointerEventData = new PointerEventData(EventSystem.current);
+        }
+
         if (minPosition == Vector2.zero)
         {  minPosition =new Vector2(-1000f,-1000f); }
         if (maxPosition == Vector2.zero)
@@ -62,7 +71,26 @@ public class RTSCameraController : MonoBehaviour
         inputActions.Player.Sprint.performed += ctx => isSprinting = true;
         inputActions.Player.Sprint.canceled += ctx => isSprinting = false;
     }
+    private bool IsMouseOverUI()
+    {
+        if (EventSystem.current == null)
+            return false;
 
+        // Initialize if needed (in case EventSystem wasn't ready at Awake)
+        if (cachedPointerEventData == null)
+        {
+            cachedPointerEventData = new PointerEventData(EventSystem.current);
+        }
+
+        // Update position
+        cachedPointerEventData.position = Mouse.current.position.ReadValue();
+
+        // Clear previous results and raycast
+        cachedRaycastResults.Clear();
+        EventSystem.current.RaycastAll(cachedPointerEventData, cachedRaycastResults);
+
+        return cachedRaycastResults.Count > 0;
+    }
     private void OnEnable() => inputActions.Enable();
     private void OnDisable() => inputActions.Disable();
 
@@ -79,8 +107,8 @@ public class RTSCameraController : MonoBehaviour
     {
         Vector3 dir = new Vector3(moveInput.x, 0, moveInput.y);
 
-        // Edge scrolling
-        if (useEdgeScroll && Mouse.current != null)
+        // Edge scrolling - ✅ ADD UI CHECK
+        if (useEdgeScroll && Mouse.current != null && !IsMouseOverUI())
         {
             Vector2 mousePos = Mouse.current.position.ReadValue();
             if (mousePos.y >= Screen.height - panBorderThickness) dir.z += 1;
@@ -102,9 +130,12 @@ public class RTSCameraController : MonoBehaviour
             Mathf.Clamp(transform.position.z, minPosition.y, maxPosition.y)
         );
     }
-
     private void HandleZoom()
     {
+        if (IsMouseOverUI())
+        {
+            return;
+        }
         float newZoom = cam.orthographic ? cam.orthographicSize - zoomInput * zoomSpeed * Time.deltaTime
                                          : cam.fieldOfView - zoomInput * zoomSpeed * Time.deltaTime;
 
@@ -187,7 +218,7 @@ public class RTSCameraController : MonoBehaviour
             forward.y = 0; // Keep movement horizontal
             forward.Normalize();
 
-            Vector3 move = (right * delta.x + forward * delta.y) * dragSpeed * Time.deltaTime;
+            Vector3 move = dragSpeed * Time.deltaTime * (right * delta.x + forward * delta.y);
             transform.position += move;
         }
 

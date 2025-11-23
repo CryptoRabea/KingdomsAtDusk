@@ -232,15 +232,12 @@ namespace RTS.Managers
                     DestroyImmediate(component);
             }
 
-
             // Disable scripts on preview
-            var building = previewBuilding.GetComponent<Building>();
-            if (building != null)
+            if (previewBuilding.TryGetComponent<Building>(out var building))
                 building.enabled = false;
 
             // Disable BuildingSelectable to prevent preview from being selected
-            var buildingSelectable = previewBuilding.GetComponent<BuildingSelectable>();
-            if (buildingSelectable != null)
+            if (previewBuilding.TryGetComponent<BuildingSelectable>(out var buildingSelectable))
                 buildingSelectable.enabled = false;
 
             // Reactivate preview now that components are cleaned up
@@ -344,8 +341,7 @@ namespace RTS.Managers
         {
             if (previewBuilding == null || currentBuildingData == null) return;
 
-            Vector3 position = previewBuilding.transform.position;
-            Quaternion rotation = previewBuilding.transform.rotation;
+            previewBuilding.transform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
 
             // ✅ CHECK COSTS DIRECTLY FROM DATA (not from prefab)
             if (resourceService != null)
@@ -397,8 +393,7 @@ namespace RTS.Managers
             GameObject newBuilding = Instantiate(currentBuildingData.buildingPrefab, position, rotation);
 
             // ✅ ENSURE BUILDING HAS DATA REFERENCE
-            var buildingComponent = newBuilding.GetComponent<Building>();
-            if (buildingComponent != null)
+            if (newBuilding.TryGetComponent<Building>(out var buildingComponent))
             {
                 buildingComponent.SetData(currentBuildingData);
                 Debug.Log($"✅ Assigned {currentBuildingData.buildingName} data to building component");
@@ -566,8 +561,7 @@ namespace RTS.Managers
         private Bounds GetBuildingBounds(GameObject building)
         {
             // Try to get bounds from collider
-            Collider col = building.GetComponent<Collider>();
-            if (col != null)
+            if (building.TryGetComponent<Collider>(out var col))
             {
                 return col.bounds;
             }
@@ -632,8 +626,7 @@ namespace RTS.Managers
                     continue;
                 }
 
-                var building = data.buildingPrefab.GetComponent<Building>();
-                if (building == null)
+                if (!data.buildingPrefab.TryGetComponent<Building>(out var building))
                 {
                     Debug.LogWarning($"BuildingManager: '{data.buildingName}' prefab doesn't have Building component!");
                 }

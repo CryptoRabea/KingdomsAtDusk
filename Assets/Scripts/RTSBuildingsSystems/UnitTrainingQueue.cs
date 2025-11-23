@@ -361,8 +361,7 @@ namespace RTS.Buildings
                 yield break;
             }
 
-            var unitMovement = unit.GetComponent<UnitMovement>();
-            if (unitMovement != null)
+            if (unit.TryGetComponent<UnitMovement>(out var unitMovement))
             {
                 if (showDebugInfo)
                 {

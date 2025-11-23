@@ -88,8 +88,7 @@ namespace RTS.UI
             // Set up rally point button click handler
             if (setRallyPointButton != null)
             {
-                var button = setRallyPointButton.GetComponent<Button>();
-                if (button != null)
+                if (setRallyPointButton.TryGetComponent<Button>(out var button))
                 {
                     button.onClick.AddListener(OnSetRallyPointButtonClicked);
                 }
@@ -124,11 +123,7 @@ namespace RTS.UI
             buildingComponent = evt.Building.GetComponent<Building>();
             trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
 
-            if (enableDebugLogs)
-            {
-                Debug.Log($"  - Building component: {(buildingComponent != null ? "Found" : "NULL")}");
-                Debug.Log($"  - Building Data: {(buildingComponent?.Data != null ? buildingComponent.Data.buildingName : "NULL")}");
-            }
+           
 
             if (buildingComponent != null && buildingComponent.Data != null)
             {
@@ -260,9 +255,8 @@ namespace RTS.UI
                 if (trainableUnit?.unitConfig == null) continue;
 
                 GameObject buttonObj = Instantiate(trainUnitButtonPrefab, unitButtonContainer);
-                var button = buttonObj.GetComponent<TrainUnitButton>();
-
-                if (button != null)
+                
+                if (buttonObj.TryGetComponent<TrainUnitButton>(out var button))
                 {
                     button.Initialize(trainableUnit, trainingQueue);
                     spawnedButtons.Add(buttonObj);

@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Editor\UnitDetailsUISetup.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Scripts\Editor\PT_Create_Prefab_Editor.cs" />
     <Compile Include="Assets\Scripts\UI\Editor\CursorTextureGenerator.cs" />
+    <Compile Include="Assets\AOSFogWar\Editor\editorFogWar.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallConnectionSystemEditor.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallPrefabSetupUtility.cs" />
   </ItemGroup>

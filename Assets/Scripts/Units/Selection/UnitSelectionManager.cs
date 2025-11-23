@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -15,6 +15,7 @@ namespace RTS.Units
     /// - Max selection limits with distance sorting
     /// - Unit type filtering (owned/friendly/neutral/enemy)
     /// - Drag-to-highlight before selection
+    /// - OPTIMIZED: Cached unit references for performance
     /// ADD THIS TO ONE GAMEOBJECT IN YOUR SCENE (like a "SelectionManager").
     /// DO NOT ADD TO UNITS!
     /// </summary>
@@ -53,6 +54,10 @@ namespace RTS.Units
         [SerializeField] private bool enableHoverHighlight = true;
         [SerializeField] private Color hoverColor = new Color(1, 1, 0, 0.5f);
 
+        [Header("Performance")]
+        [SerializeField] private bool useCachedUnits = true;
+        [SerializeField] private bool showPerformanceStats = false;
+
         private List<UnitSelectable> selectedUnits = new List<UnitSelectable>();
         private List<UnitSelectable> highlightedUnits = new List<UnitSelectable>();
         private UnitSelectable hoveredUnit = null;
@@ -62,8 +67,17 @@ namespace RTS.Units
         private float lastClickTime = 0f;
         private Vector2 lastClickPosition;
 
+        // ✅ UI Detection - Cached
+        private PointerEventData cachedPointerEventData;
+        private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
+
+        // ✅ Performance Optimization - Cached Unit References
+        private HashSet<UnitSelectable> allSelectableUnits = new HashSet<UnitSelectable>();
+
         public IReadOnlyList<UnitSelectable> SelectedUnits => selectedUnits;
         public int SelectionCount => selectedUnits.Count;
+        public int TotalSelectableUnits => allSelectableUnits.Count;
+        private RaycastHit[] raycastHitsCache = new RaycastHit[50]; // Adjust size based on max overlapping units
 
         public enum SelectionPriority
         {
@@ -73,6 +87,12 @@ namespace RTS.Units
 
         private void Awake()
         {
+            // Initialize cached pointer data
+            if (EventSystem.current != null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
@@ -86,6 +106,12 @@ namespace RTS.Units
                 selectionBoxRect.pivot = new Vector2(0, 0);
                 selectionBoxRect.anchorMin = new Vector2(0, 0);
                 selectionBoxRect.anchorMax = new Vector2(0, 0);
+            }
+
+            // ✅ Initialize unit cache if enabled
+            if (useCachedUnits)
+            {
+                InitializeUnitCache();
             }
         }
 
@@ -102,6 +128,13 @@ namespace RTS.Units
             {
                 positionAction.action.Enable();
             }
+
+            // ✅ Subscribe to unit events for cache management
+            if (useCachedUnits)
+            {
+                EventBus.Subscribe<UnitSpawnedEvent>(OnUnitSpawned);
+                EventBus.Subscribe<UnitDiedEvent>(OnUnitDied);
+            }
         }
 
         private void OnDisable()
@@ -116,6 +149,13 @@ namespace RTS.Units
             if (positionAction != null)
             {
                 positionAction.action.Disable();
+            }
+
+            // ✅ Unsubscribe from unit events
+            if (useCachedUnits)
+            {
+                EventBus.Unsubscribe<UnitSpawnedEvent>(OnUnitSpawned);
+                EventBus.Unsubscribe<UnitDiedEvent>(OnUnitDied);
             }
         }
 
@@ -147,11 +187,123 @@ namespace RTS.Units
                 // Check for hover highlighting when not dragging
                 UpdateHoverHighlight();
             }
+
+            // Show performance stats if enabled
+            if (showPerformanceStats && Time.frameCount % 60 == 0)
+            {
+                Debug.Log($"[UnitSelectionManager] Cached Units: {allSelectableUnits.Count} | Selected: {selectedUnits.Count}");
+            }
         }
+
+        #region Unit Cache Management
+
+        /// <summary>
+        /// ✅ NEW: Initialize unit cache by finding all existing units
+        /// </summary>
+        private void InitializeUnitCache()
+        {
+            allSelectableUnits.Clear();
+            UnitSelectable[] existingUnits = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+
+            foreach (var unit in existingUnits)
+            {
+                if (unit != null)
+                {
+                    allSelectableUnits.Add(unit);
+                }
+            }
+
+            if (showPerformanceStats)
+            {
+                Debug.Log($"[UnitSelectionManager] Initialized cache with {allSelectableUnits.Count} units");
+            }
+        }
+
+        /// <summary>
+        /// ✅ NEW: Add unit to cache when spawned
+        /// </summary>
+        private void OnUnitSpawned(UnitSpawnedEvent evt)
+        {
+            if (evt.Unit != null && evt.Unit.TryGetComponent<UnitSelectable>(out var selectable))
+            {
+                allSelectableUnits.Add(selectable);
+
+                if (showPerformanceStats)
+                {
+                    Debug.Log($"[UnitSelectionManager] Unit added to cache: {evt.Unit.name}. Total: {allSelectableUnits.Count}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// ✅ NEW: Remove unit from cache when died
+        /// </summary>
+        private void OnUnitDied(UnitDiedEvent evt)
+        {
+            if (evt.Unit != null && evt.Unit.TryGetComponent<UnitSelectable>(out var selectable))
+            {
+                allSelectableUnits.Remove(selectable);
+
+                // Also remove from selection if selected
+                if (selectedUnits.Contains(selectable))
+                {
+                    selectedUnits.Remove(selectable);
+                    EventBus.Publish(new SelectionChangedEvent(selectedUnits.Count));
+                }
+
+                if (showPerformanceStats)
+                {
+                    Debug.Log($"[UnitSelectionManager] Unit removed from cache: {evt.Unit.name}. Total: {allSelectableUnits.Count}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// ✅ NEW: Manual cache refresh (use if units exist before manager enables)
+        /// </summary>
+        [ContextMenu("Refresh Unit Cache")]
+        public void RefreshUnitCache()
+        {
+            InitializeUnitCache();
+        }
+
+        #endregion
+
+        #region UI Detection
+
+        private bool IsMouseOverUI()
+        {
+            if (EventSystem.current == null)
+                return false;
+
+            // Initialize if needed (in case EventSystem wasn't ready at Awake)
+            if (cachedPointerEventData == null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+
+            // Update position
+            cachedPointerEventData.position = Mouse.current.position.ReadValue();
+
+            // Clear previous results and raycast
+            cachedRaycastResults.Clear();
+            EventSystem.current.RaycastAll(cachedPointerEventData, cachedRaycastResults);
+
+            return cachedRaycastResults.Count > 0;
+        }
+
+        #endregion
+
+        #region Input Handling
 
         private void OnClickStarted(InputAction.CallbackContext context)
         {
-           
+            // Don't process if clicking on UI
+            if (IsMouseOverUI())
+            {
+                return;
+            }
+
             Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
 
             // Start tracking for potential drag or click
@@ -165,8 +317,6 @@ namespace RTS.Units
         {
             if (isDragging)
             {
-                
-
                 Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
                 float dragDistance = Vector2.Distance(dragStartPosition, mousePosition);
 
@@ -213,47 +363,60 @@ namespace RTS.Units
             }
         }
 
+        #endregion
+
+        #region Selection Logic
+
         private bool TrySingleSelection(Vector2 screenPosition)
         {
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
-            // Get all hits to handle overlapping units
-            RaycastHit[] hits = Physics.RaycastAll(ray, 1000f, selectableLayer);
+            // ✅ Use RaycastNonAlloc instead of RaycastAll - zero GC!
+            int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, selectableLayer);
 
-            if (hits.Length > 0)
+            if (hitCount > 0)
             {
                 UnitSelectable selectedUnit = null;
 
-                if (hits.Length == 1)
+                if (hitCount == 1)
                 {
                     // Only one unit - select it
-                    selectedUnit = hits[0].collider.GetComponent<UnitSelectable>();
+                    selectedUnit = raycastHitsCache[0].collider.GetComponent<UnitSelectable>();
                 }
                 else
                 {
                     // Multiple units - apply priority
-                    List<RaycastHit> validHits = new List<RaycastHit>();
-                    foreach (var hit in hits)
+                    UnitSelectable nearestUnit = null;
+                    UnitSelectable furthestUnit = null;
+                    float nearestDistance = float.MaxValue;
+                    float furthestDistance = float.MinValue;
+
+                    // ✅ OPTIMIZED: Find nearest/furthest in single pass instead of sorting
+                    for (int i = 0; i < hitCount; i++)
                     {
-                        var selectable = hit.collider.GetComponent<UnitSelectable>();
+                        var selectable = raycastHitsCache[i].collider.GetComponent<UnitSelectable>();
                         if (selectable != null && PassesTypeFilter(selectable))
                         {
-                            validHits.Add(hit);
+                            float distance = raycastHitsCache[i].distance;
+
+                            if (distance < nearestDistance)
+                            {
+                                nearestDistance = distance;
+                                nearestUnit = selectable;
+                            }
+
+                            if (distance > furthestDistance)
+                            {
+                                furthestDistance = distance;
+                                furthestUnit = selectable;
+                            }
                         }
                     }
 
-                    if (validHits.Count > 0)
-                    {
-                        // Sort by distance
-                        validHits.Sort((a, b) => a.distance.CompareTo(b.distance));
-
-                        // Select based on priority
-                        var targetHit = overlapPriority == SelectionPriority.Nearest
-                            ? validHits[0]
-                            : validHits[validHits.Count - 1];
-
-                        selectedUnit = targetHit.collider.GetComponent<UnitSelectable>();
-                    }
+                    // Select based on priority
+                    selectedUnit = overlapPriority == SelectionPriority.Nearest
+                        ? nearestUnit
+                        : furthestUnit;
                 }
 
                 if (selectedUnit != null && PassesTypeFilter(selectedUnit))
@@ -275,18 +438,20 @@ namespace RTS.Units
             ClearSelection();
             return false;
         }
-
+        /// <summary>
+        /// ✅ OPTIMIZED: Uses cached units instead of FindObjectsByType
+        /// </summary>
         private void PerformDragSelection(Vector2 start, Vector2 end)
         {
             ClearSelection();
 
             Rect selectionRect = GetScreenRect(start, end);
-
-            // Find all selectables in scene
-            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
             List<UnitSelectable> unitsInBox = new List<UnitSelectable>();
 
-            foreach (var selectable in allSelectables)
+            // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
+            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+
+            foreach (var selectable in unitsToCheck)
             {
                 if (selectable == null || !PassesTypeFilter(selectable))
                     continue;
@@ -326,99 +491,19 @@ namespace RTS.Units
             }
         }
 
-        private void UpdateSelectionBox(Vector2 start, Vector2 end)
-        {
-            if (selectionBoxRect == null) return;
-
-            // Calculate the difference between start and end
-            Vector2 diff = end - start;
-
-            // Determine the actual starting corner based on drag direction
-            // We want the box to always start from the drag start point
-            Vector2 boxStart = new Vector2(
-                diff.x < 0 ? start.x + diff.x : start.x,  // If dragging left, start from end.x
-                diff.y < 0 ? start.y + diff.y : start.y   // If dragging down, start from end.y
-            );
-
-            // Size is always positive (absolute values)
-            Vector2 boxSize = new Vector2(
-                Mathf.Abs(diff.x),
-                Mathf.Abs(diff.y)
-            );
-
-            // Set position to the calculated starting corner
-            selectionBoxRect.anchoredPosition = boxStart;
-
-            // Set size (always positive)
-            selectionBoxRect.sizeDelta = boxSize;
-        }
-
-        private Rect GetScreenRect(Vector2 start, Vector2 end)
-        {
-            Vector2 min = Vector2.Min(start, end);
-            Vector2 max = Vector2.Max(start, end);
-            return new Rect(min, max - min);
-        }
-
-        private void SelectUnit(UnitSelectable unit)
-        {
-            if (!selectedUnits.Contains(unit))
-            {
-                selectedUnits.Add(unit);
-                unit.Select();
-            }
-
-            EventBus.Publish(new SelectionChangedEvent(selectedUnits.Count));
-        }
-
-        private void ClearSelection()
-        {
-            foreach (var unit in selectedUnits)
-            {
-                if (unit != null)
-                {
-                    unit.Deselect();
-                }
-            }
-
-            selectedUnits.Clear();
-            EventBus.Publish(new SelectionChangedEvent(0));
-        }
-
-        #region Command Methods (for RTS controls)
-
-        public void MoveSelectedUnits(Vector3 destination)
-        {
-            foreach (var unit in selectedUnits)
-            {
-                if (unit == null) continue;
-
-                var movement = unit.GetComponent<UnitMovement>();
-                movement?.SetDestination(destination);
-            }
-        }
-
-        public void AttackMoveSelectedUnits(Vector3 destination)
-        {
-            // Implement attack-move logic
-            MoveSelectedUnits(destination);
-        }
-
-        #endregion
-
-        #region New Selection Features
-
         /// <summary>
-        /// Selects all units visible to the camera (double-click feature).
+        /// ✅ OPTIMIZED: Uses cached units instead of FindObjectsByType
         /// </summary>
         private void SelectAllVisibleUnits()
         {
             ClearSelection();
 
-            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
             List<UnitSelectable> visibleUnits = new List<UnitSelectable>();
 
-            foreach (var selectable in allSelectables)
+            // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
+            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+
+            foreach (var selectable in unitsToCheck)
             {
                 if (selectable == null || !PassesTypeFilter(selectable))
                     continue;
@@ -461,9 +546,36 @@ namespace RTS.Units
             Debug.Log($"Selected all visible units: {selectedUnits.Count} units");
         }
 
-        /// <summary>
-        /// Updates hover highlighting for unit under mouse cursor.
-        /// </summary>
+        #endregion
+
+        #region Visual Feedback
+
+        private void UpdateSelectionBox(Vector2 start, Vector2 end)
+        {
+            if (selectionBoxRect == null) return;
+
+            // Calculate the difference between start and end
+            Vector2 diff = end - start;
+
+            // Determine the actual starting corner based on drag direction
+            Vector2 boxStart = new Vector2(
+                diff.x < 0 ? start.x + diff.x : start.x,
+                diff.y < 0 ? start.y + diff.y : start.y
+            );
+
+            // Size is always positive (absolute values)
+            Vector2 boxSize = new Vector2(
+                Mathf.Abs(diff.x),
+                Mathf.Abs(diff.y)
+            );
+
+            // Set position to the calculated starting corner
+            selectionBoxRect.anchoredPosition = boxStart;
+
+            // Set size (always positive)
+            selectionBoxRect.sizeDelta = boxSize;
+        }
+
         private void UpdateHoverHighlight()
         {
             if (positionAction == null) return;
@@ -476,7 +588,7 @@ namespace RTS.Units
             }
 
             // Don't highlight if mouse is over UI
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (IsMouseOverUI())
             {
                 return;
             }
@@ -497,7 +609,7 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// Highlights units during drag selection.
+        /// ✅ OPTIMIZED: Uses cached units instead of FindObjectsByType
         /// </summary>
         private void UpdateDragHighlight(Vector2 start, Vector2 end)
         {
@@ -505,9 +617,11 @@ namespace RTS.Units
             ClearDragHighlights();
 
             Rect selectionRect = GetScreenRect(start, end);
-            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
 
-            foreach (var selectable in allSelectables)
+            // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
+            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+
+            foreach (var selectable in unitsToCheck)
             {
                 if (selectable == null || !PassesTypeFilter(selectable))
                     continue;
@@ -525,9 +639,6 @@ namespace RTS.Units
             }
         }
 
-        /// <summary>
-        /// Clears drag highlights.
-        /// </summary>
         private void ClearDragHighlights()
         {
             foreach (var unit in highlightedUnits)
@@ -540,9 +651,46 @@ namespace RTS.Units
             highlightedUnits.Clear();
         }
 
-        /// <summary>
-        /// Checks if a unit passes the type filter.
-        /// </summary>
+        #endregion
+
+        #region Selection Management
+
+        private Rect GetScreenRect(Vector2 start, Vector2 end)
+        {
+            Vector2 min = Vector2.Min(start, end);
+            Vector2 max = Vector2.Max(start, end);
+            return new Rect(min, max - min);
+        }
+
+        private void SelectUnit(UnitSelectable unit)
+        {
+            if (!selectedUnits.Contains(unit))
+            {
+                selectedUnits.Add(unit);
+                unit.Select();
+            }
+
+            EventBus.Publish(new SelectionChangedEvent(selectedUnits.Count));
+        }
+
+        private void ClearSelection()
+        {
+            foreach (var unit in selectedUnits)
+            {
+                if (unit != null)
+                {
+                    unit.Deselect();
+                }
+            }
+
+            selectedUnits.Clear();
+            EventBus.Publish(new SelectionChangedEvent(0));
+        }
+
+        #endregion
+
+        #region Filtering
+
         private bool PassesTypeFilter(UnitSelectable selectable)
         {
             if (!enableTypeFilter)
@@ -566,9 +714,6 @@ namespace RTS.Units
             }
         }
 
-        /// <summary>
-        /// Determines unit type based on layer.
-        /// </summary>
         private UnitType GetUnitType(GameObject obj)
         {
             int layer = obj.layer;
@@ -588,6 +733,27 @@ namespace RTS.Units
 
             // Default to owned if no specific layer found
             return UnitType.Owned;
+        }
+
+        #endregion
+
+        #region Command Methods (for RTS controls)
+
+        public void MoveSelectedUnits(Vector3 destination)
+        {
+            foreach (var unit in selectedUnits)
+            {
+                if (unit == null) continue;
+
+                var movement = unit.GetComponent<UnitMovement>();
+                movement?.SetDestination(destination);
+            }
+        }
+
+        public void AttackMoveSelectedUnits(Vector3 destination)
+        {
+            // Implement attack-move logic
+            MoveSelectedUnits(destination);
         }
 
         #endregion
