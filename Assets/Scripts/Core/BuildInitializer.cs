@@ -87,7 +87,7 @@ namespace RTS.Core
             // Fix 7: Anisotropic filtering
             QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
 
-            LogDebug($"Screen: {Screen.width}x{Screen.height} @ {Screen.currentResolution.refreshRate}Hz");
+            LogDebug($"Screen: {Screen.width}x{Screen.height} @ {Screen.currentResolution.refreshRateRatio.value:F0}Hz");
             LogDebug($"Graphics Device: {SystemInfo.graphicsDeviceName}");
             LogDebug($"Graphics API: {SystemInfo.graphicsDeviceType}");
             LogDebug($"GPU Memory: {SystemInfo.graphicsMemorySize}MB");
@@ -110,17 +110,7 @@ namespace RTS.Core
             yield return null;
 
             // Warmup shaders to prevent black screens
-            if (ShaderVariantCollection.defaultVariantCollection != null)
-            {
-                ShaderVariantCollection.defaultVariantCollection.WarmUp();
-                LogDebug("Default shader variants warmed up");
-            }
-            else
-            {
-                LogDebug("No default shader variant collection found - this may cause shader compilation stutters");
-            }
-
-            // Force shader warmup by rendering all loaded shaders
+            // Note: In Unity 6+, Shader.WarmupAllShaders() is the primary method for shader warmup
             Shader.WarmupAllShaders();
             LogDebug("All shaders warmed up");
 

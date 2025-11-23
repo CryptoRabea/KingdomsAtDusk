@@ -113,7 +113,7 @@ namespace RTS.Core
             // Screen Settings
             sb.AppendLine("--- DISPLAY ---");
             sb.AppendLine($"Resolution: {Screen.width}x{Screen.height}");
-            sb.AppendLine($"Refresh Rate: {Screen.currentResolution.refreshRate}Hz");
+            sb.AppendLine($"Refresh Rate: {Screen.currentResolution.refreshRateRatio.value:F0}Hz");
             sb.AppendLine($"Fullscreen: {Screen.fullScreenMode}");
             sb.AppendLine($"DPI: {Screen.dpi}");
             sb.AppendLine();
