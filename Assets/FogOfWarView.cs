@@ -48,7 +48,6 @@ namespace RTS.FogOfWar
         [Tooltip("Only units/buildings on these layers will reveal fog")]
 
         [Header("Debug")]
-        [SerializeField] private bool showDebugLogs = true;
         [SerializeField] private bool showRevealerCount = false;
 
         // Track active revealers
@@ -66,13 +65,11 @@ namespace RTS.FogOfWar
 
                 if (fogWarSystem == null)
                 {
-                    Debug.LogError("[FogOfWarView] No csFogWar component found in scene! Please add one.");
                     enabled = false;
                     return;
                 }
 
-                if (showDebugLogs)
-                    Debug.Log("[FogOfWarView] Found csFogWar component automatically");
+
             }
         }
 
@@ -87,8 +84,7 @@ namespace RTS.FogOfWar
             EventBus.Subscribe<BuildingCompletedEvent>(OnBuildingCompleted);
             EventBus.Subscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
-            if (showDebugLogs)
-                Debug.Log("[FogOfWarView] Subscribed to spawn/destroy events");
+
         }
 
         private void OnDisable()
@@ -100,8 +96,7 @@ namespace RTS.FogOfWar
             EventBus.Unsubscribe<BuildingCompletedEvent>(OnBuildingCompleted);
             EventBus.Unsubscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
-            if (showDebugLogs)
-                Debug.Log("[FogOfWarView] Unsubscribed from events");
+
         }
 
         private void Start()
@@ -109,8 +104,6 @@ namespace RTS.FogOfWar
             // Register any existing units/buildings in the scene
             RegisterExistingEntities();
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Initialized with {activeRevealers.Count} revealers");
         }
 
         #endregion
@@ -124,16 +117,13 @@ namespace RTS.FogOfWar
             // Check if unit is on friendly layer
             if (!IsOnFriendlyLayer(evt.Unit))
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Unit {evt.Unit.name} is not on friendly layer, skipping");
                 return;
             }
 
             int sightRange = GetUnitSightRange(evt.Unit);
             RegisterRevealer(evt.Unit, sightRange);
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Registered unit '{evt.Unit.name}' with sight range {sightRange}");
+
         }
 
         private void OnUnitDied(UnitDiedEvent evt)
@@ -142,8 +132,6 @@ namespace RTS.FogOfWar
 
             UnregisterRevealer(evt.Unit);
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Unregistered unit '{evt.Unit.name}'");
         }
 
         private void OnBuildingPlaced(BuildingPlacedEvent evt)
@@ -153,24 +141,21 @@ namespace RTS.FogOfWar
             // Check if building is on friendly layer
             if (!IsOnFriendlyLayer(evt.Building))
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Building {evt.Building.name} is not on friendly layer, skipping");
+
                 return;
             }
 
             // Get Building component and verify it's enabled
             if (!evt.Building.TryGetComponent<Building>(out var buildingComponent))
             {
-                if (showDebugLogs)
-                    Debug.LogWarning($"[FogOfWarView] Building {evt.Building.name} has no Building component!");
+
                 return;
             }
 
             // Skip if Building component is disabled (preview buildings)
             if (!buildingComponent.enabled)
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Building {evt.Building.name} component is disabled (preview), skipping");
+
                 return;
             }
 
@@ -182,16 +167,11 @@ namespace RTS.FogOfWar
                 int sightRange = GetBuildingSightRange(evt.Building);
                 RegisterRevealer(evt.Building, sightRange);
 
-                if (showDebugLogs)
-                {
-                    string reason = buildingComponent.IsConstructed ? "no construction required" : "reveal during construction enabled";
-                    Debug.Log($"[FogOfWarView] Registered building '{evt.Building.name}' with sight range {sightRange} ({reason})");
-                }
+
             }
             else
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Building '{evt.Building.name}' requires construction, will register when completed");
+
             }
         }
 
@@ -202,16 +182,12 @@ namespace RTS.FogOfWar
             // Check if building is on friendly layer
             if (!IsOnFriendlyLayer(evt.Building))
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Completed building {evt.Building.name} is not on friendly layer, skipping");
                 return;
             }
 
             // Check if already registered (in case building didn't require construction)
             if (activeRevealers.ContainsKey(evt.Building))
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Building '{evt.BuildingName}' already registered (no construction required)");
                 return;
             }
 
@@ -219,8 +195,6 @@ namespace RTS.FogOfWar
             int sightRange = GetBuildingSightRange(evt.Building);
             RegisterRevealer(evt.Building, sightRange);
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Registered completed building '{evt.BuildingName}' with sight range {sightRange}");
         }
 
         private void OnBuildingDestroyed(BuildingDestroyedEvent evt)
@@ -229,8 +203,6 @@ namespace RTS.FogOfWar
 
             UnregisterRevealer(evt.Building);
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Unregistered building '{evt.BuildingName}'");
         }
 
         #endregion
@@ -245,16 +217,13 @@ namespace RTS.FogOfWar
             var buildingComponent = entity.GetComponent<Building>();
             if (buildingComponent != null && !buildingComponent.enabled)
             {
-                if (showDebugLogs)
-                    Debug.Log($"[FogOfWarView] Blocked registration of preview building: {entity.name}");
+
                 return;
             }
 
             // Don't register if already registered
             if (activeRevealers.ContainsKey(entity))
             {
-                if (showDebugLogs)
-                    Debug.LogWarning($"[FogOfWarView] {entity.name} is already registered as a revealer");
                 return;
             }
 
@@ -387,8 +356,7 @@ namespace RTS.FogOfWar
                 // Skip buildings with disabled components (previews)
                 if (!building.enabled)
                 {
-                    if (showDebugLogs)
-                        Debug.Log($"[FogOfWarView] Skipping disabled building {building.gameObject.name} (preview)");
+
                     continue;
                 }
 
@@ -401,8 +369,7 @@ namespace RTS.FogOfWar
                 registeredBuildings++;
             }
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Registered {activeRevealers.Count} existing entities ({registeredUnits} units, {registeredBuildings} buildings)");
+
         }
 
         #endregion
@@ -411,10 +378,7 @@ namespace RTS.FogOfWar
 
         private void Update()
         {
-            if (showRevealerCount && Time.frameCount % 60 == 0)
-            {
-                Debug.Log($"[FogOfWarView] Active revealers: {activeRevealers.Count}");
-            }
+
 
             // Clean up any null references
             CleanupNullRevealers();
@@ -443,7 +407,7 @@ namespace RTS.FogOfWar
         {
             if (entity == null)
             {
-                Debug.LogWarning("[FogOfWarView] Cannot register null entity");
+
                 return;
             }
 
@@ -487,8 +451,7 @@ namespace RTS.FogOfWar
             // Re-register all entities
             RegisterExistingEntities();
 
-            if (showDebugLogs)
-                Debug.Log($"[FogOfWarView] Refreshed all revealers: {activeRevealers.Count} entities");
+
         }
 
         #endregion
@@ -512,46 +475,6 @@ namespace RTS.FogOfWar
         }
 
         #endregion
-
-        #region Editor Utilities
-
-#if UNITY_EDITOR
-        [ContextMenu("Debug: List All Revealers")]
-        private void DebugListRevealers()
-        {
-            Debug.Log($"=== Active Fog Revealers ({activeRevealers.Count}) ===");
-            foreach (var kvp in activeRevealers)
-            {
-                if (kvp.Key != null)
-                {
-                    GameObject entity = kvp.Key;
-                    int sightRange = entity.GetComponent<UnitHealth>() != null
-                        ? GetUnitSightRange(entity)
-                        : GetBuildingSightRange(entity);
-
-                    Debug.Log($"  - {entity.name} (Index: {kvp.Value}, Sight: {sightRange})");
-                }
-            }
-        }
-
-        [ContextMenu("Debug: Refresh All Revealers")]
-        private void DebugRefreshRevealers()
-        {
-            RefreshAllRevealers();
-        }
-
-        [ContextMenu("Debug: Clear All Revealers")]
-        private void DebugClearRevealers()
-        {
-            foreach (var kvp in activeRevealers.ToList())
-            {
-                if (kvp.Key != null)
-                    UnregisterRevealer(kvp.Key);
-            }
-            Debug.Log("[FogOfWarView] Cleared all revealers");
-        }
-#endif
-
-        #endregion
     }
+   
 }

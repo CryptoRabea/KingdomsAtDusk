@@ -1,9 +1,9 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System.Collections.Generic;
 using RTS.Buildings;
 using RTS.Core.Events;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace RTS.UI
 {
@@ -36,8 +36,7 @@ namespace RTS.UI
         [Header("References")]
         [SerializeField] private BuildingSelectionManager selectionManager;
 
-        [Header("Debug")]
-        [SerializeField] private bool enableDebugLogs = true;
+
 
         private GameObject currentSelectedBuilding;
         private Building buildingComponent;
@@ -51,8 +50,6 @@ namespace RTS.UI
             EventBus.Subscribe<BuildingDeselectedEvent>(OnBuildingDeselected);
             EventBus.Subscribe<TrainingProgressEvent>(OnTrainingProgress);
 
-            if (enableDebugLogs)
-                Debug.Log($"✅ BuildingDetailsUI subscribed to events on {gameObject.name}");
         }
 
         private void OnDisable()
@@ -61,28 +58,18 @@ namespace RTS.UI
             EventBus.Unsubscribe<BuildingDeselectedEvent>(OnBuildingDeselected);
             EventBus.Unsubscribe<TrainingProgressEvent>(OnTrainingProgress);
 
-            if (enableDebugLogs)
-                Debug.Log($"❌ BuildingDetailsUI unsubscribed from events on {gameObject.name}");
+            
         }
 
         private void Start()
         {
-            if (enableDebugLogs)
-            {
-                Debug.Log($"BuildingDetailsUI.Start() on {gameObject.name}");
-                Debug.Log($"  - panelRoot: {(panelRoot != null ? panelRoot.name : "NULL")}");
-                Debug.Log($"  - Component enabled: {enabled}");
-                Debug.Log($"  - GameObject active: {gameObject.activeInHierarchy}");
-            }
+           
 
             // Find selection manager if not assigned
             if (selectionManager == null)
             {
                 selectionManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
-                if (selectionManager == null && enableDebugLogs)
-                {
-                    Debug.LogWarning("BuildingDetailsUI: BuildingSelectionManager not found in scene!");
-                }
+              
             }
 
             // Set up rally point button click handler
@@ -116,14 +103,12 @@ namespace RTS.UI
 
         private void OnBuildingSelected(BuildingSelectedEvent evt)
         {
-            if (enableDebugLogs)
-                Debug.Log($"🟢 BuildingDetailsUI received BuildingSelectedEvent for: {evt.Building.name}");
 
             currentSelectedBuilding = evt.Building;
             buildingComponent = evt.Building.GetComponent<Building>();
             trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
 
-           
+
 
             if (buildingComponent != null && buildingComponent.Data != null)
             {
@@ -131,15 +116,11 @@ namespace RTS.UI
             }
             else
             {
-                if (enableDebugLogs)
-                    Debug.LogWarning($"⚠️ Cannot show details - Building component or Data is null!");
             }
         }
 
         private void OnBuildingDeselected(BuildingDeselectedEvent evt)
         {
-            if (enableDebugLogs)
-                Debug.Log($"🔴 BuildingDetailsUI received BuildingDeselectedEvent for: {evt.Building.name}");
 
             if (currentSelectedBuilding == evt.Building)
             {
@@ -163,28 +144,19 @@ namespace RTS.UI
         {
             if (building?.Data == null)
             {
-                if (enableDebugLogs)
-                    Debug.LogWarning("⚠️ ShowBuildingDetails called with null building or data!");
                 return;
             }
 
             var data = building.Data;
 
-            if (enableDebugLogs)
-                Debug.Log($"📋 Showing building details for: {data.buildingName}");
 
             // Show panel
             if (panelRoot != null)
             {
                 panelRoot.SetActive(true);
-                if (enableDebugLogs)
-                    Debug.Log($"✅ Panel shown: {panelRoot.name} SetActive(true)");
+                
             }
-            else
-            {
-                if (enableDebugLogs)
-                    Debug.LogError("❌ CRITICAL: panelRoot is NULL! Cannot show panel!");
-            }
+            
 
             // Update building info
             if (buildingNameText != null)
@@ -255,7 +227,7 @@ namespace RTS.UI
                 if (trainableUnit?.unitConfig == null) continue;
 
                 GameObject buttonObj = Instantiate(trainUnitButtonPrefab, unitButtonContainer);
-                
+
                 if (buttonObj.TryGetComponent<TrainUnitButton>(out var button))
                 {
                     button.Initialize(trainableUnit, trainingQueue);
@@ -316,14 +288,10 @@ namespace RTS.UI
 
         private void HidePanel()
         {
-            if (enableDebugLogs)
-                Debug.Log($"🙈 Hiding building details panel");
 
             if (panelRoot != null)
             {
                 panelRoot.SetActive(false);
-                if (enableDebugLogs)
-                    Debug.Log($"✅ Panel hidden: {panelRoot.name} SetActive(false)");
             }
 
             ClearTrainingButtons();
@@ -341,8 +309,6 @@ namespace RTS.UI
         {
             if (selectionManager == null)
             {
-                if (enableDebugLogs)
-                    Debug.LogWarning("Cannot set rally point - BuildingSelectionManager not found!");
                 return;
             }
 
@@ -351,10 +317,7 @@ namespace RTS.UI
             selectionManager.SetSpawnPointMode(isSettingRallyPoint);
             UpdateRallyPointButtonText();
 
-            if (enableDebugLogs)
-            {
-                Debug.Log($"Rally point mode: {(isSettingRallyPoint ? "ENABLED" : "DISABLED")}");
-            }
+            
         }
 
         private void UpdateRallyPointButtonText()

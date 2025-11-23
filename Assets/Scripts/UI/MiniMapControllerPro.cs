@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using UnityEngine.Rendering.Universal;
 using RTS.Core.Events;
 using RTS.UI.Minimap;
 using System.Collections;
@@ -68,7 +67,6 @@ namespace RTS.UI
             // Validate configuration
             if (config == null)
             {
-                Debug.LogError("MiniMapControllerPro: MinimapConfig is not assigned! Please create and assign a MinimapConfig ScriptableObject.");
                 enabled = false;
                 return;
             }
@@ -154,8 +152,7 @@ namespace RTS.UI
                 unitMarkerPrefab
             );
 
-            Debug.Log($"MiniMapControllerPro initialized with object pooling. " +
-                      $"Building pool: {config.buildingMarkerPoolSize}, Unit pool: {config.unitMarkerPoolSize}");
+
         }
 
         /// <summary>
@@ -178,7 +175,6 @@ namespace RTS.UI
                 registeredCount++;
             }
 
-            Debug.Log($"MiniMapControllerPro: Registered {registeredCount} existing units");
         }
 
         /// <summary>
@@ -201,7 +197,6 @@ namespace RTS.UI
                 registeredCount++;
             }
 
-            Debug.Log($"MiniMapControllerPro: Registered {registeredCount} existing buildings");
         }
 
         private void OnEnable()
@@ -287,7 +282,6 @@ namespace RTS.UI
             }
             else
             {
-                Debug.LogError("MiniMapControllerPro: MiniMap RawImage is null!");
                 return;
             }
 
@@ -314,22 +308,13 @@ namespace RTS.UI
             miniMapCamera.backgroundColor = config.backgroundColor;
             miniMapCamera.depth = -10;
 
-            // URP setup
-            var cameraData = miniMapCamera.GetUniversalAdditionalCameraData();
-            if (cameraData != null)
-            {
-                cameraData.renderType = CameraRenderType.Base;
-                cameraData.requiresColorOption = CameraOverrideOption.On;
-                cameraData.requiresDepthOption = CameraOverrideOption.On;
-            }
-
+          
             // Remove audio listener
             if (miniMapCamera.TryGetComponent<AudioListener>(out var listener))
             {
                 Destroy(listener);
             }
 
-            Debug.Log($"MiniMapControllerPro: Camera setup complete. Rendering {config.WorldSize.x}x{config.WorldSize.y} world area at {config.renderTextureSize}x{config.renderTextureSize}.");
         }
 
         #endregion
@@ -344,7 +329,6 @@ namespace RTS.UI
 
             if (worldPos != Vector3.zero)
             {
-                Debug.Log($"MiniMapControllerPro: Click at screen {eventData.position} -> World {worldPos}");
                 MoveCameraToPosition(worldPos);
             }
         }

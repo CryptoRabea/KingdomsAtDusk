@@ -36,7 +36,6 @@ using UnityEngine;
                 TryGetUnitDetectionRange();
             }
 
-            Debug.Log($"[VisionProvider] {gameObject.name} - Awake (Owner: {ownerId}, Radius: {visionRadius})");
         }
 
         private void OnEnable()
@@ -76,12 +75,8 @@ using UnityEngine;
             if (FogOfWarManager.Instance != null)
             {
                 RegisterWithManager();
-                Debug.Log($"[VisionProvider] {gameObject.name} - Successfully registered after retry");
             }
-            else
-            {
-                Debug.LogError($"[VisionProvider] {gameObject.name} - Failed to register: FogOfWarManager not found after 5 seconds!");
-            }
+           
         }
 
         private void OnDisable()
@@ -93,13 +88,9 @@ using UnityEngine;
         {
             if (FogOfWarManager.Instance != null)
             {
-                Debug.Log($"[VisionProvider] {gameObject.name} - Registering at position {Position} (Owner: {ownerId}, Radius: {visionRadius})");
                 FogOfWarManager.Instance.RegisterVisionProvider(this);
             }
-            else
-            {
-                Debug.LogWarning($"[VisionProvider] {gameObject.name} - FogOfWarManager.Instance is null! Cannot register.");
-            }
+          
         }
 
         private void UnregisterWithManager()

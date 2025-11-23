@@ -90,14 +90,11 @@ namespace RTS.FogOfWar
             if (customSightRange < 0)
             {
                 customSightRange = 0;
-                Debug.LogWarning($"[FogRevealerConfig] Sight range cannot be negative on {gameObject.name}");
             }
 
             // Warn if sight range is very large
             if (customSightRange > 100)
             {
-                Debug.LogWarning($"[FogRevealerConfig] Very large sight range ({customSightRange}) on {gameObject.name}. " +
-                                "This may impact performance.");
             }
         }
 
@@ -113,7 +110,6 @@ namespace RTS.FogOfWar
         {
             if (newRange < 0)
             {
-                Debug.LogWarning($"[FogRevealerConfig] Cannot set negative sight range on {gameObject.name}");
                 return;
             }
 
