@@ -463,19 +463,23 @@ namespace RTS.Editor
             System.IO.Directory.CreateDirectory("Assets/Prefabs/UI");
             PrefabUtility.SaveAsPrefabAsset(loadingScreenObj, prefabPath);
 
-            // Instantiate in current scene
-            GameObject instance = PrefabUtility.InstantiatePrefab(loadingScreenObj) as GameObject;
-            DontDestroyOnLoad(instance);
-
-            // Clean up original
+            // Clean up temporary object
             DestroyImmediate(loadingScreenObj);
 
             Debug.Log($"[MenuSetup] Loading Screen prefab created at: {prefabPath}");
             AssetDatabase.Refresh();
 
+            // Select the prefab in the project window
+            Object prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab != null)
+            {
+                EditorGUIUtility.PingObject(prefab);
+                Selection.activeObject = prefab;
+            }
+
             EditorUtility.DisplayDialog("Loading Screen Created",
                 $"Loading Screen prefab created at:\n{prefabPath}\n\n" +
-                "It has been added to the current scene as well.",
+                "Drag it into your scene when needed, or it will be instantiated automatically at runtime.",
                 "OK");
         }
 
