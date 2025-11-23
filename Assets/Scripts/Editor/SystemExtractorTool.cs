@@ -190,7 +190,7 @@ namespace RTS.Editor
             AddSystemIfExists("Core Services",
                 "Service locator, event bus, and core architecture",
                 new[] { "Assets/Scripts/Core" },
-                new[] { });
+                new string[] { });
 
             // Build Initialization
             AddSystemIfExists("Build Initialization",
@@ -262,7 +262,7 @@ namespace RTS.Editor
             AddSystemIfExists("RTS Camera System",
                 "RTS camera with pan, zoom, and rotation",
                 new[] { "Assets/Scripts/Camera" },
-                new[] { });
+                new string[] { });
 
             // UI System
             AddSystemIfExists("UI System",
@@ -280,19 +280,19 @@ namespace RTS.Editor
             AddSystemIfExists("Cursor System",
                 "Custom cursor with state management",
                 new[] { "Assets/Scripts/UI/CursorStateManager.cs" },
-                new[] { });
+                new string[] { });
 
             // Input System
             AddSystemIfExists("Input System",
                 "Input action configuration",
                 new[] { "Assets/Scripts/InputSystem_Actions.inputactions", "Assets/Scripts/InputSystem_Actions.cs" },
-                new[] { });
+                new string[] { });
 
             // Editor Tools
             AddSystemIfExists("Editor Tools",
                 "All editor tools and utilities",
                 new[] { "Assets/Scripts/Editor" },
-                new[] { });
+                new string[] { });
 
             Debug.Log($"[SystemExtractor] Found {detectedSystems.Count} systems");
         }
