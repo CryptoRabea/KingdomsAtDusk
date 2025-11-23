@@ -30,6 +30,14 @@ using KingdomsAtDusk.FogOfWar;
             meshFilter = GetComponent<MeshFilter>();
             meshRenderer = GetComponent<MeshRenderer>();
 
+            // Check if material is assigned
+            if (fogMaterial == null)
+            {
+                Debug.LogWarning("[FogOfWarRenderer] No fog material assigned! Disabling mesh renderer to prevent pink screen.");
+                meshRenderer.enabled = false;
+                return;
+            }
+
             CreateFogMesh();
             CreateFogTexture();
 
@@ -110,7 +118,7 @@ using KingdomsAtDusk.FogOfWar;
 
         private void Update()
         {
-            if (!isDirty) return;
+            if (!isDirty || !meshRenderer.enabled) return;
 
             UpdateFogTexture();
         }
@@ -181,7 +189,10 @@ using KingdomsAtDusk.FogOfWar;
         /// </summary>
         public void SetEnabled(bool enabled)
         {
-            meshRenderer.enabled = enabled;
+            if (meshRenderer != null && fogMaterial != null)
+            {
+                meshRenderer.enabled = enabled;
+            }
         }
 
         private void OnDestroy()
