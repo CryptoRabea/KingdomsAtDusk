@@ -40,61 +40,59 @@ namespace RTS.Core
         {
             LogDebug("=== Shader Preloader Starting ===");
 
-            try
+            // Step 1: Warmup all shaders in build (optional, can cause freezing)
+            if (callShaderWarmup)
             {
-                // Step 1: Warmup all shaders in build (optional, can cause freezing)
-                if (callShaderWarmup)
-                {
-                    yield return StartCoroutine(WarmupAllShaders());
-                }
-                else
-                {
-                    LogDebug("Shader warmup disabled (callShaderWarmup = false)");
-                }
-
-                // Step 2: Preload critical materials
-                yield return StartCoroutine(PreloadCriticalMaterials());
-
-                // Step 3: Create dummy objects to force material initialization (optional)
-                if (createDummyObjects)
-                {
-                    yield return StartCoroutine(CreateDummyRenderObjects());
-
-                    // Step 4: Wait for rendering
-                    yield return new WaitForSeconds(preloadDuration);
-
-                    // Step 5: Clean up dummy objects
-                    CleanupDummyObjects();
-                }
-                else
-                {
-                    LogDebug("Dummy object creation disabled (createDummyObjects = false)");
-                }
-
-                LogDebug("=== Shader Preloader Complete ===");
+                yield return StartCoroutine(WarmupAllShaders());
             }
-            catch (System.Exception e)
+            else
             {
-                Debug.LogError($"[ShaderPreloader] Error during preload: {e.Message}");
-                Debug.LogException(e);
-                CleanupDummyObjects(); // Clean up on error
+                LogDebug("Shader warmup disabled (callShaderWarmup = false)");
             }
+
+            // Step 2: Preload critical materials
+            yield return StartCoroutine(PreloadCriticalMaterials());
+
+            // Step 3: Create dummy objects to force material initialization (optional)
+            if (createDummyObjects)
+            {
+                yield return StartCoroutine(CreateDummyRenderObjects());
+
+                // Step 4: Wait for rendering
+                yield return new WaitForSeconds(preloadDuration);
+
+                // Step 5: Clean up dummy objects
+                CleanupDummyObjects();
+            }
+            else
+            {
+                LogDebug("Dummy object creation disabled (createDummyObjects = false)");
+            }
+
+            LogDebug("=== Shader Preloader Complete ===");
         }
 
         private IEnumerator WarmupAllShaders()
         {
             LogDebug("Warming up all shaders...");
 
+            // Warmup built-in shaders (WARNING: Can freeze main thread)
+            LogDebug("Calling Shader.WarmupAllShaders() - this may freeze temporarily...");
+
+            bool success = false;
             try
             {
-                // Warmup built-in shaders (WARNING: Can freeze main thread)
-                LogDebug("Calling Shader.WarmupAllShaders() - this may freeze temporarily...");
                 Shader.WarmupAllShaders();
-                LogDebug("Shader.WarmupAllShaders() completed");
+                success = true;
             }
             catch (System.Exception e)
             {
                 Debug.LogWarning($"[ShaderPreloader] Shader warmup failed: {e.Message}");
+            }
+
+            if (success)
+            {
+                LogDebug("Shader.WarmupAllShaders() completed");
             }
 
             yield return null;
