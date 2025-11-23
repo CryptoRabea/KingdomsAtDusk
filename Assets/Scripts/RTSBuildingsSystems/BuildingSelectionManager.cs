@@ -129,8 +129,7 @@ namespace RTS.Buildings
                 if (enableDebugLogs)
                     Debug.Log($"BuildingSelectionManager: Hit {hit.collider.gameObject.name}");
 
-                var selectable = hit.collider.GetComponent<BuildingSelectable>();
-                if (selectable != null)
+                if (hit.collider.TryGetComponent<BuildingSelectable>(out var selectable))
                 {
                     if (enableDebugLogs)
                         Debug.Log($"✅ BuildingSelectable found on {hit.collider.gameObject.name}");
@@ -247,14 +246,12 @@ namespace RTS.Buildings
                     Debug.Log($"✅ Ground hit at world position {hit.point} on object {hit.collider.gameObject.name}");
 
                 // Get UnitTrainingQueue component
-                var trainingQueue = currentlySelected.GetComponent<UnitTrainingQueue>();
-                if (trainingQueue != null)
+                if (currentlySelected.TryGetComponent<UnitTrainingQueue>(out UnitTrainingQueue trainingQueue))
                 {
                     trainingQueue.SetRallyPointPosition(hit.point);
 
                     // Update flag position if present
-                    var rallyFlag = currentlySelected.GetComponent<RallyPointFlag>();
-                    if (rallyFlag != null)
+                    if (currentlySelected.TryGetComponent<RallyPointFlag>(out var rallyFlag))
                     {
                         if (enableDebugLogs)
                             Debug.Log($"🚩 BuildingSelectionManager: Found RallyPointFlag component on {currentlySelected.gameObject.name}, updating position and showing flag...");

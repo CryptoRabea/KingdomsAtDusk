@@ -111,12 +111,12 @@ namespace RTS.UI
 
             UpdatePlacementInfoPanel();
 
-            // Check for clicks outside the building panel
-            HandleOutsideClick();
+            // Check for clicks outside the building panel to close
+            //  HandleOutsideClick();
         }
 
 
-       
+
 
         #region Initialization
 
@@ -180,8 +180,7 @@ namespace RTS.UI
             }
 
             // Setup BuildingButton component
-            var buildingButton = buttonObj.GetComponent<BuildingButton>();
-            if (buildingButton == null)
+            if (!buttonObj.TryGetComponent<BuildingButton>(out var buildingButton))
             {
                 buildingButton = buttonObj.AddComponent<BuildingButton>();
             }
@@ -190,8 +189,7 @@ namespace RTS.UI
             buildingButtons.Add(buildingButton);
 
             // Add click listener
-            var button = buttonObj.GetComponent<Button>();
-            if (button != null)
+            if (buttonObj.TryGetComponent<Button>(out var button))
             {
                 int buildingIndex = index; // Capture for closure
                 button.onClick.AddListener(() => OnBuildingButtonClicked(buildingIndex));
@@ -255,8 +253,8 @@ namespace RTS.UI
             buildingManager.StartPlacingBuilding(buildingIndex);
             Debug.Log($"Started placing: {buildingData.buildingName}");
 
-            // Close the building panel when a building is chosen
-            SetPanelVisible(false);
+            //to Close the building panel when a building is chosen
+           // SetPanelVisible(false);
         }
 
         private void HandleHotkeys()
@@ -326,8 +324,8 @@ namespace RTS.UI
                 _ => Key.None
             };
         }
-
-        private void HandleOutsideClick()
+       // to close panel
+      /* private void HandleOutsideClick()
         {
             // Only check if panel is visible
             if (buildingPanel == null || !buildingPanel.activeSelf)
@@ -354,11 +352,11 @@ namespace RTS.UI
                 position = mouse.position.ReadValue()
             };
 
-            // Raycast to check what UI element was clicked
+            // Raycast to check what UI element was clicked 
             List<RaycastResult> results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointerData, results);
 
-            // Check if any of the results are the building panel or its children
+            // Check if any of the results are the building panel or its children to close
             bool clickedOnPanel = false;
             foreach (RaycastResult result in results)
             {
@@ -375,7 +373,7 @@ namespace RTS.UI
                 SetPanelVisible(false);
             }
         }
-
+      */
         #endregion
 
         #region UI Updates

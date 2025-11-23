@@ -4,7 +4,7 @@ using UnityEngine;
 namespace RTS.Core.Events
 {
     // ==================== RESOURCE EVENTS ====================
-    
+
     public struct ResourcesChangedEvent
     {
         public int WoodDelta;
@@ -40,7 +40,7 @@ namespace RTS.Core.Events
     }
 
     // ==================== HAPPINESS EVENTS ====================
-    
+
     public struct HappinessChangedEvent
     {
         public float NewHappiness;
@@ -200,7 +200,7 @@ namespace RTS.Core.Events
     }
 
     // ==================== COMBAT EVENTS ====================
-    
+
     public struct DamageDealtEvent
     {
         public GameObject Attacker;
@@ -230,7 +230,7 @@ namespace RTS.Core.Events
     }
 
     // ==================== WAVE EVENTS ====================
-    
+
     public struct WaveStartedEvent
     {
         public int WaveNumber;
@@ -350,6 +350,33 @@ namespace RTS.Core.Events
         public AllVisibleUnitsSelectedEvent(int unitCount)
         {
             UnitCount = unitCount;
+        }
+    }
+
+
+    public struct BuildingGroupSavedEvent
+    {
+        public int GroupNumber;
+        public string BuildingName;
+
+        public BuildingGroupSavedEvent(int groupNumber, string buildingName)
+        {
+            GroupNumber = groupNumber;
+            BuildingName = buildingName;
+        }
+    }
+
+    public struct BuildingGroupRecalledEvent
+    {
+        public int GroupNumber;
+        public string BuildingName;
+        public bool WasDoubleTap;
+
+        public BuildingGroupRecalledEvent(int groupNumber, string buildingName, bool wasDoubleTap)
+        {
+            GroupNumber = groupNumber;
+            BuildingName = buildingName;
+            WasDoubleTap = wasDoubleTap;
         }
     }
 

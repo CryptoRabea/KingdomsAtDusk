@@ -197,6 +197,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Campfire.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\HUDController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingGroupManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\StairPlacementController.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\MouseLook.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />

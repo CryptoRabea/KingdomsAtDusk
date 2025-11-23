@@ -23,7 +23,7 @@ namespace RTS.Units
         [SerializeField] private bool enableDoubleTapCenter = true;
         [SerializeField] private float doubleTapTime = 0.3f;
         [SerializeField] private bool clearEmptyGroups = true;
-
+        [SerializeField] private int xOffset, yOffset, zOffset;
         [Header("Visual Feedback")]
         [SerializeField] private bool showDebugMessages = true;
 
@@ -209,7 +209,7 @@ namespace RTS.Units
             centerPos /= units.Count;
 
             // Move camera to center (keeping same height)
-            Vector3 targetPos = new Vector3(centerPos.x, mainCamera.transform.position.y, centerPos.z);
+            Vector3 targetPos = new Vector3(centerPos.x+xOffset, mainCamera.transform.position.y+yOffset, centerPos.z+zOffset);
 
             // Use the RTS camera controller if available
             var cameraController = mainCamera.GetComponent<RTSCameraController>();

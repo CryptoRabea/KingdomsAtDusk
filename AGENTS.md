@@ -2,7 +2,7 @@
 - Project name: KingdomsAtDusk
 - Unity version: Unity 6000.2.10f1
 - Active game object:
-  - Name: TopBar
+  - Name: MainHUDImage
   - Tag: Untagged
   - Layer: UI
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
