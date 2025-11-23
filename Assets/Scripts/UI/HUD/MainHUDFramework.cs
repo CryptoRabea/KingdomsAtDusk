@@ -151,29 +151,72 @@ namespace RTS.UI.HUD
         {
             hudElements.Clear();
 
+            int registeredCount = 0;
+
             if (minimapPanel != null)
+            {
                 hudElements["Minimap"] = minimapPanel.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered Minimap for layout");
+                registeredCount++;
+            }
 
             if (unitDetailsUI != null)
+            {
                 hudElements["UnitDetails"] = unitDetailsUI.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered UnitDetails for layout");
+                registeredCount++;
+            }
 
             if (buildingDetailsUI != null)
+            {
                 hudElements["BuildingDetails"] = buildingDetailsUI.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered BuildingDetails for layout");
+                registeredCount++;
+            }
 
             if (buildingHUD != null)
+            {
                 hudElements["BuildingHUD"] = buildingHUD.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered BuildingHUD for layout");
+                registeredCount++;
+            }
 
             if (inventoryUI != null)
+            {
                 hudElements["Inventory"] = inventoryUI.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered Inventory for layout");
+                registeredCount++;
+            }
 
             if (topBarUI != null)
+            {
                 hudElements["TopBar"] = topBarUI.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered TopBar for layout");
+                registeredCount++;
+            }
 
             if (resourceUI != null)
+            {
                 hudElements["ResourcePanel"] = resourceUI.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered ResourcePanel for layout");
+                registeredCount++;
+            }
 
             if (notificationUI != null)
+            {
                 hudElements["Notifications"] = notificationUI.GetComponent<RectTransform>();
+                Debug.Log("MainHUDFramework: Registered Notifications for layout");
+                registeredCount++;
+            }
+
+            if (registeredCount == 0)
+            {
+                Debug.LogWarning("MainHUDFramework: NO UI COMPONENTS ASSIGNED! Layout will not be applied. Please assign your UI components in the Inspector.");
+            }
+            else
+            {
+                Debug.Log($"MainHUDFramework: Registered {registeredCount} UI components for layout management");
+            }
         }
 
         /// <summary>
@@ -264,6 +307,8 @@ namespace RTS.UI.HUD
 
             // Apply offset
             element.anchoredPosition = offset;
+
+            Debug.Log($"MainHUDFramework: Applied layout to {element.gameObject.name} - Anchor: {anchor}, Size: {size}, Offset: {offset}");
         }
 
         /// <summary>
