@@ -118,18 +118,27 @@ namespace RTS.Core
             yield return null;
             yield return new WaitForSeconds(0.1f);
 
+            // Warmup shaders (try-catch can't be used with yield, so using bool flag)
+            LogDebug("Calling Shader.WarmupAllShaders()...");
+
+            bool success = false;
             try
             {
-                // Warmup shaders in a try-catch to prevent crashes
-                // Note: This can be slow and may cause temporary freezing
-                LogDebug("Calling Shader.WarmupAllShaders()...");
                 Shader.WarmupAllShaders();
-                LogDebug("All shaders warmed up successfully");
+                success = true;
             }
             catch (System.Exception e)
             {
                 Debug.LogWarning($"[BuildInitializer] Shader warmup failed: {e.Message}");
-                // Continue anyway - game should still work
+            }
+
+            if (success)
+            {
+                LogDebug("All shaders warmed up successfully");
+            }
+            else
+            {
+                LogDebug("Shader warmup failed - continuing anyway");
             }
 
             yield return new WaitForSeconds(0.5f);
