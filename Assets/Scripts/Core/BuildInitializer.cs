@@ -18,7 +18,7 @@ namespace RTS.Core
         [SerializeField] private int targetFrameRate = 300; // High frame rate, let hardware decide actual FPS
 
         [Header("Graphics Settings")]
-        [SerializeField] private bool warmupAllShaders = true;
+        [SerializeField] private bool warmupAllShaders = false; // Disabled by default - can cause freezing
         [SerializeField] private bool optimizeTextureStreaming = true;
         [SerializeField] private bool forceDiscreteGPU = true; // For laptops with integrated + discrete GPU
 
@@ -36,17 +36,29 @@ namespace RTS.Core
 
         private void Awake()
         {
-            InitializeBuildSettings();
+            try
+            {
+                InitializeBuildSettings();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[BuildInitializer] Error during initialization: {e.Message}");
+                Debug.LogException(e);
+            }
         }
 
         private void Start()
         {
-            StartCoroutine(WarmupShadersCoroutine());
+            if (warmupAllShaders)
+            {
+                StartCoroutine(WarmupShadersCoroutine());
+            }
         }
 
         private void InitializeBuildSettings()
         {
             LogDebug("=== Build Initializer Starting ===");
+            LogDebug($"Unity Version: {Application.unityVersion}");
 
             // Fix 1: Remove VSync limitation (causes 20 FPS on some systems)
             if (disableVSyncInBuild)
@@ -99,20 +111,26 @@ namespace RTS.Core
 
         private IEnumerator WarmupShadersCoroutine()
         {
-            if (!warmupAllShaders)
-            {
-                yield break;
-            }
+            LogDebug("Starting shader warmup (this may take a moment)...");
 
-            LogDebug("Starting shader warmup...");
-
-            // Wait a frame for scene to load
+            // Wait multiple frames for scene to fully load
             yield return null;
+            yield return null;
+            yield return new WaitForSeconds(0.1f);
 
-            // Warmup shaders to prevent black screens
-            // Note: In Unity 6+, Shader.WarmupAllShaders() is the primary method for shader warmup
-            Shader.WarmupAllShaders();
-            LogDebug("All shaders warmed up");
+            try
+            {
+                // Warmup shaders in a try-catch to prevent crashes
+                // Note: This can be slow and may cause temporary freezing
+                LogDebug("Calling Shader.WarmupAllShaders()...");
+                Shader.WarmupAllShaders();
+                LogDebug("All shaders warmed up successfully");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[BuildInitializer] Shader warmup failed: {e.Message}");
+                // Continue anyway - game should still work
+            }
 
             yield return new WaitForSeconds(0.5f);
 
