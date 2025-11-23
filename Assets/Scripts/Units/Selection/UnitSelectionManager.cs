@@ -151,12 +151,7 @@ namespace RTS.Units
 
         private void OnClickStarted(InputAction.CallbackContext context)
         {
-            // Don't start selection if clicking on UI
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-
+           
             Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
 
             // Start tracking for potential drag or click
@@ -170,18 +165,7 @@ namespace RTS.Units
         {
             if (isDragging)
             {
-                // Don't complete selection if releasing over UI
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                {
-                    // Clear drag highlights and reset state
-                    ClearDragHighlights();
-                    isDragging = false;
-                    if (selectionBoxUI != null)
-                    {
-                        selectionBoxUI.gameObject.SetActive(false);
-                    }
-                    return;
-                }
+                
 
                 Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
                 float dragDistance = Vector2.Distance(dragStartPosition, mousePosition);

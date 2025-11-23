@@ -117,13 +117,7 @@ namespace RTS.Buildings
 
         private void TrySelectBuilding(Vector2 screenPosition)
         {
-            // Don't select if clicking on UI
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            {
-                if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Click was over UI, ignoring");
-                return;
-            }
+            
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
