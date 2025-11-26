@@ -336,7 +336,20 @@ namespace RTS.Managers
                 }
                 else
                 {
-                    Debug.Log("Cannot place building here!");
+                    // Event is published in IsValidPlacement for specific reasons
+                    // This is a fallback for any other validation failures
+                    if (previewBuilding != null)
+                    {
+                        Vector3 pos = previewBuilding.transform.position;
+                        if (FogOfWarManager.Instance != null && !FogOfWarManager.Instance.IsVisible(pos))
+                        {
+                            // Already published in IsValidPlacement
+                        }
+                        else
+                        {
+                            EventBus.Publish(new BuildingPlacementFailedEvent("Invalid placement location!"));
+                        }
+                    }
                 }
             }
 
@@ -475,7 +488,7 @@ namespace RTS.Managers
             {
                 if (!FogOfWarManager.Instance.IsVisible(position))
                 {
-                    Debug.Log("Cannot place building: area not currently visible");
+                    EventBus.Publish(new BuildingPlacementFailedEvent("Cannot build in unexplored or hidden areas!"));
                     return false;
                 }
             }

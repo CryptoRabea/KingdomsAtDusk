@@ -920,7 +920,7 @@ namespace RTS.Buildings
             {
                 if (!FogOfWarManager.Instance.IsVisible(firstPolePosition))
                 {
-                    Debug.Log("Cannot place first pole: area not currently visible");
+                    EventBus.Publish(new BuildingPlacementFailedEvent("Cannot place wall in unexplored or hidden areas!"));
                     return;
                 }
             }
@@ -980,20 +980,20 @@ namespace RTS.Buildings
                 bool secondPoleVisible = FogOfWarManager.Instance.IsVisible(secondPolePos);
                 if (!firstPoleVisible || !secondPoleVisible)
                 {
-                    Debug.LogWarning("❌ Cannot place wall: area not currently visible.");
+                    EventBus.Publish(new BuildingPlacementFailedEvent("Cannot place wall in unexplored or hidden areas!"));
                     return;
                 }
             }
 
             if (WouldOverlapExistingWall(firstPolePosition, secondPolePos))
             {
-                Debug.LogWarning("❌ Cannot place wall: overlaps existing wall.");
+                EventBus.Publish(new BuildingPlacementFailedEvent("Cannot place wall: overlaps existing wall!"));
                 return;
             }
 
             if (WouldOverlapBuildings(firstPolePosition, secondPolePos))
             {
-                Debug.LogWarning("❌ Cannot place wall: would overlap existing building.");
+                EventBus.Publish(new BuildingPlacementFailedEvent("Cannot place wall: overlaps existing building!"));
                 return;
             }
 

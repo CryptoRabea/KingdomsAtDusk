@@ -27,6 +27,7 @@ namespace RTS.UI
         EventBus.Subscribe<WaveStartedEvent>(OnWaveStarted);
         EventBus.Subscribe<UnitDiedEvent>(OnUnitDied);
         EventBus.Subscribe<ResourcesSpentEvent>(OnResourcesSpent);
+        EventBus.Subscribe<BuildingPlacementFailedEvent>(OnBuildingPlacementFailed);
     }
 
     private void OnDisable()
@@ -35,6 +36,7 @@ namespace RTS.UI
         EventBus.Unsubscribe<WaveStartedEvent>(OnWaveStarted);
         EventBus.Unsubscribe<UnitDiedEvent>(OnUnitDied);
         EventBus.Unsubscribe<ResourcesSpentEvent>(OnResourcesSpent);
+        EventBus.Unsubscribe<BuildingPlacementFailedEvent>(OnBuildingPlacementFailed);
     }
 
     private void OnBuildingCompleted(BuildingCompletedEvent evt)
@@ -61,6 +63,11 @@ namespace RTS.UI
         {
             ShowNotification("Not enough resources!");
         }
+    }
+
+    private void OnBuildingPlacementFailed(BuildingPlacementFailedEvent evt)
+    {
+        ShowNotification(evt.Reason);
     }
 
     public void ShowNotification(string message)
