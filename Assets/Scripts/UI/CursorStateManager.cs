@@ -17,6 +17,16 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Texture2D selectUnitCursor;
         [SerializeField] private Texture2D selectBuildingCursor;
 
+        [Header("Edge Scroll Cursors")]
+        [SerializeField] private Texture2D scrollUpCursor;
+        [SerializeField] private Texture2D scrollDownCursor;
+        [SerializeField] private Texture2D scrollLeftCursor;
+        [SerializeField] private Texture2D scrollRightCursor;
+        [SerializeField] private Texture2D scrollUpLeftCursor;
+        [SerializeField] private Texture2D scrollUpRightCursor;
+        [SerializeField] private Texture2D scrollDownLeftCursor;
+        [SerializeField] private Texture2D scrollDownRightCursor;
+
         [Header("Cursor Hotspots (pixel offset from top-left)")]
         [SerializeField] private Vector2 normalHotspot = Vector2.zero;
         [SerializeField] private Vector2 moveHotspot = new Vector2(16, 16);
@@ -24,6 +34,7 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Vector2 invalidHotspot = new Vector2(16, 16);
         [SerializeField] private Vector2 selectUnitHotspot = new Vector2(16, 16);
         [SerializeField] private Vector2 selectBuildingHotspot = new Vector2(16, 16);
+        [SerializeField] private Vector2 scrollHotspot = new Vector2(16, 16);
 
         [Header("References")]
         [SerializeField] private UnitSelectionManager selectionManager;
@@ -33,6 +44,11 @@ namespace KingdomsAtDusk.UI
 
         [Header("Settings")]
         [SerializeField] private float raycastDistance = 1000f;
+        [SerializeField] private float edgeScrollBorderThickness = 10f;
+        [Tooltip("Camera viewport height (0-1). If viewport is smaller than screen, UI below viewport counts as edge.")]
+        [SerializeField] private float viewportHeight = 0.8f;
+        [Tooltip("Camera viewport Y offset (0-1). Bottom of viewport where edge scrolling starts.")]
+        [SerializeField] private float viewportYOffset = 0.2f;
 
         private CursorState currentState = CursorState.Normal;
         private Mouse mouse;
@@ -44,7 +60,15 @@ namespace KingdomsAtDusk.UI
             Attack,
             Invalid,
             SelectUnit,
-            SelectBuilding
+            SelectBuilding,
+            ScrollUp,
+            ScrollDown,
+            ScrollLeft,
+            ScrollRight,
+            ScrollUpLeft,
+            ScrollUpRight,
+            ScrollDownLeft,
+            ScrollDownRight
         }
 
         private void Start()
@@ -79,6 +103,15 @@ namespace KingdomsAtDusk.UI
         {
             // Check what's under the cursor
             Vector2 mousePosition = mouse.position.ReadValue();
+
+            // Priority 0: Check for edge scrolling (highest priority)
+            CursorState edgeScrollState = CheckEdgeScrolling(mousePosition);
+            if (edgeScrollState != CursorState.Normal)
+            {
+                SetCursor(edgeScrollState);
+                return;
+            }
+
             Ray ray = mainCamera.ScreenPointToRay(mousePosition);
 
             // Priority 1: Check for buildings (BuildingSelectable component)
@@ -144,6 +177,32 @@ namespace KingdomsAtDusk.UI
             SetCursor(CursorState.Normal);
         }
 
+        private CursorState CheckEdgeScrolling(Vector2 mousePosition)
+        {
+            // Calculate viewport boundaries in screen space
+            float viewportBottomY = Screen.height * viewportYOffset;
+            float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
+
+            bool isAtTop = mousePosition.y >= viewportTopY - edgeScrollBorderThickness;
+            bool isAtBottom = mousePosition.y <= viewportBottomY + edgeScrollBorderThickness;
+            bool isAtLeft = mousePosition.x <= edgeScrollBorderThickness;
+            bool isAtRight = mousePosition.x >= Screen.width - edgeScrollBorderThickness;
+
+            // Check diagonal edges first
+            if (isAtTop && isAtLeft) return CursorState.ScrollUpLeft;
+            if (isAtTop && isAtRight) return CursorState.ScrollUpRight;
+            if (isAtBottom && isAtLeft) return CursorState.ScrollDownLeft;
+            if (isAtBottom && isAtRight) return CursorState.ScrollDownRight;
+
+            // Check cardinal edges
+            if (isAtTop) return CursorState.ScrollUp;
+            if (isAtBottom) return CursorState.ScrollDown;
+            if (isAtLeft) return CursorState.ScrollLeft;
+            if (isAtRight) return CursorState.ScrollRight;
+
+            return CursorState.Normal;
+        }
+
         private bool IsEnemy(GameObject obj)
         {
             int enemyLayer = LayerMask.NameToLayer("Enemy");
@@ -202,6 +261,46 @@ namespace KingdomsAtDusk.UI
                 case CursorState.SelectBuilding:
                     texture = selectBuildingCursor;
                     hotspot = selectBuildingHotspot;
+                    break;
+
+                case CursorState.ScrollUp:
+                    texture = scrollUpCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollDown:
+                    texture = scrollDownCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollLeft:
+                    texture = scrollLeftCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollRight:
+                    texture = scrollRightCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollUpLeft:
+                    texture = scrollUpLeftCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollUpRight:
+                    texture = scrollUpRightCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollDownLeft:
+                    texture = scrollDownLeftCursor;
+                    hotspot = scrollHotspot;
+                    break;
+
+                case CursorState.ScrollDownRight:
+                    texture = scrollDownRightCursor;
+                    hotspot = scrollHotspot;
                     break;
 
                 case CursorState.Normal:
