@@ -49,6 +49,10 @@ namespace RTS.Managers
         private Material[] originalMaterials;
         private bool canPlace = false;
 
+        // Rotation state
+        private float currentBuildingRotation = 0f; // Y-axis rotation in degrees
+        private const float rotationStep = 15f; // Rotate by 15 degrees per scroll notch
+
         // Tower placement state
         private bool isPlacingTower = false;
         private TowerDataSO currentTowerData;
@@ -97,6 +101,7 @@ namespace RTS.Managers
         {
             if (isPlacingBuilding)
             {
+                HandleRotationInput(); // Handle rotation before updating preview
                 UpdateBuildingPreview();
                 HandlePlacementInput();
             }
@@ -160,6 +165,9 @@ namespace RTS.Managers
                 currentBuildingData = buildingData;  // ✅ Store the data
                 isPlacingBuilding = true;
 
+                // Reset rotation for new building
+                currentBuildingRotation = 0f;
+
                 // Check if this is a tower
                 if (buildingData is TowerDataSO towerData)
                 {
@@ -207,6 +215,9 @@ namespace RTS.Managers
             currentTowerData = null;
             wallToReplace = null;
             isSnappedToWall = false;
+
+            // Reset rotation
+            currentBuildingRotation = 0f;
         }
 
         #endregion
@@ -334,6 +345,29 @@ namespace RTS.Managers
                 (keyboard != null && keyboard.escapeKey.wasPressedThisFrame))
             {
                 CancelPlacement();
+            }
+        }
+
+        private void HandleRotationInput()
+        {
+            if (mouse == null) return;
+
+            // Read scroll wheel input
+            float scrollDelta = mouse.scroll.ReadValue().y;
+
+            if (Mathf.Abs(scrollDelta) > 0.01f)
+            {
+                // Rotate based on scroll direction
+                currentBuildingRotation += Mathf.Sign(scrollDelta) * rotationStep;
+
+                // Keep rotation in 0-360 range for cleaner values
+                currentBuildingRotation = Mathf.Repeat(currentBuildingRotation, 360f);
+
+                // Apply rotation to preview building
+                if (previewBuilding != null)
+                {
+                    previewBuilding.transform.rotation = Quaternion.Euler(0, currentBuildingRotation, 0);
+                }
             }
         }
 

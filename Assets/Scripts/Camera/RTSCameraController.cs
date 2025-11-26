@@ -36,6 +36,9 @@ public class RTSCameraController : MonoBehaviour
 
     private InputSystem_Actions inputActions;
 
+    // Building placement reference
+    private RTS.Managers.BuildingManager buildingManager;
+
     private PointerEventData cachedPointerEventData;
     private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
     private void Awake()
@@ -71,6 +74,17 @@ public class RTSCameraController : MonoBehaviour
         inputActions.Player.Sprint.performed += ctx => isSprinting = true;
         inputActions.Player.Sprint.canceled += ctx => isSprinting = false;
     }
+
+    private void Start()
+    {
+        // Find BuildingManager to check placement state
+        buildingManager = UnityEngine.Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+        if (buildingManager == null)
+        {
+            Debug.LogWarning("RTSCameraController: BuildingManager not found. Camera zoom will not be disabled during placement.");
+        }
+    }
+
     private bool IsMouseOverUI()
     {
         if (EventSystem.current == null)
@@ -136,6 +150,13 @@ public class RTSCameraController : MonoBehaviour
         {
             return;
         }
+
+        // Disable zoom during building placement
+        if (buildingManager != null && buildingManager.IsPlacing)
+        {
+            return;
+        }
+
         float newZoom = cam.orthographic ? cam.orthographicSize - zoomInput * zoomSpeed * Time.deltaTime
                                          : cam.fieldOfView - zoomInput * zoomSpeed * Time.deltaTime;
 
