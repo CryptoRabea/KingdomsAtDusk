@@ -173,7 +173,8 @@ public class RTSCameraController : MonoBehaviour
                 {
                     dir.z += 1; // Scroll forward (camera moves up)
                 }
-                else if (mousePos.y <= viewportBottomY + panBorderThickness)
+
+                if (mousePos.y <= viewportBottomY + panBorderThickness)
                 {
                     dir.z -= 1; // Scroll backward (camera moves down)
                 }
@@ -183,7 +184,8 @@ public class RTSCameraController : MonoBehaviour
                 {
                     dir.x += 1; // Scroll right
                 }
-                else if (mousePos.x <= panBorderThickness)
+
+                if (mousePos.x <= panBorderThickness)
                 {
                     dir.x -= 1; // Scroll left
                 }

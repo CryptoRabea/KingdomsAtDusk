@@ -275,6 +275,12 @@ namespace KingdomsAtDusk.UI
             float viewportBottomY = Screen.height * viewportYOffset;
             float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
 
+            // Only show edge scroll cursors if mouse is within viewport Y bounds
+            if (mousePosition.y < viewportBottomY || mousePosition.y > viewportTopY)
+            {
+                return CursorState.Normal;
+            }
+
             bool isAtTop = mousePosition.y >= viewportTopY - edgeScrollBorderThickness;
             bool isAtBottom = mousePosition.y <= viewportBottomY + edgeScrollBorderThickness;
             bool isAtLeft = mousePosition.x <= edgeScrollBorderThickness;
