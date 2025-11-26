@@ -143,6 +143,19 @@ namespace RTS.Core.Events
         }
     }
 
+    /// <summary>
+    /// Event published when building placement fails.
+    /// </summary>
+    public struct BuildingPlacementFailedEvent
+    {
+        public string Reason { get; }
+
+        public BuildingPlacementFailedEvent(string reason)
+        {
+            Reason = reason;
+        }
+    }
+
     // ==================== UNIT EVENTS ====================
 
     public struct UnitSpawnedEvent
