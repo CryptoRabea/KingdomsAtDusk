@@ -51,7 +51,9 @@ namespace RTS.Managers
 
         // Rotation state
         private float currentBuildingRotation = 0f; // Y-axis rotation in degrees
-        private const float rotationStep = 15f; // Rotate by 15 degrees per scroll notch
+        private const float rotationStep = 1f; // Rotate by 15 degrees per scroll notch
+                                               // Cache the prefab’s original rotation
+        private Quaternion baseRotation;
 
         // Tower placement state
         private bool isPlacingTower = false;
@@ -62,6 +64,8 @@ namespace RTS.Managers
         // Input
         private Mouse mouse;
         private Keyboard keyboard;
+        private InputSystem_Actions inputActions;
+
 
         // Services
         private IResourcesService resourceService;
@@ -79,6 +83,18 @@ namespace RTS.Managers
 
             mouse = Mouse.current;
             keyboard = Keyboard.current;
+            inputActions = new InputSystem_Actions();
+
+
+        }
+        private void OnEnable()
+        {
+            inputActions.Player.Enable();
+        }
+
+        private void OnDisable()
+        {
+            inputActions.Player.Disable();
         }
 
         private void Start()
@@ -230,14 +246,21 @@ namespace RTS.Managers
 
             // Instantiate preview as INACTIVE to prevent OnEnable() from running
             // This prevents VisionProvider from registering before we can disable it
-            previewBuilding = Instantiate(currentBuildingData.buildingPrefab);
+            previewBuilding = Instantiate(
+                currentBuildingData.buildingPrefab,
+                Vector3.zero,
+                currentBuildingData.buildingPrefab.transform.rotation
+            );
             previewBuilding.SetActive(false);
+
+            // Cache the prefab’s base rotation so scroll rotation is applied relative to it
+            baseRotation = currentBuildingData.buildingPrefab.transform.rotation;
+            currentBuildingRotation = 0f;
 
             // Destroy VisionProvider on preview to prevent fog of war reveal at wrong position
             // Use DestroyImmediate because Destroy() only marks for deletion at end of frame
             if (previewBuilding.TryGetComponent<KingdomsAtDusk.FogOfWar.IVisionProvider>(out var visionProvider))
             {
-                // Cast the interface back to a component
                 var component = visionProvider as Component;
                 if (component != null)
                     DestroyImmediate(component);
@@ -260,7 +283,7 @@ namespace RTS.Managers
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i] != null)
-                    // ✅ FIX: Use sharedMaterial to avoid creating instances
+                    // ✅ Use sharedMaterial to avoid creating instances
                     originalMaterials[i] = renderers[i].sharedMaterial;
             }
 
@@ -355,35 +378,45 @@ namespace RTS.Managers
             }
 
             // Right click or ESC to cancel
-            if (mouse.rightButton.wasPressedThisFrame ||
-                (keyboard != null && keyboard.escapeKey.wasPressedThisFrame))
+            if (inputActions.Player.Click1.WasPerformedThisFrame() ||
+                inputActions.Player.Cancel.WasPerformedThisFrame())
             {
                 CancelPlacement();
             }
+
+        }
+        public void SetPreview(GameObject prefabInstance)
+        {
+            previewBuilding = prefabInstance;
+            baseRotation = prefabInstance.transform.rotation; // store prefab’s rotation
+            currentBuildingRotation = 0f; // reset scroll rotation
         }
 
         private void HandleRotationInput()
         {
-            if (mouse == null) return;
+            float scrollDelta = inputActions.Player.Zoom.ReadValue<float>();
 
-            // Read scroll wheel input
-            float scrollDelta = mouse.scroll.ReadValue().y;
-
-            if (Mathf.Abs(scrollDelta) > 0.01f)
+            if (scrollDelta > 0f)
             {
-                // Rotate based on scroll direction
-                currentBuildingRotation += Mathf.Sign(scrollDelta) * rotationStep;
+                currentBuildingRotation += rotationStep;
+            }
+            else if (scrollDelta < 0f)
+            {
+                currentBuildingRotation -= rotationStep;
+            }
 
-                // Keep rotation in 0-360 range for cleaner values
-                currentBuildingRotation = Mathf.Repeat(currentBuildingRotation, 360f);
+            currentBuildingRotation = Mathf.Repeat(currentBuildingRotation, 360f);
 
-                // Apply rotation to preview building
-                if (previewBuilding != null)
-                {
-                    previewBuilding.transform.rotation = Quaternion.Euler(0, currentBuildingRotation, 0);
-                }
+            if (previewBuilding != null)
+            {
+                // Apply prefab’s base rotation + scroll rotation around Z
+                previewBuilding.transform.rotation =
+                    baseRotation * Quaternion.Euler(0, 0, currentBuildingRotation);
             }
         }
+
+
+
 
         private void PlaceBuilding()
         {

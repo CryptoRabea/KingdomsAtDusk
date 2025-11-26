@@ -62,12 +62,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\RTSAnimation\Editor\AnimationSetupHelper.cs" />
+    <Compile Include="Assets\Scripts\Editor\SystemExtractorTool.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\BuildingSpawnPointEditor.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Editor\HUDConfigurationTemplates.cs" />
+    <Compile Include="Assets\Scripts\Editor\BuildSetupMenu.cs" />
     <Compile Include="Assets\Scripts\Editor\UnitDetailsUISetup.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Scripts\Editor\PT_Create_Prefab_Editor.cs" />
     <Compile Include="Assets\Scripts\UI\Editor\CursorTextureGenerator.cs" />
+    <Compile Include="Assets\Scripts\Editor\PackageExporterTool.cs" />
     <Compile Include="Assets\AOSFogWar\Editor\editorFogWar.cs" />
+    <Compile Include="Assets\Scripts\Editor\MenuSetupTool.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallConnectionSystemEditor.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\WallPrefabSetupUtility.cs" />
   </ItemGroup>

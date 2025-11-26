@@ -71,6 +71,7 @@
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarRenderer.cs" />
     <Compile Include="Assets\Scripts\Core\ServiceLocator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_A.cs" />
+    <Compile Include="Assets\Scripts\Core\BuildInitializer.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\RetreatState.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectable.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\ResourceWorkerModule.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSpawnPoint.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
+    <Compile Include="Assets\Scripts\UI\LoadingScreen\LoadingScreenManager.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsPlacement.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\HUDLayoutPreset.cs" />
@@ -120,6 +122,8 @@
     <Compile Include="Assets\Scripts\Units\Components\UnitCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
     <Compile Include="Assets\FPSCounter.cs" />
+    <Compile Include="Assets\Scripts\UI\MainMenu\MainMenuManager.cs" />
+    <Compile Include="Assets\Scripts\Core\ShaderPreloader.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallPlacementController.cs" />
     <Compile Include="Assets\Scripts\UI\HappinessUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
@@ -196,10 +200,12 @@
     <Compile Include="Assets\AOSFogWar\Demo\Scripts\csEyeController.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEntityVisibility.cs" />
     <Compile Include="Assets\Scripts\Camera\RTSCameraController.cs" />
+    <Compile Include="Assets\Scripts\UI\LoadingScreen\SceneTransitionManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\StoneKeep\Scripts\MouseLook.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\SimpleToon\Scripts\SelfRotation.cs" />
+    <Compile Include="Assets\Scripts\Core\BuildDiagnostics.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingDataSO.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarMinimapRenderer.cs" />
     <Compile Include="Assets\Scripts\Managers\ResourceManager.cs" />
@@ -214,6 +220,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TeleType.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallNavMeshObstacle.cs" />
+    <Compile Include="Assets\Scripts\Core\StartupDiagnostics.cs" />
     <Compile Include="Assets\Scripts\Managers\PeasantWorkforceManager.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Scripts\PT_Create_Prefab.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PlayerMovement.cs" />
@@ -269,6 +276,7 @@
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader_VS.shader" />
     <None Include="Assets\ConstructableMedievalHouses\Art\Shader\BuildingEffect.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
+    <None Include="Assets\Scripts\Managers\New Text Document.txt" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Flowers_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Rock_Shader.shader" />
