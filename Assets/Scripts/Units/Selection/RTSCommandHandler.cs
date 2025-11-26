@@ -28,6 +28,7 @@ namespace RTS.Units
         [Header("Visual Feedback")]
         [SerializeField] private GameObject moveMarkerPrefab; // Optional: shows where units will move
         [SerializeField] private float markerLifetime = 1f;
+        [SerializeField] private float markerHeightOffset = 0.1f; // Height above ground to spawn marker
 
         [Header("Double-Click Settings")]
         [SerializeField] private float doubleClickTime = 0.3f; // Time window for double-click
@@ -195,10 +196,10 @@ namespace RTS.Units
             // Show visual feedback
             if (moveMarkerPrefab != null)
             {
-                // Build the spawn position: X/Z from destination, Y from prefab
+                // Use the ground Y position with a small offset to keep marker above ground
                 Vector3 spawnPosition = new Vector3(
                     destination.x,
-                    moveMarkerPrefab.transform.position.y,
+                    destination.y + markerHeightOffset,
                     destination.z
                 );
 
@@ -209,7 +210,6 @@ namespace RTS.Units
                 GameObject marker = Instantiate(moveMarkerPrefab, spawnPosition, spawnRotation);
 
                 Destroy(marker, markerLifetime);
-
             }
 
             Debug.Log($"Moving {selectionManager.SelectionCount} units to {destination}");
@@ -242,10 +242,10 @@ namespace RTS.Units
             // Show visual feedback
             if (moveMarkerPrefab != null)
             {
-                // Build the spawn position: X/Z from destination, Y from prefab
+                // Use the ground Y position with a small offset to keep marker above ground
                 Vector3 spawnPosition = new Vector3(
                     destination.x,
-                    moveMarkerPrefab.transform.position.y,
+                    destination.y + markerHeightOffset,
                     destination.z
                 );
 
