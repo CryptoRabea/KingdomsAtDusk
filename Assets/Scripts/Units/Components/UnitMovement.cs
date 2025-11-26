@@ -16,6 +16,17 @@ namespace RTS.Units
         [SerializeField] private float stoppingDistance = 0.1f;
         [SerializeField] private float pathUpdateInterval = 0.5f;
 
+        [Header("Avoidance Settings")]
+        [SerializeField] private float avoidanceRadius = 0.5f;
+        [SerializeField] private int avoidancePriority = 50;
+        [SerializeField] private float separationWeight = 1.5f;
+
+        [Header("Stuck Detection")]
+        [SerializeField] private float stuckCheckInterval = 1.0f;
+        [SerializeField] private float stuckThreshold = 0.1f; // Minimum distance to move per check
+        [SerializeField] private int maxStuckChecks = 3; // Number of failed checks before considering stuck
+        [SerializeField] private float pathFailureTimeout = 2.0f; // Time to wait for path calculation
+
         private NavMeshAgent agent;
         private Transform currentTarget;
         private Vector3 currentDestination;
@@ -24,8 +35,17 @@ namespace RTS.Units
         private bool isEnabled = true;
         private bool hasMovementIntent = false; // Track movement intent before velocity updates
 
-        public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f);
+        // Stuck detection
+        private Vector3 lastStuckCheckPosition;
+        private float stuckCheckTimer;
+        private int consecutiveStuckChecks;
+        private bool isStuck = false;
+        private float pathPendingTimer;
+
+        public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f) && !isStuck;
         public bool HasReachedDestination => hasDestination && !agent.pathPending && agent.remainingDistance <= stoppingDistance;
+        public bool IsStuck => isStuck;
+        public bool HasValidPath => agent != null && agent.hasPath && agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathComplete;
         public float Speed => moveSpeed;
         public Vector3 Velocity => agent != null ? agent.velocity : Vector3.zero;
 
@@ -37,7 +57,7 @@ namespace RTS.Units
         private void InitializeAgent()
         {
             agent = GetComponent<NavMeshAgent>();
-            
+
             if (agent != null)
             {
                 agent.speed = moveSpeed;
@@ -45,6 +65,18 @@ namespace RTS.Units
                 agent.stoppingDistance = stoppingDistance;
                 agent.autoBraking = true;
                 agent.updateRotation = true;
+
+                // Configure avoidance for better group movement
+                agent.radius = avoidanceRadius;
+                agent.avoidancePriority = avoidancePriority;
+                agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+
+                // Initialize stuck detection
+                lastStuckCheckPosition = transform.position;
+                stuckCheckTimer = 0f;
+                consecutiveStuckChecks = 0;
+                isStuck = false;
+                pathPendingTimer = 0f;
             }
             else
             {
@@ -60,6 +92,8 @@ namespace RTS.Units
             if (hasMovementIntent && HasReachedDestination)
             {
                 hasMovementIntent = false;
+                isStuck = false;
+                consecutiveStuckChecks = 0;
             }
 
             // Update path to moving targets periodically
@@ -71,6 +105,13 @@ namespace RTS.Units
                     pathUpdateTimer = 0f;
                     SetDestination(currentTarget.position);
                 }
+            }
+
+            // Stuck detection
+            if (hasDestination && hasMovementIntent)
+            {
+                UpdateStuckDetection();
+                UpdatePathFailureDetection();
             }
         }
 
@@ -142,6 +183,8 @@ namespace RTS.Units
             currentTarget = null;
             hasDestination = false;
             hasMovementIntent = false; // Clear movement intent when stopped
+            isStuck = false;
+            consecutiveStuckChecks = 0;
         }
 
         /// <summary>
@@ -246,7 +289,7 @@ namespace RTS.Units
             {
                 Gizmos.color = Color.yellow;
                 Vector3[] corners = agent.path.corners;
-                
+
                 for (int i = 0; i < corners.Length - 1; i++)
                 {
                     Gizmos.DrawLine(corners[i], corners[i + 1]);
@@ -258,6 +301,106 @@ namespace RTS.Units
                 Gizmos.color = Color.cyan;
                 Gizmos.DrawLine(transform.position, currentTarget.position);
             }
+
+            // Draw stuck indicator
+            if (isStuck)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(transform.position + Vector3.up, 0.5f);
+            }
         }
+
+        #endregion
+
+        #region Stuck Detection
+
+        private void UpdateStuckDetection()
+        {
+            stuckCheckTimer += Time.deltaTime;
+
+            if (stuckCheckTimer >= stuckCheckInterval)
+            {
+                stuckCheckTimer = 0f;
+
+                // Check if unit has moved significantly since last check
+                float distanceMoved = Vector3.Distance(transform.position, lastStuckCheckPosition);
+
+                if (distanceMoved < stuckThreshold && hasMovementIntent && !HasReachedDestination)
+                {
+                    consecutiveStuckChecks++;
+
+                    if (consecutiveStuckChecks >= maxStuckChecks)
+                    {
+                        // Unit is stuck
+                        if (!isStuck)
+                        {
+                            isStuck = true;
+                            Debug.LogWarning($"Unit {gameObject.name} detected as stuck at {transform.position}");
+                        }
+                    }
+                }
+                else
+                {
+                    // Unit is moving, reset stuck counter
+                    consecutiveStuckChecks = 0;
+                    if (isStuck && distanceMoved >= stuckThreshold)
+                    {
+                        isStuck = false;
+                        Debug.Log($"Unit {gameObject.name} is no longer stuck");
+                    }
+                }
+
+                lastStuckCheckPosition = transform.position;
+            }
+        }
+
+        private void UpdatePathFailureDetection()
+        {
+            if (agent == null || !agent.enabled) return;
+
+            // Check if path is pending for too long
+            if (agent.pathPending)
+            {
+                pathPendingTimer += Time.deltaTime;
+
+                if (pathPendingTimer >= pathFailureTimeout)
+                {
+                    Debug.LogWarning($"Unit {gameObject.name} - path calculation timeout. Path may be invalid.");
+                    isStuck = true;
+                    pathPendingTimer = 0f;
+                }
+            }
+            else
+            {
+                pathPendingTimer = 0f;
+
+                // Check if path is invalid
+                if (agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid)
+                {
+                    Debug.LogWarning($"Unit {gameObject.name} - invalid path to {currentDestination}");
+                    isStuck = true;
+                }
+                else if (agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial)
+                {
+                    Debug.LogWarning($"Unit {gameObject.name} - partial path to {currentDestination}");
+                    // Partial paths are acceptable, but log for debugging
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reset stuck state and try to resume movement.
+        /// </summary>
+        public void ResetStuckState()
+        {
+            isStuck = false;
+            consecutiveStuckChecks = 0;
+            stuckCheckTimer = 0f;
+            lastStuckCheckPosition = transform.position;
+
+            Debug.Log($"Unit {gameObject.name} stuck state reset");
+        }
+
+        #endregion
     }
 }
