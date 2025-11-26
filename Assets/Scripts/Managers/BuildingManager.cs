@@ -325,14 +325,15 @@ namespace RTS.Managers
                 }
                 else
                 {
-                    // Event is published in IsValidPlacement for specific reasons
-                    // This is a fallback for any other validation failures
+                    // Determine the specific reason for failure and publish event
                     if (previewBuilding != null)
                     {
                         Vector3 pos = previewBuilding.transform.position;
+
+                        // Check fog of war first
                         if (FogOfWarManager.Instance != null && !FogOfWarManager.Instance.IsVisible(pos))
                         {
-                            // Already published in IsValidPlacement
+                            EventBus.Publish(new BuildingPlacementFailedEvent("Cannot build in unexplored or hidden areas!"));
                         }
                         else
                         {
@@ -450,11 +451,11 @@ namespace RTS.Managers
             if (previewBuilding == null) return false;
 
             // ✅ CHECK FOG OF WAR: Only allow placement in currently visible areas
+            // NOTE: Don't publish event here - this is called every frame during preview
             if (FogOfWarManager.Instance != null)
             {
                 if (!FogOfWarManager.Instance.IsVisible(position))
                 {
-                    EventBus.Publish(new BuildingPlacementFailedEvent("Cannot build in unexplored or hidden areas!"));
                     return false;
                 }
             }
