@@ -18,6 +18,11 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Texture2D selectBuildingCursor;
 
         [Header("Edge Scroll Cursors")]
+        [SerializeField] private Texture2D baseScrollArrowCursor;
+        [Tooltip("If true, rotates the base arrow cursor. If false, uses individual textures.")]
+        [SerializeField] private bool useRotatedArrow = true;
+
+        // Individual cursor textures (used when useRotatedArrow is false)
         [SerializeField] private Texture2D scrollUpCursor;
         [SerializeField] private Texture2D scrollDownCursor;
         [SerializeField] private Texture2D scrollLeftCursor;
@@ -26,6 +31,16 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Texture2D scrollUpRightCursor;
         [SerializeField] private Texture2D scrollDownLeftCursor;
         [SerializeField] private Texture2D scrollDownRightCursor;
+
+        // Cached rotated cursors (generated at runtime if useRotatedArrow is true)
+        private Texture2D cachedScrollUpCursor;
+        private Texture2D cachedScrollDownCursor;
+        private Texture2D cachedScrollLeftCursor;
+        private Texture2D cachedScrollRightCursor;
+        private Texture2D cachedScrollUpLeftCursor;
+        private Texture2D cachedScrollUpRightCursor;
+        private Texture2D cachedScrollDownLeftCursor;
+        private Texture2D cachedScrollDownRightCursor;
 
         [Header("Cursor Hotspots (pixel offset from top-left)")]
         [SerializeField] private Vector2 normalHotspot = Vector2.zero;
@@ -89,6 +104,83 @@ namespace KingdomsAtDusk.UI
             {
                 selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
             }
+
+            // Generate rotated cursors if using rotated arrow mode
+            if (useRotatedArrow && baseScrollArrowCursor != null)
+            {
+                GenerateRotatedCursors();
+            }
+        }
+
+        private void GenerateRotatedCursors()
+        {
+            // Assume base arrow points UP (0 degrees)
+            cachedScrollUpCursor = baseScrollArrowCursor; // 0 degrees
+            cachedScrollRightCursor = RotateTexture(baseScrollArrowCursor, 90); // 90 degrees clockwise
+            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, 180); // 180 degrees
+            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, 270); // 270 degrees clockwise
+
+            // Diagonals
+            cachedScrollUpRightCursor = RotateTexture(baseScrollArrowCursor, 45); // 45 degrees
+            cachedScrollDownRightCursor = RotateTexture(baseScrollArrowCursor, 135); // 135 degrees
+            cachedScrollDownLeftCursor = RotateTexture(baseScrollArrowCursor, 225); // 225 degrees
+            cachedScrollUpLeftCursor = RotateTexture(baseScrollArrowCursor, 315); // 315 degrees
+        }
+
+        private Texture2D RotateTexture(Texture2D source, float angleDegrees)
+        {
+            if (source == null) return null;
+
+            int width = source.width;
+            int height = source.height;
+
+            // Create new texture with same dimensions
+            Texture2D rotated = new Texture2D(width, height, source.format, false);
+
+            // Get pixel data from source
+            Color[] sourcePixels = source.GetPixels();
+            Color[] rotatedPixels = new Color[width * height];
+
+            // Calculate rotation
+            float angleRad = angleDegrees * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(angleRad);
+            float sin = Mathf.Sin(angleRad);
+
+            // Center of rotation
+            float centerX = width / 2f;
+            float centerY = height / 2f;
+
+            // Rotate pixels
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    // Translate to origin
+                    float dx = x - centerX;
+                    float dy = y - centerY;
+
+                    // Rotate
+                    float rotatedX = dx * cos - dy * sin + centerX;
+                    float rotatedY = dx * sin + dy * cos + centerY;
+
+                    // Sample source pixel (with bounds check)
+                    if (rotatedX >= 0 && rotatedX < width && rotatedY >= 0 && rotatedY < height)
+                    {
+                        int sourceX = Mathf.RoundToInt(rotatedX);
+                        int sourceY = Mathf.RoundToInt(rotatedY);
+                        rotatedPixels[y * width + x] = sourcePixels[sourceY * width + sourceX];
+                    }
+                    else
+                    {
+                        rotatedPixels[y * width + x] = Color.clear;
+                    }
+                }
+            }
+
+            rotated.SetPixels(rotatedPixels);
+            rotated.Apply();
+
+            return rotated;
         }
 
         private void Update()
@@ -264,42 +356,42 @@ namespace KingdomsAtDusk.UI
                     break;
 
                 case CursorState.ScrollUp:
-                    texture = scrollUpCursor;
+                    texture = useRotatedArrow ? cachedScrollUpCursor : scrollUpCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollDown:
-                    texture = scrollDownCursor;
+                    texture = useRotatedArrow ? cachedScrollDownCursor : scrollDownCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollLeft:
-                    texture = scrollLeftCursor;
+                    texture = useRotatedArrow ? cachedScrollLeftCursor : scrollLeftCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollRight:
-                    texture = scrollRightCursor;
+                    texture = useRotatedArrow ? cachedScrollRightCursor : scrollRightCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollUpLeft:
-                    texture = scrollUpLeftCursor;
+                    texture = useRotatedArrow ? cachedScrollUpLeftCursor : scrollUpLeftCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollUpRight:
-                    texture = scrollUpRightCursor;
+                    texture = useRotatedArrow ? cachedScrollUpRightCursor : scrollUpRightCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollDownLeft:
-                    texture = scrollDownLeftCursor;
+                    texture = useRotatedArrow ? cachedScrollDownLeftCursor : scrollDownLeftCursor;
                     hotspot = scrollHotspot;
                     break;
 
                 case CursorState.ScrollDownRight:
-                    texture = scrollDownRightCursor;
+                    texture = useRotatedArrow ? cachedScrollDownRightCursor : scrollDownRightCursor;
                     hotspot = scrollHotspot;
                     break;
 

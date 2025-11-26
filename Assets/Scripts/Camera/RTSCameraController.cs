@@ -163,18 +163,30 @@ public class RTSCameraController : MonoBehaviour
             float viewportBottomY = Screen.height * viewportYOffset;
             float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
 
-            // Only process edge scrolling if mouse is within viewport bounds
-            if (mousePos.y >= viewportBottomY && mousePos.y <= viewportTopY)
+            // Check if mouse is within the viewport's Y range (not in UI area below)
+            bool isInViewportY = mousePos.y >= viewportBottomY && mousePos.y <= viewportTopY;
+
+            if (isInViewportY)
             {
-                // Top edge: use viewport top boundary
-                if (mousePos.y >= viewportTopY - panBorderThickness) dir.z += 1;
+                // Vertical scrolling - Check top and bottom edges of viewport
+                if (mousePos.y >= viewportTopY - panBorderThickness)
+                {
+                    dir.z += 1; // Scroll forward (camera moves up)
+                }
+                else if (mousePos.y <= viewportBottomY + panBorderThickness)
+                {
+                    dir.z -= 1; // Scroll backward (camera moves down)
+                }
 
-                // Bottom edge: use viewport bottom boundary (where UI HUD starts)
-                if (mousePos.y <= viewportBottomY + panBorderThickness) dir.z -= 1;
-
-                // Left and right edges use screen boundaries
-                if (mousePos.x >= Screen.width - panBorderThickness) dir.x += 1;
-                if (mousePos.x <= panBorderThickness) dir.x -= 1;
+                // Horizontal scrolling - Check left and right edges of screen
+                if (mousePos.x >= Screen.width - panBorderThickness)
+                {
+                    dir.x += 1; // Scroll right
+                }
+                else if (mousePos.x <= panBorderThickness)
+                {
+                    dir.x -= 1; // Scroll left
+                }
             }
         }
 
