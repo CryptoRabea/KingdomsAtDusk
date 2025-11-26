@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace RTS.Units
@@ -12,20 +14,31 @@ namespace RTS.Units
         [Header("References")]
         [SerializeField] private UnitSelectionManager selectionManager;
         [SerializeField] private Camera mainCamera;
-        
+
         [Header("Settings")]
         [SerializeField] private LayerMask groundLayer; // What counts as ground
         [SerializeField] private LayerMask unitLayer;   // What counts as units
+
+        [Header("Viewport Settings")]
+        [Tooltip("Camera viewport height (0-1). Should match RTSCameraController settings.")]
+        [SerializeField] private float viewportHeight = 0.8f;
+        [Tooltip("Camera viewport Y offset (0-1). Should match RTSCameraController settings.")]
+        [SerializeField] private float viewportYOffset = 0.2f;
         
         [Header("Visual Feedback")]
         [SerializeField] private GameObject moveMarkerPrefab; // Optional: shows where units will move
         [SerializeField] private float markerLifetime = 1f;
+        [SerializeField] private float markerHeightOffset = 0.1f; // Height above ground to spawn marker
 
         [Header("Double-Click Settings")]
         [SerializeField] private float doubleClickTime = 0.3f; // Time window for double-click
 
         private Mouse mouse;
         private float lastRightClickTime = -1f;
+
+        // Cached for UI detection
+        private PointerEventData cachedPointerEventData;
+        private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
 
         private void Awake()
         {
@@ -39,6 +52,60 @@ namespace RTS.Units
                 Debug.LogError("No mouse detected! RTSCommandHandler won't work.");
                 enabled = false;
             }
+
+            // Initialize UI detection
+            if (EventSystem.current != null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+        }
+
+        private bool IsMouseOverUI()
+        {
+            if (EventSystem.current == null)
+                return false;
+
+            // Initialize if needed
+            if (cachedPointerEventData == null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+
+            // Update position
+            cachedPointerEventData.position = mouse.position.ReadValue();
+
+            // Clear previous results and raycast
+            cachedRaycastResults.Clear();
+            EventSystem.current.RaycastAll(cachedPointerEventData, cachedRaycastResults);
+
+            return cachedRaycastResults.Count > 0;
+        }
+
+        private bool IsMouseOutsideViewport()
+        {
+            if (mouse == null)
+                return true;
+
+            Vector2 mousePos = mouse.position.ReadValue();
+
+            // Calculate viewport boundaries in screen space
+            float viewportBottomY = Screen.height * viewportYOffset;
+            float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
+
+            // Check if mouse is outside screen bounds
+            if (mousePos.x < 0 || mousePos.x > Screen.width ||
+                mousePos.y < 0 || mousePos.y > Screen.height)
+            {
+                return true;
+            }
+
+            // Check if mouse is below viewport (in UI area) or above viewport
+            if (mousePos.y < viewportBottomY || mousePos.y > viewportTopY)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void Update()
@@ -52,6 +119,12 @@ namespace RTS.Units
 
         private void HandleRightClick()
         {
+            // Don't process right-click if mouse is over UI or outside viewport
+            if (IsMouseOverUI() || IsMouseOutsideViewport())
+            {
+                return;
+            }
+
             // Check for double-click
             bool isDoubleClick = false;
             float currentTime = Time.time;
@@ -123,10 +196,10 @@ namespace RTS.Units
             // Show visual feedback
             if (moveMarkerPrefab != null)
             {
-                // Build the spawn position: X/Z from destination, Y from prefab
+                // Use the ground Y position with a small offset to keep marker above ground
                 Vector3 spawnPosition = new Vector3(
                     destination.x,
-                    moveMarkerPrefab.transform.position.y,
+                    destination.y + markerHeightOffset,
                     destination.z
                 );
 
@@ -137,7 +210,6 @@ namespace RTS.Units
                 GameObject marker = Instantiate(moveMarkerPrefab, spawnPosition, spawnRotation);
 
                 Destroy(marker, markerLifetime);
-
             }
 
             Debug.Log($"Moving {selectionManager.SelectionCount} units to {destination}");
@@ -170,10 +242,10 @@ namespace RTS.Units
             // Show visual feedback
             if (moveMarkerPrefab != null)
             {
-                // Build the spawn position: X/Z from destination, Y from prefab
+                // Use the ground Y position with a small offset to keep marker above ground
                 Vector3 spawnPosition = new Vector3(
                     destination.x,
-                    moveMarkerPrefab.transform.position.y,
+                    destination.y + markerHeightOffset,
                     destination.z
                 );
 
