@@ -17,6 +17,12 @@ public class RTSCameraController : MonoBehaviour
     public Vector2 maxPosition;
     public bool isCamInverted = false;
 
+    [Header("Viewport Settings")]
+    [Tooltip("Camera viewport height (0-1). If viewport is smaller than screen, UI below viewport counts as edge.")]
+    public float viewportHeight = 0.8f;
+    [Tooltip("Camera viewport Y offset (0-1). Bottom of viewport where edge scrolling starts.")]
+    public float viewportYOffset = 0.2f;
+
     [Header("Zoom")]
     public float zoomSpeed = 50f;
     public float minZoom = 15f;
@@ -105,6 +111,33 @@ public class RTSCameraController : MonoBehaviour
 
         return cachedRaycastResults.Count > 0;
     }
+
+    private bool IsMouseOutsideViewport()
+    {
+        if (Mouse.current == null)
+            return true;
+
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+
+        // Calculate viewport boundaries in screen space
+        float viewportBottomY = Screen.height * viewportYOffset;
+        float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
+
+        // Check if mouse is outside screen bounds or outside viewport bounds
+        if (mousePos.x < 0 || mousePos.x > Screen.width ||
+            mousePos.y < 0 || mousePos.y > Screen.height)
+        {
+            return true;
+        }
+
+        // Check if mouse is below viewport (in UI area) or above viewport
+        if (mousePos.y < viewportBottomY || mousePos.y > viewportTopY)
+        {
+            return true;
+        }
+
+        return false;
+    }
     private void OnEnable() => inputActions.Enable();
     private void OnDisable() => inputActions.Disable();
 
@@ -121,14 +154,28 @@ public class RTSCameraController : MonoBehaviour
     {
         Vector3 dir = new Vector3(moveInput.x, 0, moveInput.y);
 
-        // Edge scrolling - ✅ ADD UI CHECK
+        // Edge scrolling - Check UI and viewport bounds
         if (useEdgeScroll && Mouse.current != null && !IsMouseOverUI())
         {
             Vector2 mousePos = Mouse.current.position.ReadValue();
-            if (mousePos.y >= Screen.height - panBorderThickness) dir.z += 1;
-            if (mousePos.y <= panBorderThickness) dir.z -= 1;
-            if (mousePos.x >= Screen.width - panBorderThickness) dir.x += 1;
-            if (mousePos.x <= panBorderThickness) dir.x -= 1;
+
+            // Calculate viewport boundaries in screen space
+            float viewportBottomY = Screen.height * viewportYOffset;
+            float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
+
+            // Only process edge scrolling if mouse is within viewport bounds
+            if (mousePos.y >= viewportBottomY && mousePos.y <= viewportTopY)
+            {
+                // Top edge: use viewport top boundary
+                if (mousePos.y >= viewportTopY - panBorderThickness) dir.z += 1;
+
+                // Bottom edge: use viewport bottom boundary (where UI HUD starts)
+                if (mousePos.y <= viewportBottomY + panBorderThickness) dir.z -= 1;
+
+                // Left and right edges use screen boundaries
+                if (mousePos.x >= Screen.width - panBorderThickness) dir.x += 1;
+                if (mousePos.x <= panBorderThickness) dir.x -= 1;
+            }
         }
 
         // Apply sprint multiplier when shift is held
@@ -146,7 +193,8 @@ public class RTSCameraController : MonoBehaviour
     }
     private void HandleZoom()
     {
-        if (IsMouseOverUI())
+        // Disable zoom if mouse is over UI or outside viewport bounds
+        if (IsMouseOverUI() || IsMouseOutsideViewport())
         {
             return;
         }
