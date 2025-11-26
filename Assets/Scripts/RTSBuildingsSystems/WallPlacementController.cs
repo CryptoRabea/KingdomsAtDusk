@@ -632,7 +632,21 @@ namespace RTS.Buildings
 
         private void UpdateWallPreview(Vector3 secondPolePos)
         {
-            // Check for overlaps FIRST
+            // ✅ CHECK FOG OF WAR: Only allow placement in currently visible areas
+            bool notVisible = false;
+            if (FogOfWarManager.Instance != null)
+            {
+                bool firstPoleVisible = FogOfWarManager.Instance.IsVisible(firstPolePosition);
+                bool secondPoleVisible = FogOfWarManager.Instance.IsVisible(secondPolePos);
+                notVisible = !firstPoleVisible || !secondPoleVisible;
+
+                if (notVisible)
+                {
+                    Debug.Log("Cannot place wall: area not currently visible");
+                }
+            }
+
+            // Check for overlaps
             bool overlapsWall = WouldOverlapExistingWall(firstPolePosition, secondPolePos);
             bool overlapsBuilding = WouldOverlapBuildings(firstPolePosition, secondPolePos);
 
@@ -654,8 +668,8 @@ namespace RTS.Buildings
             // Check affordability AFTER calculating costs
             canAfford = resourceService != null && resourceService.CanAfford(totalCost);
 
-            // Determine material: show invalid (red) if overlapping OR can't afford
-            bool isInvalid = overlapsWall || overlapsBuilding || !canAfford;
+            // Determine material: show invalid (red) if overlapping OR can't afford OR not visible
+            bool isInvalid = overlapsWall || overlapsBuilding || !canAfford || notVisible;
             Material previewMat = isInvalid ? invalidPreviewMaterial : validPreviewMaterial;
 
             // Determine line color: cyan if snapped, red if invalid, green if valid
@@ -900,6 +914,17 @@ namespace RTS.Buildings
             if (mouseWorldPos == Vector3.zero) return;
 
             firstPolePosition = SnapToGrid(mouseWorldPos);
+
+            // ✅ CHECK FOG OF WAR: Only allow placing first pole in currently visible areas
+            if (FogOfWarManager.Instance != null)
+            {
+                if (!FogOfWarManager.Instance.IsVisible(firstPolePosition))
+                {
+                    Debug.Log("Cannot place first pole: area not currently visible");
+                    return;
+                }
+            }
+
             firstPoleSet = true;
 
             if (polePrefab != null)
@@ -948,6 +973,17 @@ namespace RTS.Buildings
             bool snappedToExistingWall = TrySnapToNearbyWall(secondPolePos, out Vector3 finalSecondPolePos);
             secondPolePos = finalSecondPolePos;
 
+            // ✅ CHECK FOG OF WAR: Only allow placement in currently visible areas
+            if (FogOfWarManager.Instance != null)
+            {
+                bool firstPoleVisible = FogOfWarManager.Instance.IsVisible(firstPolePosition);
+                bool secondPoleVisible = FogOfWarManager.Instance.IsVisible(secondPolePos);
+                if (!firstPoleVisible || !secondPoleVisible)
+                {
+                    Debug.LogWarning("❌ Cannot place wall: area not currently visible.");
+                    return;
+                }
+            }
 
             if (WouldOverlapExistingWall(firstPolePosition, secondPolePos))
             {

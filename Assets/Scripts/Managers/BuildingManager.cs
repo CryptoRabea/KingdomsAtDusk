@@ -436,6 +436,16 @@ namespace RTS.Managers
         {
             if (previewBuilding == null) return false;
 
+            // ✅ CHECK FOG OF WAR: Only allow placement in currently visible areas
+            if (FogOfWarManager.Instance != null)
+            {
+                if (!FogOfWarManager.Instance.IsVisible(position))
+                {
+                    Debug.Log("Cannot place building: area not currently visible");
+                    return false;
+                }
+            }
+
             // Get bounds for overlap check
             Bounds buildingBounds = GetBuildingBounds(previewBuilding);
 
