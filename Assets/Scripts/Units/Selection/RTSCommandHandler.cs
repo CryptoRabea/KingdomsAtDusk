@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using RTS.Units.Formation;
 
 namespace RTS.Units
 {
@@ -14,6 +15,7 @@ namespace RTS.Units
         [Header("References")]
         [SerializeField] private UnitSelectionManager selectionManager;
         [SerializeField] private Camera mainCamera;
+        [SerializeField] private FormationSettingsSO formationSettings;
 
         [Header("Settings")]
         [SerializeField] private LayerMask groundLayer; // What counts as ground
@@ -174,23 +176,70 @@ namespace RTS.Units
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
-            // Move all selected units (they will resume aggro when reaching destination)
+            int unitCount = selectionManager.SelectionCount;
+            List<Vector3> formationPositions;
+
+            // Calculate formation positions if multiple units
+            if (unitCount > 1 && formationSettings != null)
+            {
+                FormationType formationType = formationSettings.GetFormationForUnitCount(unitCount);
+                float spacing = formationSettings.GetSpacingForUnitCount(unitCount);
+
+                // Calculate facing direction (from camera to destination)
+                Vector3 cameraPos = mainCamera.transform.position;
+                Vector3 facingDirection = (destination - cameraPos);
+                facingDirection.y = 0;
+                facingDirection.Normalize();
+
+                formationPositions = FormationManager.CalculateFormationPositions(
+                    destination,
+                    unitCount,
+                    formationType,
+                    spacing,
+                    facingDirection
+                );
+
+                // Validate positions if enabled
+                if (formationSettings.validatePositions)
+                {
+                    formationPositions = FormationManager.ValidateFormationPositions(
+                        formationPositions,
+                        formationSettings.maxValidationDistance
+                    );
+                }
+            }
+            else
+            {
+                // Single unit or no formation settings - all go to same point
+                formationPositions = new List<Vector3>();
+                for (int i = 0; i < unitCount; i++)
+                {
+                    formationPositions.Add(destination);
+                }
+            }
+
+            // Move units to their formation positions
+            int index = 0;
             foreach (var unit in selectionManager.SelectedUnits)
             {
-                if (unit == null) continue;
+                if (unit == null || index >= formationPositions.Count) continue;
+
+                Vector3 unitDestination = formationPositions[index];
 
                 // Set as forced move with destination so unit can resume aggro when it arrives
                 var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
                 if (aiController != null)
                 {
-                    aiController.SetForcedMove(true, destination);
+                    aiController.SetForcedMove(true, unitDestination);
                 }
 
                 var movement = unit.GetComponent<UnitMovement>();
                 if (movement != null)
                 {
-                    movement.SetDestination(destination);
+                    movement.SetDestination(unitDestination);
                 }
+
+                index++;
             }
 
             // Show visual feedback
@@ -212,7 +261,7 @@ namespace RTS.Units
                 Destroy(marker, markerLifetime);
             }
 
-            Debug.Log($"Moving {selectionManager.SelectionCount} units to {destination}");
+            Debug.Log($"Moving {selectionManager.SelectionCount} units to {destination} in formation");
         }
 
         private void IssueForcedMoveCommand(Vector3 destination)
@@ -220,23 +269,70 @@ namespace RTS.Units
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
+            int unitCount = selectionManager.SelectionCount;
+            List<Vector3> formationPositions;
+
+            // Calculate formation positions if multiple units
+            if (unitCount > 1 && formationSettings != null)
+            {
+                FormationType formationType = formationSettings.GetFormationForUnitCount(unitCount);
+                float spacing = formationSettings.GetSpacingForUnitCount(unitCount);
+
+                // Calculate facing direction (from camera to destination)
+                Vector3 cameraPos = mainCamera.transform.position;
+                Vector3 facingDirection = (destination - cameraPos);
+                facingDirection.y = 0;
+                facingDirection.Normalize();
+
+                formationPositions = FormationManager.CalculateFormationPositions(
+                    destination,
+                    unitCount,
+                    formationType,
+                    spacing,
+                    facingDirection
+                );
+
+                // Validate positions if enabled
+                if (formationSettings.validatePositions)
+                {
+                    formationPositions = FormationManager.ValidateFormationPositions(
+                        formationPositions,
+                        formationSettings.maxValidationDistance
+                    );
+                }
+            }
+            else
+            {
+                // Single unit or no formation settings - all go to same point
+                formationPositions = new List<Vector3>();
+                for (int i = 0; i < unitCount; i++)
+                {
+                    formationPositions.Add(destination);
+                }
+            }
+
             // Force move all selected units (ignore combat/aggro, resume when reaching destination)
+            int index = 0;
             foreach (var unit in selectionManager.SelectedUnits)
             {
-                if (unit == null) continue;
+                if (unit == null || index >= formationPositions.Count) continue;
+
+                Vector3 unitDestination = formationPositions[index];
 
                 // Clear AI target and set forced move flag with destination
                 var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
                 if (aiController != null)
                 {
-                    aiController.SetForcedMove(true, destination);
+                    aiController.SetForcedMove(true, unitDestination);
                 }
 
                 var movement = unit.GetComponent<UnitMovement>();
                 if (movement != null)
                 {
-                    movement.SetDestination(destination);
+                    movement.SetDestination(unitDestination);
                 }
+
+                index++;
             }
 
             // Show visual feedback
@@ -258,7 +354,7 @@ namespace RTS.Units
                 Destroy(marker, markerLifetime);
             }
 
-            Debug.Log($"FORCED Moving {selectionManager.SelectionCount} units to {destination}");
+            Debug.Log($"FORCED Moving {selectionManager.SelectionCount} units to {destination} in formation");
         }
 
         private void IssueAttackCommand(Transform target)

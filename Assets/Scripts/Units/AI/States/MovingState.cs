@@ -26,6 +26,25 @@ namespace RTS.Units.AI
         {
             Transform target = controller.CurrentTarget;
 
+            // Check if unit is stuck and cannot reach destination
+            if (controller.Movement != null && controller.Movement.IsStuck)
+            {
+                // If stuck for too long, give up and return to idle/origin
+                if (controller.Config != null &&
+                    controller.Config.returnToOriginAfterAggro &&
+                    controller.AggroOriginPosition.HasValue)
+                {
+                    controller.ClearTarget();
+                    controller.ChangeState(new ReturningToOriginState(controller));
+                }
+                else
+                {
+                    controller.ClearTarget();
+                    controller.ChangeState(new IdleState(controller));
+                }
+                return;
+            }
+
             if (target == null)
             {
                 // Lost target, return to origin if configured
