@@ -1,0 +1,14 @@
+{
+  "name": "com.topdownwallbuilding.wall-system",
+  "version": "1.0.0",
+  "displayName": "Top-Down Wall Building System",
+  "description": "Standalone pole-to-pole wall building system with automatic mesh fitting, perfect segmentation, overlap detection, and intelligent snapping. Works in any top-down game or RTS project.",
+  "unity": "2021.3",
+  "keywords": ["wall", "building", "placement", "rts", "top-down", "pole-to-pole", "fortification", "defense", "modular"],
+  "author": {
+    "name": "Top-Down Wall Building Systems"
+  },
+  "dependencies": {
+    "com.unity.inputsystem": "1.4.4"
+  }
+}
