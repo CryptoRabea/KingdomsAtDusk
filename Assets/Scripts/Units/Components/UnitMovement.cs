@@ -13,8 +13,9 @@ namespace RTS.Units
         [Header("Movement Settings")]
         [SerializeField] private float moveSpeed = 3.5f;
         [SerializeField] private float rotationSpeed = 120f;
-        [SerializeField] private float stoppingDistance = 0.1f;
+        [SerializeField] private float stoppingDistance = 0.5f; // Increased from 0.1 to prevent units from constantly trying to reach exact point
         [SerializeField] private float pathUpdateInterval = 0.5f;
+        [SerializeField] private float arrivalThreshold = 1.5f; // Distance to consider "close enough" to destination
 
         [Header("Avoidance Settings")]
         [SerializeField] private float avoidanceRadius = 0.5f;
@@ -45,11 +46,24 @@ namespace RTS.Units
         // IsMoving is based on actual velocity and movement intent, not explicit stuck check
         // When unit gets stuck, it physically stops, making velocity = 0 and IsMoving naturally becomes false
         public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f);
-        public bool HasReachedDestination => hasDestination && !agent.pathPending && agent.remainingDistance <= stoppingDistance;
+        public bool HasReachedDestination => hasDestination && !agent.pathPending &&
+            (agent.remainingDistance <= stoppingDistance || IsCloseEnoughToDestination());
         public bool IsStuck => isStuck;
         public bool HasValidPath => agent != null && agent.hasPath && agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathComplete;
         public float Speed => moveSpeed;
         public Vector3 Velocity => agent != null ? agent.velocity : Vector3.zero;
+
+        /// <summary>
+        /// Check if unit is close enough to destination to be considered "arrived"
+        /// Helps prevent units from constantly trying to reach exact point when blocked by others
+        /// </summary>
+        private bool IsCloseEnoughToDestination()
+        {
+            if (!hasDestination || agent == null) return false;
+
+            float distanceToDestination = Vector3.Distance(transform.position, currentDestination);
+            return distanceToDestination <= arrivalThreshold;
+        }
 
         private void Awake()
         {
@@ -72,6 +86,10 @@ namespace RTS.Units
                 agent.radius = avoidanceRadius;
                 agent.avoidancePriority = avoidancePriority;
                 agent.obstacleAvoidanceType = UnityEngine.AI.ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+
+                // Optimize for simultaneous group movement
+                agent.acceleration = 100f; // High acceleration for instant response
+                agent.autoRepath = true; // Auto recalculate path when blocked
 
                 // Initialize stuck detection
                 lastStuckCheckPosition = transform.position;
@@ -96,6 +114,13 @@ namespace RTS.Units
                 hasMovementIntent = false;
                 isStuck = false;
                 consecutiveStuckChecks = 0;
+
+                // Physically stop the agent when destination reached
+                if (agent.enabled && !agent.isStopped)
+                {
+                    agent.isStopped = true;
+                    agent.velocity = Vector3.zero;
+                }
             }
 
             // Update path to moving targets periodically
@@ -109,8 +134,8 @@ namespace RTS.Units
                 }
             }
 
-            // Stuck detection
-            if (hasDestination && hasMovementIntent)
+            // Stuck detection - only check if we haven't reached destination yet
+            if (hasDestination && hasMovementIntent && !HasReachedDestination)
             {
                 UpdateStuckDetection();
                 UpdatePathFailureDetection();
@@ -155,8 +180,8 @@ namespace RTS.Units
                     agent.isStopped = false;
                 }
 
+                // Set destination - high acceleration ensures immediate response
                 agent.SetDestination(destination);
-                Debug.Log($"✅ UnitMovement: {gameObject.name} moving from {transform.position} to {destination} (distance: {Vector3.Distance(transform.position, destination):F2})");
             }
             else
             {
@@ -353,6 +378,13 @@ namespace RTS.Units
             if (stuckCheckTimer >= stuckCheckInterval)
             {
                 stuckCheckTimer = 0f;
+
+                // Check if we're close enough to destination - if so, not stuck, just arrived
+                if (IsCloseEnoughToDestination())
+                {
+                    consecutiveStuckChecks = 0;
+                    return;
+                }
 
                 // Check if unit has moved significantly since last check
                 float distanceMoved = Vector3.Distance(transform.position, lastStuckCheckPosition);
