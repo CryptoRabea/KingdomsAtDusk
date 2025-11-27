@@ -21,6 +21,9 @@ namespace RTS.Managers
         [SerializeField] private ReputationManager reputationManager;
         [SerializeField] private PeasantWorkforceManager peasantWorkforceManager;
 
+        [Header("Save/Load System")]
+        [SerializeField] private RTS.SaveLoad.SaveLoadManager saveLoadManager;
+
         [Header("Settings")]
         [SerializeField] private bool initializeOnAwake = true;
 
@@ -72,6 +75,9 @@ namespace RTS.Managers
 
             // 5. Building management system
             InitializeBuildingManager();
+
+            // 6. Save/Load system
+            InitializeSaveLoadManager();
 
             Debug.Log("All services initialized successfully!");
         }
@@ -165,6 +171,24 @@ namespace RTS.Managers
 
             ServiceLocator.Register<IBuildingService>(buildingManager);
             Debug.Log("BuildingManager registered as IBuildingService");
+        }
+
+        private void InitializeSaveLoadManager()
+        {
+            if (saveLoadManager == null)
+            {
+                // Try to find it in the scene
+                saveLoadManager = FindAnyObjectByType<RTS.SaveLoad.SaveLoadManager>();
+
+                if (saveLoadManager == null)
+                {
+                    Debug.LogWarning("SaveLoadManager not assigned and not found in scene!");
+                    return;
+                }
+            }
+
+            ServiceLocator.Register<ISaveLoadService>(saveLoadManager);
+            Debug.Log("SaveLoadManager registered as ISaveLoadService");
         }
 
         private void OnDestroy()

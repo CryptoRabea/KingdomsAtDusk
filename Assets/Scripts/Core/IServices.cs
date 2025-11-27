@@ -169,4 +169,73 @@ namespace RTS.Core.Services
         bool CanAssignWorkers(int amount);
     }
 
+    /// <summary>
+    /// Interface for save/load system.
+    /// Handles game state persistence and restoration.
+    /// </summary>
+    public interface ISaveLoadService
+    {
+        /// <summary>
+        /// Save the current game state to a file.
+        /// </summary>
+        /// <param name="saveName">Name of the save file</param>
+        /// <param name="isAutoSave">Whether this is an auto-save</param>
+        /// <param name="isQuickSave">Whether this is a quick-save</param>
+        /// <returns>True if save was successful</returns>
+        bool SaveGame(string saveName, bool isAutoSave = false, bool isQuickSave = false);
+
+        /// <summary>
+        /// Load a game state from a file.
+        /// </summary>
+        /// <param name="saveName">Name of the save file to load</param>
+        /// <returns>True if load was successful</returns>
+        bool LoadGame(string saveName);
+
+        /// <summary>
+        /// Quick save to a dedicated slot (F5).
+        /// </summary>
+        bool QuickSave();
+
+        /// <summary>
+        /// Quick load from the quick save slot.
+        /// </summary>
+        bool QuickLoad();
+
+        /// <summary>
+        /// Delete a save file.
+        /// </summary>
+        bool DeleteSave(string saveName);
+
+        /// <summary>
+        /// Get all available save files.
+        /// </summary>
+        string[] GetAllSaves();
+
+        /// <summary>
+        /// Get save file info without loading it.
+        /// </summary>
+        SaveFileInfo GetSaveInfo(string saveName);
+
+        /// <summary>
+        /// Check if a save file exists.
+        /// </summary>
+        bool SaveExists(string saveName);
+    }
+
+    /// <summary>
+    /// Information about a save file.
+    /// </summary>
+    [System.Serializable]
+    public class SaveFileInfo
+    {
+        public string fileName;
+        public string saveName;
+        public string saveDate;
+        public float playTime;
+        public string gameVersion;
+        public long fileSize;
+        public bool isAutoSave;
+        public bool isQuickSave;
+    }
+
 }
