@@ -141,9 +141,9 @@ namespace RTS.Units.Animation
             if (combat != null && combat.CurrentTarget != null && combat.IsInAttackRange)
                 return AnimationState.Attack;
 
-            // Check if unit is moving and NOT stuck
-            // If stuck, should play idle animation even if movement intent exists
-            if (movement != null && movement.IsMoving && !movement.IsStuck)
+            // Check movement - animation follows actual velocity naturally
+            // No explicit stuck checks - if unit stops moving, animation will transition to idle
+            if (movement != null && movement.IsMoving)
                 return AnimationState.Walk;
 
             return AnimationState.Idle;

@@ -42,7 +42,9 @@ namespace RTS.Units
         private bool isStuck = false;
         private float pathPendingTimer;
 
-        public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f) && !isStuck;
+        // IsMoving is based on actual velocity and movement intent, not explicit stuck check
+        // When unit gets stuck, it physically stops, making velocity = 0 and IsMoving naturally becomes false
+        public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f);
         public bool HasReachedDestination => hasDestination && !agent.pathPending && agent.remainingDistance <= stoppingDistance;
         public bool IsStuck => isStuck;
         public bool HasValidPath => agent != null && agent.hasPath && agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathComplete;
@@ -139,8 +141,20 @@ namespace RTS.Units
             hasDestination = true;
             hasMovementIntent = true; // Signal movement intent immediately
 
+            // Clear stuck state and resume agent if it was stopped
+            if (isStuck)
+            {
+                ResetStuckState();
+            }
+
             if (agent.enabled)
             {
+                // Ensure agent is not stopped before setting destination
+                if (agent.isStopped)
+                {
+                    agent.isStopped = false;
+                }
+
                 agent.SetDestination(destination);
                 Debug.Log($"✅ UnitMovement: {gameObject.name} moving from {transform.position} to {destination} (distance: {Vector3.Distance(transform.position, destination):F2})");
             }
@@ -162,8 +176,20 @@ namespace RTS.Units
             hasMovementIntent = true; // Signal movement intent immediately
             pathUpdateTimer = pathUpdateInterval; // Update immediately
 
+            // Clear stuck state and resume agent if it was stopped
+            if (isStuck)
+            {
+                ResetStuckState();
+            }
+
             if (agent.enabled)
             {
+                // Ensure agent is not stopped before setting destination
+                if (agent.isStopped)
+                {
+                    agent.isStopped = false;
+                }
+
                 agent.SetDestination(target.position);
             }
         }
@@ -178,6 +204,12 @@ namespace RTS.Units
             if (agent.enabled)
             {
                 agent.ResetPath();
+                // Ensure agent is stopped
+                if (!agent.isStopped)
+                {
+                    agent.isStopped = true;
+                }
+                agent.velocity = Vector3.zero;
             }
 
             currentTarget = null;
@@ -331,11 +363,19 @@ namespace RTS.Units
 
                     if (consecutiveStuckChecks >= maxStuckChecks)
                     {
-                        // Unit is stuck
+                        // Unit is stuck - physically stop it
                         if (!isStuck)
                         {
                             isStuck = true;
                             Debug.LogWarning($"Unit {gameObject.name} detected as stuck at {transform.position}");
+
+                            // Stop the agent so velocity goes to 0 and animations naturally transition to idle
+                            if (agent != null && agent.enabled)
+                            {
+                                agent.isStopped = true;
+                                agent.velocity = Vector3.zero;
+                            }
+                            hasMovementIntent = false;
                         }
                     }
                 }
@@ -347,6 +387,12 @@ namespace RTS.Units
                     {
                         isStuck = false;
                         Debug.Log($"Unit {gameObject.name} is no longer stuck");
+
+                        // Resume agent movement
+                        if (agent != null && agent.enabled)
+                        {
+                            agent.isStopped = false;
+                        }
                     }
                 }
 
@@ -368,6 +414,11 @@ namespace RTS.Units
                     Debug.LogWarning($"Unit {gameObject.name} - path calculation timeout. Path may be invalid.");
                     isStuck = true;
                     pathPendingTimer = 0f;
+
+                    // Physically stop the agent
+                    agent.isStopped = true;
+                    agent.velocity = Vector3.zero;
+                    hasMovementIntent = false;
                 }
             }
             else
@@ -379,6 +430,11 @@ namespace RTS.Units
                 {
                     Debug.LogWarning($"Unit {gameObject.name} - invalid path to {currentDestination}");
                     isStuck = true;
+
+                    // Physically stop the agent
+                    agent.isStopped = true;
+                    agent.velocity = Vector3.zero;
+                    hasMovementIntent = false;
                 }
                 else if (agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial)
                 {
@@ -397,6 +453,12 @@ namespace RTS.Units
             consecutiveStuckChecks = 0;
             stuckCheckTimer = 0f;
             lastStuckCheckPosition = transform.position;
+
+            // Resume agent if it was stopped
+            if (agent != null && agent.enabled && agent.isStopped)
+            {
+                agent.isStopped = false;
+            }
 
             Debug.Log($"Unit {gameObject.name} stuck state reset");
         }
