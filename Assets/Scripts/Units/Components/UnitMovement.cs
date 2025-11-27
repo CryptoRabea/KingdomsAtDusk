@@ -342,7 +342,7 @@ namespace RTS.Units
             }
         }
 
-        #endregion
+        
 
         #region Stuck Detection
 
