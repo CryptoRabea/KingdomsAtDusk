@@ -271,6 +271,13 @@ namespace KingdomsAtDusk.UI
 
         private CursorState CheckEdgeScrolling(Vector2 mousePosition)
         {
+            // Don't show edge scroll cursor if mouse is outside game view (especially in Unity Editor)
+            if (mousePosition.x < 0 || mousePosition.x > Screen.width ||
+                mousePosition.y < 0 || mousePosition.y > Screen.height)
+            {
+                return CursorState.Normal;
+            }
+
             // Calculate viewport boundaries in screen space
             float viewportBottomY = Screen.height * viewportYOffset;
             float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
