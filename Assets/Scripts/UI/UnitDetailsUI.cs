@@ -3,6 +3,9 @@ using UnityEngine.UI;
 using TMPro;
 using RTS.Core.Events;
 using RTS.Units;
+using RTS.Units.Formation;
+using System.Collections.Generic;
+using System;
 
 namespace RTS.UI
 {
@@ -22,6 +25,10 @@ namespace RTS.UI
         [SerializeField] private TextMeshProUGUI attackSpeedText;
         [SerializeField] private TextMeshProUGUI attackRangeText;
 
+        [Header("Formation")]
+        [SerializeField] private TMP_Dropdown formationDropdown;
+        [SerializeField] private FormationGroupManager formationGroupManager;
+
         [Header("Health Bar")]
         [SerializeField] private Image healthBarFill;
         [SerializeField] private Color healthyColor = Color.green;
@@ -37,6 +44,7 @@ namespace RTS.UI
             EventBus.Subscribe<UnitDeselectedEvent>(OnUnitDeselected);
             EventBus.Subscribe<UnitHealthChangedEvent>(OnUnitHealthChanged);
             EventBus.Subscribe<SelectionChangedEvent>(OnSelectionChanged);
+            EventBus.Subscribe<FormationChangedEvent>(OnFormationChanged);
         }
 
         private void OnDisable()
@@ -45,6 +53,7 @@ namespace RTS.UI
             EventBus.Unsubscribe<UnitDeselectedEvent>(OnUnitDeselected);
             EventBus.Unsubscribe<UnitHealthChangedEvent>(OnUnitHealthChanged);
             EventBus.Unsubscribe<SelectionChangedEvent>(OnSelectionChanged);
+            EventBus.Unsubscribe<FormationChangedEvent>(OnFormationChanged);
         }
 
         private void Start()
@@ -53,6 +62,70 @@ namespace RTS.UI
             if (unitDetailsPanel != null)
             {
                 unitDetailsPanel.SetActive(false);
+            }
+
+            // Initialize formation dropdown
+            InitializeFormationDropdown();
+        }
+
+        private void InitializeFormationDropdown()
+        {
+            if (formationDropdown == null) return;
+
+            // Clear existing options
+            formationDropdown.ClearOptions();
+
+            // Add all formation types
+            List<string> options = new List<string>();
+            foreach (FormationType formationType in Enum.GetValues(typeof(FormationType)))
+            {
+                options.Add(FormatFormationName(formationType));
+            }
+
+            formationDropdown.AddOptions(options);
+
+            // Set current formation
+            if (formationGroupManager != null)
+            {
+                formationDropdown.value = (int)formationGroupManager.CurrentFormation;
+                formationDropdown.RefreshShownValue();
+            }
+
+            // Add listener
+            formationDropdown.onValueChanged.AddListener(OnFormationDropdownChanged);
+        }
+
+        private string FormatFormationName(FormationType type)
+        {
+            switch (type)
+            {
+                case FormationType.None: return "No Formation";
+                case FormationType.Line: return "Line";
+                case FormationType.Column: return "Column";
+                case FormationType.Box: return "Box";
+                case FormationType.Wedge: return "Wedge";
+                case FormationType.Circle: return "Circle";
+                case FormationType.Scatter: return "Scatter";
+                default: return type.ToString();
+            }
+        }
+
+        private void OnFormationDropdownChanged(int index)
+        {
+            if (formationGroupManager != null)
+            {
+                FormationType newFormation = (FormationType)index;
+                formationGroupManager.CurrentFormation = newFormation;
+            }
+        }
+
+        private void OnFormationChanged(FormationChangedEvent evt)
+        {
+            // Update dropdown to match current formation (in case it was changed elsewhere)
+            if (formationDropdown != null)
+            {
+                formationDropdown.value = (int)evt.FormationType;
+                formationDropdown.RefreshShownValue();
             }
         }
 

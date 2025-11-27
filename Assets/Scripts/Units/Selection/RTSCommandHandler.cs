@@ -15,7 +15,7 @@ namespace RTS.Units
         [Header("References")]
         [SerializeField] private UnitSelectionManager selectionManager;
         [SerializeField] private Camera mainCamera;
-        [SerializeField] private FormationSettingsSO formationSettings;
+        [SerializeField] private FormationGroupManager formationGroupManager;
 
         [Header("Settings")]
         [SerializeField] private LayerMask groundLayer; // What counts as ground
@@ -179,11 +179,11 @@ namespace RTS.Units
             int unitCount = selectionManager.SelectionCount;
             List<Vector3> formationPositions;
 
-            // Calculate formation positions if multiple units
-            if (unitCount > 1 && formationSettings != null)
+            // Calculate formation positions based on current formation setting
+            if (unitCount > 1 && formationGroupManager != null && formationGroupManager.ShouldUseFormation())
             {
-                FormationType formationType = formationSettings.GetFormationForUnitCount(unitCount);
-                float spacing = formationSettings.GetSpacingForUnitCount(unitCount);
+                FormationType formationType = formationGroupManager.CurrentFormation;
+                float spacing = formationGroupManager.GetSpacing(unitCount);
 
                 // Calculate facing direction (from camera to destination)
                 Vector3 cameraPos = mainCamera.transform.position;
@@ -199,18 +199,18 @@ namespace RTS.Units
                     facingDirection
                 );
 
-                // Validate positions if enabled
-                if (formationSettings.validatePositions)
+                // Validate positions if enabled in settings
+                if (formationGroupManager.FormationSettings != null && formationGroupManager.FormationSettings.validatePositions)
                 {
                     formationPositions = FormationManager.ValidateFormationPositions(
                         formationPositions,
-                        formationSettings.maxValidationDistance
+                        formationGroupManager.FormationSettings.maxValidationDistance
                     );
                 }
             }
             else
             {
-                // Single unit or no formation settings - all go to same point
+                // Single unit or no formation - all go to same point
                 formationPositions = new List<Vector3>();
                 for (int i = 0; i < unitCount; i++)
                 {
@@ -272,11 +272,11 @@ namespace RTS.Units
             int unitCount = selectionManager.SelectionCount;
             List<Vector3> formationPositions;
 
-            // Calculate formation positions if multiple units
-            if (unitCount > 1 && formationSettings != null)
+            // Calculate formation positions based on current formation setting
+            if (unitCount > 1 && formationGroupManager != null && formationGroupManager.ShouldUseFormation())
             {
-                FormationType formationType = formationSettings.GetFormationForUnitCount(unitCount);
-                float spacing = formationSettings.GetSpacingForUnitCount(unitCount);
+                FormationType formationType = formationGroupManager.CurrentFormation;
+                float spacing = formationGroupManager.GetSpacing(unitCount);
 
                 // Calculate facing direction (from camera to destination)
                 Vector3 cameraPos = mainCamera.transform.position;
@@ -292,18 +292,18 @@ namespace RTS.Units
                     facingDirection
                 );
 
-                // Validate positions if enabled
-                if (formationSettings.validatePositions)
+                // Validate positions if enabled in settings
+                if (formationGroupManager.FormationSettings != null && formationGroupManager.FormationSettings.validatePositions)
                 {
                     formationPositions = FormationManager.ValidateFormationPositions(
                         formationPositions,
-                        formationSettings.maxValidationDistance
+                        formationGroupManager.FormationSettings.maxValidationDistance
                     );
                 }
             }
             else
             {
-                // Single unit or no formation settings - all go to same point
+                // Single unit or no formation - all go to same point
                 formationPositions = new List<Vector3>();
                 for (int i = 0; i < unitCount; i++)
                 {

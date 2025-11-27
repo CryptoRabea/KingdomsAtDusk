@@ -270,6 +270,7 @@ namespace RTS.Units.Formation
     /// </summary>
     public enum FormationType
     {
+        None,       // No formation - all units go to same point
         Line,       // Horizontal line
         Column,     // Vertical column
         Box,        // Grid/rectangle
