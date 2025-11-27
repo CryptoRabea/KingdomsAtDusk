@@ -159,6 +159,14 @@ public class RTSCameraController : MonoBehaviour
         {
             Vector2 mousePos = Mouse.current.position.ReadValue();
 
+            // Don't edge scroll if mouse is outside game view (especially in Unity Editor)
+            if (mousePos.x < 0 || mousePos.x > Screen.width ||
+                mousePos.y < 0 || mousePos.y > Screen.height)
+            {
+                // Mouse is outside the game view (e.g., over Inspector in editor)
+                return;
+            }
+
             // Calculate viewport boundaries in screen space
             float viewportBottomY = Screen.height * viewportYOffset;
             float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
