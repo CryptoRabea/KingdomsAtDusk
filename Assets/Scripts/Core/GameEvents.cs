@@ -298,6 +298,16 @@ namespace RTS.Core.Events
         }
     }
 
+    public struct FormationChangedEvent
+    {
+        public RTS.Units.Formation.FormationType FormationType;
+
+        public FormationChangedEvent(RTS.Units.Formation.FormationType formationType)
+        {
+            FormationType = formationType;
+        }
+    }
+
     public struct BuildingSelectedEvent
     {
         public GameObject Building;
