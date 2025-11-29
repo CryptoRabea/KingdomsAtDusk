@@ -156,7 +156,18 @@ namespace RTS.Units.AI
                 GameObject minion;
                 if (poolService != null)
                 {
-                    minion = poolService.Get(minionPrefab, spawnPosition, Quaternion.identity);
+                    var minionComponent = minionPrefab.GetComponent<Transform>();
+                    if (minionComponent != null)
+                    {
+                        var pooledComponent = poolService.Get(minionComponent);
+                        minion = pooledComponent.gameObject;
+                        pooledComponent.position = spawnPosition;
+                        pooledComponent.rotation = Quaternion.identity;
+                    }
+                    else
+                    {
+                        minion = Instantiate(minionPrefab, spawnPosition, Quaternion.identity);
+                    }
                 }
                 else
                 {
@@ -164,7 +175,7 @@ namespace RTS.Units.AI
                 }
 
                 // Publish spawn event
-                EventBus.Publish(new UnitSpawnedEvent(minion));
+                EventBus.Publish(new UnitSpawnedEvent(minion, spawnPosition));
             }
 
             Debug.Log($"{gameObject.name} summoned {minionsPerSummon} minions!");
