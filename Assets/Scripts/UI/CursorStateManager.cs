@@ -139,7 +139,7 @@ namespace KingdomsAtDusk.UI
 
             // Get pixel data from source
             Color[] sourcePixels = source.GetPixels();
-            Color[] rotatedPixels = new Color[width * height];
+            Color32[] rotatedPixels = new Color32[width * height];
 
             // Calculate rotation
             float angleRad = angleDegrees * Mathf.Deg2Rad;
@@ -177,7 +177,7 @@ namespace KingdomsAtDusk.UI
                 }
             }
 
-            rotated.SetPixels(rotatedPixels);
+            rotated.SetPixels32(rotatedPixels);
             rotated.Apply();
 
             return rotated;
@@ -212,16 +212,14 @@ namespace KingdomsAtDusk.UI
                 GameObject hitObject = hit.collider.gameObject;
 
                 // Check for BuildingSelectable (highest priority)
-                var buildingSelectable = hitObject.GetComponent<RTS.Buildings.BuildingSelectable>();
-                if (buildingSelectable != null)
+                if (hitObject.TryGetComponent<RTS.Buildings.BuildingSelectable>(out var buildingSelectable))
                 {
                     SetCursor(CursorState.SelectBuilding);
                     return;
                 }
 
                 // Check for UnitSelectable
-                var unitSelectable = hitObject.GetComponent<RTS.Units.UnitSelectable>();
-                if (unitSelectable != null)
+                if (hitObject.TryGetComponent<RTS.Units.UnitSelectable>(out var unitSelectable))
                 {
                     SetCursor(CursorState.SelectUnit);
                     return;
