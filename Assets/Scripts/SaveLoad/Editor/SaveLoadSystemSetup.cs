@@ -224,6 +224,7 @@ namespace RTS.SaveLoad.Editor
 
             // Create menu panel
             GameObject menuPanel = new GameObject("SaveLoadMenuPanel");
+            menuPanel.AddComponent<RectTransform>(); // Add RectTransform for UI element
             menuPanel.transform.SetParent(canvas.transform, false);
 
             // Add CanvasGroup for fading
