@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using RTS.Core.Events;
 
@@ -27,7 +28,7 @@ namespace RTS.Buildings
 
         private Building building;
         private BuildingHealth health;
-        private EventBus.EventSubscription<BuildingDamagedEvent> damageSubscription;
+        private Action<BuildingDamagedEvent> damageHandler;
 
         private void Awake()
         {
@@ -38,7 +39,8 @@ namespace RTS.Buildings
         private void Start()
         {
             // Listen for damage events to this stronghold
-            damageSubscription = EventBus.Subscribe<BuildingDamagedEvent>(OnBuildingDamaged);
+            damageHandler = OnBuildingDamaged;
+            EventBus.Subscribe(damageHandler);
 
             // Show rally point marker if available
             if (rallyPointMarker != null)
@@ -106,7 +108,10 @@ namespace RTS.Buildings
 
         private void OnDestroy()
         {
-            EventBus.Unsubscribe(damageSubscription);
+            if (damageHandler != null)
+            {
+                EventBus.Unsubscribe(damageHandler);
+            }
         }
     }
 }

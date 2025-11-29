@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using RTS.Core.Events;
 
@@ -12,7 +13,7 @@ namespace RTS.Core.Conditions
         [SerializeField] private int targetWaves = 10;
 
         private int currentWave = 0;
-        private EventBus.EventSubscription<WaveCompletedEvent> waveSubscription;
+        private Action<WaveCompletedEvent> waveHandler;
 
         public override bool IsCompleted => currentWave >= targetWaves;
         public override float Progress => Mathf.Clamp01((float)currentWave / targetWaves);
@@ -20,12 +21,16 @@ namespace RTS.Core.Conditions
         public override void Initialize()
         {
             currentWave = 0;
-            waveSubscription = EventBus.Subscribe<WaveCompletedEvent>(OnWaveCompleted);
+            waveHandler = OnWaveCompleted;
+            EventBus.Subscribe(waveHandler);
         }
 
         public override void Cleanup()
         {
-            EventBus.Unsubscribe(waveSubscription);
+            if (waveHandler != null)
+            {
+                EventBus.Unsubscribe(waveHandler);
+            }
         }
 
         public override string GetStatusText()

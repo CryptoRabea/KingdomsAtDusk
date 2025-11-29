@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using RTS.Core.Events;
 using RTS.Units.AI;
@@ -13,7 +14,7 @@ namespace RTS.Core.Conditions
         [SerializeField] private string bossTag = "Boss";
 
         private bool bossDefeated = false;
-        private EventBus.EventSubscription<UnitDiedEvent> unitDiedSubscription;
+        private Action<UnitDiedEvent> unitDiedHandler;
 
         public override bool IsCompleted => bossDefeated;
         public override float Progress => bossDefeated ? 1f : 0f;
@@ -21,12 +22,16 @@ namespace RTS.Core.Conditions
         public override void Initialize()
         {
             bossDefeated = false;
-            unitDiedSubscription = EventBus.Subscribe<UnitDiedEvent>(OnUnitDied);
+            unitDiedHandler = OnUnitDied;
+            EventBus.Subscribe(unitDiedHandler);
         }
 
         public override void Cleanup()
         {
-            EventBus.Unsubscribe(unitDiedSubscription);
+            if (unitDiedHandler != null)
+            {
+                EventBus.Unsubscribe(unitDiedHandler);
+            }
         }
 
         public override string GetStatusText()

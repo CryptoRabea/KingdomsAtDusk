@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using RTS.Core.Services;
+using static RTS.Core.Services.GameState;
 
 namespace RTS.Core
 {
@@ -117,7 +118,7 @@ namespace RTS.Core
             // Trigger game over with victory state
             if (gameStateService != null)
             {
-                gameStateService.EndGame(true);
+                gameStateService.ChangeState(GameState.Victory);
             }
         }
 
@@ -132,7 +133,7 @@ namespace RTS.Core
             // Trigger game over with defeat state
             if (gameStateService != null)
             {
-                gameStateService.EndGame(false);
+                gameStateService.ChangeState(GameState.GameOver);
             }
         }
 
