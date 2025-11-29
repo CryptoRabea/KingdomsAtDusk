@@ -128,7 +128,7 @@ namespace RTS.Buildings
         {
             Debug.Log("\n--- Checking Buildings ---");
 
-            var buildings = Object.FindObjectsByType<Building>(FindObjectsSortMode.None);
+            var buildings = Object.FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             if (buildings.Length == 0)
             {
                 Debug.LogWarning("⚠️ No buildings found in scene");

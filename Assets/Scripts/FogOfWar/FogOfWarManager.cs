@@ -121,7 +121,7 @@ public class FogOfWarManager : MonoBehaviour
         private void RegisterExistingVisionProviders()
         {
             // Find all existing vision providers in the scene
-            var providers = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None)
+            var providers = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
                 .OfType<IVisionProvider>();
 
             foreach (var provider in providers)

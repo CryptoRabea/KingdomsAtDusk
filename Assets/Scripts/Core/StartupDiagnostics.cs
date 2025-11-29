@@ -86,11 +86,11 @@ namespace RTS.Core
             }
 
             // Check for lights
-            Light[] lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+            Light[] lights = FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             Log($"Lights in scene: {lights.Length}");
 
             // Check for renderers
-            Renderer[] renderers = FindObjectsByType<Renderer>(FindObjectsSortMode.None);
+            Renderer[] renderers = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             Log($"Renderers in scene: {renderers.Length}");
 
             FlushLog();

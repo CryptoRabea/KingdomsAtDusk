@@ -349,7 +349,7 @@ namespace RTS.SaveLoad
             List<BuildingSaveData> buildingsData = new List<BuildingSaveData>();
 
             // Find all buildings in the scene
-            Building[] buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
+            Building[] buildings = FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var building in buildings)
             {
@@ -394,7 +394,7 @@ namespace RTS.SaveLoad
             List<UnitSaveData> unitsData = new List<UnitSaveData>();
 
             // Find all units in the scene
-            UnitAIController[] units = FindObjectsByType<UnitAIController>(FindObjectsSortMode.None);
+            UnitAIController[] units = FindObjectsByType<UnitAIController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var unit in units)
             {
@@ -506,14 +506,14 @@ namespace RTS.SaveLoad
             Log("Clearing current game state...");
 
             // Destroy all buildings
-            Building[] buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
+            Building[] buildings = FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (var building in buildings)
             {
                 Destroy(building.gameObject);
             }
 
             // Destroy all units
-            UnitAIController[] units = FindObjectsByType<UnitAIController>(FindObjectsSortMode.None);
+            UnitAIController[] units = FindObjectsByType<UnitAIController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (var unit in units)
             {
                 Destroy(unit.gameObject);

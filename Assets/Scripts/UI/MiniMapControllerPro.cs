@@ -161,7 +161,7 @@ namespace RTS.UI
         private void RegisterExistingUnits()
         {
             // Find all UnitAIController components in the scene
-            var unitControllers = FindObjectsByType<RTS.Units.AI.UnitAIController>(FindObjectsSortMode.None);
+            var unitControllers = FindObjectsByType<RTS.Units.AI.UnitAIController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             int registeredCount = 0;
             foreach (var unitController in unitControllers)
@@ -183,7 +183,7 @@ namespace RTS.UI
         private void RegisterExistingBuildings()
         {
             // Find all Building components in the scene
-            var buildings = FindObjectsByType<RTS.Buildings.Building>(FindObjectsSortMode.None);
+            var buildings = FindObjectsByType<RTS.Buildings.Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             int registeredCount = 0;
             foreach (var building in buildings)

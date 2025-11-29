@@ -333,7 +333,7 @@ namespace RTS.FogOfWar
         private void RegisterExistingEntities()
         {
             // Find all existing units in the scene
-            var existingUnits = FindObjectsByType<UnitHealth>(FindObjectsSortMode.None);
+            var existingUnits = FindObjectsByType<UnitHealth>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             int registeredUnits = 0;
 
             foreach (var unit in existingUnits)
@@ -347,7 +347,7 @@ namespace RTS.FogOfWar
             }
 
             // Find all existing buildings in the scene
-            var existingBuildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
+            var existingBuildings = FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             int registeredBuildings = 0;
 
             foreach (var building in existingBuildings)

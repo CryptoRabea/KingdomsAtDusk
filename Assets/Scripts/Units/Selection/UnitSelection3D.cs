@@ -293,7 +293,7 @@ namespace RTS.Units
         private List<UnitSelectable> GetUnitsViaBounds(Vector3 center, Vector3 size)
         {
             List<UnitSelectable> units = new List<UnitSelectable>();
-            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             Bounds selectionBounds = new Bounds(center, size);
 
@@ -318,7 +318,7 @@ namespace RTS.Units
         private List<UnitSelectable> GetUnitsViaPosition(Vector3 center, Vector3 size)
         {
             List<UnitSelectable> units = new List<UnitSelectable>();
-            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+            UnitSelectable[] allSelectables = FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             Bounds selectionBounds = new Bounds(center, size);
 
