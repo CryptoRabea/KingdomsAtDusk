@@ -413,7 +413,7 @@ namespace RTS.UI.HUD
         /// <summary>
         /// Public API: Get specific HUD component.
         /// </summary>
-        public T GetComponent<T>() where T : MonoBehaviour
+        public new T GetComponent<T>() where T : MonoBehaviour
         {
             if (typeof(T) == typeof(TopBarUI)) return topBarUI as T;
             if (typeof(T) == typeof(InventoryUI)) return inventoryUI as T;

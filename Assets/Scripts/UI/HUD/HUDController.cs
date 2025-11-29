@@ -17,7 +17,7 @@ namespace RTS.UI.HUD
             {
                 if (instance == null)
                 {
-                    instance = FindObjectOfType<HUDController>();
+                    instance = Object.FindAnyObjectByType<HUDController>();
                     if (instance == null)
                     {
                         GameObject go = new GameObject("HUDController");
@@ -58,7 +58,7 @@ namespace RTS.UI.HUD
             // Auto-find MainHUDFramework if not assigned
             if (hudFramework == null)
             {
-                hudFramework = FindObjectOfType<MainHUDFramework>();
+                hudFramework = Object.FindAnyObjectByType<MainHUDFramework>();
             }
 
             if (hudFramework == null)
