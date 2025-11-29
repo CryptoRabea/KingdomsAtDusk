@@ -62,7 +62,7 @@ namespace RTS.Units.Formation
             // Find selection manager if not assigned
             if (selectionManager == null)
             {
-                selectionManager = FindObjectOfType<UnitSelectionManager>();
+                selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
             }
 
             // Find main camera if not assigned
