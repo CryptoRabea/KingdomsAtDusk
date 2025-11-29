@@ -16,15 +16,20 @@ namespace RTS.SaveLoad
         [Header("UI References")]
         [SerializeField] private GameObject menuPanel;
         [SerializeField] private TMP_InputField saveNameInput;
+        [SerializeField] private Button resumeButton;
         [SerializeField] private Button saveButton;
         [SerializeField] private Button loadButton;
         [SerializeField] private Button deleteButton;
+        [SerializeField] private Button backToMainMenuButton;
+        [SerializeField] private Button saveAndQuitButton;
+        [SerializeField] private Button quitWithoutSavingButton;
         [SerializeField] private Button closeButton;
         [SerializeField] private Transform saveListContent;
         [SerializeField] private GameObject saveListItemPrefab;
 
         [Header("Settings")]
         [SerializeField] private bool pauseGameWhenOpen = true;
+        [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         private ISaveLoadService saveLoadService;
         private IGameStateService gameStateService;
@@ -41,12 +46,20 @@ namespace RTS.SaveLoad
                 menuPanel.SetActive(false);
 
             // Setup button listeners
+            if (resumeButton != null)
+                resumeButton.onClick.AddListener(OnResumeButtonClicked);
             if (saveButton != null)
                 saveButton.onClick.AddListener(OnSaveButtonClicked);
             if (loadButton != null)
                 loadButton.onClick.AddListener(OnLoadButtonClicked);
             if (deleteButton != null)
                 deleteButton.onClick.AddListener(OnDeleteButtonClicked);
+            if (backToMainMenuButton != null)
+                backToMainMenuButton.onClick.AddListener(OnBackToMainMenuClicked);
+            if (saveAndQuitButton != null)
+                saveAndQuitButton.onClick.AddListener(OnSaveAndQuitClicked);
+            if (quitWithoutSavingButton != null)
+                quitWithoutSavingButton.onClick.AddListener(OnQuitWithoutSavingClicked);
             if (closeButton != null)
                 closeButton.onClick.AddListener(CloseMenu);
 
@@ -251,6 +264,69 @@ namespace RTS.SaveLoad
                 loadButton.interactable = hasSelection;
             if (deleteButton != null)
                 deleteButton.interactable = hasSelection;
+        }
+
+        private void OnResumeButtonClicked()
+        {
+            CloseMenu();
+        }
+
+        private void OnBackToMainMenuClicked()
+        {
+            if (saveLoadService == null)
+                return;
+
+            // Show confirmation dialog (for now, just log)
+            Debug.Log("Returning to main menu...");
+
+            // Find SceneTransitionManager
+            var sceneManager = FindAnyObjectByType<RTS.UI.SceneTransitionManager>();
+            if (sceneManager != null)
+            {
+                sceneManager.LoadMainMenu();
+            }
+            else
+            {
+                // Fallback to direct scene loading
+                UnityEngine.SceneManagement.SceneManager.LoadScene(mainMenuSceneName);
+            }
+        }
+
+        private void OnSaveAndQuitClicked()
+        {
+            if (saveLoadService == null)
+                return;
+
+            // Generate auto-save name
+            string saveName = "AutoSave_" + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            // Perform save
+            bool success = saveLoadService.SaveGame(saveName);
+
+            if (success)
+            {
+                Debug.Log($"Game saved: {saveName}. Quitting...");
+                QuitGame();
+            }
+            else
+            {
+                Debug.LogError($"Failed to save game before quitting!");
+            }
+        }
+
+        private void OnQuitWithoutSavingClicked()
+        {
+            Debug.Log("Quitting without saving...");
+            QuitGame();
+        }
+
+        private void QuitGame()
+        {
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #else
+            Application.Quit();
+            #endif
         }
     }
 
