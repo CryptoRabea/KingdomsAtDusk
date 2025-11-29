@@ -216,7 +216,7 @@ namespace RTS.SaveLoad.Editor
         private SaveLoadMenu CreateSaveLoadUI(GameObject itemPrefab)
         {
             // Find or create Canvas
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null)
             {
                 canvas = CreateCanvas();
@@ -748,7 +748,7 @@ namespace RTS.SaveLoad.Editor
             }
 
             var settings = AssetDatabase.LoadAssetAtPath<SaveLoadSettings>(SETTINGS_PATH);
-            var menu = FindObjectOfType<SaveLoadMenu>();
+            var menu = FindAnyObjectByType<SaveLoadMenu>();
             var itemPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{PREFABS_PATH}/SaveListItem.prefab");
 
             if (settings == null || menu == null || itemPrefab == null)
@@ -774,7 +774,7 @@ namespace RTS.SaveLoad.Editor
 
         private void IntegrateWithGameManager(GameObject systemObj)
         {
-            var gameManager = FindObjectOfType<RTS.Managers.GameManager>();
+            var gameManager = FindAnyObjectByType<RTS.Managers.GameManager>();
             if (gameManager == null)
             {
                 Debug.LogWarning("GameManager not found in scene. SaveLoadManager will be auto-found at runtime.");

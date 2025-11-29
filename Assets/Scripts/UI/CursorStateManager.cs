@@ -1,12 +1,9 @@
-using RTS.Units;
+﻿using RTS.Units;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace KingdomsAtDusk.UI
 {
-    /// <summary>
-    /// Manages cursor state and appearance based on hover context and selected units
-    /// </summary>
     public class CursorStateManager : MonoBehaviour
     {
         [Header("Cursor Textures")]
@@ -19,10 +16,8 @@ namespace KingdomsAtDusk.UI
 
         [Header("Edge Scroll Cursors")]
         [SerializeField] private Texture2D baseScrollArrowCursor;
-        [Tooltip("If true, rotates the base arrow cursor. If false, uses individual textures.")]
         [SerializeField] private bool useRotatedArrow = true;
 
-        // Individual cursor textures (used when useRotatedArrow is false)
         [SerializeField] private Texture2D scrollUpCursor;
         [SerializeField] private Texture2D scrollDownCursor;
         [SerializeField] private Texture2D scrollLeftCursor;
@@ -32,7 +27,7 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Texture2D scrollDownLeftCursor;
         [SerializeField] private Texture2D scrollDownRightCursor;
 
-        // Cached rotated cursors (generated at runtime if useRotatedArrow is true)
+        // Cached rotated cursors
         private Texture2D cachedScrollUpCursor;
         private Texture2D cachedScrollDownCursor;
         private Texture2D cachedScrollLeftCursor;
@@ -42,7 +37,7 @@ namespace KingdomsAtDusk.UI
         private Texture2D cachedScrollDownLeftCursor;
         private Texture2D cachedScrollDownRightCursor;
 
-        [Header("Cursor Hotspots (pixel offset from top-left)")]
+        [Header("Cursor Hotspots")]
         [SerializeField] private Vector2 normalHotspot = Vector2.zero;
         [SerializeField] private Vector2 moveHotspot = new Vector2(16, 16);
         [SerializeField] private Vector2 attackHotspot = new Vector2(16, 16);
@@ -60,10 +55,12 @@ namespace KingdomsAtDusk.UI
         [Header("Settings")]
         [SerializeField] private float raycastDistance = 1000f;
         [SerializeField] private float edgeScrollBorderThickness = 10f;
-        [Tooltip("Camera viewport height (0-1). If viewport is smaller than screen, UI below viewport counts as edge.")]
-        [SerializeField] private float viewportHeight = 0.8f;
-        [Tooltip("Camera viewport Y offset (0-1). Bottom of viewport where edge scrolling starts.")]
-        [SerializeField] private float viewportYOffset = 0.2f;
+
+        [Tooltip("Viewport height (0-1). You set 0.76")]
+        [SerializeField] private float viewportHeight = 0.76f;
+
+        [Tooltip("Viewport Y offset (0-1). You set 0.24")]
+        [SerializeField] private float viewportYOffset = 0.24f;
 
         private CursorState currentState = CursorState.Normal;
         private Mouse mouse;
@@ -88,104 +85,77 @@ namespace KingdomsAtDusk.UI
 
         private void Start()
         {
-            // Get input device
             mouse = Mouse.current;
-
-            // Set default cursor
             SetCursor(CursorState.Normal);
 
-            // Auto-find references if not set
             if (mainCamera == null)
-            {
                 mainCamera = Camera.main;
-            }
 
             if (selectionManager == null)
-            {
                 selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
-            }
 
-            // Generate rotated cursors if using rotated arrow mode
             if (useRotatedArrow && baseScrollArrowCursor != null)
-            {
                 GenerateRotatedCursors();
-            }
         }
 
         private void GenerateRotatedCursors()
         {
-            // Assume base arrow points UP (0 degrees)
-            cachedScrollUpCursor = baseScrollArrowCursor; // 0 degrees
-            cachedScrollRightCursor = RotateTexture(baseScrollArrowCursor, 90); // 90 degrees clockwise
-            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, -180); // 180 degrees
-            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, -90); // 270 degrees clockwise
+            cachedScrollUpCursor = baseScrollArrowCursor;
+            cachedScrollRightCursor = RotateTexture(baseScrollArrowCursor, 90);
+            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, 180);
+            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, 270);
 
-            // Diagonals
-            cachedScrollUpRightCursor = RotateTexture(baseScrollArrowCursor, 45); // 45 degrees
-            cachedScrollDownRightCursor = RotateTexture(baseScrollArrowCursor, 135); // 135 degrees
-            cachedScrollDownLeftCursor = RotateTexture(baseScrollArrowCursor, 225); // 225 degrees
-            cachedScrollUpLeftCursor = RotateTexture(baseScrollArrowCursor, 315); // 315 degrees
+            cachedScrollUpRightCursor = RotateTexture(baseScrollArrowCursor, 45);
+            cachedScrollDownRightCursor = RotateTexture(baseScrollArrowCursor, 135);
+            cachedScrollDownLeftCursor = RotateTexture(baseScrollArrowCursor, 225);
+            cachedScrollUpLeftCursor = RotateTexture(baseScrollArrowCursor, 315);
         }
 
         private Texture2D RotateTexture(Texture2D source, float angleDegrees)
         {
-            if (source == null) return null;
+            if (source == null)
+                return null;
 
             int width = source.width;
             int height = source.height;
 
-            // Create new texture with same dimensions
-            Texture2D rotated = new Texture2D(width, height, source.format, false);
+            Texture2D rotated = new Texture2D(width, height, TextureFormat.RGBA32, false);
 
-            // Get pixel data from source
-            Color[] sourcePixels = source.GetPixels();
-            Color32[] rotatedPixels = new Color32[width * height];
+            Color[] src = source.GetPixels();
+            Color32[] dst = new Color32[src.Length];
 
-            // Calculate rotation
             float angleRad = angleDegrees * Mathf.Deg2Rad;
             float cos = Mathf.Cos(angleRad);
             float sin = Mathf.Sin(angleRad);
 
-            // Center of rotation
-            float centerX = width / 2f;
-            float centerY = height / 2f;
+            float cx = width * 0.5f;
+            float cy = height * 0.5f;
 
-            // Rotate pixels
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    // Translate to origin
-                    float dx = x - centerX;
-                    float dy = y - centerY;
+                    float dx = x - cx;
+                    float dy = y - cy;
 
-                    // Rotate
-                    float rotatedX = dx * cos - dy * sin + centerX;
-                    float rotatedY = dx * sin + dy * cos + centerY;
+                    float rx = dx * cos - dy * sin + cx;
+                    float ry = dx * sin + dy * cos + cy;
 
-                    // Sample source pixel (with bounds check)
-                    if (rotatedX >= 0 && rotatedX < width && rotatedY >= 0 && rotatedY < height)
-                    {
-                        int sourceX = Mathf.RoundToInt(rotatedX);
-                        int sourceY = Mathf.RoundToInt(rotatedY);
-                        rotatedPixels[y * width + x] = sourcePixels[sourceY * width + sourceX];
-                    }
-                    else
-                    {
-                        rotatedPixels[y * width + x] = Color.clear;
-                    }
+                    int sx = Mathf.Clamp(Mathf.RoundToInt(rx), 0, width - 1);
+                    int sy = Mathf.Clamp(Mathf.RoundToInt(ry), 0, height - 1);
+
+                    dst[y * width + x] = src[sy * width + sx];
                 }
             }
 
-            rotated.SetPixels32(rotatedPixels);
+            rotated.SetPixels32(dst);
             rotated.Apply();
-
             return rotated;
         }
 
         private void Update()
         {
-            if (mouse == null || selectionManager == null || mainCamera == null)
+            if (mouse == null)
                 return;
 
             UpdateCursorState();
@@ -193,115 +163,92 @@ namespace KingdomsAtDusk.UI
 
         private void UpdateCursorState()
         {
-            // Check what's under the cursor
-            Vector2 mousePosition = mouse.position.ReadValue();
+            Vector2 pos = mouse.position.ReadValue();
 
-            // Priority 0: Check for edge scrolling (highest priority)
-            CursorState edgeScrollState = CheckEdgeScrolling(mousePosition);
-            if (edgeScrollState != CursorState.Normal)
+            // Edge scrolling first
+            CursorState edgeState = CheckEdgeScrolling(pos);
+            if (edgeState != CursorState.Normal)
             {
-                SetCursor(edgeScrollState);
+                SetCursor(edgeState);
                 return;
             }
 
-            Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+            Ray ray = mainCamera.ScreenPointToRay(pos);
 
-            // Priority 1: Check for buildings (BuildingSelectable component)
+            // Buildings
             if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
             {
-                GameObject hitObject = hit.collider.gameObject;
-
-                // Check for BuildingSelectable (highest priority)
-                if (hitObject.TryGetComponent<RTS.Buildings.BuildingSelectable>(out var buildingSelectable))
+                if (hit.collider.TryGetComponent<RTS.Buildings.BuildingSelectable>(out _))
                 {
                     SetCursor(CursorState.SelectBuilding);
                     return;
                 }
 
-                // Check for UnitSelectable
-                if (hitObject.TryGetComponent<RTS.Units.UnitSelectable>(out var unitSelectable))
+                if (hit.collider.TryGetComponent<UnitSelectable>(out _))
                 {
                     SetCursor(CursorState.SelectUnit);
                     return;
                 }
             }
 
-            // If no units selected, use normal cursor for everything else
+            // No unit selected → normal
             if (selectionManager.SelectionCount == 0)
             {
                 SetCursor(CursorState.Normal);
                 return;
             }
 
-            // Priority 2: Check for units (for attack commands)
+            // Attackable unit
             if (Physics.Raycast(ray, out RaycastHit unitHit, raycastDistance, unitLayer))
             {
-                GameObject hitObject = unitHit.collider.gameObject;
-
-                // Check if it's an enemy
-                if (IsEnemy(hitObject))
+                if (IsEnemy(unitHit.collider.gameObject))
                 {
-                    // Check if any selected unit can attack
                     if (AnySelectedUnitCanAttack())
-                    {
                         SetCursor(CursorState.Attack);
-                        return;
-                    }
                     else
-                    {
                         SetCursor(CursorState.Invalid);
-                        return;
-                    }
+
+                    return;
                 }
             }
 
-            // Priority 3: Check for ground (move command)
+            // Ground = move
             if (Physics.Raycast(ray, out RaycastHit groundHit, raycastDistance, groundLayer))
             {
-                // Hovering over ground with units selected = move cursor
                 SetCursor(CursorState.Move);
                 return;
             }
 
-            // Nothing under cursor
             SetCursor(CursorState.Normal);
         }
 
-        private CursorState CheckEdgeScrolling(Vector2 mousePosition)
+        private CursorState CheckEdgeScrolling(Vector2 pos)
         {
-            // Don't show edge scroll cursor if mouse is outside game view (especially in Unity Editor)
-            if (mousePosition.x < 0 || mousePosition.x > Screen.width ||
-                mousePosition.y < 0 || mousePosition.y > Screen.height)
-            {
+            if (pos.x < 0 || pos.x > Screen.width ||
+                pos.y < 0 || pos.y > Screen.height)
                 return CursorState.Normal;
-            }
 
-            // Calculate viewport boundaries in screen space
-            float viewportBottomY = Screen.height * viewportYOffset;
-            float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
+            float viewBottom = Screen.height * viewportYOffset;
+            float viewTop = Screen.height * (viewportYOffset + viewportHeight);
 
-            // Only show edge scroll cursors if mouse is within viewport Y bounds
-            if (mousePosition.y < viewportBottomY || mousePosition.y > viewportTopY)
-            {
+            // Only apply scrolling inside the viewport area
+            if (pos.y < viewBottom || pos.y > viewTop)
                 return CursorState.Normal;
-            }
 
-            bool isAtTop = mousePosition.y >= viewportTopY - edgeScrollBorderThickness;
-            bool isAtBottom = mousePosition.y <= viewportBottomY + edgeScrollBorderThickness;
-            bool isAtLeft = mousePosition.x <= edgeScrollBorderThickness;
-            bool isAtRight = mousePosition.x >= Screen.width - edgeScrollBorderThickness;
+            bool top = pos.y >= viewTop - edgeScrollBorderThickness;
+            bool bottom = pos.y <= viewBottom + edgeScrollBorderThickness;
+            bool left = pos.x <= edgeScrollBorderThickness;
+            bool right = pos.x >= Screen.width - edgeScrollBorderThickness;
 
-            // Check diagonal edges first
-            if (isAtTop && isAtLeft) return CursorState.ScrollUpLeft;
-            if (isAtTop && isAtRight) return CursorState.ScrollUpRight;
-            if (isAtBottom && isAtLeft) return CursorState.ScrollDownLeft;
-            if (isAtBottom && isAtRight) return CursorState.ScrollDownRight;
+            if (top && left) return CursorState.ScrollUpLeft;
+            if (top && right) return CursorState.ScrollUpRight;
+            if (bottom && left) return CursorState.ScrollDownLeft;
+            if (bottom && right) return CursorState.ScrollDownRight;
 
-            // Check cardinal edges
-            if (isAtTop) return CursorState.ScrollUp;
-            if (isAtBottom) return CursorState.ScrollDown;
-            if (isAtLeft) return CursorState.ScrollLeft;
-            if (isAtRight) return CursorState.ScrollRight;
+            if (top) return CursorState.ScrollUp;
+            if (bottom) return CursorState.ScrollDown;
+            if (left) return CursorState.ScrollLeft;
+            if (right) return CursorState.ScrollRight;
 
             return CursorState.Normal;
         }
@@ -314,18 +261,13 @@ namespace KingdomsAtDusk.UI
 
         private bool AnySelectedUnitCanAttack()
         {
-            foreach (var unit in selectionManager.SelectedUnits)
+            foreach (var u in selectionManager.SelectedUnits)
             {
-                if (unit == null) continue;
+                if (u == null) continue;
 
-                // Check if unit has combat component
-                var combat = unit.GetComponent<UnitCombat>();
-                if (combat != null && combat.enabled)
-                {
+                if (u.TryGetComponent<UnitCombat>(out var combat) && combat.enabled)
                     return true;
-                }
             }
-
             return false;
         }
 
@@ -336,104 +278,48 @@ namespace KingdomsAtDusk.UI
 
             currentState = newState;
 
-            Texture2D texture;
-            Vector2 hotspot;
+            Texture2D tex;
+            Vector2 hot;
 
             switch (newState)
             {
-                case CursorState.Move:
-                    texture = moveCursor;
-                    hotspot = moveHotspot;
-                    break;
-
-                case CursorState.Attack:
-                    texture = attackCursor;
-                    hotspot = attackHotspot;
-                    break;
-
-                case CursorState.Invalid:
-                    texture = invalidCursor;
-                    hotspot = invalidHotspot;
-                    break;
-
-                case CursorState.SelectUnit:
-                    texture = selectUnitCursor;
-                    hotspot = selectUnitHotspot;
-                    break;
-
-                case CursorState.SelectBuilding:
-                    texture = selectBuildingCursor;
-                    hotspot = selectBuildingHotspot;
-                    break;
+                case CursorState.Move: tex = moveCursor; hot = moveHotspot; break;
+                case CursorState.Attack: tex = attackCursor; hot = attackHotspot; break;
+                case CursorState.Invalid: tex = invalidCursor; hot = invalidHotspot; break;
+                case CursorState.SelectUnit: tex = selectUnitCursor; hot = selectUnitHotspot; break;
+                case CursorState.SelectBuilding: tex = selectBuildingCursor; hot = selectBuildingHotspot; break;
 
                 case CursorState.ScrollUp:
-                    texture = useRotatedArrow ? cachedScrollUpCursor : scrollUpCursor;
-                    hotspot = scrollHotspot;
-                    break;
-
+                    tex = useRotatedArrow ? cachedScrollUpCursor : scrollUpCursor; hot = scrollHotspot; break;
                 case CursorState.ScrollDown:
-                    texture = useRotatedArrow ? cachedScrollDownCursor : scrollDownCursor;
-                    hotspot = scrollHotspot;
-                    break;
-
+                    tex = useRotatedArrow ? cachedScrollDownCursor : scrollDownCursor; hot = scrollHotspot; break;
                 case CursorState.ScrollLeft:
-                    texture = useRotatedArrow ? cachedScrollLeftCursor : scrollLeftCursor;
-                    hotspot = scrollHotspot;
-                    break;
-
+                    tex = useRotatedArrow ? cachedScrollLeftCursor : scrollLeftCursor; hot = scrollHotspot; break;
                 case CursorState.ScrollRight:
-                    texture = useRotatedArrow ? cachedScrollRightCursor : scrollRightCursor;
-                    hotspot = scrollHotspot;
-                    break;
+                    tex = useRotatedArrow ? cachedScrollRightCursor : scrollRightCursor; hot = scrollHotspot; break;
 
                 case CursorState.ScrollUpLeft:
-                    texture = useRotatedArrow ? cachedScrollUpLeftCursor : scrollUpLeftCursor;
-                    hotspot = scrollHotspot;
-                    break;
-
+                    tex = useRotatedArrow ? cachedScrollUpLeftCursor : scrollUpLeftCursor; hot = scrollHotspot; break;
                 case CursorState.ScrollUpRight:
-                    texture = useRotatedArrow ? cachedScrollUpRightCursor : scrollUpRightCursor;
-                    hotspot = scrollHotspot;
-                    break;
-
+                    tex = useRotatedArrow ? cachedScrollUpRightCursor : scrollUpRightCursor; hot = scrollHotspot; break;
                 case CursorState.ScrollDownLeft:
-                    texture = useRotatedArrow ? cachedScrollDownLeftCursor : scrollDownLeftCursor;
-                    hotspot = scrollHotspot;
-                    break;
-
+                    tex = useRotatedArrow ? cachedScrollDownLeftCursor : scrollDownLeftCursor; hot = scrollHotspot; break;
                 case CursorState.ScrollDownRight:
-                    texture = useRotatedArrow ? cachedScrollDownRightCursor : scrollDownRightCursor;
-                    hotspot = scrollHotspot;
-                    break;
+                    tex = useRotatedArrow ? cachedScrollDownRightCursor : scrollDownRightCursor; hot = scrollHotspot; break;
 
-                case CursorState.Normal:
                 default:
-                    texture = normalCursor;
-                    hotspot = normalHotspot;
+                    tex = normalCursor;
+                    hot = normalHotspot;
                     break;
             }
 
-            // If texture is null, use hardware cursor
-            if (texture == null)
-            {
+            if (tex == null)
                 Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-            }
             else
-            {
-                Cursor.SetCursor(texture, hotspot, CursorMode.Auto);
-            }
+                Cursor.SetCursor(tex, hot, CursorMode.Auto);
         }
 
-        private void OnDisable()
-        {
-            // Reset to default cursor when disabled
-            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-        }
-
-        private void OnDestroy()
-        {
-            // Reset to default cursor when destroyed
-            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
-        }
+        private void OnDisable() => Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+        private void OnDestroy() => Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
     }
 }
