@@ -203,7 +203,7 @@ namespace RTS.Units
         private void InitializeUnitCache()
         {
             allSelectableUnits.Clear();
-            UnitSelectable[] existingUnits = FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+            UnitSelectable[] existingUnits = FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var unit in existingUnits)
             {
@@ -449,7 +449,7 @@ namespace RTS.Units
             List<UnitSelectable> unitsInBox = new List<UnitSelectable>();
 
             // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
-            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var selectable in unitsToCheck)
             {
@@ -501,7 +501,7 @@ namespace RTS.Units
             List<UnitSelectable> visibleUnits = new List<UnitSelectable>();
 
             // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
-            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var selectable in unitsToCheck)
             {
@@ -619,7 +619,7 @@ namespace RTS.Units
             Rect selectionRect = GetScreenRect(start, end);
 
             // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
-            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsSortMode.None);
+            IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var selectable in unitsToCheck)
             {
