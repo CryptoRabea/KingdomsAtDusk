@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{19F88481-968D-FC32-2229-9A0B10549E7A}</ProjectGuid>
+    <ProjectGuid>{C92D7BA0-F31C-377C-1E76-0777B8ADC3A8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp-Editor</AssemblyName>
@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Editor\BuildingSpawnPointEditor.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\Editor\HUDConfigurationTemplates.cs" />
     <Compile Include="Assets\Scripts\Editor\BuildSetupMenu.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\Editor\SaveLoadSystemSetup.cs" />
     <Compile Include="Assets\Scripts\Editor\UnitDetailsUISetup.cs" />
     <Compile Include="Assets\Scripts\UI\Editor\CursorTextureGenerator.cs" />
     <Compile Include="Assets\Scripts\Editor\PackageExporterTool.cs" />
@@ -1372,12 +1373,12 @@
       <HintPath>Library\ScriptAssemblies\Unity.ShaderGraph.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.RenderPipelines.Core.Editor.Shared">
-      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.Shared.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.2D.Sprite.AIIntegration.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.AIIntegration.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Editor.Shared">
+      <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.Shared.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InputSystem">
@@ -1391,11 +1392,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp.csproj">
-      <Project>{DF3C2AA0-9208-7EDE-3796-77D009EC7D65}</Project>
+      <Project>{B5EA29A3-EC65-216C-2E76-061E46E42EC0}</Project>
       <Name>Assembly-CSharp</Name>
     </ProjectReference>
     <ProjectReference Include="BigRookGames.csproj">
-      <Project>{436034AB-E937-3580-3D12-B9AC371020B2}</Project>
+      <Project>{0E8B82CC-CBD9-3E6E-E288-37F3DA37C449}</Project>
       <Name>BigRookGames</Name>
     </ProjectReference>
   </ItemGroup>

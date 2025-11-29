@@ -10,7 +10,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{436034AB-E937-3580-3D12-B9AC371020B2}</ProjectGuid>
+    <ProjectGuid>{0E8B82CC-CBD9-3E6E-E288-37F3DA37C449}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>BigRookGames</AssemblyName>
