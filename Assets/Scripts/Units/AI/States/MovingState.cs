@@ -26,6 +26,21 @@ namespace RTS.Units.AI
         {
             Transform target = controller.CurrentTarget;
 
+            // Check if we're on a forced move (no target, just moving to destination)
+            if (controller.IsOnForcedMove)
+            {
+                // Check if destination reached
+                if (controller.HasReachedForcedMoveDestination() ||
+                    (controller.Movement != null && controller.Movement.HasReachedDestination))
+                {
+                    // Reached destination, clear forced move and go idle
+                    controller.SetForcedMove(false);
+                    controller.ChangeState(new IdleState(controller));
+                }
+                // Still moving to forced destination, continue
+                return;
+            }
+
             // Check if unit is stuck and cannot reach destination
             if (controller.Movement != null && controller.Movement.IsStuck)
             {
@@ -120,13 +135,6 @@ namespace RTS.Units.AI
                         return;
                     }
                 }
-            }
-
-            // Check if unit reached forced move destination
-            if (controller.IsOnForcedMove && controller.HasReachedForcedMoveDestination())
-            {
-                // Reached destination, clear forced move and allow aggro
-                controller.SetForcedMove(false);
             }
 
             pathUpdateTimer += Time.deltaTime;
