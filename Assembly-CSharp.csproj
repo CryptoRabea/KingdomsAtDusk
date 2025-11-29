@@ -82,6 +82,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitHealth.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionVisuals\GroundUpConstructionVisual.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\SoldierAI.cs" />
     <Compile Include="Assets\LPEnviroment\Scripts\LPEnviromentTool.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarManager.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="Assets\Scripts\UI\CursorStateManager.cs" />
     <Compile Include="Assets\Scripts\Units\AI\TankAI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionVisuals\ScaffoldingConstructionVisual.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogRevealerConfig.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\HUDConfiguration.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingTooltip.cs" />
@@ -165,6 +167,7 @@
     <Compile Include="Assets\AOSFogWar\Examples\csRevealerSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\InventoryUI.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitGroupManager.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionVisuals\FadeInConstructionVisual.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
     <Compile Include="Assets\Scripts\SaveLoad\SaveLoadInputHandler.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\HealingState.cs" />
@@ -209,6 +212,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
     <Compile Include="Assets\LPEnviroment\Scripts\TreeWindParams.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionVisuals\BaseConstructionVisual.cs" />
     <Compile Include="Assets\Scripts\Units\AI\EnemyArcherAI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
     <Compile Include="Assets\Scripts\Managers\ReputationManager.cs" />
@@ -219,6 +223,7 @@
     <Compile Include="Assets\TestCode\UnitVision.cs" />
     <Compile Include="Assets\AOSFogWar\Demo\Scripts\csEyeController.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Stronghold.cs" />
+    <Compile Include="Assets\Scripts\RTSBuildingsSystems\ConstructionVisuals\ParticleAssemblyConstructionVisual.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEntityVisibility.cs" />
     <Compile Include="Assets\Scripts\Camera\RTSCameraController.cs" />
     <Compile Include="Assets\Scripts\UI\LoadingScreen\SceneTransitionManager.cs" />
