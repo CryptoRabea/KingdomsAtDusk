@@ -118,7 +118,7 @@ namespace RTS.Units
                 consecutiveStuckChecks = 0;
 
                 // Physically stop the agent when destination reached
-                if (agent.enabled && !agent.isStopped)
+                if (agent.enabled && agent.isOnNavMesh && !agent.isStopped)
                 {
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
@@ -174,7 +174,7 @@ namespace RTS.Units
                 ResetStuckState();
             }
 
-            if (agent.enabled)
+            if (agent.enabled && agent.isOnNavMesh)
             {
                 // Ensure agent is not stopped before setting destination
                 if (agent.isStopped)
@@ -209,7 +209,7 @@ namespace RTS.Units
                 ResetStuckState();
             }
 
-            if (agent.enabled)
+            if (agent.enabled && agent.isOnNavMesh)
             {
                 // Ensure agent is not stopped before setting destination
                 if (agent.isStopped)
@@ -228,7 +228,7 @@ namespace RTS.Units
         {
             if (agent == null) return;
 
-            if (agent.enabled)
+            if (agent.enabled && agent.isOnNavMesh)
             {
                 agent.ResetPath();
                 // Ensure agent is stopped
@@ -264,8 +264,8 @@ namespace RTS.Units
         public void SetEnabled(bool enabled)
         {
             isEnabled = enabled;
-            
-            if (agent != null)
+
+            if (agent != null && agent.isOnNavMesh)
             {
                 agent.isStopped = !enabled;
             }
@@ -336,7 +336,8 @@ namespace RTS.Units
         private void OnDestroy()
         {
             // Critical: Clean up NavMeshAgent and references to prevent memory leaks
-            if (agent != null && agent.enabled)
+            // Must check isOnNavMesh to avoid errors when agent is not placed on NavMesh
+            if (agent != null && agent.enabled && agent.isOnNavMesh)
             {
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -418,7 +419,7 @@ namespace RTS.Units
                             Debug.LogWarning($"Unit {gameObject.name} detected as stuck at {transform.position}");
 
                             // Stop the agent so velocity goes to 0 and animations naturally transition to idle
-                            if (agent != null && agent.enabled)
+                            if (agent != null && agent.enabled && agent.isOnNavMesh)
                             {
                                 agent.isStopped = true;
                                 agent.velocity = Vector3.zero;
@@ -437,7 +438,7 @@ namespace RTS.Units
                         Debug.Log($"Unit {gameObject.name} is no longer stuck");
 
                         // Resume agent movement
-                        if (agent != null && agent.enabled)
+                        if (agent != null && agent.enabled && agent.isOnNavMesh)
                         {
                             agent.isStopped = false;
                         }
@@ -464,8 +465,11 @@ namespace RTS.Units
                     pathPendingTimer = 0f;
 
                     // Physically stop the agent
-                    agent.isStopped = true;
-                    agent.velocity = Vector3.zero;
+                    if (agent.isOnNavMesh)
+                    {
+                        agent.isStopped = true;
+                        agent.velocity = Vector3.zero;
+                    }
                     hasMovementIntent = false;
                 }
             }
@@ -480,8 +484,11 @@ namespace RTS.Units
                     isStuck = true;
 
                     // Physically stop the agent
-                    agent.isStopped = true;
-                    agent.velocity = Vector3.zero;
+                    if (agent.isOnNavMesh)
+                    {
+                        agent.isStopped = true;
+                        agent.velocity = Vector3.zero;
+                    }
                     hasMovementIntent = false;
                 }
                 else if (agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial)
@@ -503,7 +510,7 @@ namespace RTS.Units
             lastStuckCheckPosition = transform.position;
 
             // Resume agent if it was stopped
-            if (agent != null && agent.enabled && agent.isStopped)
+            if (agent != null && agent.enabled && agent.isOnNavMesh && agent.isStopped)
             {
                 agent.isStopped = false;
             }
