@@ -1,4 +1,5 @@
 using RTS.Units;
+using RTS.Buildings.Components;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,6 +7,7 @@ namespace KingdomsAtDusk.UI
 {
     /// <summary>
     /// Manages cursor state and appearance based on hover context and selected units
+    /// Shows attack cursor for enemy units and buildings
     /// </summary>
     public class CursorStateManager : MonoBehaviour
     {
@@ -56,6 +58,7 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Camera mainCamera;
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private LayerMask unitLayer;
+        [SerializeField] private LayerMask buildingLayer;
 
         [Header("Settings")]
         [SerializeField] private float raycastDistance = 1000f;
@@ -251,6 +254,33 @@ namespace KingdomsAtDusk.UI
                     {
                         SetCursor(CursorState.Invalid);
                         return;
+                    }
+                }
+            }
+
+            // Priority 2.5: Check for enemy buildings (for attack commands)
+            if (Physics.Raycast(ray, out RaycastHit buildingHit, raycastDistance, buildingLayer))
+            {
+                GameObject hitObject = buildingHit.collider.gameObject;
+
+                // Check if it's an enemy building
+                if (IsEnemy(hitObject))
+                {
+                    // Check if building has health (is attackable)
+                    var buildingHealth = hitObject.GetComponent<BuildingHealth>();
+                    if (buildingHealth != null && !buildingHealth.IsDead)
+                    {
+                        // Check if any selected unit can attack
+                        if (AnySelectedUnitCanAttack())
+                        {
+                            SetCursor(CursorState.Attack);
+                            return;
+                        }
+                        else
+                        {
+                            SetCursor(CursorState.Invalid);
+                            return;
+                        }
                     }
                 }
             }
