@@ -11,7 +11,7 @@ namespace RTS.SaveLoad
     public class AutoSaveSystem : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] internal SaveLoadSettings settings;
+        [SerializeField] private SaveLoadSettings settings;
 
         private ISaveLoadService saveLoadService;
         private float timeSinceLastAutoSave = 0f;

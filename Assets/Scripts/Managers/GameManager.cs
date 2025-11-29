@@ -22,7 +22,7 @@ namespace RTS.Managers
         [SerializeField] private PeasantWorkforceManager peasantWorkforceManager;
 
         [Header("Save/Load System")]
-        [SerializeField] internal RTS.SaveLoad.SaveLoadManager saveLoadManager;
+        [SerializeField] private RTS.SaveLoad.SaveLoadManager saveLoadManager;
 
         [Header("Settings")]
         [SerializeField] private bool initializeOnAwake = true;

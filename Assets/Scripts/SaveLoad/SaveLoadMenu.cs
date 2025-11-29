@@ -14,17 +14,22 @@ namespace RTS.SaveLoad
     public class SaveLoadMenu : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] internal GameObject menuPanel;
-        [SerializeField] internal TMP_InputField saveNameInput;
-        [SerializeField] internal Button saveButton;
-        [SerializeField] internal Button loadButton;
-        [SerializeField] internal Button deleteButton;
-        [SerializeField] internal Button closeButton;
-        [SerializeField] internal Transform saveListContent;
-        [SerializeField] internal GameObject saveListItemPrefab;
+        [SerializeField] private GameObject menuPanel;
+        [SerializeField] private TMP_InputField saveNameInput;
+        [SerializeField] private Button resumeButton;
+        [SerializeField] private Button saveButton;
+        [SerializeField] private Button loadButton;
+        [SerializeField] private Button deleteButton;
+        [SerializeField] private Button backToMainMenuButton;
+        [SerializeField] private Button saveAndQuitButton;
+        [SerializeField] private Button quitWithoutSavingButton;
+        [SerializeField] private Button closeButton;
+        [SerializeField] private Transform saveListContent;
+        [SerializeField] private GameObject saveListItemPrefab;
 
         [Header("Settings")]
-        [SerializeField] internal bool pauseGameWhenOpen = true;
+        [SerializeField] private bool pauseGameWhenOpen = true;
+        [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         private ISaveLoadService saveLoadService;
         private IGameStateService gameStateService;
@@ -41,12 +46,20 @@ namespace RTS.SaveLoad
                 menuPanel.SetActive(false);
 
             // Setup button listeners
+            if (resumeButton != null)
+                resumeButton.onClick.AddListener(OnResumeButtonClicked);
             if (saveButton != null)
                 saveButton.onClick.AddListener(OnSaveButtonClicked);
             if (loadButton != null)
                 loadButton.onClick.AddListener(OnLoadButtonClicked);
             if (deleteButton != null)
                 deleteButton.onClick.AddListener(OnDeleteButtonClicked);
+            if (backToMainMenuButton != null)
+                backToMainMenuButton.onClick.AddListener(OnBackToMainMenuClicked);
+            if (saveAndQuitButton != null)
+                saveAndQuitButton.onClick.AddListener(OnSaveAndQuitClicked);
+            if (quitWithoutSavingButton != null)
+                quitWithoutSavingButton.onClick.AddListener(OnQuitWithoutSavingClicked);
             if (closeButton != null)
                 closeButton.onClick.AddListener(CloseMenu);
 
@@ -252,6 +265,69 @@ namespace RTS.SaveLoad
             if (deleteButton != null)
                 deleteButton.interactable = hasSelection;
         }
+
+        private void OnResumeButtonClicked()
+        {
+            CloseMenu();
+        }
+
+        private void OnBackToMainMenuClicked()
+        {
+            if (saveLoadService == null)
+                return;
+
+            // Show confirmation dialog (for now, just log)
+            Debug.Log("Returning to main menu...");
+
+            // Find SceneTransitionManager
+            var sceneManager = FindAnyObjectByType<RTS.UI.SceneTransitionManager>();
+            if (sceneManager != null)
+            {
+                sceneManager.LoadMainMenu();
+            }
+            else
+            {
+                // Fallback to direct scene loading
+                UnityEngine.SceneManagement.SceneManager.LoadScene(mainMenuSceneName);
+            }
+        }
+
+        private void OnSaveAndQuitClicked()
+        {
+            if (saveLoadService == null)
+                return;
+
+            // Generate auto-save name
+            string saveName = "AutoSave_" + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+
+            // Perform save
+            bool success = saveLoadService.SaveGame(saveName);
+
+            if (success)
+            {
+                Debug.Log($"Game saved: {saveName}. Quitting...");
+                QuitGame();
+            }
+            else
+            {
+                Debug.LogError($"Failed to save game before quitting!");
+            }
+        }
+
+        private void OnQuitWithoutSavingClicked()
+        {
+            Debug.Log("Quitting without saving...");
+            QuitGame();
+        }
+
+        private void QuitGame()
+        {
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #else
+            Application.Quit();
+            #endif
+        }
     }
 
     /// <summary>
@@ -260,17 +336,17 @@ namespace RTS.SaveLoad
     public class SaveListItem : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] internal TextMeshProUGUI saveNameText;
-        [SerializeField] internal TextMeshProUGUI saveDateText;
-        [SerializeField] internal TextMeshProUGUI playTimeText;
-        [SerializeField] internal Image backgroundImage;
-        [SerializeField] internal Button selectButton;
+        [SerializeField] private TextMeshProUGUI saveNameText;
+        [SerializeField] private TextMeshProUGUI saveDateText;
+        [SerializeField] private TextMeshProUGUI playTimeText;
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Button selectButton;
 
         [Header("Visual Settings")]
-        [SerializeField] internal Color normalColor = Color.white;
-        [SerializeField] internal Color selectedColor = Color.green;
-        [SerializeField] internal Color autoSaveColor = Color.yellow;
-        [SerializeField] internal Color quickSaveColor = Color.cyan;
+        [SerializeField] private Color normalColor = Color.white;
+        [SerializeField] private Color selectedColor = Color.green;
+        [SerializeField] private Color autoSaveColor = Color.yellow;
+        [SerializeField] private Color quickSaveColor = Color.cyan;
 
         private SaveFileInfo saveInfo;
         private bool isSelected = false;

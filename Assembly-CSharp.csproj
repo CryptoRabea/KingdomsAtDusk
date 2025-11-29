@@ -65,6 +65,7 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerProjectile.cs" />
     <Compile Include="Assets\AOSFogWar\Shadowcaster.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
+    <Compile Include="Assets\Scripts\Debug\FPSCounter.cs" />
     <Compile Include="Assets\Scripts\Core\Utilities\ResourceDisplayUtility.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\IMinimapEntity.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
@@ -75,9 +76,8 @@
     <Compile Include="Assets\Scripts\Units\AI\States\RetreatState.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectable.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\ResourceWorkerModule.cs" />
-    <Compile Include="Assets\AOSFogWar\csFogWar.cs" />
     <Compile Include="Assets\Scripts\Managers\WaveManager.cs" />
-    <Compile Include="Assets\FogOfWarView.cs" />
+    <Compile Include="Assets\Scripts\Units\Formation\FormationGroupManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitHealth.cs" />
@@ -91,11 +91,14 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSpawnPoint.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitState.cs" />
     <Compile Include="Assets\Scripts\Core\ObjectPool.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\AutoSaveSystem.cs" />
     <Compile Include="Assets\Scripts\UI\LoadingScreen\LoadingScreenManager.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\csFogWar.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsPlacement.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\RTSCommandHandler.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\HUDLayoutPreset.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitMovement.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogOfWarView.cs" />
     <Compile Include="Assets\ConstructableMedievalHouses\Scripts\BuildingsProgressController.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\TowerDataSO.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WorkerModules\TrainingWorkerModule.cs" />
@@ -105,6 +108,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeB.cs" />
     <Compile Include="Assets\Scripts\UI\WallResourcePreviewUI.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapDragHandler.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveLoadManager.cs" />
     <Compile Include="Assets\Scripts\Units\AI\AISettingsSO.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\ArcherAI.cs" />
     <Compile Include="Assets\RTSAnimation\AnimationConfigSO.cs" />
@@ -112,16 +116,19 @@
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarEnums.cs" />
     <Compile Include="Assets\Scripts\UI\CursorStateManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\FogRevealerConfig.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\HUDConfiguration.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingTooltip.cs" />
+    <Compile Include="Assets\FogPerCamera.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveData.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_UiFrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarGrid.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveLoadMenu.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapMarkerPool.cs" />
     <Compile Include="Assets\Scripts\UI\NotificationUI.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitCombat.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextSelector_B.cs" />
-    <Compile Include="Assets\FPSCounter.cs" />
     <Compile Include="Assets\Scripts\UI\MainMenu\MainMenuManager.cs" />
     <Compile Include="Assets\Scripts\Core\ShaderPreloader.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallPlacementController.cs" />
@@ -147,18 +154,17 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <Compile Include="Assets\AOSFogWar\Examples\csRevealerSpawner.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\InventoryUI.cs" />
-    <Compile Include="Assets\FogRevealerConfig.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitGroupManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveLoadInputHandler.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\HealingState.cs" />
     <Compile Include="Assets\StoneKeep\Scripts\CharacterMovement.cs" />
     <Compile Include="Assets\Scripts\UI\BuildingHUDToggle.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingNavMeshObstacle.cs" />
-    <Compile Include="Assets\MinimapFogOfWarIntegration.cs" />
-    <Compile Include="Assets\ControlGroupFeedbackUI.cs" />
     <Compile Include="Assets\Scripts\Units\Data\UnitConfigSO.cs" />
+    <Compile Include="Assets\Scripts\FogOfWar\MinimapFogOfWarIntegration.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\IdleState.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01_UGUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
@@ -169,13 +175,14 @@
     <Compile Include="Assets\Scripts\UI\BuildingDetailsUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\Units\AI\States\UnitStateType.cs" />
-    <Compile Include="Assets\UnifiedControlGroupManager.cs" />
+    <Compile Include="Assets\Scripts\Units\UnifiedControlGroupManager.cs" />
     <Compile Include="Assets\SimpleToon\Model\Kawaii Slimes\Cameras\Scripts\AbstractTargetFollower.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallConnectionSystem.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\UI\MiniMapControllerPro.cs" />
     <Compile Include="Assets\Scripts\InputSystem_Actions.cs" />
+    <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\UI\ResourceUI.cs" />
     <Compile Include="Assets\Scripts\Units\AI\UnitAIController.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\UnitTrainingQueue.cs" />
@@ -185,10 +192,10 @@
     <Compile Include="Assets\Scripts\Core\IServices.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingHUD.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\HealerAI.cs" />
+    <Compile Include="Assets\Scripts\Units\Formation\FormationManager.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\TopBarUI.cs" />
     <Compile Include="Assets\StoneKeep\Scripts\PlayerInteraction.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelection3D.cs" />
-    <Compile Include="Assets\Settings\FogPerCamera.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
@@ -213,18 +220,21 @@
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\Campfire.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\HUDController.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_PhoneNumberValidator.cs" />
+    <Compile Include="Assets\Scripts\Units\ControlGroupFeedbackUI.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BuildingGroupManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\StairPlacementController.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\MouseLook.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TeleType.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventCheck.cs" />
+    <Compile Include="Assets\Scripts\UI\Minimap\MinimapMarkerFogIntegration.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\WallNavMeshObstacle.cs" />
+    <Compile Include="Assets\Scripts\SaveLoad\SaveLoadSettings.cs" />
     <Compile Include="Assets\Scripts\Core\StartupDiagnostics.cs" />
     <Compile Include="Assets\Scripts\Managers\PeasantWorkforceManager.cs" />
-    <Compile Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Scripts\PT_Create_Prefab.cs" />
     <Compile Include="Assets\Polytope Studio\Lowpoly_Demos\Environment_Free\Helpers\PlayerMovement.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
+    <Compile Include="Assets\Scripts\Units\Formation\FormationSettingsSO.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapMarkerManager.cs" />
     <Compile Include="Assets\SimpleToon\Model\Kawaii Slimes\Cameras\Scripts\FreeLookCam.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapBuildingMarkerManager.cs" />
@@ -242,10 +252,8 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Glass_PBR.shader" />
     <None Include="Assets\SimpleToon\Shader\ToonLightBase.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader_WebGl.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Unity - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Modular_NPC\Shaders\PT_Modular_NPC_Shader_Toon.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - AFL.txt" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader.shader" />
@@ -255,7 +263,6 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Shader_PBR.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\SDFFunctions.hlsl" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader.shader" />
@@ -267,28 +274,24 @@
     <None Include="Assets\AOSFogWar\README.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
+    <None Include="Assets\FogPlane.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Water_Shader.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Flowers_Shader.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Rock_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
+    <None Include="Assets\Shaders\FogPlaneCS.shader" />
     <None Include="Assets\StoneKeep\Readme.txt" />
     <None Include="Assets\StrategyGameResourceIcons\Docs\readme.txt" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader_VS.shader" />
     <None Include="Assets\ConstructableMedievalHouses\Art\Shader\BuildingEffect.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\Scripts\Managers\New Text Document.txt" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Flowers_Shader_VS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Rock_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\AOSFogWar\Shaders\FogPlane.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\VS_indirect.cginc" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Props\Sources\Shaders\PT_Props_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
+    <None Include="Assets\FogPlaneCS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader_VS.shader" />
-    <None Include="Assets\Polytope Studio\Lowpoly_Characters\Sources\Modular_NPC\Shaders\PT_Modular_NPC_Shader_PBR.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
   </ItemGroup>
@@ -1321,16 +1324,8 @@
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.MemoryProfiler">
-      <HintPath>Library\ScriptAssemblies\Unity.MemoryProfiler.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VisualScripting.SettingsProvider.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Splines.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Splines.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Editor">
@@ -1351,14 +1346,6 @@
     </Reference>
     <Reference Include="PPv2URPConverters">
       <HintPath>Library\ScriptAssemblies\PPv2URPConverters.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.EditorCoroutines.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.EditorCoroutines.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.MemoryProfiler.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime.Shared">
@@ -1391,14 +1378,6 @@
     </Reference>
     <Reference Include="Unity.Mathematics.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Mathematics.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Cinemachine.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Cinemachine.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Cinemachine">
-      <HintPath>Library\ScriptAssemblies\Unity.Cinemachine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Rendering.LightTransport.Editor">
@@ -1439,10 +1418,6 @@
     </Reference>
     <Reference Include="Unity.Collections">
       <HintPath>Library\ScriptAssemblies\Unity.Collections.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Profiling.Core">
-      <HintPath>Library\ScriptAssemblies\Unity.Profiling.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InputSystem.ForUI">
@@ -1497,10 +1472,6 @@
       <HintPath>Library\ScriptAssemblies\Unity.Rendering.LightTransport.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.MemoryProfiler.Editor.MemoryProfilerModule">
-      <HintPath>Library\ScriptAssemblies\Unity.MemoryProfiler.Editor.MemoryProfilerModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.VisualScripting.State">
       <HintPath>Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
       <Private>False</Private>
@@ -1531,14 +1502,6 @@
     </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>Library\ScriptAssemblies\Unity.InputSystem.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Settings.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.Settings.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Unity.Splines">
-      <HintPath>Library\ScriptAssemblies\Unity.Splines.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.UI">

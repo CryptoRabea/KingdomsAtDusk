@@ -165,8 +165,7 @@ namespace RTS.Buildings
             if (!checkConnections) return true;
 
             // Check wall connections
-            var wallSystem = wall.GetComponent<WallConnectionSystem>();
-            if (wallSystem != null)
+            if (wall.TryGetComponent<WallConnectionSystem>(out var wallSystem))
             {
                 // Don't replace walls with many connections (corner walls)
                 // This is optional - you can adjust this logic

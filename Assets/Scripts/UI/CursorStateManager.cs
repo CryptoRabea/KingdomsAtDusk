@@ -1,4 +1,5 @@
 using RTS.Units;
+using RTS.Buildings.Components;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,6 +7,7 @@ namespace KingdomsAtDusk.UI
 {
     /// <summary>
     /// Manages cursor state and appearance based on hover context and selected units
+    /// Shows attack cursor for enemy units and buildings
     /// </summary>
     public class CursorStateManager : MonoBehaviour
     {
@@ -56,6 +58,7 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private Camera mainCamera;
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private LayerMask unitLayer;
+        [SerializeField] private LayerMask buildingLayer;
 
         [Header("Settings")]
         [SerializeField] private float raycastDistance = 1000f;
@@ -117,8 +120,8 @@ namespace KingdomsAtDusk.UI
             // Assume base arrow points UP (0 degrees)
             cachedScrollUpCursor = baseScrollArrowCursor; // 0 degrees
             cachedScrollRightCursor = RotateTexture(baseScrollArrowCursor, 90); // 90 degrees clockwise
-            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, 180); // 180 degrees
-            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, 270); // 270 degrees clockwise
+            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, -180); // 180 degrees
+            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, -90); // 270 degrees clockwise
 
             // Diagonals
             cachedScrollUpRightCursor = RotateTexture(baseScrollArrowCursor, 45); // 45 degrees
@@ -139,7 +142,7 @@ namespace KingdomsAtDusk.UI
 
             // Get pixel data from source
             Color[] sourcePixels = source.GetPixels();
-            Color[] rotatedPixels = new Color[width * height];
+            Color32[] rotatedPixels = new Color32[width * height];
 
             // Calculate rotation
             float angleRad = angleDegrees * Mathf.Deg2Rad;
@@ -177,7 +180,7 @@ namespace KingdomsAtDusk.UI
                 }
             }
 
-            rotated.SetPixels(rotatedPixels);
+            rotated.SetPixels32(rotatedPixels);
             rotated.Apply();
 
             return rotated;
@@ -212,16 +215,14 @@ namespace KingdomsAtDusk.UI
                 GameObject hitObject = hit.collider.gameObject;
 
                 // Check for BuildingSelectable (highest priority)
-                var buildingSelectable = hitObject.GetComponent<RTS.Buildings.BuildingSelectable>();
-                if (buildingSelectable != null)
+                if (hitObject.TryGetComponent<RTS.Buildings.BuildingSelectable>(out var buildingSelectable))
                 {
                     SetCursor(CursorState.SelectBuilding);
                     return;
                 }
 
                 // Check for UnitSelectable
-                var unitSelectable = hitObject.GetComponent<RTS.Units.UnitSelectable>();
-                if (unitSelectable != null)
+                if (hitObject.TryGetComponent<RTS.Units.UnitSelectable>(out var unitSelectable))
                 {
                     SetCursor(CursorState.SelectUnit);
                     return;
@@ -253,6 +254,33 @@ namespace KingdomsAtDusk.UI
                     {
                         SetCursor(CursorState.Invalid);
                         return;
+                    }
+                }
+            }
+
+            // Priority 2.5: Check for enemy buildings (for attack commands)
+            if (Physics.Raycast(ray, out RaycastHit buildingHit, raycastDistance, buildingLayer))
+            {
+                GameObject hitObject = buildingHit.collider.gameObject;
+
+                // Check if it's an enemy building
+                if (IsEnemy(hitObject))
+                {
+                    // Check if building has health (is attackable)
+                    var buildingHealth = hitObject.GetComponent<BuildingHealth>();
+                    if (buildingHealth != null && !buildingHealth.IsDead)
+                    {
+                        // Check if any selected unit can attack
+                        if (AnySelectedUnitCanAttack())
+                        {
+                            SetCursor(CursorState.Attack);
+                            return;
+                        }
+                        else
+                        {
+                            SetCursor(CursorState.Invalid);
+                            return;
+                        }
                     }
                 }
             }

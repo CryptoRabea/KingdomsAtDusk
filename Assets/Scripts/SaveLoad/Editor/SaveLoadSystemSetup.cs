@@ -34,7 +34,7 @@ namespace RTS.SaveLoad.Editor
                 "This tool will automatically create and configure the entire Save/Load system:\n\n" +
                 "✓ SaveLoadSettings ScriptableObject\n" +
                 "✓ SaveLoadSystem GameObject with all components\n" +
-                "✓ In-game UI menu with all buttons and layout\n" +
+                "✓ In-game menu with Resume, Save, Load, Back to Main Menu, Save & Quit, Quit without Saving\n" +
                 "✓ SaveListItem prefab\n" +
                 "✓ Auto-wire all references\n" +
                 "✓ Integrate with GameManager",
@@ -222,8 +222,9 @@ namespace RTS.SaveLoad.Editor
                 canvas = CreateCanvas();
             }
 
-            // Create menu panel with RectTransform
-            GameObject menuPanel = new GameObject("SaveLoadMenuPanel", typeof(RectTransform));
+            // Create menu panel
+            GameObject menuPanel = new GameObject("SaveLoadMenuPanel");
+            menuPanel.AddComponent<RectTransform>(); // Add RectTransform for UI element
             menuPanel.transform.SetParent(canvas.transform, false);
 
             // Add CanvasGroup for fading
@@ -248,7 +249,7 @@ namespace RTS.SaveLoad.Editor
             contentRect.anchorMin = new Vector2(0.5f, 0.5f);
             contentRect.anchorMax = new Vector2(0.5f, 0.5f);
             contentRect.pivot = new Vector2(0.5f, 0.5f);
-            contentRect.sizeDelta = new Vector2(600, 700);
+            contentRect.sizeDelta = new Vector2(600, 800);
             contentRect.anchoredPosition = Vector2.zero;
 
             var contentBg = contentPanel.AddComponent<Image>();
@@ -264,19 +265,27 @@ namespace RTS.SaveLoad.Editor
             verticalLayout.childForceExpandWidth = true;
 
             // Create title
-            CreateTitle(contentPanel, "Save / Load Game");
+            CreateTitle(contentPanel, "Game Menu");
+
+            // Create main action buttons (Resume, Save, Load, etc.)
+            var resumeButton = CreateMenuButton(contentPanel, "ResumeButton", "Resume Game", new Color(0.2f, 0.6f, 0.2f, 1f));
 
             // Create save name input section
             var inputField = CreateSaveNameInput(contentPanel);
 
             // Create action buttons (Save, Load, Delete)
-            var buttonPanel = CreateActionButtons(contentPanel);
+            var actionButtons = CreateActionButtons(contentPanel);
 
             // Create save list
             var scrollView = CreateSaveList(contentPanel);
 
+            // Create utility buttons
+            var backToMainMenuButton = CreateMenuButton(contentPanel, "BackToMainMenuButton", "Back to Main Menu", new Color(0.6f, 0.4f, 0.2f, 1f));
+            var saveAndQuitButton = CreateMenuButton(contentPanel, "SaveAndQuitButton", "Save and Quit", new Color(0.4f, 0.5f, 0.6f, 1f));
+            var quitWithoutSavingButton = CreateMenuButton(contentPanel, "QuitWithoutSavingButton", "Quit Without Saving", new Color(0.8f, 0.2f, 0.2f, 1f));
+
             // Create close button
-            var closeButton = CreateCloseButton(contentPanel);
+            var closeButton = CreateMenuButton(contentPanel, "CloseButton", "Close (ESC)", new Color(0.5f, 0.5f, 0.5f, 1f));
 
             // Add SaveLoadMenu component
             var saveLoadMenu = menuPanel.AddComponent<SaveLoadMenu>();
@@ -286,13 +295,18 @@ namespace RTS.SaveLoad.Editor
 
             serializedMenu.FindProperty("menuPanel").objectReferenceValue = menuPanel;
             serializedMenu.FindProperty("saveNameInput").objectReferenceValue = inputField;
-            serializedMenu.FindProperty("saveButton").objectReferenceValue = buttonPanel.transform.Find("SaveButton").GetComponent<Button>();
-            serializedMenu.FindProperty("loadButton").objectReferenceValue = buttonPanel.transform.Find("LoadButton").GetComponent<Button>();
-            serializedMenu.FindProperty("deleteButton").objectReferenceValue = buttonPanel.transform.Find("DeleteButton").GetComponent<Button>();
+            serializedMenu.FindProperty("resumeButton").objectReferenceValue = resumeButton;
+            serializedMenu.FindProperty("saveButton").objectReferenceValue = actionButtons.transform.Find("SaveButton").GetComponent<Button>();
+            serializedMenu.FindProperty("loadButton").objectReferenceValue = actionButtons.transform.Find("LoadButton").GetComponent<Button>();
+            serializedMenu.FindProperty("deleteButton").objectReferenceValue = actionButtons.transform.Find("DeleteButton").GetComponent<Button>();
+            serializedMenu.FindProperty("backToMainMenuButton").objectReferenceValue = backToMainMenuButton;
+            serializedMenu.FindProperty("saveAndQuitButton").objectReferenceValue = saveAndQuitButton;
+            serializedMenu.FindProperty("quitWithoutSavingButton").objectReferenceValue = quitWithoutSavingButton;
             serializedMenu.FindProperty("closeButton").objectReferenceValue = closeButton;
             serializedMenu.FindProperty("saveListContent").objectReferenceValue = scrollView.transform.Find("Viewport/Content");
             serializedMenu.FindProperty("saveListItemPrefab").objectReferenceValue = itemPrefab;
             serializedMenu.FindProperty("pauseGameWhenOpen").boolValue = true;
+            serializedMenu.FindProperty("mainMenuSceneName").stringValue = "MainMenu";
 
             serializedMenu.ApplyModifiedProperties();
 
@@ -327,13 +341,49 @@ namespace RTS.SaveLoad.Editor
 
             var titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = text;
-            titleText.fontSize = 32;
+            titleText.fontSize = 36;
             titleText.fontStyle = FontStyles.Bold;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.color = Color.white;
 
             var layoutElement = titleObj.AddComponent<LayoutElement>();
             layoutElement.minHeight = 60;
+        }
+
+        private Button CreateMenuButton(GameObject parent, string name, string text, Color color)
+        {
+            GameObject buttonObj = new GameObject(name);
+            buttonObj.transform.SetParent(parent.transform, false);
+
+            var buttonRect = buttonObj.AddComponent<RectTransform>();
+            buttonRect.sizeDelta = new Vector2(0, 50);
+
+            var buttonImage = buttonObj.AddComponent<Image>();
+            buttonImage.color = color;
+
+            var button = buttonObj.AddComponent<Button>();
+            button.targetGraphic = buttonImage;
+
+            var layoutElement = buttonObj.AddComponent<LayoutElement>();
+            layoutElement.minHeight = 50;
+
+            // Create button text
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(buttonObj.transform, false);
+
+            var textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+
+            var buttonText = textObj.AddComponent<TextMeshProUGUI>();
+            buttonText.text = text;
+            buttonText.fontSize = 22;
+            buttonText.fontStyle = FontStyles.Bold;
+            buttonText.alignment = TextAlignmentOptions.Center;
+            buttonText.color = Color.white;
+
+            return button;
         }
 
         private TMP_InputField CreateSaveNameInput(GameObject parent)
@@ -448,8 +498,8 @@ namespace RTS.SaveLoad.Editor
             GameObject scrollViewObj = new GameObject("SaveListScrollView", typeof(RectTransform));
             scrollViewObj.transform.SetParent(parent.transform, false);
 
-            var scrollRect = scrollViewObj.GetComponent<RectTransform>();
-            scrollRect.sizeDelta = new Vector2(0, 400);
+            var scrollRect = scrollViewObj.AddComponent<RectTransform>();
+            scrollRect.sizeDelta = new Vector2(0, 300);
 
             var scrollViewImage = scrollViewObj.AddComponent<Image>();
             scrollViewImage.color = new Color(0.1f, 0.1f, 0.1f, 1f);
@@ -500,42 +550,6 @@ namespace RTS.SaveLoad.Editor
             scrollView.vertical = true;
 
             return scrollViewObj;
-        }
-
-        private Button CreateCloseButton(GameObject parent)
-        {
-            GameObject buttonObj = new GameObject("CloseButton", typeof(RectTransform));
-            buttonObj.transform.SetParent(parent.transform, false);
-
-            var buttonRect = buttonObj.GetComponent<RectTransform>();
-            buttonRect.sizeDelta = new Vector2(0, 50);
-
-            var buttonImage = buttonObj.AddComponent<Image>();
-            buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-
-            var button = buttonObj.AddComponent<Button>();
-            button.targetGraphic = buttonImage;
-
-            var layoutElement = buttonObj.AddComponent<LayoutElement>();
-            layoutElement.minHeight = 50;
-
-            // Create button text
-            GameObject textObj = new GameObject("Text", typeof(RectTransform));
-            textObj.transform.SetParent(buttonObj.transform, false);
-
-            var textRect = textObj.GetComponent<RectTransform>();
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.sizeDelta = Vector2.zero;
-
-            var buttonText = textObj.AddComponent<TextMeshProUGUI>();
-            buttonText.text = "Close (ESC)";
-            buttonText.fontSize = 20;
-            buttonText.fontStyle = FontStyles.Bold;
-            buttonText.alignment = TextAlignmentOptions.Center;
-            buttonText.color = Color.white;
-
-            return button;
         }
 
         private GameObject CreateSaveListItemPrefab()
@@ -776,57 +790,6 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.SetDirty(gameManager.gameObject);
                 Debug.Log("✅ Integrated with GameManager");
             }
-        }
-
-        #endregion
-
-        #region Utility Methods
-
-        private void SetPrivateField(Object obj, string fieldName, object value)
-        {
-            var serializedObject = new SerializedObject(obj);
-            var property = serializedObject.FindProperty(fieldName);
-
-            if (property == null)
-            {
-                Debug.LogWarning($"Could not find field '{fieldName}' on {obj.GetType().Name}");
-                return;
-            }
-
-            if (value is Object unityObj)
-            {
-                property.objectReferenceValue = unityObj;
-            }
-            else if (value is bool boolVal)
-            {
-                property.boolValue = boolVal;
-            }
-            else if (value is int intVal)
-            {
-                property.intValue = intVal;
-            }
-            else if (value is float floatVal)
-            {
-                property.floatValue = floatVal;
-            }
-            else if (value is string strVal)
-            {
-                property.stringValue = strVal;
-            }
-            else if (value is Color colorVal)
-            {
-                property.colorValue = colorVal;
-            }
-            else if (value is Vector2 vec2Val)
-            {
-                property.vector2Value = vec2Val;
-            }
-            else if (value is Vector3 vec3Val)
-            {
-                property.vector3Value = vec3Val;
-            }
-
-            serializedObject.ApplyModifiedProperties();
         }
 
         #endregion

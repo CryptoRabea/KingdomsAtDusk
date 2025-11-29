@@ -137,7 +137,7 @@ namespace RTS.Core
             {
                 if (mat != null)
                 {
-                    // Access material properties to force initialization
+                    // Access material properties to force initialization.
                     _ = mat.shader;
                     _ = mat.mainTexture;
                     _ = mat.color;
@@ -187,8 +187,7 @@ namespace RTS.Core
                     quad.GetComponent<MeshRenderer>().material = mat;
 
                     // Disable collider
-                    Collider col = quad.GetComponent<Collider>();
-                    if (col != null) Destroy(col);
+                    if (quad.TryGetComponent<Collider>(out var col)) Destroy(col);
 
                     dummyObjects.Add(quad);
 
