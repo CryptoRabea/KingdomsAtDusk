@@ -19,6 +19,14 @@ namespace RTS.Units.AI
 
         public override void OnUpdate()
         {
+            // Check if unit should be moving (formation change, forced move, etc.)
+            if (controller.Movement != null && controller.Movement.IsMoving)
+            {
+                // Unit is moving, transition to MovingState
+                controller.ChangeState(new MovingState(controller));
+                return;
+            }
+
             // Clear forced move flag if we've reached the destination
             if (controller.IsOnForcedMove && controller.HasReachedForcedMoveDestination())
             {

@@ -15,6 +15,14 @@ namespace RTS.Units.AI
 
         public override void OnUpdate()
         {
+            // Check if player issued a forced move (e.g., formation change)
+            if (controller.IsOnForcedMove)
+            {
+                controller.ClearTarget();
+                controller.ChangeState(new MovingState(controller));
+                return;
+            }
+
             Transform target = controller.CurrentTarget;
 
             if (target == null)
