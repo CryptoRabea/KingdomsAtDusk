@@ -1,12 +1,10 @@
 using UnityEngine;
-using RTS.Buildings.Components;
 
 namespace RTS.Units
 {
     /// <summary>
     /// Component handling unit combat mechanics (attacking).
-    /// Works with UnitHealth and BuildingHealth for damage application.
-    /// Can attack both units and buildings.
+    /// Works with UnitHealth for damage application.
     /// </summary>
     public class UnitCombat : MonoBehaviour
     {
@@ -84,16 +82,9 @@ namespace RTS.Units
             if (!IsTargetInRange(currentTarget)) return false;
             if (Time.time < lastAttackTime + (1f / attackRate)) return false;
 
-            // Check if target is still valid and alive (units)
+            // Check if target is still valid and alive
             var targetHealth = currentTarget.GetComponent<UnitHealth>();
             if (targetHealth != null && targetHealth.IsDead) return false;
-
-            // Check if target is still valid and alive (buildings)
-            var buildingHealth = currentTarget.GetComponent<BuildingHealth>();
-            if (buildingHealth != null && buildingHealth.IsDead) return false;
-
-            // Target must have either UnitHealth or BuildingHealth
-            if (targetHealth == null && buildingHealth == null) return false;
 
             return true;
         }
@@ -102,18 +93,11 @@ namespace RTS.Units
         {
             lastAttackTime = Time.time;
 
-            // Apply damage to target (unit)
+            // Apply damage to target
             var targetHealth = currentTarget.GetComponent<UnitHealth>();
             if (targetHealth != null)
             {
                 targetHealth.TakeDamage(attackDamage, gameObject);
-            }
-
-            // Apply damage to target (building)
-            var buildingHealth = currentTarget.GetComponent<BuildingHealth>();
-            if (buildingHealth != null)
-            {
-                buildingHealth.TakeDamage(attackDamage, gameObject);
             }
 
             // Spawn projectile if configured
@@ -144,12 +128,12 @@ namespace RTS.Units
         #region Target Finding
 
         /// <summary>
-        /// Find nearest enemy within detection range (includes both units and buildings).
+        /// Find nearest enemy within detection range.
         /// </summary>
         public Transform FindNearestEnemy(float detectionRange)
         {
             Collider[] hits = Physics.OverlapSphere(transform.position, detectionRange, targetLayers);
-
+            
             Transform nearest = null;
             float minDistance = float.MaxValue;
 
@@ -158,16 +142,9 @@ namespace RTS.Units
                 // Skip self
                 if (hit.gameObject == gameObject) continue;
 
-                // Skip dead units
+                // Skip dead targets
                 var health = hit.GetComponent<UnitHealth>();
                 if (health != null && health.IsDead) continue;
-
-                // Skip dead buildings
-                var buildingHealth = hit.GetComponent<BuildingHealth>();
-                if (buildingHealth != null && buildingHealth.IsDead) continue;
-
-                // Must have either UnitHealth or BuildingHealth
-                if (health == null && buildingHealth == null) continue;
 
                 float distance = Vector3.Distance(transform.position, hit.transform.position);
                 if (distance < minDistance)
@@ -281,18 +258,10 @@ namespace RTS.Units
 
         private void HitTarget()
         {
-            // Damage units
             var health = target.GetComponent<UnitHealth>();
             if (health != null)
             {
                 health.TakeDamage(damage, attacker);
-            }
-
-            // Damage buildings
-            var buildingHealth = target.GetComponent<BuildingHealth>();
-            if (buildingHealth != null)
-            {
-                buildingHealth.TakeDamage(damage, attacker);
             }
 
             Destroy(gameObject);

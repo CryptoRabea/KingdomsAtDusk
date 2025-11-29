@@ -156,57 +156,6 @@ namespace RTS.Core.Events
         }
     }
 
-    /// <summary>
-    /// Event published when a building's health changes.
-    /// </summary>
-    public struct BuildingHealthChangedEvent
-    {
-        public GameObject Building { get; }
-        public float CurrentHealth { get; }
-        public float MaxHealth { get; }
-
-        public BuildingHealthChangedEvent(GameObject building, float current, float max)
-        {
-            Building = building;
-            CurrentHealth = current;
-            MaxHealth = max;
-        }
-    }
-
-    /// <summary>
-    /// Event published when a building takes damage.
-    /// </summary>
-    public struct BuildingDamageDealtEvent
-    {
-        public GameObject Attacker { get; }
-        public GameObject Building { get; }
-        public float Damage { get; }
-
-        public BuildingDamageDealtEvent(GameObject attacker, GameObject building, float damage)
-        {
-            Attacker = attacker;
-            Building = building;
-            Damage = damage;
-        }
-    }
-
-    /// <summary>
-    /// Event published when a building is healed.
-    /// </summary>
-    public struct BuildingHealingAppliedEvent
-    {
-        public GameObject Healer { get; }
-        public GameObject Building { get; }
-        public float Amount { get; }
-
-        public BuildingHealingAppliedEvent(GameObject healer, GameObject building, float amount)
-        {
-            Healer = healer;
-            Building = building;
-            Amount = amount;
-        }
-    }
-
     // ==================== UNIT EVENTS ====================
 
     public struct UnitSpawnedEvent
