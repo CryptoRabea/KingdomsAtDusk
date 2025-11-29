@@ -57,8 +57,8 @@ namespace RTS.Core.Conditions
             var buildings = FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (var building in buildings)
             {
-                if (building.BuildingData != null &&
-                    building.BuildingData.buildingName.Contains(strongholdBuildingName))
+                if (building.Data != null &&
+                    building.Data.buildingName.Contains(strongholdBuildingName))
                 {
                     stronghold = building.gameObject;
                     Debug.Log($"Found stronghold: {stronghold.name}");
