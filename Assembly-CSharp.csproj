@@ -83,6 +83,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\Units\Components\UnitHealth.cs" />
     <Compile Include="Assets\Scripts\Units\AI\Specialized\SoldierAI.cs" />
+    <Compile Include="Assets\LPEnviroment\Scripts\LPEnviromentTool.cs" />
     <Compile Include="Assets\Scripts\FogOfWar\FogOfWarManager.cs" />
     <Compile Include="Assets\Scripts\UI\Minimap\MinimapUnitMarkerManager.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\CampfireDataSO.cs" />
@@ -206,6 +207,7 @@
     <Compile Include="Assets\StoneKeep\Scripts\PlayerInteraction.cs" />
     <Compile Include="Assets\Scripts\Units\Selection\UnitSelection3D.cs" />
     <Compile Include="Assets\Scripts\RTSBuildingsSystems\BlockingPanelHandler.cs" />
+    <Compile Include="Assets\LPEnviroment\Scripts\TreeWindParams.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\Units\AI\EnemyArcherAI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
@@ -266,17 +268,21 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Glass_PBR.shader" />
     <None Include="Assets\SimpleToon\Shader\ToonLightBase.shader" />
+    <None Include="Assets\LPEnviroment\Shaders\TreeBase.cginc" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Unity - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
+    <None Include="Assets\LPEnviroment\Shaders\TreeURP.shader" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Oswald-Bold - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Roboto-Bold - AFL.txt" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Plants_Shader.shader" />
     <None Include="Assets\BigRookGames\_AssetPacks\Stylized Build Panels\Readme.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
+    <None Include="Assets\LPEnviroment\Shaders\TreeSRPLegacy.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Village\Sources\Shaders\PT_Buildings_Shader_PBR.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
+    <None Include="Assets\LPEnviroment\Shaders\TreeSRP.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\SDFFunctions.hlsl" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Opaque_Shader.shader" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Vegetation_Foliage_Shader.shader" />
@@ -284,6 +290,7 @@
     <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF.shader" />
+    <None Include="Assets\LPEnviroment\Shaders\URPStdOverride.hlsl" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
     <None Include="Assets\AOSFogWar\README.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
@@ -295,18 +302,24 @@
     <None Include="Assets\Shaders\FogPlaneCS.shader" />
     <None Include="Assets\StoneKeep\Readme.txt" />
     <None Include="Assets\StrategyGameResourceIcons\Docs\readme.txt" />
+    <None Include="Assets\LPEnviroment\Third-Party Notices.txt" />
     <None Include="Assets\ConstructableMedievalHouses\Art\Shader\BuildingEffect.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\Scripts\Managers\New Text Document.txt" />
+    <None Include="Assets\LPEnviroment\Shaders\SRPStdOverride.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets\LPEnviroment\performance.txt" />
+    <None Include="Assets\LPEnviroment\Shaders\license.txt" />
     <None Include="Assets\Polytope Studio\Lowpoly_Environments\Sources\Shaders\PT_Rock_Shader.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\AOSFogWar\Shaders\FogPlane.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\LPEnviroment\Textures\license.txt" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\FogPlaneCS.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
+    <None Include="Assets\LPEnviroment\README.txt" />
     <None Include="Assets\TextMesh Pro\Examples &amp; Extras\Fonts\Bangers - OFL.txt" />
   </ItemGroup>
   <ItemGroup>

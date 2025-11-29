@@ -1,5 +1,6 @@
 using UnityEngine;
 using RTS.Core.Events;
+using RTS.Buildings;
 
 namespace RTS.Core.Conditions
 {
@@ -48,7 +49,7 @@ namespace RTS.Core.Conditions
         private void FindStronghold()
         {
             // Try to find stronghold by name
-            var buildings = GameObject.FindObjectsOfType<Building>();
+            var buildings = FindAnyObjectByType<Building>();
             foreach (var building in buildings)
             {
                 if (building.BuildingData != null &&
