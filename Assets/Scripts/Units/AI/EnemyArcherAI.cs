@@ -112,7 +112,7 @@ namespace RTS.Units.AI
                 Vector3 retreatPosition = transform.position + directionAway * 5f;
 
                 Movement.SetSpeed(retreatSpeed);
-                Movement.MoveTo(retreatPosition);
+                Movement.SetDestination(retreatPosition);
             }
             // If enemy is too far, move closer
             else if (distance > preferredDistance * 1.5f)
