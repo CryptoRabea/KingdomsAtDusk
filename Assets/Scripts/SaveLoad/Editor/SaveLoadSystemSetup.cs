@@ -59,7 +59,8 @@ namespace RTS.SaveLoad.Editor
 
             if (GUILayout.Button("2. Create Save/Load UI Only"))
             {
-                CreateSaveLoadUI();
+                var itemPrefab = CreateSaveListItemPrefab();
+                CreateSaveLoadUI(itemPrefab);
             }
 
             if (GUILayout.Button("3. Create SaveLoadSystem GameObject Only"))
@@ -100,11 +101,13 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Creating settings...", 0.2f);
                 var settings = CreateSaveLoadSettings();
 
-                EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Creating UI...", 0.4f);
-                var menu = CreateSaveLoadUI();
+                EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Creating prefab...", 0.3f);
                 var itemPrefab = CreateSaveListItemPrefab();
 
-                EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Creating system GameObject...", 0.6f);
+                EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Creating UI...", 0.5f);
+                var menu = CreateSaveLoadUI(itemPrefab);
+
+                EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Creating system GameObject...", 0.7f);
                 var systemObj = CreateSaveLoadSystemObject();
 
                 EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Wiring references...", 0.8f);
@@ -113,11 +116,20 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Integrating with GameManager...", 0.9f);
                 IntegrateWithGameManager(systemObj);
 
+                EditorUtility.DisplayProgressBar("Setting Up Save/Load", "Marking scene dirty...", 0.95f);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                    UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene()
+                );
+
                 EditorUtility.ClearProgressBar();
 
                 EditorUtility.DisplayDialog(
                     "Setup Complete!",
                     "Save/Load system has been fully configured!\n\n" +
+                    "✓ SaveLoadSettings created\n" +
+                    "✓ UI Menu created (hidden by default)\n" +
+                    "✓ SaveListItem prefab created\n" +
+                    "✓ All references wired\n\n" +
                     "Press Play and use:\n" +
                     "F5 - Quick Save\n" +
                     "F9 - Quick Load\n" +
@@ -126,6 +138,7 @@ namespace RTS.SaveLoad.Editor
                 );
 
                 Debug.Log("✅ Save/Load system setup complete!");
+                Selection.activeGameObject = systemObj;
             }
             catch (System.Exception e)
             {
@@ -200,7 +213,7 @@ namespace RTS.SaveLoad.Editor
 
         #region UI Creation
 
-        private SaveLoadMenu CreateSaveLoadUI()
+        private SaveLoadMenu CreateSaveLoadUI(GameObject itemPrefab)
         {
             // Find or create Canvas
             Canvas canvas = FindObjectOfType<Canvas>();
@@ -234,6 +247,7 @@ namespace RTS.SaveLoad.Editor
             var contentRect = contentPanel.AddComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0.5f, 0.5f);
             contentRect.anchorMax = new Vector2(0.5f, 0.5f);
+            contentRect.pivot = new Vector2(0.5f, 0.5f);
             contentRect.sizeDelta = new Vector2(600, 700);
             contentRect.anchoredPosition = Vector2.zero;
 
@@ -267,20 +281,27 @@ namespace RTS.SaveLoad.Editor
             // Add SaveLoadMenu component
             var saveLoadMenu = menuPanel.AddComponent<SaveLoadMenu>();
 
-            // Wire UI references to menu component
-            SetPrivateField(saveLoadMenu, "menuPanel", menuPanel);
-            SetPrivateField(saveLoadMenu, "saveNameInput", inputField);
-            SetPrivateField(saveLoadMenu, "saveButton", buttonPanel.transform.Find("SaveButton").GetComponent<Button>());
-            SetPrivateField(saveLoadMenu, "loadButton", buttonPanel.transform.Find("LoadButton").GetComponent<Button>());
-            SetPrivateField(saveLoadMenu, "deleteButton", buttonPanel.transform.Find("DeleteButton").GetComponent<Button>());
-            SetPrivateField(saveLoadMenu, "closeButton", closeButton);
-            SetPrivateField(saveLoadMenu, "saveListContent", scrollView.transform.Find("Viewport/Content"));
-            SetPrivateField(saveLoadMenu, "pauseGameWhenOpen", true);
+            // Wire UI references to menu component using SerializedObject for proper serialization
+            var serializedMenu = new SerializedObject(saveLoadMenu);
+
+            serializedMenu.FindProperty("menuPanel").objectReferenceValue = menuPanel;
+            serializedMenu.FindProperty("saveNameInput").objectReferenceValue = inputField;
+            serializedMenu.FindProperty("saveButton").objectReferenceValue = buttonPanel.transform.Find("SaveButton").GetComponent<Button>();
+            serializedMenu.FindProperty("loadButton").objectReferenceValue = buttonPanel.transform.Find("LoadButton").GetComponent<Button>();
+            serializedMenu.FindProperty("deleteButton").objectReferenceValue = buttonPanel.transform.Find("DeleteButton").GetComponent<Button>();
+            serializedMenu.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedMenu.FindProperty("saveListContent").objectReferenceValue = scrollView.transform.Find("Viewport/Content");
+            serializedMenu.FindProperty("saveListItemPrefab").objectReferenceValue = itemPrefab;
+            serializedMenu.FindProperty("pauseGameWhenOpen").boolValue = true;
+
+            serializedMenu.ApplyModifiedProperties();
+
+            EditorUtility.SetDirty(saveLoadMenu);
 
             // Initially hide the menu
             menuPanel.SetActive(false);
 
-            Debug.Log("✅ Created Save/Load UI");
+            Debug.Log("✅ Created Save/Load UI with all references wired");
             return saveLoadMenu;
         }
 
@@ -579,18 +600,22 @@ namespace RTS.SaveLoad.Editor
             // Add SaveListItem component
             var saveListItem = itemObj.AddComponent<SaveListItem>();
 
-            // Wire references
-            SetPrivateField(saveListItem, "saveNameText", itemObj.transform.Find("Content/SaveNameText").GetComponent<TextMeshProUGUI>());
-            SetPrivateField(saveListItem, "saveDateText", itemObj.transform.Find("Content/InfoPanel/SaveDateText").GetComponent<TextMeshProUGUI>());
-            SetPrivateField(saveListItem, "playTimeText", itemObj.transform.Find("Content/InfoPanel/PlayTimeText").GetComponent<TextMeshProUGUI>());
-            SetPrivateField(saveListItem, "backgroundImage", bgImage);
-            SetPrivateField(saveListItem, "selectButton", selectButton);
+            // Wire references using SerializedObject
+            var serializedItem = new SerializedObject(saveListItem);
+
+            serializedItem.FindProperty("saveNameText").objectReferenceValue = itemObj.transform.Find("Content/SaveNameText").GetComponent<TextMeshProUGUI>();
+            serializedItem.FindProperty("saveDateText").objectReferenceValue = itemObj.transform.Find("Content/InfoPanel/SaveDateText").GetComponent<TextMeshProUGUI>();
+            serializedItem.FindProperty("playTimeText").objectReferenceValue = itemObj.transform.Find("Content/InfoPanel/PlayTimeText").GetComponent<TextMeshProUGUI>();
+            serializedItem.FindProperty("backgroundImage").objectReferenceValue = bgImage;
+            serializedItem.FindProperty("selectButton").objectReferenceValue = selectButton;
 
             // Set colors
-            SetPrivateField(saveListItem, "normalColor", new Color(0.3f, 0.3f, 0.3f, 1f));
-            SetPrivateField(saveListItem, "selectedColor", new Color(0.2f, 0.6f, 0.2f, 1f));
-            SetPrivateField(saveListItem, "autoSaveColor", new Color(0.5f, 0.4f, 0.2f, 1f));
-            SetPrivateField(saveListItem, "quickSaveColor", new Color(0.2f, 0.4f, 0.6f, 1f));
+            serializedItem.FindProperty("normalColor").colorValue = new Color(0.3f, 0.3f, 0.3f, 1f);
+            serializedItem.FindProperty("selectedColor").colorValue = new Color(0.2f, 0.6f, 0.2f, 1f);
+            serializedItem.FindProperty("autoSaveColor").colorValue = new Color(0.5f, 0.4f, 0.2f, 1f);
+            serializedItem.FindProperty("quickSaveColor").colorValue = new Color(0.2f, 0.4f, 0.6f, 1f);
+
+            serializedItem.ApplyModifiedProperties();
 
             // Save as prefab
             PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);
@@ -644,36 +669,59 @@ namespace RTS.SaveLoad.Editor
 
         private void WireReferences(GameObject systemObj, SaveLoadSettings settings, SaveLoadMenu menu, GameObject itemPrefab)
         {
-            // Wire SaveLoadManager
+            // Wire SaveLoadManager using SerializedObject
             var manager = systemObj.GetComponent<SaveLoadManager>();
             if (manager != null)
             {
-                SetPrivateField(manager, "settings", settings);
-                SetPrivateField(manager, "mainCamera", Camera.main);
+                var serializedManager = new SerializedObject(manager);
+                serializedManager.FindProperty("settings").objectReferenceValue = settings;
+                serializedManager.FindProperty("mainCamera").objectReferenceValue = Camera.main;
+                serializedManager.ApplyModifiedProperties();
+                EditorUtility.SetDirty(manager);
+                Debug.Log("✓ Wired SaveLoadManager");
             }
 
-            // Wire AutoSaveSystem
+            // Wire AutoSaveSystem using SerializedObject
             var autoSave = systemObj.GetComponent<AutoSaveSystem>();
             if (autoSave != null)
             {
-                SetPrivateField(autoSave, "settings", settings);
+                var serializedAutoSave = new SerializedObject(autoSave);
+                serializedAutoSave.FindProperty("settings").objectReferenceValue = settings;
+                serializedAutoSave.ApplyModifiedProperties();
+                EditorUtility.SetDirty(autoSave);
+                Debug.Log("✓ Wired AutoSaveSystem");
             }
 
-            // Wire SaveLoadInputHandler
+            // Wire SaveLoadInputHandler using SerializedObject
             var inputHandler = systemObj.GetComponent<SaveLoadInputHandler>();
             if (inputHandler != null)
             {
-                SetPrivateField(inputHandler, "saveLoadMenu", menu);
+                var serializedInputHandler = new SerializedObject(inputHandler);
+                serializedInputHandler.FindProperty("saveLoadMenu").objectReferenceValue = menu;
+                serializedInputHandler.ApplyModifiedProperties();
+                EditorUtility.SetDirty(inputHandler);
+                Debug.Log("✓ Wired SaveLoadInputHandler");
             }
 
-            // Wire SaveLoadMenu
-            if (menu != null)
+            // Double-check SaveLoadMenu has prefab (should already be set in CreateSaveLoadUI)
+            if (menu != null && itemPrefab != null)
             {
-                SetPrivateField(menu, "saveListItemPrefab", itemPrefab);
+                var serializedMenu = new SerializedObject(menu);
+                var prefabProperty = serializedMenu.FindProperty("saveListItemPrefab");
+
+                if (prefabProperty.objectReferenceValue == null)
+                {
+                    Debug.LogWarning("SaveListItemPrefab was null, assigning now...");
+                    prefabProperty.objectReferenceValue = itemPrefab;
+                    serializedMenu.ApplyModifiedProperties();
+                }
+
+                EditorUtility.SetDirty(menu);
+                Debug.Log("✓ Verified SaveLoadMenu prefab reference");
             }
 
             EditorUtility.SetDirty(systemObj);
-            Debug.Log("✅ Wired all references");
+            Debug.Log("✅ All references wired successfully");
         }
 
         private void AutoWireReferences()
@@ -722,7 +770,9 @@ namespace RTS.SaveLoad.Editor
             var manager = systemObj.GetComponent<SaveLoadManager>();
             if (manager != null)
             {
-                SetPrivateField(gameManager, "saveLoadManager", manager);
+                var serializedGameManager = new SerializedObject(gameManager);
+                serializedGameManager.FindProperty("saveLoadManager").objectReferenceValue = manager;
+                serializedGameManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(gameManager.gameObject);
                 Debug.Log("✅ Integrated with GameManager");
             }
