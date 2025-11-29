@@ -54,7 +54,7 @@ namespace RTS.Core.Conditions
         private void FindStronghold()
         {
             // Try to find stronghold by name
-            var buildings = FindAnyObjectByType<Building>(FindObjectsSortMode.None);
+            var buildings = FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (var building in buildings)
             {
                 if (building.BuildingData != null &&
