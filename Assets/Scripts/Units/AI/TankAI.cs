@@ -93,6 +93,10 @@ namespace RTS.Units.AI
 
         private void OnDestroy()
         {
+            // Critical: Cancel any pending Invoke callbacks to prevent memory leaks
+            CancelInvoke();
+
+            // Clean up taunted units
             ReleaseTaunt();
         }
     }

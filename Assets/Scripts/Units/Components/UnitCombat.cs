@@ -193,6 +193,13 @@ namespace RTS.Units
 
         #region Callbacks
 
+        private void OnDestroy()
+        {
+            // Critical: Clear target references to prevent memory leaks
+            ClearTarget();
+            canAttack = false;
+        }
+
       /*  private void OnUnitDied()
         {
             // Disable combat when unit dies

@@ -331,6 +331,20 @@ namespace RTS.Units
 
         #region Callbacks
 
+        private void OnDestroy()
+        {
+            // Critical: Clean up NavMeshAgent and references to prevent memory leaks
+            if (agent != null && agent.enabled)
+            {
+                agent.isStopped = true;
+                agent.ResetPath();
+            }
+
+            currentTarget = null;
+            hasDestination = false;
+            hasMovementIntent = false;
+        }
+
         private void OnUnitDied()
         {
             // Disable movement when unit dies

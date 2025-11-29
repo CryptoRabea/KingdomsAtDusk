@@ -417,6 +417,15 @@ namespace RTS.Units.Animation
 
         #region Callbacks
 
+        private void OnDestroy()
+        {
+            // Critical: Stop all coroutines to prevent memory leaks
+            StopAllCoroutines();
+
+            // Critical: Ensure events are unsubscribed even if OnDisable wasn't called
+            UnsubscribeFromEvents();
+        }
+
       /*  private void OnUnitDied()
         {
             TriggerDeath();
