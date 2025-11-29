@@ -48,7 +48,9 @@ namespace RTS.FogOfWar
         [Tooltip("Only units/buildings on these layers will reveal fog")]
 
         [Header("Debug")]
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future debug display feature
         [SerializeField] private bool showRevealerCount = false;
+        #pragma warning restore CS0414
 
         // Track active revealers
         private Dictionary<GameObject, int> activeRevealers = new Dictionary<GameObject, int>();

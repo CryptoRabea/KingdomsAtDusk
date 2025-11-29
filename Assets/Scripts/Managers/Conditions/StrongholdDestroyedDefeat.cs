@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using RTS.Core.Events;
 using RTS.Buildings;
@@ -14,7 +15,7 @@ namespace RTS.Core.Conditions
         [SerializeField] private string strongholdBuildingName = "Stronghold";
 
         private bool strongholdDestroyed = false;
-        private EventBus.EventSubscription<BuildingDestroyedEvent> buildingDestroyedSubscription;
+        private Action<BuildingDestroyedEvent> buildingDestroyedHandler;
 
         public override bool IsFailed => strongholdDestroyed;
 
@@ -28,12 +29,16 @@ namespace RTS.Core.Conditions
                 FindStronghold();
             }
 
-            buildingDestroyedSubscription = EventBus.Subscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
+            buildingDestroyedHandler = OnBuildingDestroyed;
+            EventBus.Subscribe(buildingDestroyedHandler);
         }
 
         public override void Cleanup()
         {
-            EventBus.Unsubscribe(buildingDestroyedSubscription);
+            if (buildingDestroyedHandler != null)
+            {
+                EventBus.Unsubscribe(buildingDestroyedHandler);
+            }
         }
 
         public override string GetStatusText()
@@ -49,7 +54,7 @@ namespace RTS.Core.Conditions
         private void FindStronghold()
         {
             // Try to find stronghold by name
-            var buildings = FindAnyObjectByType<Building>();
+            var buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
             foreach (var building in buildings)
             {
                 if (building.BuildingData != null &&

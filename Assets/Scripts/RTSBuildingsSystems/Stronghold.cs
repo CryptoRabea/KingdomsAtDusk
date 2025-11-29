@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using RTS.Core.Events;
 
@@ -14,8 +15,12 @@ namespace RTS.Buildings
     {
         [Header("Stronghold Settings")]
         [SerializeField] private float visionRange = 30f;
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future housing system
         [SerializeField] private int housingBonus = 20;
+        #pragma warning restore CS0414
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future happiness system
         [SerializeField] private float happinessBonus = 10f;
+        #pragma warning restore CS0414
 
         [Header("Rally Point")]
         [SerializeField] private Transform rallyPoint;
@@ -23,7 +28,7 @@ namespace RTS.Buildings
 
         private Building building;
         private BuildingHealth health;
-        private EventBus.EventSubscription<BuildingDamagedEvent> damageSubscription;
+        private Action<BuildingDamagedEvent> damageHandler;
 
         private void Awake()
         {
@@ -34,7 +39,8 @@ namespace RTS.Buildings
         private void Start()
         {
             // Listen for damage events to this stronghold
-            damageSubscription = EventBus.Subscribe<BuildingDamagedEvent>(OnBuildingDamaged);
+            damageHandler = OnBuildingDamaged;
+            EventBus.Subscribe(damageHandler);
 
             // Show rally point marker if available
             if (rallyPointMarker != null)
@@ -102,7 +108,10 @@ namespace RTS.Buildings
 
         private void OnDestroy()
         {
-            EventBus.Unsubscribe(damageSubscription);
+            if (damageHandler != null)
+            {
+                EventBus.Unsubscribe(damageHandler);
+            }
         }
     }
 }
