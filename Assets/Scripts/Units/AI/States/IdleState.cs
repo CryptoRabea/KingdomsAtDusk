@@ -13,25 +13,31 @@ namespace RTS.Units.AI
 
         public override void OnEnter()
         {
-            controller.Movement?.Stop();
+            // Don't stop if we're on a forced move (formation change)
+            if (!controller.IsOnForcedMove)
+            {
+                controller.Movement?.Stop();
+            }
             scanTimer = 0f;
         }
 
         public override void OnUpdate()
         {
-            // Check if unit should be moving (formation change, forced move, etc.)
-            if (controller.Movement != null && controller.Movement.IsMoving)
+            // Check if we're on a forced move and still moving
+            if (controller.IsOnForcedMove)
             {
-                // Unit is moving, transition to MovingState
-                controller.ChangeState(new MovingState(controller));
-                return;
-            }
-
-            // Clear forced move flag if we've reached the destination
-            if (controller.IsOnForcedMove && controller.HasReachedForcedMoveDestination())
-            {
-                // Reached destination, resume normal aggro behavior immediately
-                controller.SetForcedMove(false);
+                // Check if we've reached the destination
+                if (controller.HasReachedForcedMoveDestination() ||
+                    (controller.Movement != null && controller.Movement.HasReachedDestination))
+                {
+                    // Reached destination, clear forced move and resume normal behavior
+                    controller.SetForcedMove(false);
+                }
+                else
+                {
+                    // Still moving to forced destination, stay in idle (don't auto-aggro)
+                    return;
+                }
             }
 
             scanTimer += Time.deltaTime;
@@ -40,7 +46,7 @@ namespace RTS.Units.AI
             {
                 scanTimer = 0f;
 
-                // Don't auto-target if player has issued a forced move command
+                // Only scan for targets if not on a forced move
                 if (!controller.IsOnForcedMove)
                 {
                     Transform target = controller.FindTarget();
