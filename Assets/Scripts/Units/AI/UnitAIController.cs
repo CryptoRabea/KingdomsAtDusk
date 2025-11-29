@@ -34,6 +34,9 @@ namespace RTS.Units.AI
         private Vector3? forcedMoveDestination = null;
         private const float DESTINATION_REACHED_DISTANCE = 3f; // Distance to consider destination reached
 
+        // Cached array for Physics.OverlapSphereNonAlloc to prevent garbage allocation
+        private Collider[] cachedHits = new Collider[32]; // Reusable buffer
+
         // Public accessors
         public UnitHealth Health => healthComponent;
         public UnitMovement Movement => movementComponent;
@@ -206,32 +209,35 @@ namespace RTS.Units.AI
         {
             if (config == null || aiSettings == null) return null;
 
-            Collider[] hits = Physics.OverlapSphere(
+            // Use NonAlloc version to prevent garbage allocation
+            int hitCount = Physics.OverlapSphereNonAlloc(
                 transform.position,
                 config.detectionRange,
+                cachedHits,
                 aiSettings.enemyLayer
             );
 
-            if (hits.Length == 0) return null;
+            if (hitCount == 0) return null;
 
             // Different target selection based on behavior type
             return behaviorType switch
             {
-                AIBehaviorType.Aggressive => FindNearestTarget(hits),
-                AIBehaviorType.Defensive => FindWeakestTarget(hits),
-                AIBehaviorType.Support => FindAllyToHeal(hits),
-                _ => FindNearestTarget(hits)
+                AIBehaviorType.Aggressive => FindNearestTarget(cachedHits, hitCount),
+                AIBehaviorType.Defensive => FindWeakestTarget(cachedHits, hitCount),
+                AIBehaviorType.Support => FindAllyToHeal(cachedHits, hitCount),
+                _ => FindNearestTarget(cachedHits, hitCount)
             };
         }
 
-        private Transform FindNearestTarget(Collider[] hits)
+        private Transform FindNearestTarget(Collider[] hits, int hitCount)
         {
             Transform nearest = null;
             float minDistance = float.MaxValue;
 
-            foreach (var hit in hits)
+            for (int i = 0; i < hitCount; i++)
             {
-                if (hit.gameObject == gameObject) continue;
+                var hit = hits[i];
+                if (hit == null || hit.gameObject == gameObject) continue;
 
                 var health = hit.GetComponent<UnitHealth>();
                 if (health != null && health.IsDead) continue;
@@ -247,14 +253,15 @@ namespace RTS.Units.AI
             return nearest;
         }
 
-        private Transform FindWeakestTarget(Collider[] hits)
+        private Transform FindWeakestTarget(Collider[] hits, int hitCount)
         {
             Transform weakest = null;
             float lowestHealth = float.MaxValue;
 
-            foreach (var hit in hits)
+            for (int i = 0; i < hitCount; i++)
             {
-                if (hit.gameObject == gameObject) continue;
+                var hit = hits[i];
+                if (hit == null || hit.gameObject == gameObject) continue;
 
                 var health = hit.GetComponent<UnitHealth>();
                 if (health == null || health.IsDead) continue;
@@ -266,24 +273,26 @@ namespace RTS.Units.AI
                 }
             }
 
-            return weakest ?? FindNearestTarget(hits);
+            return weakest ?? FindNearestTarget(hits, hitCount);
         }
 
-        private Transform FindAllyToHeal(Collider[] hits)
+        private Transform FindAllyToHeal(Collider[] hits, int hitCount)
         {
-            // For healers, look for injured allies
-            Collider[] allies = Physics.OverlapSphere(
+            // For healers, look for injured allies using NonAlloc to prevent garbage
+            int allyCount = Physics.OverlapSphereNonAlloc(
                 transform.position,
                 config.detectionRange,
+                cachedHits,
                 aiSettings.allyLayer
             );
 
             Transform mostInjured = null;
             float lowestHealthPercent = 1f;
 
-            foreach (var ally in allies)
+            for (int i = 0; i < allyCount; i++)
             {
-                if (ally.gameObject == gameObject) continue;
+                var ally = cachedHits[i];
+                if (ally == null || ally.gameObject == gameObject) continue;
 
                 var health = ally.GetComponent<UnitHealth>();
                 if (health == null || health.IsDead) continue;
