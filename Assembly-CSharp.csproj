@@ -1514,6 +1514,14 @@
       <Project>{0E8B82CC-CBD9-3E6E-E288-37F3DA37C449}</Project>
       <Name>BigRookGames</Name>
     </ProjectReference>
+    <ProjectReference Include="KrisDevelopment.EnviroSpawn.Editor.csproj">
+      <Project>{95620C31-67E4-4FB3-3F20-305EA370CDE3}</Project>
+      <Name>KrisDevelopment.EnviroSpawn.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="KrisDevelopment.EnviroSpawn.csproj">
+      <Project>{5B316142-2DAA-5BA4-41FE-14A25CBBD6C6}</Project>
+      <Name>KrisDevelopment.EnviroSpawn</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
