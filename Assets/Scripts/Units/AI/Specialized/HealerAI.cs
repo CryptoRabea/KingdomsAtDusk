@@ -11,32 +11,35 @@ public class HealerAI : UnitAIController
     [SerializeField] private float dangerAvoidanceRange = 5f;
 
     private float nextHealTime;
+    private Collider[] cachedAllyHits = new Collider[16]; // Cached for ally detection
+    private Collider[] cachedEnemyHits = new Collider[8]; // Cached for enemy avoidance
 
     public override Transform FindTarget()
     {
-        // Healers look for injured allies
+        // Healers look for injured allies using NonAlloc to prevent garbage
         if (Config == null || AISettings == null) return null;
 
-        Collider[] allies = Physics.OverlapSphere(
+        int allyCount = Physics.OverlapSphereNonAlloc(
             transform.position,
             Config.detectionRange,
+            cachedAllyHits,
             AISettings.allyLayer
         );
 
-        if (allies.Length == 0) return null;
+        if (allyCount == 0) return null;
 
-        return FindMostInjuredAlly(allies);
+        return FindMostInjuredAlly(cachedAllyHits, allyCount);
     }
 
-    private Transform FindMostInjuredAlly(Collider[] allies)
+    private Transform FindMostInjuredAlly(Collider[] allies, int count)
     {
         Transform mostInjured = null;
         float lowestHealthPercent = 1f;
 
-        foreach (var ally in allies)
+        for (int i = 0; i < count; i++)
         {
-            // Skip self
-            if (ally.gameObject == gameObject) continue;
+            var ally = allies[i];
+            if (ally == null || ally.gameObject == gameObject) continue;
 
             var health = ally.GetComponent<UnitHealth>();
             if (health == null || health.IsDead) continue;
@@ -90,19 +93,21 @@ public class HealerAI : UnitAIController
     {
         if (Config == null || AISettings == null) return;
 
-        // Check for nearby enemies
-        Collider[] enemies = Physics.OverlapSphere(
+        // Use NonAlloc to prevent garbage allocation (runs every frame!)
+        int enemyCount = Physics.OverlapSphereNonAlloc(
             transform.position,
             dangerAvoidanceRange,
+            cachedEnemyHits,
             AISettings.enemyLayer
         );
 
-        if (enemies.Length > 0)
+        if (enemyCount > 0)
         {
             // Find safest direction (away from enemies)
             Vector3 avoidanceDirection = Vector3.zero;
-            foreach (var enemy in enemies)
+            for (int i = 0; i < enemyCount; i++)
             {
+                var enemy = cachedEnemyHits[i];
                 if (enemy != null)
                 {
                     avoidanceDirection += (transform.position - enemy.transform.position).normalized;

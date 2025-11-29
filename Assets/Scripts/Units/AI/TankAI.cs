@@ -17,6 +17,7 @@ namespace RTS.Units.AI
 
         private float tauntTimer = 0f;
         private HashSet<UnitAIController> tauntedUnits = new HashSet<UnitAIController>();
+        private Collider[] tauntHits = new Collider[16]; // Cached array for Physics queries
 
         protected override void Update()
         {
@@ -47,12 +48,15 @@ namespace RTS.Units.AI
 
         private void PerformTaunt()
         {
-            // Find all player units in range
-            Collider[] hits = Physics.OverlapSphere(transform.position, tauntRadius, playerUnitsLayer);
+            // Use NonAlloc to prevent garbage allocation
+            int hitCount = Physics.OverlapSphereNonAlloc(transform.position, tauntRadius, tauntHits, playerUnitsLayer);
 
             tauntedUnits.Clear();
-            foreach (var hit in hits)
+            for (int i = 0; i < hitCount; i++)
             {
+                var hit = tauntHits[i];
+                if (hit == null) continue;
+
                 var enemyAI = hit.GetComponent<UnitAIController>();
                 if (enemyAI != null && enemyAI.Health != null && !enemyAI.Health.IsDead)
                 {

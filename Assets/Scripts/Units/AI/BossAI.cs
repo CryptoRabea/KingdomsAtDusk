@@ -36,6 +36,7 @@ namespace RTS.Units.AI
         private float originalDamage;
         private float originalAttackRate;
         private IPoolService poolService;
+        private Collider[] areaAttackHits = new Collider[32]; // Cached for area attack
 
         private void Start()
         {
@@ -172,12 +173,15 @@ namespace RTS.Units.AI
 
         private void PerformAreaAttack()
         {
-            // Find all player units in radius
-            Collider[] hits = Physics.OverlapSphere(transform.position, areaAttackRadius, playerUnitsLayer);
+            // Use NonAlloc to prevent garbage allocation
+            int count = Physics.OverlapSphereNonAlloc(transform.position, areaAttackRadius, areaAttackHits, playerUnitsLayer);
 
             int hitCount = 0;
-            foreach (var hit in hits)
+            for (int i = 0; i < count; i++)
             {
+                var hit = areaAttackHits[i];
+                if (hit == null) continue;
+
                 var health = hit.GetComponent<UnitHealth>();
                 if (health != null && !health.IsDead)
                 {
