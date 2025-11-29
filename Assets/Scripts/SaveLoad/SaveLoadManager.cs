@@ -18,10 +18,10 @@ namespace RTS.SaveLoad
     public class SaveLoadManager : MonoBehaviour, ISaveLoadService
     {
         [Header("Settings")]
-        [SerializeField] private SaveLoadSettings settings;
+        [SerializeField] internal SaveLoadSettings settings;
 
         [Header("References")]
-        [SerializeField] private Camera mainCamera;
+        [SerializeField] internal Camera mainCamera;
 
         // Runtime state
         private float playTime = 0f;
