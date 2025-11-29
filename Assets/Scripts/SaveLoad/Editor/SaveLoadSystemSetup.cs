@@ -222,8 +222,8 @@ namespace RTS.SaveLoad.Editor
                 canvas = CreateCanvas();
             }
 
-            // Create menu panel
-            GameObject menuPanel = new GameObject("SaveLoadMenuPanel");
+            // Create menu panel with RectTransform
+            GameObject menuPanel = new GameObject("SaveLoadMenuPanel", typeof(RectTransform));
             menuPanel.transform.SetParent(canvas.transform, false);
 
             // Add CanvasGroup for fading
@@ -241,10 +241,10 @@ namespace RTS.SaveLoad.Editor
             bgImage.color = new Color(0, 0, 0, 0.8f);
 
             // Create content panel (centered, fixed size)
-            GameObject contentPanel = new GameObject("ContentPanel");
+            GameObject contentPanel = new GameObject("ContentPanel", typeof(RectTransform));
             contentPanel.transform.SetParent(menuPanel.transform, false);
 
-            var contentRect = contentPanel.AddComponent<RectTransform>();
+            var contentRect = contentPanel.GetComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0.5f, 0.5f);
             contentRect.anchorMax = new Vector2(0.5f, 0.5f);
             contentRect.pivot = new Vector2(0.5f, 0.5f);
@@ -319,10 +319,10 @@ namespace RTS.SaveLoad.Editor
 
         private void CreateTitle(GameObject parent, string text)
         {
-            GameObject titleObj = new GameObject("Title");
+            GameObject titleObj = new GameObject("Title", typeof(RectTransform));
             titleObj.transform.SetParent(parent.transform, false);
 
-            var titleRect = titleObj.AddComponent<RectTransform>();
+            var titleRect = titleObj.GetComponent<RectTransform>();
             titleRect.sizeDelta = new Vector2(0, 60);
 
             var titleText = titleObj.AddComponent<TextMeshProUGUI>();
@@ -338,10 +338,10 @@ namespace RTS.SaveLoad.Editor
 
         private TMP_InputField CreateSaveNameInput(GameObject parent)
         {
-            GameObject inputObj = new GameObject("SaveNameInputField");
+            GameObject inputObj = new GameObject("SaveNameInputField", typeof(RectTransform));
             inputObj.transform.SetParent(parent.transform, false);
 
-            var inputRect = inputObj.AddComponent<RectTransform>();
+            var inputRect = inputObj.GetComponent<RectTransform>();
             inputRect.sizeDelta = new Vector2(0, 50);
 
             var inputImage = inputObj.AddComponent<Image>();
@@ -351,9 +351,9 @@ namespace RTS.SaveLoad.Editor
             inputField.textViewport = inputRect;
 
             // Create text component
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("Text", typeof(RectTransform));
             textObj.transform.SetParent(inputObj.transform, false);
-            var textRect = textObj.AddComponent<RectTransform>();
+            var textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.offsetMin = new Vector2(10, 0);
@@ -364,9 +364,9 @@ namespace RTS.SaveLoad.Editor
             text.color = Color.white;
 
             // Create placeholder
-            GameObject placeholderObj = new GameObject("Placeholder");
+            GameObject placeholderObj = new GameObject("Placeholder", typeof(RectTransform));
             placeholderObj.transform.SetParent(inputObj.transform, false);
-            var placeholderRect = placeholderObj.AddComponent<RectTransform>();
+            var placeholderRect = placeholderObj.GetComponent<RectTransform>();
             placeholderRect.anchorMin = Vector2.zero;
             placeholderRect.anchorMax = Vector2.one;
             placeholderRect.offsetMin = new Vector2(10, 0);
@@ -389,10 +389,10 @@ namespace RTS.SaveLoad.Editor
 
         private GameObject CreateActionButtons(GameObject parent)
         {
-            GameObject buttonPanel = new GameObject("ActionButtons");
+            GameObject buttonPanel = new GameObject("ActionButtons", typeof(RectTransform));
             buttonPanel.transform.SetParent(parent.transform, false);
 
-            var panelRect = buttonPanel.AddComponent<RectTransform>();
+            var panelRect = buttonPanel.GetComponent<RectTransform>();
             panelRect.sizeDelta = new Vector2(0, 50);
 
             var horizontalLayout = buttonPanel.AddComponent<HorizontalLayoutGroup>();
@@ -415,7 +415,7 @@ namespace RTS.SaveLoad.Editor
 
         private Button CreateButton(GameObject parent, string name, string text, Color color)
         {
-            GameObject buttonObj = new GameObject(name);
+            GameObject buttonObj = new GameObject(name, typeof(RectTransform));
             buttonObj.transform.SetParent(parent.transform, false);
 
             var buttonImage = buttonObj.AddComponent<Image>();
@@ -425,10 +425,10 @@ namespace RTS.SaveLoad.Editor
             button.targetGraphic = buttonImage;
 
             // Create button text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("Text", typeof(RectTransform));
             textObj.transform.SetParent(buttonObj.transform, false);
 
-            var textRect = textObj.AddComponent<RectTransform>();
+            var textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.sizeDelta = Vector2.zero;
@@ -445,10 +445,10 @@ namespace RTS.SaveLoad.Editor
 
         private GameObject CreateSaveList(GameObject parent)
         {
-            GameObject scrollViewObj = new GameObject("SaveListScrollView");
+            GameObject scrollViewObj = new GameObject("SaveListScrollView", typeof(RectTransform));
             scrollViewObj.transform.SetParent(parent.transform, false);
 
-            var scrollRect = scrollViewObj.AddComponent<RectTransform>();
+            var scrollRect = scrollViewObj.GetComponent<RectTransform>();
             scrollRect.sizeDelta = new Vector2(0, 400);
 
             var scrollViewImage = scrollViewObj.AddComponent<Image>();
@@ -461,10 +461,10 @@ namespace RTS.SaveLoad.Editor
             layoutElement.minHeight = 200;
 
             // Create viewport
-            GameObject viewportObj = new GameObject("Viewport");
+            GameObject viewportObj = new GameObject("Viewport", typeof(RectTransform));
             viewportObj.transform.SetParent(scrollViewObj.transform, false);
 
-            var viewportRect = viewportObj.AddComponent<RectTransform>();
+            var viewportRect = viewportObj.GetComponent<RectTransform>();
             viewportRect.anchorMin = Vector2.zero;
             viewportRect.anchorMax = Vector2.one;
             viewportRect.sizeDelta = Vector2.zero;
@@ -473,10 +473,10 @@ namespace RTS.SaveLoad.Editor
             viewportObj.AddComponent<Image>();
 
             // Create content
-            GameObject contentObj = new GameObject("Content");
+            GameObject contentObj = new GameObject("Content", typeof(RectTransform));
             contentObj.transform.SetParent(viewportObj.transform, false);
 
-            var contentRect = contentObj.AddComponent<RectTransform>();
+            var contentRect = contentObj.GetComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0, 1);
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(0.5f, 1);
@@ -504,10 +504,10 @@ namespace RTS.SaveLoad.Editor
 
         private Button CreateCloseButton(GameObject parent)
         {
-            GameObject buttonObj = new GameObject("CloseButton");
+            GameObject buttonObj = new GameObject("CloseButton", typeof(RectTransform));
             buttonObj.transform.SetParent(parent.transform, false);
 
-            var buttonRect = buttonObj.AddComponent<RectTransform>();
+            var buttonRect = buttonObj.GetComponent<RectTransform>();
             buttonRect.sizeDelta = new Vector2(0, 50);
 
             var buttonImage = buttonObj.AddComponent<Image>();
@@ -520,10 +520,10 @@ namespace RTS.SaveLoad.Editor
             layoutElement.minHeight = 50;
 
             // Create button text
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new GameObject("Text", typeof(RectTransform));
             textObj.transform.SetParent(buttonObj.transform, false);
 
-            var textRect = textObj.AddComponent<RectTransform>();
+            var textRect = textObj.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.sizeDelta = Vector2.zero;
@@ -549,10 +549,10 @@ namespace RTS.SaveLoad.Editor
                 return existing;
             }
 
-            // Create item GameObject
-            GameObject itemObj = new GameObject("SaveListItem");
+            // Create item GameObject with RectTransform
+            GameObject itemObj = new GameObject("SaveListItem", typeof(RectTransform));
 
-            var itemRect = itemObj.AddComponent<RectTransform>();
+            var itemRect = itemObj.GetComponent<RectTransform>();
             itemRect.sizeDelta = new Vector2(0, 80);
 
             // Add background
@@ -569,10 +569,10 @@ namespace RTS.SaveLoad.Editor
             layoutElement.preferredHeight = 80;
 
             // Create content layout
-            GameObject contentObj = new GameObject("Content");
+            GameObject contentObj = new GameObject("Content", typeof(RectTransform));
             contentObj.transform.SetParent(itemObj.transform, false);
 
-            var contentRect = contentObj.AddComponent<RectTransform>();
+            var contentRect = contentObj.GetComponent<RectTransform>();
             contentRect.anchorMin = Vector2.zero;
             contentRect.anchorMax = Vector2.one;
             contentRect.offsetMin = new Vector2(10, 10);
@@ -585,7 +585,7 @@ namespace RTS.SaveLoad.Editor
             CreateItemText(contentObj, "SaveNameText", 20, FontStyles.Bold, TextAlignmentOptions.Left);
 
             // Create horizontal layout for date and time
-            GameObject infoPanel = new GameObject("InfoPanel");
+            GameObject infoPanel = new GameObject("InfoPanel", typeof(RectTransform));
             infoPanel.transform.SetParent(contentObj.transform, false);
 
             var infoLayout = infoPanel.AddComponent<HorizontalLayoutGroup>();
@@ -627,7 +627,7 @@ namespace RTS.SaveLoad.Editor
 
         private void CreateItemText(GameObject parent, string name, float fontSize, FontStyles style, TextAlignmentOptions alignment)
         {
-            GameObject textObj = new GameObject(name);
+            GameObject textObj = new GameObject(name, typeof(RectTransform));
             textObj.transform.SetParent(parent.transform, false);
 
             var text = textObj.AddComponent<TextMeshProUGUI>();
