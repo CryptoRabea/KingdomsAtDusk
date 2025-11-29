@@ -146,8 +146,7 @@ namespace RTS.Buildings
                 string buildingName = building.gameObject.name;
 
                 // Check BuildingSelectable
-                var selectable = building.GetComponent<BuildingSelectable>();
-                if (selectable == null)
+                if (!building.TryGetComponent<BuildingSelectable>(out var selectable))
                 {
                     Debug.LogError($"❌ {buildingName}: Missing BuildingSelectable component!");
                     Debug.LogError($"   Fix: Add BuildingSelectable component to {buildingName}");
@@ -155,8 +154,7 @@ namespace RTS.Buildings
                 }
 
                 // Check Collider
-                var collider = building.GetComponent<Collider>();
-                if (collider == null)
+                if (!building.TryGetComponent<Collider>(out var collider))
                 {
                     Debug.LogError($"❌ {buildingName}: Missing Collider component!");
                     Debug.LogError($"   Fix: Add a Collider (BoxCollider, etc.) to {buildingName}");
@@ -174,8 +172,7 @@ namespace RTS.Buildings
                 // Check UnitTrainingQueue if can train units
                 if (building.Data != null && building.Data.canTrainUnits)
                 {
-                    var trainingQueue = building.GetComponent<UnitTrainingQueue>();
-                    if (trainingQueue == null)
+                    if (!building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
                     {
                         Debug.LogError($"❌ {buildingName}: Can train units but missing UnitTrainingQueue!");
                         Debug.LogError($"   Fix: Add UnitTrainingQueue component to {buildingName}");

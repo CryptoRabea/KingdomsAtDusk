@@ -14,17 +14,17 @@ namespace RTS.SaveLoad
     public class SaveLoadMenu : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] internal GameObject menuPanel;
-        [SerializeField] internal TMP_InputField saveNameInput;
-        [SerializeField] internal Button saveButton;
-        [SerializeField] internal Button loadButton;
-        [SerializeField] internal Button deleteButton;
-        [SerializeField] internal Button closeButton;
-        [SerializeField] internal Transform saveListContent;
-        [SerializeField] internal GameObject saveListItemPrefab;
+        [SerializeField] private GameObject menuPanel;
+        [SerializeField] private TMP_InputField saveNameInput;
+        [SerializeField] private Button saveButton;
+        [SerializeField] private Button loadButton;
+        [SerializeField] private Button deleteButton;
+        [SerializeField] private Button closeButton;
+        [SerializeField] private Transform saveListContent;
+        [SerializeField] private GameObject saveListItemPrefab;
 
         [Header("Settings")]
-        [SerializeField] internal bool pauseGameWhenOpen = true;
+        [SerializeField] private bool pauseGameWhenOpen = true;
 
         private ISaveLoadService saveLoadService;
         private IGameStateService gameStateService;
@@ -260,17 +260,17 @@ namespace RTS.SaveLoad
     public class SaveListItem : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] internal TextMeshProUGUI saveNameText;
-        [SerializeField] internal TextMeshProUGUI saveDateText;
-        [SerializeField] internal TextMeshProUGUI playTimeText;
-        [SerializeField] internal Image backgroundImage;
-        [SerializeField] internal Button selectButton;
+        [SerializeField] private TextMeshProUGUI saveNameText;
+        [SerializeField] private TextMeshProUGUI saveDateText;
+        [SerializeField] private TextMeshProUGUI playTimeText;
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Button selectButton;
 
         [Header("Visual Settings")]
-        [SerializeField] internal Color normalColor = Color.white;
-        [SerializeField] internal Color selectedColor = Color.green;
-        [SerializeField] internal Color autoSaveColor = Color.yellow;
-        [SerializeField] internal Color quickSaveColor = Color.cyan;
+        [SerializeField] private Color normalColor = Color.white;
+        [SerializeField] private Color selectedColor = Color.green;
+        [SerializeField] private Color autoSaveColor = Color.yellow;
+        [SerializeField] private Color quickSaveColor = Color.cyan;
 
         private SaveFileInfo saveInfo;
         private bool isSelected = false;

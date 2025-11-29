@@ -117,8 +117,8 @@ namespace KingdomsAtDusk.UI
             // Assume base arrow points UP (0 degrees)
             cachedScrollUpCursor = baseScrollArrowCursor; // 0 degrees
             cachedScrollRightCursor = RotateTexture(baseScrollArrowCursor, 90); // 90 degrees clockwise
-            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, 180); // 180 degrees
-            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, 270); // 270 degrees clockwise
+            cachedScrollDownCursor = RotateTexture(baseScrollArrowCursor, -180); // 180 degrees
+            cachedScrollLeftCursor = RotateTexture(baseScrollArrowCursor, -90); // 270 degrees clockwise
 
             // Diagonals
             cachedScrollUpRightCursor = RotateTexture(baseScrollArrowCursor, 45); // 45 degrees

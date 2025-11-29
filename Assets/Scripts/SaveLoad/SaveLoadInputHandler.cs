@@ -12,13 +12,13 @@ namespace RTS.SaveLoad
     public class SaveLoadInputHandler : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] internal SaveLoadMenu saveLoadMenu;
+        [SerializeField] private SaveLoadMenu saveLoadMenu;
 
         [Header("Input Settings")]
-        [SerializeField] internal KeyCode quickSaveKey = KeyCode.F5;
-        [SerializeField] internal KeyCode quickLoadKey = KeyCode.F9;
-        [SerializeField] internal KeyCode toggleMenuKey = KeyCode.F10;
-        [SerializeField] internal bool allowEscapeToggle = true;
+        [SerializeField] private KeyCode quickSaveKey = KeyCode.F5;
+        [SerializeField] private KeyCode quickLoadKey = KeyCode.F9;
+        [SerializeField] private KeyCode toggleMenuKey = KeyCode.F10;
+        [SerializeField] private bool allowEscapeToggle = true;
 
         private ISaveLoadService saveLoadService;
         private IGameStateService gameStateService;
