@@ -94,5 +94,9 @@ namespace RTS.Core.Events
         {
             eventHandlers.Clear();
         }
+
+        internal class EventSubscription<T>
+        {
+        }
     }
 }
