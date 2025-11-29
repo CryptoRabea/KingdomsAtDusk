@@ -24,8 +24,10 @@ namespace RTS.UI.Minimap
         [Tooltip("Update camera continuously while dragging")]
         [SerializeField] private bool continuousDrag = true;
 
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future visual feedback feature
         [Tooltip("Visual feedback while dragging")]
         [SerializeField] private bool showDragFeedback = true;
+        #pragma warning restore CS0414
 
         [Tooltip("Cursor texture while dragging (optional)")]
         [SerializeField] private Texture2D dragCursor;

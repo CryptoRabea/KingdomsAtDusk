@@ -11,7 +11,9 @@ namespace RTS.Buildings
     public class TowerPlacementHelper : MonoBehaviour
     {
         [Header("Wall Detection")]
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future wall detection feature
         [SerializeField] private float wallDetectionRadius = 2f;
+        #pragma warning restore CS0414
         [SerializeField] private LayerMask wallLayer; // Optional: specific layer for walls
 
         [Header("Visual Feedback")]

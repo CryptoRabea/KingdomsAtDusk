@@ -20,7 +20,9 @@ namespace RTS.Units
         [Header("Avoidance Settings")]
         [SerializeField] private float avoidanceRadius = 0.5f;
         [SerializeField] private int avoidancePriority = 50;
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future separation force feature
         [SerializeField] private float separationWeight = 1.5f;
+        #pragma warning restore CS0414
 
         [Header("Stuck Detection")]
         [SerializeField] private float stuckCheckInterval = 1.0f;

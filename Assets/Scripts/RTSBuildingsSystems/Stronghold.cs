@@ -14,8 +14,12 @@ namespace RTS.Buildings
     {
         [Header("Stronghold Settings")]
         [SerializeField] private float visionRange = 30f;
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future housing system
         [SerializeField] private int housingBonus = 20;
+        #pragma warning restore CS0414
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future happiness system
         [SerializeField] private float happinessBonus = 10f;
+        #pragma warning restore CS0414
 
         [Header("Rally Point")]
         [SerializeField] private Transform rallyPoint;

@@ -13,9 +13,11 @@ namespace RTS.Units.Animation
     {
         [Header("References")]
         [SerializeField] private Animator animator;
-        
+
         [Header("Animation Settings")]
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future movement threshold feature
         [SerializeField] private float movementThreshold = 0.1f; // Min speed to trigger walk
+        #pragma warning restore CS0414
         [SerializeField] private bool useRootMotion = false;
         [SerializeField] private float animationTransitionSpeed = 0.1f;
 

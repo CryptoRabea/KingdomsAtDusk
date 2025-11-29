@@ -305,7 +305,9 @@ namespace RTS.UI
         [Header("Group Display Settings")]
         [SerializeField] private GameObject groupIndicatorPrefab; // Should have a TextMeshPro component
         [SerializeField] private Vector3 indicatorOffset = new Vector3(0, 3, 0);
+        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future group filtering feature
         [SerializeField] private bool showOnlyAssignedGroups = true;
+        #pragma warning restore CS0414
 
         // Dictionary to track which groups have which objects
         private System.Collections.Generic.Dictionary<int, GameObject> unitGroupIndicators = 
