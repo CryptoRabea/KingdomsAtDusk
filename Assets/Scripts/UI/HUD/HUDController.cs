@@ -31,13 +31,6 @@ namespace RTS.UI.HUD
         [Header("References")]
         [SerializeField] private MainHUDFramework hudFramework;
 
-        [Header("Hotkeys (Optional)")]
-        [SerializeField] private bool enableHotkeys = true;
-        [SerializeField] private KeyCode toggleInventoryKey = KeyCode.I;
-        [SerializeField] private KeyCode toggleMinimapKey = KeyCode.M;
-        [SerializeField] private KeyCode toggleTopBarKey = KeyCode.T;
-        [SerializeField] private KeyCode toggleAllUIKey = KeyCode.F1;
-
         [Header("Presets")]
         [SerializeField] private HUDConfiguration[] presetConfigurations;
         [SerializeField] private HUDLayoutPreset[] presetLayouts;
@@ -64,32 +57,6 @@ namespace RTS.UI.HUD
             if (hudFramework == null)
             {
                 Debug.LogError("HUDController: No MainHUDFramework found in scene!");
-            }
-        }
-
-        private void Update()
-        {
-            if (!enableHotkeys) return;
-
-            // Toggle hotkeys
-            if (Input.GetKeyDown(toggleInventoryKey))
-            {
-                ToggleInventory();
-            }
-
-            if (Input.GetKeyDown(toggleMinimapKey))
-            {
-                ToggleMinimap();
-            }
-
-            if (Input.GetKeyDown(toggleTopBarKey))
-            {
-                ToggleTopBar();
-            }
-
-            if (Input.GetKeyDown(toggleAllUIKey))
-            {
-                ToggleAllUI();
             }
         }
 

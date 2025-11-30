@@ -1,27 +1,29 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using RTS.Core.Services;
 
 namespace RTS.SaveLoad
 {
     /// <summary>
-    /// Handles keyboard input for save/load operations.
+    /// Handles keyboard input for save/load operations using the new Input System.
     /// F5 - Quick Save
     /// F9 - Quick Load
-    /// F10/ESC - Toggle Save/Load Menu
+    /// F10 - Toggle In-Game Menu
     /// </summary>
     public class SaveLoadInputHandler : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private SaveLoadMenu saveLoadMenu;
-
-        [Header("Input Settings")]
-        [SerializeField] private KeyCode quickSaveKey = KeyCode.F5;
-        [SerializeField] private KeyCode quickLoadKey = KeyCode.F9;
-        [SerializeField] private KeyCode toggleMenuKey = KeyCode.F10;
-        [SerializeField] private bool allowEscapeToggle = true;
+        [SerializeField] private RTS.UI.InGameMenu inGameMenu;
 
         private ISaveLoadService saveLoadService;
         private IGameStateService gameStateService;
+        private InputSystem_Actions inputActions;
+
+        private void Awake()
+        {
+            // Initialize input actions
+            inputActions = new InputSystem_Actions();
+        }
 
         private void Start()
         {
@@ -33,43 +35,72 @@ namespace RTS.SaveLoad
                 Debug.LogWarning("SaveLoadInputHandler: ISaveLoadService not found!");
             }
 
-            if (saveLoadMenu == null)
+            if (inGameMenu == null)
             {
-                saveLoadMenu = FindAnyObjectByType<SaveLoadMenu>(FindObjectsInactive.Include);
-                if (saveLoadMenu == null)
+                inGameMenu = FindAnyObjectByType<RTS.UI.InGameMenu>(FindObjectsInactive.Include);
+                if (inGameMenu == null)
                 {
-                    Debug.LogWarning("SaveLoadInputHandler: SaveLoadMenu not found in scene!");
+                    Debug.LogWarning("SaveLoadInputHandler: InGameMenu not found in scene!");
                 }
             }
         }
 
-        private void Update()
+        private void OnEnable()
         {
-            // Don't process input if menu is open (except for toggle keys)
-            bool menuOpen = saveLoadMenu != null && saveLoadMenu.IsOpen;
-
-            // Toggle menu (always works)
-            if (Input.GetKeyDown(toggleMenuKey) || (allowEscapeToggle && Input.GetKeyDown(KeyCode.Escape)))
+            if (inputActions != null)
             {
-                ToggleMenu();
+                // Enable the SaveLoad action map
+                inputActions.SaveLoad.Enable();
+
+                // Subscribe to actions
+                inputActions.SaveLoad.F5.performed += OnF5Pressed;
+                inputActions.SaveLoad.F9.performed += OnF9Pressed;
+                inputActions.SaveLoad.F10.performed += OnF10Pressed;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (inputActions != null)
+            {
+                // Unsubscribe from actions
+                inputActions.SaveLoad.F5.performed -= OnF5Pressed;
+                inputActions.SaveLoad.F9.performed -= OnF9Pressed;
+                inputActions.SaveLoad.F10.performed -= OnF10Pressed;
+
+                // Disable the SaveLoad action map
+                inputActions.SaveLoad.Disable();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // Dispose of input actions
+            inputActions?.Dispose();
+        }
+
+        private void OnF5Pressed(InputAction.CallbackContext context)
+        {
+            // Don't process if menu is open
+            if (inGameMenu != null && inGameMenu.IsOpen)
                 return;
-            }
 
-            // Don't process other inputs when menu is open
-            if (menuOpen)
+            HandleQuickSave();
+        }
+
+        private void OnF9Pressed(InputAction.CallbackContext context)
+        {
+            // Don't process if menu is open
+            if (inGameMenu != null && inGameMenu.IsOpen)
                 return;
 
-            // Quick Save (F5)
-            if (Input.GetKeyDown(quickSaveKey))
-            {
-                HandleQuickSave();
-            }
+            HandleQuickLoad();
+        }
 
-            // Quick Load (F9)
-            if (Input.GetKeyDown(quickLoadKey))
-            {
-                HandleQuickLoad();
-            }
+        private void OnF10Pressed(InputAction.CallbackContext context)
+        {
+            // Toggle in-game menu
+            ToggleMenu();
         }
 
         private void HandleQuickSave()
@@ -122,17 +153,10 @@ namespace RTS.SaveLoad
 
         private void ToggleMenu()
         {
-            if (saveLoadMenu == null)
+            if (inGameMenu == null)
                 return;
 
-            if (saveLoadMenu.IsOpen)
-            {
-                saveLoadMenu.CloseMenu();
-            }
-            else
-            {
-                saveLoadMenu.OpenMenu();
-            }
+            inGameMenu.ToggleMenu();
         }
 
         private void ShowNotification(string message, bool isError = false)
