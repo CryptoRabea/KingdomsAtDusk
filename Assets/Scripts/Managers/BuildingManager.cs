@@ -40,10 +40,10 @@ namespace RTS.Managers
 
         [Header("Building Data - SOURCE OF TRUTH")]
         [Tooltip("Assign BuildingDataSO assets here, NOT prefabs!")]
-        [SerializeField] private BuildingDataSO[] buildingDataArray; // ✅ USE DATA, NOT PREFABS
+        [SerializeField] private BuildingDataSO[] buildingDataArray; // USE DATA, NOT PREFABS
 
         // Current state
-        private BuildingDataSO currentBuildingData;  // ✅ Store data, not prefab
+        private BuildingDataSO currentBuildingData;  // Store data, not prefab
         private GameObject previewBuilding;
         private bool isPlacingBuilding = false;
         private Material[] originalMaterials;
@@ -178,7 +178,7 @@ namespace RTS.Managers
             else
             {
                 // Use regular building placement
-                currentBuildingData = buildingData;  // ✅ Store the data
+                currentBuildingData = buildingData;  // [OK] Store the data
                 isPlacingBuilding = true;
 
                 // Reset rotation for new building
@@ -283,7 +283,7 @@ namespace RTS.Managers
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i] != null)
-                    // ✅ Use sharedMaterial to avoid creating instances
+                    // Use sharedMaterial to avoid creating instances
                     originalMaterials[i] = renderers[i].sharedMaterial;
             }
 
@@ -311,7 +311,7 @@ namespace RTS.Managers
                     position.z = Mathf.Round(position.z / gridSize) * gridSize;
                 }
 
-                // ✅ TOWER: Check for wall snapping
+                // TOWER: Check for wall snapping
                 if (isPlacingTower && currentTowerData != null && enableTowerWallSnapping && towerPlacementHelper != null)
                 {
                     if (towerPlacementHelper.TrySnapToWall(position, currentTowerData, out Vector3 wallSnapPos, out GameObject wall))
@@ -327,7 +327,7 @@ namespace RTS.Managers
                     }
                 }
 
-                // ✅ FIX: Adjust Y position to place building bottom on ground (not pivot)
+                // FIX: Adjust Y position to place building bottom on ground (not pivot)
                 position.y = hit.point.y + GetBuildingGroundOffset(previewBuilding);
 
                 previewBuilding.transform.position = position;
@@ -424,7 +424,7 @@ namespace RTS.Managers
 
             previewBuilding.transform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
 
-            // ✅ CHECK COSTS DIRECTLY FROM DATA (not from prefab)
+            // CHECK COSTS DIRECTLY FROM DATA (not from prefab)
             if (resourceService != null)
             {
                 var costs = currentBuildingData.GetCosts();
@@ -445,11 +445,11 @@ namespace RTS.Managers
                     return;
                 }
 
-                // ✅ SPEND THE RESOURCES!
+                // SPEND THE RESOURCES!
                 bool success = resourceService.SpendResources(costs);
                 if (success)
                 {
-                    Debug.Log($"✅ Spent resources for {currentBuildingData.buildingName}: {string.Join(", ", costs.Select(c => $"{c.Key}:{c.Value}"))}");
+                    Debug.Log($"Spent resources for {currentBuildingData.buildingName}: {string.Join(", ", costs.Select(c => $"{c.Key}:{c.Value}"))}");
                 }
                 else
                 {
@@ -462,7 +462,7 @@ namespace RTS.Managers
                 Debug.LogWarning("ResourceService not available, placing building anyway!");
             }
 
-            // ✅ TOWER: Replace wall if snapped to one
+            // TOWER: Replace wall if snapped to one
             if (isPlacingTower && wallToReplace != null && autoReplaceWalls && isSnappedToWall)
             {
                 Debug.Log($"Replacing wall at {wallToReplace.transform.position} with tower {currentTowerData.buildingName}");
@@ -470,41 +470,41 @@ namespace RTS.Managers
                 wallToReplace = null;
             }
 
-            // ✅ PLACE THE ACTUAL BUILDING (from data's prefab)
+            // PLACE THE ACTUAL BUILDING (from data's prefab)
             GameObject newBuilding = Instantiate(currentBuildingData.buildingPrefab, position, rotation);
 
-            // ✅ ENSURE BUILDING HAS DATA REFERENCE
+            // ENSURE BUILDING HAS DATA REFERENCE
             if (newBuilding.TryGetComponent<Building>(out var buildingComponent))
             {
                 buildingComponent.SetData(currentBuildingData);
-                Debug.Log($"✅ Assigned {currentBuildingData.buildingName} data to building component");
+                Debug.Log($"Assigned {currentBuildingData.buildingName} data to building component");
             }
             else
             {
                 Debug.LogWarning($"Building prefab for {currentBuildingData.buildingName} doesn't have Building component!");
             }
 
-            // ✅ ADD NAVMESH OBSTACLE FOR NAVIGATION BLOCKING
+            // ADD NAVMESH OBSTACLE FOR NAVIGATION BLOCKING
             if (newBuilding.GetComponent<BuildingNavMeshObstacle>() == null)
             {
                 newBuilding.AddComponent<BuildingNavMeshObstacle>();
             }
 
-            // ✅ TOWER: Set tower-specific data
+            // TOWER: Set tower-specific data
             if (isPlacingTower)
             {
                 var towerComponent = newBuilding.GetComponent<Tower>();
                 if (towerComponent != null && currentTowerData != null)
                 {
                     towerComponent.SetTowerData(currentTowerData);
-                    Debug.Log($"✅ Assigned {currentTowerData.buildingName} tower data (Type: {currentTowerData.towerType})");
+                    Debug.Log($"Assigned {currentTowerData.buildingName} tower data (Type: {currentTowerData.towerType})");
                 }
             }
 
             // Publish success event
             EventBus.Publish(new BuildingPlacedEvent(newBuilding, position));
 
-            Debug.Log($"✅ Placed building: {currentBuildingData.buildingName} at {position}");
+            Debug.Log($"Placed building: {currentBuildingData.buildingName} at {position}");
 
             // Cancel placement (or continue placing same building)
             CancelPlacement();
@@ -517,7 +517,7 @@ namespace RTS.Managers
         {
             if (previewBuilding == null) return false;
 
-            // ✅ CHECK FOG OF WAR: Only allow placement in currently visible areas
+            // CHECK FOG OF WAR: Only allow placement in currently visible areas
             // NOTE: Don't publish event here - this is called every frame during preview
             if (FogOfWarManager.Instance != null)
             {
@@ -536,24 +536,24 @@ namespace RTS.Managers
                 buildingBounds.center,
                 buildingBounds.extents,
                 previewBuilding.transform.rotation,
-                ~groundLayer // ✅ Exclude ground layer from check
+                ~groundLayer // Exclude ground layer from check
             );
 
             foreach (var col in colliders)
             {
-                // ✅ FIRST: Ignore colliders on the preview building itself (must check BEFORE anything else!)
+                // FIRST: Ignore colliders on the preview building itself (must check BEFORE anything else!)
                 if (col.gameObject == previewBuilding || col.transform.IsChildOf(previewBuilding.transform))
                 {
                     continue;
                 }
 
-                // ✅ SECOND: Ignore terrain colliders specifically (in case terrain is on a different layer)
+                // SECOND: Ignore terrain colliders specifically (in case terrain is on a different layer)
                 if (col is TerrainCollider)
                 {
                     continue;
                 }
 
-                // ✅ THIRD: Block placement for ANY other collider (buildings, trees, rocks, units, etc.)
+                // THIRD: Block placement for ANY other collider (buildings, trees, rocks, units, etc.)
                 // This includes:
                 // - Other buildings (col.GetComponent<Building>() != null)
                 // - Any other objects with colliders (obstacles, resources, units, etc.)
@@ -561,7 +561,7 @@ namespace RTS.Managers
                 return false;
             }
 
-            // ✅ Check if ground is too steep/uneven
+            // Check if ground is too steep/uneven
             if (!IsGroundSuitable(position))
             {
                 return false;
@@ -682,7 +682,7 @@ namespace RTS.Managers
             {
                 if (renderer != null)
                 {
-                    // ✅ FIX: Use sharedMaterial to avoid creating instances during render pass
+                    // FIX: Use sharedMaterial to avoid creating instances during render pass
                     renderer.sharedMaterial = material;
                 }
             }

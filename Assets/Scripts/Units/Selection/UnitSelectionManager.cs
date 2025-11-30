@@ -67,11 +67,11 @@ namespace RTS.Units
         private float lastClickTime = 0f;
         private Vector2 lastClickPosition;
 
-        // ✅ UI Detection - Cached
+        // [OK] UI Detection - Cached
         private PointerEventData cachedPointerEventData;
         private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
 
-        // ✅ Performance Optimization - Cached Unit References
+        // [OK] Performance Optimization - Cached Unit References
         private HashSet<UnitSelectable> allSelectableUnits = new HashSet<UnitSelectable>();
 
         public IReadOnlyList<UnitSelectable> SelectedUnits => selectedUnits;
@@ -108,7 +108,7 @@ namespace RTS.Units
                 selectionBoxRect.anchorMax = new Vector2(0, 0);
             }
 
-            // ✅ Initialize unit cache if enabled
+            // [OK] Initialize unit cache if enabled
             if (useCachedUnits)
             {
                 InitializeUnitCache();
@@ -129,7 +129,7 @@ namespace RTS.Units
                 positionAction.action.Enable();
             }
 
-            // ✅ Subscribe to unit events for cache management
+            // [OK] Subscribe to unit events for cache management
             if (useCachedUnits)
             {
                 EventBus.Subscribe<UnitSpawnedEvent>(OnUnitSpawned);
@@ -151,7 +151,7 @@ namespace RTS.Units
                 positionAction.action.Disable();
             }
 
-            // ✅ Unsubscribe from unit events
+            // [OK] Unsubscribe from unit events
             if (useCachedUnits)
             {
                 EventBus.Unsubscribe<UnitSpawnedEvent>(OnUnitSpawned);
@@ -198,7 +198,7 @@ namespace RTS.Units
         #region Unit Cache Management
 
         /// <summary>
-        /// ✅ NEW: Initialize unit cache by finding all existing units
+        /// [OK] NEW: Initialize unit cache by finding all existing units
         /// </summary>
         private void InitializeUnitCache()
         {
@@ -220,7 +220,7 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// ✅ NEW: Add unit to cache when spawned
+        /// [OK] NEW: Add unit to cache when spawned
         /// </summary>
         private void OnUnitSpawned(UnitSpawnedEvent evt)
         {
@@ -236,7 +236,7 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// ✅ NEW: Remove unit from cache when died
+        /// [OK] NEW: Remove unit from cache when died
         /// </summary>
         private void OnUnitDied(UnitDiedEvent evt)
         {
@@ -259,7 +259,7 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// ✅ NEW: Manual cache refresh (use if units exist before manager enables)
+        /// [OK] NEW: Manual cache refresh (use if units exist before manager enables)
         /// </summary>
         [ContextMenu("Refresh Unit Cache")]
         public void RefreshUnitCache()
@@ -371,7 +371,7 @@ namespace RTS.Units
         {
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
-            // ✅ Use RaycastNonAlloc instead of RaycastAll - zero GC!
+            // [OK] Use RaycastNonAlloc instead of RaycastAll - zero GC!
             int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, selectableLayer);
 
             if (hitCount > 0)
@@ -391,7 +391,7 @@ namespace RTS.Units
                     float nearestDistance = float.MaxValue;
                     float furthestDistance = float.MinValue;
 
-                    // ✅ OPTIMIZED: Find nearest/furthest in single pass instead of sorting
+                    // [OK] OPTIMIZED: Find nearest/furthest in single pass instead of sorting
                     for (int i = 0; i < hitCount; i++)
                     {
                         var selectable = raycastHitsCache[i].collider.GetComponent<UnitSelectable>();
@@ -439,7 +439,7 @@ namespace RTS.Units
             return false;
         }
         /// <summary>
-        /// ✅ OPTIMIZED: Uses cached units instead of FindObjectsByType
+        /// [OK] OPTIMIZED: Uses cached units instead of FindObjectsByType
         /// </summary>
         private void PerformDragSelection(Vector2 start, Vector2 end)
         {
@@ -448,7 +448,7 @@ namespace RTS.Units
             Rect selectionRect = GetScreenRect(start, end);
             List<UnitSelectable> unitsInBox = new List<UnitSelectable>();
 
-            // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
+            // [OK] Use cached units if available, otherwise fallback to FindObjectsByType
             IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var selectable in unitsToCheck)
@@ -492,7 +492,7 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// ✅ OPTIMIZED: Uses cached units instead of FindObjectsByType
+        /// [OK] OPTIMIZED: Uses cached units instead of FindObjectsByType
         /// </summary>
         private void SelectAllVisibleUnits()
         {
@@ -500,7 +500,7 @@ namespace RTS.Units
 
             List<UnitSelectable> visibleUnits = new List<UnitSelectable>();
 
-            // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
+            // [OK] Use cached units if available, otherwise fallback to FindObjectsByType
             IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var selectable in unitsToCheck)
@@ -609,7 +609,7 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// ✅ OPTIMIZED: Uses cached units instead of FindObjectsByType
+        /// [OK] OPTIMIZED: Uses cached units instead of FindObjectsByType
         /// </summary>
         private void UpdateDragHighlight(Vector2 start, Vector2 end)
         {
@@ -618,7 +618,7 @@ namespace RTS.Units
 
             Rect selectionRect = GetScreenRect(start, end);
 
-            // ✅ Use cached units if available, otherwise fallback to FindObjectsByType
+            // [OK] Use cached units if available, otherwise fallback to FindObjectsByType
             IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
             foreach (var selectable in unitsToCheck)

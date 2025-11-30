@@ -116,7 +116,7 @@ namespace RTS.Editor
                 GUILayout.Label("Paths to Export:", EditorStyles.boldLabel);
                 foreach (string path in selectedPaths)
                 {
-                    EditorGUILayout.LabelField("• " + path);
+                    EditorGUILayout.LabelField("- " + path);
                 }
             }
 
@@ -341,12 +341,12 @@ namespace RTS.Editor
 
 ## Installation
 1. Open your Unity project
-2. Go to Assets → Import Package → Custom Package
+2. Go to Assets -> Import Package -> Custom Package
 3. Select this .unitypackage file
 4. Click Import
 
 ## Exported Paths
-{string.Join("\n", selectedPaths.Select(p => $"• {p}"))}
+{string.Join("\n", selectedPaths.Select(p => $"- {p}"))}
 
 ## Version
 {packageVersion}

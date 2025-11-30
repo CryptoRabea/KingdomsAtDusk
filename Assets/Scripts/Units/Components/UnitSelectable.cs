@@ -21,7 +21,7 @@ namespace RTS.Units
         private bool isHovered;
         private Renderer[] renderers;
         private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
-        // ✅ FIX: Use MaterialPropertyBlock to avoid creating material instances during render pass
+        // [OK] FIX: Use MaterialPropertyBlock to avoid creating material instances during render pass
         private MaterialPropertyBlock propertyBlock;
         private static readonly int ColorPropertyID = Shader.PropertyToID("_Color");
         private static readonly int BaseColorPropertyID = Shader.PropertyToID("_BaseColor");
@@ -40,7 +40,7 @@ namespace RTS.Units
                 {
                     if (rend != null && rend.sharedMaterial != null)
                     {
-                        // ✅ FIX: Use sharedMaterial instead of material
+                        // [OK] FIX: Use sharedMaterial instead of material
                         originalColors[rend] = rend.sharedMaterial.color;
                     }
                 }
@@ -65,7 +65,7 @@ namespace RTS.Units
                 {
                     if (rend != null)
                     {
-                        // ✅ FIX: Use MaterialPropertyBlock to change color without creating instances
+                        // [OK] FIX: Use MaterialPropertyBlock to change color without creating instances
                         rend.GetPropertyBlock(propertyBlock);
                         propertyBlock.SetColor(ColorPropertyID, selectedColor);
                         propertyBlock.SetColor(BaseColorPropertyID, selectedColor);
@@ -95,7 +95,7 @@ namespace RTS.Units
                 {
                     if (rend != null && originalColors.TryGetValue(rend, out Color original))
                     {
-                        // ✅ FIX: Use MaterialPropertyBlock to restore original color
+                        // [OK] FIX: Use MaterialPropertyBlock to restore original color
                         rend.GetPropertyBlock(propertyBlock);
                         propertyBlock.SetColor(ColorPropertyID, original);
                         propertyBlock.SetColor(BaseColorPropertyID, original);

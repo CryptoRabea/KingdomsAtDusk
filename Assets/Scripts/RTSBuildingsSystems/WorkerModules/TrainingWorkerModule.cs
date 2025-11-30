@@ -130,7 +130,7 @@ namespace RTS.Buildings.WorkerModules
                 // Apply training speed bonus
                 ApplyTrainingBonus(building, true);
 
-                Debug.Log($"⚔️ Assigned {peasantsPerTraining} peasants to training at {building.name}");
+                Debug.Log($"[SWORD] Assigned {peasantsPerTraining} peasants to training at {building.name}");
                 return true;
             }
 
@@ -149,7 +149,7 @@ namespace RTS.Buildings.WorkerModules
                 // Remove training bonus
                 ApplyTrainingBonus(building, false);
 
-                Debug.Log($"⚔️ Released {workerCount} peasants from training");
+                Debug.Log($"[SWORD] Released {workerCount} peasants from training");
             }
         }
 

@@ -128,7 +128,7 @@ namespace RTS.UI
                 return;
             }
 
-            // ✅ GET BUILDINGS FROM BUILDINGMANAGER - NO DUPLICATE ARRAY!
+            // [OK] GET BUILDINGS FROM BUILDINGMANAGER - NO DUPLICATE ARRAY!
             BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             if (availableBuildings == null || availableBuildings.Length == 0)
@@ -230,7 +230,7 @@ namespace RTS.UI
                 return;
             }
 
-            // ✅ GET BUILDINGS FROM BUILDINGMANAGER
+            // [OK] GET BUILDINGS FROM BUILDINGMANAGER
             BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             if (buildingIndex >= availableBuildings.Length)
@@ -263,7 +263,7 @@ namespace RTS.UI
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
 
-            // ✅ GET BUILDINGS FROM BUILDINGMANAGER
+            // [OK] GET BUILDINGS FROM BUILDINGMANAGER
             BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             for (int i = 0; i < buildingHotkeyStrings.Length && i < availableBuildings.Length; i++)

@@ -185,7 +185,7 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($"🎖️ UnitTrainingQueue: Spawning {currentTraining.unitData.unitConfig.unitName} at {spawnPoint.position}");
+                Debug.Log($"[MEDAL] UnitTrainingQueue: Spawning {currentTraining.unitData.unitConfig.unitName} at {spawnPoint.position}");
             }
 
             // Spawn the unit
@@ -197,7 +197,7 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($"✅ UnitTrainingQueue: Unit spawned - {spawnedUnit.name}. Rally point null? {rallyPoint == null}");
+                Debug.Log($"[OK] UnitTrainingQueue: Unit spawned - {spawnedUnit.name}. Rally point null? {rallyPoint == null}");
             }
 
             // Move to rally point if set - use coroutine to wait for NavMeshAgent to initialize
@@ -209,7 +209,7 @@ namespace RTS.Buildings
             {
                 if (showDebugInfo)
                 {
-                    Debug.LogWarning($"⚠️ UnitTrainingQueue: No rally point set for {gameObject.name}, unit will stay at spawn position");
+                    Debug.LogWarning($"[WARNING] UnitTrainingQueue: No rally point set for {gameObject.name}, unit will stay at spawn position");
                 }
             }
 
@@ -224,7 +224,7 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($"✅ Completed training {currentTraining.unitData.unitConfig.unitName}");
+                Debug.Log($"[OK] Completed training {currentTraining.unitData.unitConfig.unitName}");
             }
 
             currentTraining = null;
@@ -302,7 +302,7 @@ namespace RTS.Buildings
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"🚩 UnitTrainingQueue: Created rally point for {gameObject.name}");
+                    Debug.Log($"[FLAG] UnitTrainingQueue: Created rally point for {gameObject.name}");
                 }
             }
 
@@ -311,7 +311,7 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($"✅ UnitTrainingQueue: Rally point set to world position {position} for {gameObject.name}");
+                Debug.Log($"[OK] UnitTrainingQueue: Rally point set to world position {position} for {gameObject.name}");
             }
         }
 
@@ -349,7 +349,7 @@ namespace RTS.Buildings
         {
             if (showDebugInfo)
             {
-                Debug.Log($"🚩 UnitTrainingQueue: Rally point exists at {destination}, waiting for NavMeshAgent to initialize...");
+                Debug.Log($"[FLAG] UnitTrainingQueue: Rally point exists at {destination}, waiting for NavMeshAgent to initialize...");
             }
 
             // Wait a frame for the unit to fully initialize
@@ -357,7 +357,7 @@ namespace RTS.Buildings
 
             if (unit == null)
             {
-                Debug.LogError($"❌ UnitTrainingQueue: Unit destroyed before it could move to rally point!");
+                Debug.LogError($"[ERROR] UnitTrainingQueue: Unit destroyed before it could move to rally point!");
                 yield break;
             }
 
@@ -365,19 +365,19 @@ namespace RTS.Buildings
             {
                 if (showDebugInfo)
                 {
-                    Debug.Log($"🎯 UnitTrainingQueue: Issuing move command to {unit.name} to go to {destination}");
+                    Debug.Log($"[TARGET] UnitTrainingQueue: Issuing move command to {unit.name} to go to {destination}");
                 }
 
                 unitMovement.SetDestination(destination);
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"✅ UnitTrainingQueue: Unit {unit.name} commanded to move to rally point at {destination}");
+                    Debug.Log($"[OK] UnitTrainingQueue: Unit {unit.name} commanded to move to rally point at {destination}");
                 }
             }
             else
             {
-                Debug.LogError($"❌ UnitTrainingQueue: Spawned unit {unit.name} has no UnitMovement component - cannot move to rally point!");
+                Debug.LogError($"[ERROR] UnitTrainingQueue: Spawned unit {unit.name} has no UnitMovement component - cannot move to rally point!");
             }
         }
 

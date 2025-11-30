@@ -93,7 +93,7 @@ namespace RTS.UI
         {
             var stats = new List<string>();
 
-            // ✅ FIXED: Use constructionTime instead of buildTime
+            // [OK] FIXED: Use constructionTime instead of buildTime
             stats.Add($"Build Time: {data.constructionTime}s");
 
             if (data.happinessBonus > 0)
@@ -102,7 +102,7 @@ namespace RTS.UI
             if (data.housingCapacity > 0)
                 stats.Add($"Housing: +{data.housingCapacity}");
 
-            // ✅ FIXED: Use generationInterval instead of resourceGenerationRate
+            // [OK] FIXED: Use generationInterval instead of resourceGenerationRate
             if (data.generationInterval > 0)
                 stats.Add($"Production: +{data.resourceAmount} every {data.generationInterval}s");
 

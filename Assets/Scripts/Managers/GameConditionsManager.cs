@@ -112,7 +112,7 @@ namespace RTS.Core
             // Log all completed conditions
             foreach (var condition in victoryConditions.Where(c => c.IsCompleted))
             {
-                Debug.Log($"✓ {condition.ConditionName}: {condition.GetStatusText()}");
+                Debug.Log($"[OK] {condition.ConditionName}: {condition.GetStatusText()}");
             }
 
             // Trigger game over with victory state
@@ -128,7 +128,7 @@ namespace RTS.Core
 
             gameEnded = true;
             Debug.Log("=== DEFEAT ===");
-            Debug.Log($"✗ {failedCondition.ConditionName}: {failedCondition.GetStatusText()}");
+            Debug.Log($"[X] {failedCondition.ConditionName}: {failedCondition.GetStatusText()}");
 
             // Trigger game over with defeat state
             if (gameStateService != null)
@@ -147,14 +147,14 @@ namespace RTS.Core
             summary += "\nVictory Conditions:\n";
             foreach (var condition in victoryConditions)
             {
-                string status = condition.IsCompleted ? "✓" : "-";
+                string status = condition.IsCompleted ? "[OK]" : "-";
                 summary += $"{status} {condition.GetStatusText()} ({condition.Progress * 100:F0}%)\n";
             }
 
             summary += "\nDefeat Conditions:\n";
             foreach (var condition in defeatConditions)
             {
-                string status = condition.IsFailed ? "✗" : "✓";
+                string status = condition.IsFailed ? "[X]" : "[OK]";
                 summary += $"{status} {condition.GetStatusText()}\n";
             }
 

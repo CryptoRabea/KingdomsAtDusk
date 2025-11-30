@@ -34,10 +34,10 @@ namespace RTS.Editor
 
             EditorGUILayout.HelpBox(
                 "This tool will create:\n" +
-                "• Main Menu scene with UI\n" +
-                "• Loading Screen prefab\n" +
-                "• Scene Transition Manager\n" +
-                "• All necessary scripts and components",
+                "- Main Menu scene with UI\n" +
+                "- Loading Screen prefab\n" +
+                "- Scene Transition Manager\n" +
+                "- All necessary scripts and components",
                 MessageType.Info);
 
             EditorGUILayout.Space();
