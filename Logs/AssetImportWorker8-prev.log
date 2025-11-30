@@ -1,0 +1,664 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+Built from '6000.2/staging' branch; Version is '6000.2.10f1 (d3d30d158480) revision 13882125'; Using compiler version '194234433'; Build Type 'Release'
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-youss" at "2025-11-29T18:28:31.5095877Z"
+OS: 'Windows 11  (10.0.26200) 64bit Professional' Language: 'en' Physical Memory: 16123 MB
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+Date: 2025-11-29T18:28:31Z
+
+COMMAND LINE ARGUMENTS:
+D:\Work\UnityEditors\6000.2.10f1\Editor\Unity.exe
+-adb2
+-batchMode
+-noUpm
+-name
+AssetImportWorker8
+-projectPath
+D:/Work/UnityProjects/KingdomsAtDusk
+-logFile
+Logs/AssetImportWorker8.log
+-srvPort
+5191
+-licensingIpc
+LicenseClient-youss
+-job-worker-count
+15
+-background-job-worker-count
+8
+-gc-helper-count
+1
+-name
+AssetImport
+Successfully changed project path to: D:/Work/UnityProjects/KingdomsAtDusk
+D:/Work/UnityProjects/KingdomsAtDusk
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [23396]  Target information:
+
+Player connection [23396]  * "[IP] 192.168.1.5 [Port] 0 [Flags] 2 [Guid] 2278649640 [EditorId] 2278649640 [Version] 1048832 [Id] WindowsEditor(7,YoussefRabea) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [23396] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [23396] Host joined alternative multi-casting on [225.0.0.222:34997]...
+JobSystem: Creating JobQueue using job-worker-count value 15
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 10828, path: "C:/Program Files/Unity Hub/UnityLicensingClient_V1/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.17.3+a4e98f1
+  Session Id:              4b7b45d96afc4e07867865671dc2f870
+  Correlation Id:          bed2139d0c8a979a1a5b2aec45478c22
+  External correlation Id: 3985779277168063198
+  Machine Id:              n2bs+DQo4UhSln8zcJYZwSXERHg=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-youss" (connect: 0.00s, validation: 0.01s, handshake: 0.06s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-youss-notifications" at "2025-11-29T18:28:31.5737464Z"
+[Licensing::Module] Licensing Background thread has ended after 0.06s
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Refreshing native plugins compatible for Editor in 8.63 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.2.10f1 (d3d30d158480)
+[Subsystems] Discovering subsystems at path D:/Work/UnityEditors/6000.2.10f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path D:/Work/UnityProjects/KingdomsAtDusk/Assets
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce RTX 4050 Laptop GPU (ID=0x28e1)
+    Vendor:   NVIDIA
+    VRAM:     5921 MB
+    Driver:   32.0.15.8157
+Initialize mono
+Mono path[0] = 'D:/Work/UnityEditors/6000.2.10f1/Editor/Data/Managed'
+Mono path[1] = 'D:/Work/UnityEditors/6000.2.10f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'D:/Work/UnityEditors/6000.2.10f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56448
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: D:/Work/UnityEditors/6000.2.10f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 11270138060550-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+Register platform support module: D:/Work/UnityEditors/6000.2.10f1/Editor/Data/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.008216 seconds.
+- Loaded All Assemblies, in  0.329 seconds
+Native extension for Android target not found
+Android Extension - Scanning For ADB Devices 246 ms
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.579 seconds
+Domain Reload Profiling: 908ms
+	BeginReloadAssembly (99ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (1ms)
+	RebuildCommonClasses (30ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (44ms)
+	LoadAllAssembliesAndSetupDomain (147ms)
+		LoadAssemblies (98ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (144ms)
+			TypeCache.Refresh (142ms)
+				TypeCache.ScanAssembly (130ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (0ms)
+	FinalizeReload (579ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (543ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (333ms)
+			SetLoadedEditorAssemblies (3ms)
+			BeforeProcessingInitializeOnLoad (40ms)
+			ProcessInitializeOnLoadAttributes (74ms)
+			ProcessInitializeOnLoadMethodAttributes (93ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+========================================================================
+Worker process is ready to serve import requests
+Import Worker Mode flag is 0x00
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  0.530 seconds
+Refreshing native plugins compatible for Editor in 0.48 ms, found 3 plugins.
+Native extension for Android target not found
+Native extension for WindowsStandalone target not found
+Package Manager log level set to [2]
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.512 seconds
+Domain Reload Profiling: 1042ms
+	BeginReloadAssembly (122ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (4ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (21ms)
+	RebuildCommonClasses (25ms)
+	RebuildNativeTypeToScriptingClass (8ms)
+	initialDomainReloadingComplete (25ms)
+	LoadAllAssembliesAndSetupDomain (350ms)
+		LoadAssemblies (227ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (189ms)
+			TypeCache.Refresh (139ms)
+				TypeCache.ScanAssembly (125ms)
+			BuildScriptInfoCaches (38ms)
+			ResolveRequiredComponents (8ms)
+	FinalizeReload (512ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (374ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (6ms)
+			SetLoadedEditorAssemblies (3ms)
+			BeforeProcessingInitializeOnLoad (78ms)
+			ProcessInitializeOnLoadAttributes (251ms)
+			ProcessInitializeOnLoadMethodAttributes (34ms)
+			AfterProcessingInitializeOnLoad (1ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (4ms)
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.02 seconds
+Refreshing native plugins compatible for Editor in 0.47 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6441 unused Assets / (4.8 MB). Loaded Objects now: 7173.
+Memory consumption went from 173.3 MB to 168.5 MB.
+Total: 7.445000 ms (FindLiveObjects: 0.575900 ms CreateObjectMapping: 0.475900 ms MarkObjects: 3.676100 ms  DeleteObjects: 2.716400 ms)
+
+========================================================================
+Received Import Request.
+  Time since last request: 11024.685465 seconds.
+  path: Assets/Toon_RTS/Orc_Demo/sample_scene/sample_ground.mat
+  artifactKey: Guid(e94b32dc920808646a6d3ba9dea63ff8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Toon_RTS/Orc_Demo/sample_scene/sample_ground.mat using Guid(e94b32dc920808646a6d3ba9dea63ff8) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '3999525a3bd157c3c798d55b39c0bf16') in 1.4626141 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  0.533 seconds
+Refreshing native plugins compatible for Editor in 0.44 ms, found 3 plugins.
+Native extension for Android target not found
+Native extension for WindowsStandalone target not found
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.561 seconds
+Domain Reload Profiling: 1097ms
+	BeginReloadAssembly (172ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (15ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (45ms)
+	RebuildCommonClasses (23ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (19ms)
+	LoadAllAssembliesAndSetupDomain (313ms)
+		LoadAssemblies (243ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (137ms)
+			TypeCache.Refresh (5ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (119ms)
+			ResolveRequiredComponents (9ms)
+	FinalizeReload (561ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (387ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			SetLoadedEditorAssemblies (5ms)
+			BeforeProcessingInitializeOnLoad (86ms)
+			ProcessInitializeOnLoadAttributes (254ms)
+			ProcessInitializeOnLoadMethodAttributes (33ms)
+			AfterProcessingInitializeOnLoad (2ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (13ms)
+Refreshing native plugins compatible for Editor in 1.04 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6439 unused Assets / (4.4 MB). Loaded Objects now: 7255.
+Memory consumption went from 202.1 MB to 197.7 MB.
+Total: 7.499400 ms (FindLiveObjects: 0.555600 ms CreateObjectMapping: 0.311200 ms MarkObjects: 4.111300 ms  DeleteObjects: 2.519800 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.518 seconds
+Refreshing native plugins compatible for Editor in 0.40 ms, found 3 plugins.
+Native extension for Android target not found
+Native extension for WindowsStandalone target not found
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.500 seconds
+Domain Reload Profiling: 1021ms
+	BeginReloadAssembly (154ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (4ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (39ms)
+	RebuildCommonClasses (24ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (19ms)
+	LoadAllAssembliesAndSetupDomain (315ms)
+		LoadAssemblies (248ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (137ms)
+			TypeCache.Refresh (7ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (118ms)
+			ResolveRequiredComponents (9ms)
+	FinalizeReload (500ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (385ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			SetLoadedEditorAssemblies (8ms)
+			BeforeProcessingInitializeOnLoad (88ms)
+			ProcessInitializeOnLoadAttributes (245ms)
+			ProcessInitializeOnLoadMethodAttributes (35ms)
+			AfterProcessingInitializeOnLoad (2ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (11ms)
+Refreshing native plugins compatible for Editor in 0.48 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6439 unused Assets / (4.7 MB). Loaded Objects now: 7258.
+Memory consumption went from 202.0 MB to 197.3 MB.
+Total: 7.136900 ms (FindLiveObjects: 0.415300 ms CreateObjectMapping: 0.273300 ms MarkObjects: 3.908400 ms  DeleteObjects: 2.538800 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  0.498 seconds
+Refreshing native plugins compatible for Editor in 0.43 ms, found 3 plugins.
+Native extension for Android target not found
+Native extension for WindowsStandalone target not found
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.497 seconds
+Domain Reload Profiling: 998ms
+	BeginReloadAssembly (149ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (4ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (34ms)
+	RebuildCommonClasses (25ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (19ms)
+	LoadAllAssembliesAndSetupDomain (298ms)
+		LoadAssemblies (232ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (132ms)
+			TypeCache.Refresh (6ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (115ms)
+			ResolveRequiredComponents (8ms)
+	FinalizeReload (498ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (381ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			SetLoadedEditorAssemblies (7ms)
+			BeforeProcessingInitializeOnLoad (86ms)
+			ProcessInitializeOnLoadAttributes (245ms)
+			ProcessInitializeOnLoadMethodAttributes (34ms)
+			AfterProcessingInitializeOnLoad (2ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (11ms)
+Refreshing native plugins compatible for Editor in 0.46 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6439 unused Assets / (4.2 MB). Loaded Objects now: 7261.
+Memory consumption went from 202.0 MB to 197.8 MB.
+Total: 6.008500 ms (FindLiveObjects: 0.424100 ms CreateObjectMapping: 0.278300 ms MarkObjects: 3.778500 ms  DeleteObjects: 1.526600 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+========================================================================
+Received Import Request.
+  Time since last request: 239.237433 seconds.
+  path: Assets/GameScene.unity
+  artifactKey: Guid(4ae99dbe13dedef44a605c02361b3c16) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/GameScene.unity using Guid(4ae99dbe13dedef44a605c02361b3c16) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '15e8180a12f8f8ada004e1216faa81a4') in 0.1895867 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000017 seconds.
+  path: Assets/Toon_RTS/Orc_Demo/sample_scene/sample_ground.mat
+  artifactKey: Guid(e94b32dc920808646a6d3ba9dea63ff8) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/Toon_RTS/Orc_Demo/sample_scene/sample_ground.mat using Guid(e94b32dc920808646a6d3ba9dea63ff8) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: '4a2890a280365200ce82af157a3c3de2') in 0.0396397 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 9.191700 seconds.
+  path: Assets/New Material 2.mat
+  artifactKey: Guid(2b75775375bf7304aabd1790abe4b151) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/New Material 2.mat using Guid(2b75775375bf7304aabd1790abe4b151) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '63f3d171469c4e41f5944fbe47be2ed8') in 0.2937325 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.636428 seconds.
+  path: Assets/New Material 2.mat
+  artifactKey: Guid(2b75775375bf7304aabd1790abe4b151) Importer(2089858483,192608db42251d675da83286b1cce702)
+Start importing Assets/New Material 2.mat using Guid(2b75775375bf7304aabd1790abe4b151) Importer(2089858483,192608db42251d675da83286b1cce702) (ScriptedImporter) -> (artifact id: 'cfbd19f522d8f688d26159431063cb5f') in 0.0083075 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 1
+
+========================================================================
+Received Import Request.
+  Time since last request: 3.779622 seconds.
+  path: Assets/LPEnviroment/Textures/bark_apple_01b.png
+  artifactKey: Guid(0eaf2cba1a9451743b3763f319614d7e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/LPEnviroment/Textures/bark_apple_01b.png using Guid(0eaf2cba1a9451743b3763f319614d7e) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter)[Licensing::Client] Successfully resolved entitlement details
+ -> (artifact id: '5e9a4ef08512231830e15291293fb410') in 0.0320327 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 2
+
+========================================================================
+Received Import Request.
+  Time since last request: 1.786605 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Crate_Big_Stack2.png
+  artifactKey: Guid(84f743d270c2ac048ae0790860db58d0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Crate_Big_Stack2.png using Guid(84f743d270c2ac048ae0790860db58d0) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '6312b225874a3a50c5c3a54b78230523') in 0.0182896 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000018 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Dock_FirstAge.png
+  artifactKey: Guid(03ae43cc4b5cb0e4ebd348e9fa690575) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Dock_FirstAge.png using Guid(03ae43cc4b5cb0e4ebd348e9fa690575) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'ba857f72d9d8209082495f7754b0ca83') in 0.010941 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000021 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Farm_FirstAge_Level2.png
+  artifactKey: Guid(4e2dcf2397a737e4fa23201246a51c9f) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Farm_FirstAge_Level2.png using Guid(4e2dcf2397a737e4fa23201246a51c9f) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '154e23530ddb621920b6c281e28b6f82') in 0.0172675 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000069 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Farm_SecondAge_Level1.png
+  artifactKey: Guid(8a4c77e1057b0024d8a295d6dcd1de29) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Farm_SecondAge_Level1.png using Guid(8a4c77e1057b0024d8a295d6dcd1de29) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '65e2e1fa584bfcce2ad9dfee23bca749') in 0.0137874 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000022 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Farm_SecondAge_Level2_Wheat.png
+  artifactKey: Guid(4c4dfbfc983935642bd231f48b9a25bc) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Farm_SecondAge_Level2_Wheat.png using Guid(4c4dfbfc983935642bd231f48b9a25bc) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '0cf056c459e9229dcc42b8a6714637c4') in 0.0189799 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Farm_SecondAge_Level3.png
+  artifactKey: Guid(d263d4b549f6fea41bee60a3c82870a5) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Farm_SecondAge_Level3.png using Guid(d263d4b549f6fea41bee60a3c82870a5) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '4853b1319579604fd864745c7082cc53') in 0.0128446 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000025 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Farm_FirstAge_Level3.png
+  artifactKey: Guid(befeabe82009bf64eb945d6f5dbfa2c9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Farm_FirstAge_Level3.png using Guid(befeabe82009bf64eb945d6f5dbfa2c9) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '057226ceaa0b170deda038c2b724c05a') in 0.0172637 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Farm_FirstAge_Level1_Wheat.png
+  artifactKey: Guid(963a15d2308dcd3439092cd247f1f76b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Farm_FirstAge_Level1_Wheat.png using Guid(963a15d2308dcd3439092cd247f1f76b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'dd8b821c8fd64b7b11db3af78909bfca') in 0.012796 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.091278 seconds.
+  path: Assets/Medieval Buildings and Objects/Sprites/objects/garden (1).png
+  artifactKey: Guid(df6d728e908cf4a40be0c6eb8ad6788a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Medieval Buildings and Objects/Sprites/objects/garden (1).png using Guid(df6d728e908cf4a40be0c6eb8ad6788a) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '017dc28b492d0d3b0c01b7beebf44af1') in 0.0221897 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/RPG_inventory_icons/gem.png
+  artifactKey: Guid(e7d29a79bc7fae248887c8a08a160303) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/RPG_inventory_icons/gem.png using Guid(e7d29a79bc7fae248887c8a08a160303) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '0ec9c2d7de7fb02e3cad199c2fbb6d73') in 0.0189437 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000021 seconds.
+  path: Assets/StrategyGameResourceIcons/Icons/goldshape.png
+  artifactKey: Guid(10185ca3363b7f944bdb1e3959989cb0) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/StrategyGameResourceIcons/Icons/goldshape.png using Guid(10185ca3363b7f944bdb1e3959989cb0) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '23bc66740646b4914bbd1416c67aacaa') in 0.0120184 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000055 seconds.
+  path: Assets/StrategyGameResourceIcons/Icons/glass.png
+  artifactKey: Guid(7a97cb21630d39645a024e14dcac934a) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/StrategyGameResourceIcons/Icons/glass.png using Guid(7a97cb21630d39645a024e14dcac934a) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '3f1414780a175c434590dbcf8e7a8ed5') in 0.0135225 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000030 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_2_Level3.png
+  artifactKey: Guid(7cfae102ebf55134c943d337c0fc7b6b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_2_Level3.png using Guid(7cfae102ebf55134c943d337c0fc7b6b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '1ce8ce77fffc319e4e5d7d6e47caf198') in 0.0264509 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_2_Level2.png
+  artifactKey: Guid(e7e7d4ad80bfcca49b016db52482f565) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_2_Level2.png using Guid(e7e7d4ad80bfcca49b016db52482f565) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'ff99e1967847ee54017641df011483f9') in 0.0190666 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000024 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_1_Level2.png
+  artifactKey: Guid(bd2a1e4fe350d1b49a1b85d121aa136b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_1_Level2.png using Guid(bd2a1e4fe350d1b49a1b85d121aa136b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'eafbde2b667c3dc4d6afce6f1ff70c79') in 0.0295366 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000021 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_3_Level3.png
+  artifactKey: Guid(017784ee966a3bf4ea4bd59aabfee4b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_3_Level3.png using Guid(017784ee966a3bf4ea4bd59aabfee4b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'f4b095955d79c1d761ca691260e81744') in 0.0166083 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000031 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_2_Level3.png
+  artifactKey: Guid(8729fe1a207676b4fa9f1737f6539fa1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_2_Level3.png using Guid(8729fe1a207676b4fa9f1737f6539fa1) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '3ec6981cad52b15eba757364e253b3f5') in 0.0147381 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000027 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_1_Level3.png
+  artifactKey: Guid(30358324a0673b642b5304cc191ce7b9) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_1_Level3.png using Guid(30358324a0673b642b5304cc191ce7b9) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '83b1dbc157c6dcc1533ee9699f3ebb8c') in 0.0169273 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000075 seconds.
+  path: Assets/RPG_inventory_icons/ingots.png
+  artifactKey: Guid(3e4fcc84a0ac95b429c56452575f6021) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/RPG_inventory_icons/ingots.png using Guid(3e4fcc84a0ac95b429c56452575f6021) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'cfe2b991407003bd6573db6f5187ca84') in 0.0136274 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000040 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_2_Level2.png
+  artifactKey: Guid(959a5121ab2a3734ca36f97ae8a88364) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_2_Level2.png using Guid(959a5121ab2a3734ca36f97ae8a88364) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'c5face26bc088f7c2c5746f6952450d7') in 0.0164339 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000019 seconds.
+  path: Assets/RPG_inventory_icons/gloves.PNG
+  artifactKey: Guid(d4f5634edede200468fc1ccf30e6f3a1) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/RPG_inventory_icons/gloves.PNG using Guid(d4f5634edede200468fc1ccf30e6f3a1) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: '7558f676a8c2222c59e0bfd71e9dc2de') in 0.0140351 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000028 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_1_Level1.png
+  artifactKey: Guid(afc2a17f7fc38f24b82ec08f0361d4c7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_FirstAge_1_Level1.png using Guid(afc2a17f7fc38f24b82ec08f0361d4c7) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'fc5efdadc91e2e9505e6faab2a51d91f') in 0.0142406 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Import Request.
+  Time since last request: 0.000022 seconds.
+  path: Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_2_Level1.png
+  artifactKey: Guid(1239ab6612cd79b4a833504d111a7def) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/UltimateRtsFantasy/PNG/Houses_SecondAge_2_Level1.png using Guid(1239ab6612cd79b4a833504d111a7def) Importer(815301076,1909f56bfc062723c751e8b465ee728b) (PreviewImporter) -> (artifact id: 'd50e9638406c5b107cf99a7b54605457') in 0.0132646 seconds
+Number of updated asset objects reloaded before import = 0Number of asset objects unloaded after import = 3
+
+========================================================================
+Received Prepare
+Begin MonoManager ReloadAssembly
+[Licensing::Client] Successfully resolved entitlement details
+- Loaded All Assemblies, in  0.600 seconds
+Refreshing native plugins compatible for Editor in 0.44 ms, found 3 plugins.
+Native extension for Android target not found
+Native extension for WindowsStandalone target not found
+[Package Manager] Failed to launch server process. Reason: Unity was launched with the -noUpm command-line argument
+[Package Manager] Unable to send message (not connected to server process).
+[Package Manager] Cannot connect to Unity Package Manager local server
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.566 seconds
+Domain Reload Profiling: 1169ms
+	BeginReloadAssembly (200ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (20ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (60ms)
+	RebuildCommonClasses (25ms)
+	RebuildNativeTypeToScriptingClass (9ms)
+	initialDomainReloadingComplete (21ms)
+	LoadAllAssembliesAndSetupDomain (347ms)
+		LoadAssemblies (262ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (155ms)
+			TypeCache.Refresh (6ms)
+				TypeCache.ScanAssembly (0ms)
+			BuildScriptInfoCaches (136ms)
+			ResolveRequiredComponents (10ms)
+	FinalizeReload (567ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (427ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (9ms)
+			SetLoadedEditorAssemblies (11ms)
+			BeforeProcessingInitializeOnLoad (103ms)
+			ProcessInitializeOnLoadAttributes (265ms)
+			ProcessInitializeOnLoadMethodAttributes (37ms)
+			AfterProcessingInitializeOnLoad (2ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (13ms)
+Refreshing native plugins compatible for Editor in 0.87 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 14 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 6440 unused Assets / (4.2 MB). Loaded Objects now: 7288.
+Memory consumption went from 202.3 MB to 198.1 MB.
+Total: 5.966600 ms (FindLiveObjects: 0.447600 ms CreateObjectMapping: 0.254600 ms MarkObjects: 3.310900 ms  DeleteObjects: 1.952300 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+Editor requested this worker to shutdown with reason: Scaling down because of idle timeout
+AssetImportWorker is now disconnected from the server
+Process exiting
+Exiting without the bug reporter. Application will terminate with return code 0
