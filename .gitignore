@@ -18,7 +18,6 @@
 # Cache
 *.apk
 *.aab
-*.unitypackage
 *.DS_Store
 
 # Unity generated folders
