@@ -27,7 +27,6 @@ Sysroot/
 .vscode/
 .idea/
 *.sln
-*.user
 *.pidb
 *.booproj
 
@@ -82,4 +81,3 @@ Assets/Advance Studios/Medieval Castle/Art.meta
 *.meta
 /Assets/Polytope Studio
 /Assets/BigRookGames
-AGENTS.md
