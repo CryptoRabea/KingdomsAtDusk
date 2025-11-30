@@ -38,7 +38,6 @@ Sysroot/
 *.rar
 *.7z
 *.Fbx
-*.shader
 *.png
 *.asset
 *.mat
