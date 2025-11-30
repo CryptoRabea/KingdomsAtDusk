@@ -60,12 +60,12 @@ namespace RTS.Buildings
             if (evt.Delta < 0)
             {
                 float healthPercent = evt.CurrentHealth / evt.MaxHealth * 100f;
-                Debug.LogWarning($"⚠ STRONGHOLD UNDER ATTACK! Health: {healthPercent:F0}%");
+                Debug.LogWarning($"[WARNING] STRONGHOLD UNDER ATTACK! Health: {healthPercent:F0}%");
 
                 // Critical health warning
                 if (healthPercent <= 25f && healthPercent > 0f)
                 {
-                    Debug.LogError($"🚨 CRITICAL! Stronghold health at {healthPercent:F0}%!");
+                    Debug.LogError($"[ALERT] CRITICAL! Stronghold health at {healthPercent:F0}%!");
                 }
             }
         }

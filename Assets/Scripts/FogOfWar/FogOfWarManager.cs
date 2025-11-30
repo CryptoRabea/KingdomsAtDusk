@@ -89,7 +89,7 @@ public class FogOfWarManager : MonoBehaviour
 
             isInitialized = true;
 
-            Debug.Log($"[FogOfWarManager] ✓ Initialization complete with {visionProviders.Count} vision providers");
+            Debug.Log($"[FogOfWarManager] [OK] Initialization complete with {visionProviders.Count} vision providers");
         }
 
         private void Update()

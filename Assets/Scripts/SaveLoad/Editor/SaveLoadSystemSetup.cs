@@ -32,12 +32,12 @@ namespace RTS.SaveLoad.Editor
             EditorGUILayout.LabelField("Save/Load System Auto Setup", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
                 "This tool will automatically create and configure the entire Save/Load system:\n\n" +
-                "✓ SaveLoadSettings ScriptableObject\n" +
-                "✓ SaveLoadSystem GameObject with all components\n" +
-                "✓ In-game menu with Resume, Save, Load, Back to Main Menu, Save & Quit, Quit without Saving\n" +
-                "✓ SaveListItem prefab\n" +
-                "✓ Auto-wire all references\n" +
-                "✓ Integrate with GameManager",
+                "[OK] SaveLoadSettings ScriptableObject\n" +
+                "[OK] SaveLoadSystem GameObject with all components\n" +
+                "[OK] In-game menu with Resume, Save, Load, Back to Main Menu, Save & Quit, Quit without Saving\n" +
+                "[OK] SaveListItem prefab\n" +
+                "[OK] Auto-wire all references\n" +
+                "[OK] Integrate with GameManager",
                 MessageType.Info
             );
 
@@ -126,10 +126,10 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.DisplayDialog(
                     "Setup Complete!",
                     "Save/Load system has been fully configured!\n\n" +
-                    "✓ SaveLoadSettings created\n" +
-                    "✓ UI Menu created (hidden by default)\n" +
-                    "✓ SaveListItem prefab created\n" +
-                    "✓ All references wired\n\n" +
+                    "[OK] SaveLoadSettings created\n" +
+                    "[OK] UI Menu created (hidden by default)\n" +
+                    "[OK] SaveListItem prefab created\n" +
+                    "[OK] All references wired\n\n" +
                     "Press Play and use:\n" +
                     "F5 - Quick Save\n" +
                     "F9 - Quick Load\n" +
@@ -137,7 +137,7 @@ namespace RTS.SaveLoad.Editor
                     "OK"
                 );
 
-                Debug.Log("✅ Save/Load system setup complete!");
+                Debug.Log("[OK] Save/Load system setup complete!");
                 Selection.activeGameObject = systemObj;
             }
             catch (System.Exception e)
@@ -205,7 +205,7 @@ namespace RTS.SaveLoad.Editor
             AssetDatabase.CreateAsset(settings, SETTINGS_PATH);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"✅ Created SaveLoadSettings at {SETTINGS_PATH}");
+            Debug.Log($"[OK] Created SaveLoadSettings at {SETTINGS_PATH}");
             return settings;
         }
 
@@ -315,7 +315,7 @@ namespace RTS.SaveLoad.Editor
             // Initially hide the menu
             menuPanel.SetActive(false);
 
-            Debug.Log("✅ Created Save/Load UI with all references wired");
+            Debug.Log("[OK] Created Save/Load UI with all references wired");
             return saveLoadMenu;
         }
 
@@ -327,7 +327,7 @@ namespace RTS.SaveLoad.Editor
             canvasObj.AddComponent<CanvasScaler>();
             canvasObj.AddComponent<GraphicRaycaster>();
 
-            Debug.Log("✅ Created Canvas");
+            Debug.Log("[OK] Created Canvas");
             return canvas;
         }
 
@@ -635,7 +635,7 @@ namespace RTS.SaveLoad.Editor
             PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);
             DestroyImmediate(itemObj);
 
-            Debug.Log($"✅ Created SaveListItem prefab at {prefabPath}");
+            Debug.Log($"[OK] Created SaveListItem prefab at {prefabPath}");
             return AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         }
 
@@ -673,7 +673,7 @@ namespace RTS.SaveLoad.Editor
             systemObj.AddComponent<AutoSaveSystem>();
             systemObj.AddComponent<SaveLoadInputHandler>();
 
-            Debug.Log("✅ Created SaveLoadSystem GameObject with all components");
+            Debug.Log("[OK] Created SaveLoadSystem GameObject with all components");
             return systemObj;
         }
 
@@ -692,7 +692,7 @@ namespace RTS.SaveLoad.Editor
                 serializedManager.FindProperty("mainCamera").objectReferenceValue = Camera.main;
                 serializedManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(manager);
-                Debug.Log("✓ Wired SaveLoadManager");
+                Debug.Log("[OK] Wired SaveLoadManager");
             }
 
             // Wire AutoSaveSystem using SerializedObject
@@ -703,7 +703,7 @@ namespace RTS.SaveLoad.Editor
                 serializedAutoSave.FindProperty("settings").objectReferenceValue = settings;
                 serializedAutoSave.ApplyModifiedProperties();
                 EditorUtility.SetDirty(autoSave);
-                Debug.Log("✓ Wired AutoSaveSystem");
+                Debug.Log("[OK] Wired AutoSaveSystem");
             }
 
             // Wire SaveLoadInputHandler using SerializedObject
@@ -714,7 +714,7 @@ namespace RTS.SaveLoad.Editor
                 serializedInputHandler.FindProperty("saveLoadMenu").objectReferenceValue = menu;
                 serializedInputHandler.ApplyModifiedProperties();
                 EditorUtility.SetDirty(inputHandler);
-                Debug.Log("✓ Wired SaveLoadInputHandler");
+                Debug.Log("[OK] Wired SaveLoadInputHandler");
             }
 
             // Double-check SaveLoadMenu has prefab (should already be set in CreateSaveLoadUI)
@@ -731,11 +731,11 @@ namespace RTS.SaveLoad.Editor
                 }
 
                 EditorUtility.SetDirty(menu);
-                Debug.Log("✓ Verified SaveLoadMenu prefab reference");
+                Debug.Log("[OK] Verified SaveLoadMenu prefab reference");
             }
 
             EditorUtility.SetDirty(systemObj);
-            Debug.Log("✅ All references wired successfully");
+            Debug.Log("[OK] All references wired successfully");
         }
 
         private void AutoWireReferences()
@@ -756,9 +756,9 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.DisplayDialog(
                     "Missing Components",
                     $"Could not find all components:\n" +
-                    $"Settings: {(settings != null ? "✓" : "✗")}\n" +
-                    $"Menu: {(menu != null ? "✓" : "✗")}\n" +
-                    $"Item Prefab: {(itemPrefab != null ? "✓" : "✗")}",
+                    $"Settings: {(settings != null ? "[OK]" : "[X]")}\n" +
+                    $"Menu: {(menu != null ? "[OK]" : "[X]")}\n" +
+                    $"Item Prefab: {(itemPrefab != null ? "[OK]" : "[X]")}",
                     "OK"
                 );
                 return;
@@ -788,7 +788,7 @@ namespace RTS.SaveLoad.Editor
                 serializedGameManager.FindProperty("saveLoadManager").objectReferenceValue = manager;
                 serializedGameManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(gameManager.gameObject);
-                Debug.Log("✅ Integrated with GameManager");
+                Debug.Log("[OK] Integrated with GameManager");
             }
         }
 

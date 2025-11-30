@@ -24,7 +24,7 @@ namespace RTS.Buildings
         private Building buildingComponent;
         private bool isRegistered = false;
 
-        // ✅ FIX: Prevent cascading updates
+        // [OK] FIX: Prevent cascading updates
         private bool isUpdating = false;
         private static bool isBatchUpdate = false;
 
@@ -44,7 +44,7 @@ namespace RTS.Buildings
             EventBus.Subscribe<BuildingPlacedEvent>(OnBuildingPlaced);
             EventBus.Subscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
-            // ✅ FIX: Delay initial update to avoid Start() race conditions
+            // [OK] FIX: Delay initial update to avoid Start() race conditions
             Invoke(nameof(DelayedInitialUpdate), 0.1f);
         }
 
@@ -97,7 +97,7 @@ namespace RTS.Buildings
         {
             if (!enableConnections) return;
 
-            // ✅ FIX: Prevent recursive updates
+            // [OK] FIX: Prevent recursive updates
             if (isUpdating) return;
             isUpdating = true;
 
@@ -133,7 +133,7 @@ namespace RTS.Buildings
         /// </summary>
         private void UpdateNearbyWalls()
         {
-            // ✅ FIX: Prevent cascading updates during batch operations
+            // [OK] FIX: Prevent cascading updates during batch operations
             if (isBatchUpdate) return;
 
             Vector3 myPos = transform.position;
@@ -151,7 +151,7 @@ namespace RTS.Buildings
                 }
             }
 
-            // ✅ FIX: Update in batch mode to prevent cascading
+            // [OK] FIX: Update in batch mode to prevent cascading
             isBatchUpdate = true;
             try
             {
@@ -190,7 +190,7 @@ namespace RTS.Buildings
 
         private void OnBuildingPlaced(BuildingPlacedEvent evt)
         {
-            // ✅ FIX: Only process if this is a wall and it's nearby
+            // [OK] FIX: Only process if this is a wall and it's nearby
             if (evt.Building == null) return;
 
             var wallSystem = evt.Building.GetComponent<WallConnectionSystem>();
@@ -200,7 +200,7 @@ namespace RTS.Buildings
             float distance = Vector3.Distance(transform.position, evt.Position);
             if (distance <= connectionDistance * 2f)
             {
-                // ✅ FIX: Use delayed update to prevent immediate cascade
+                // [OK] FIX: Use delayed update to prevent immediate cascade
                 Invoke(nameof(UpdateConnections), 0.05f);
             }
         }

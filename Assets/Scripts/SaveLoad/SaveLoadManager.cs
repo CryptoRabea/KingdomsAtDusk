@@ -85,7 +85,7 @@ namespace RTS.SaveLoad
                 string filePath = settings.GetSaveFilePath(saveName);
                 File.WriteAllText(filePath, json);
 
-                Log($"✅ Game saved successfully: {filePath}");
+                Log($"[OK] Game saved successfully: {filePath}");
 
                 // Publish save event
                 EventBus.Publish(new GameSavedEvent(saveName, isAutoSave, isQuickSave));
@@ -94,7 +94,7 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"❌ Failed to save game: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[ERROR] Failed to save game: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -108,7 +108,7 @@ namespace RTS.SaveLoad
                 string filePath = settings.GetSaveFilePath(saveName);
                 if (!File.Exists(filePath))
                 {
-                    Debug.LogError($"❌ Save file not found: {filePath}");
+                    Debug.LogError($"[ERROR] Save file not found: {filePath}");
                     return false;
                 }
 
@@ -134,7 +134,7 @@ namespace RTS.SaveLoad
                 // Restore game state
                 RestoreGameState(saveData);
 
-                Log($"✅ Game loaded successfully: {saveName}");
+                Log($"[OK] Game loaded successfully: {saveName}");
 
                 // Publish load event
                 EventBus.Publish(new GameLoadedEvent(saveName));
@@ -143,7 +143,7 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"❌ Failed to load game: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[ERROR] Failed to load game: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }

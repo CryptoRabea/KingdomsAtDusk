@@ -36,7 +36,7 @@ namespace RTS.UI
         [SerializeField] private Color pressedColor = new Color(0.2f, 0.5f, 1f, 1f); // Blue
 
         [Header("State Management")]
-        [SerializeField] private bool maintainColorState = true; // ✅ NEW: Keep colors permanent
+        [SerializeField] private bool maintainColorState = true; // NEW: Keep colors permanent
 
         private BuildingDataSO buildingData;
         private int buildingIndex;
@@ -105,7 +105,7 @@ namespace RTS.UI
                 button.interactable = canAfford;
             }
 
-            // ✅ UPDATE COLOR PERMANENTLY (only if changed)
+            // UPDATE COLOR PERMANENTLY (only if changed)
             if (affordabilityChanged && !isSelected && !isHovered)
             {
                 UpdateColor(canAfford ? affordableColor : unaffordableColor);
@@ -151,7 +151,7 @@ namespace RTS.UI
         }
 
         /// <summary>
-        /// ✅ NEW: Display costs with resource icons from ResourceUI
+        /// NEW: Display costs with resource icons from ResourceUI
         /// </summary>
         private void UpdateCostDisplayWithIcons()
         {
@@ -251,7 +251,7 @@ namespace RTS.UI
         }
 
         /// <summary>
-        /// ✅ PERMANENT COLOR: Updates and maintains color state
+        /// PERMANENT COLOR: Updates and maintains color state
         /// </summary>
         private void UpdateColor(Color newColor)
         {
@@ -278,7 +278,7 @@ namespace RTS.UI
                 }
                 else
                 {
-                    // ✅ NEW: Brighten current color instead of replacing
+                    // NEW: Brighten current color instead of replacing
                     Color brightened = currentColor * 1.2f;
                     brightened.a = currentColor.a;
                     backgroundImage.color = brightened;
@@ -292,7 +292,7 @@ namespace RTS.UI
 
             if (!maintainColorState)
             {
-                // ❌ OLD BEHAVIOR: Reset to affordable/unaffordable
+                // OLD BEHAVIOR: Reset to affordable/unaffordable
                 if (backgroundImage != null)
                 {
                     var resourceService = ServiceLocator.TryGet<IResourcesService>();
@@ -306,7 +306,7 @@ namespace RTS.UI
             }
             else
             {
-                // ✅ NEW BEHAVIOR: Return to current state color
+                // NEW BEHAVIOR: Return to current state color
                 if (backgroundImage != null)
                 {
                     backgroundImage.color = currentColor;

@@ -29,10 +29,10 @@ namespace RTS.Buildings.Editor
             // Info box
             EditorGUILayout.HelpBox(
                 "TRUE FREE-BUILD wall system!\n" +
-                "✓ NO grid snapping\n" +
-                "✓ NO variants\n" +
-                "✓ Place anywhere, drag to connect\n" +
-                "✓ Distance-based connections",
+                "[OK] NO grid snapping\n" +
+                "[OK] NO variants\n" +
+                "[OK] Place anywhere, drag to connect\n" +
+                "[OK] Distance-based connections",
                 MessageType.Info
             );
 
@@ -82,7 +82,7 @@ namespace RTS.Buildings.Editor
                         if (connectedWall != null)
                         {
                             float dist = Vector3.Distance(wall.transform.position, connectedWall.transform.position);
-                            EditorGUILayout.LabelField($"  • Wall at {connectedWall.transform.position} (dist: {dist:F2})");
+                            EditorGUILayout.LabelField($"  - Wall at {connectedWall.transform.position} (dist: {dist:F2})");
                         }
                     }
                 }

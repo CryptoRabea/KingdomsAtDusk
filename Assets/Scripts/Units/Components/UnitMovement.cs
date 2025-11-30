@@ -153,13 +153,13 @@ namespace RTS.Units
         {
             if (!isEnabled)
             {
-                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - movement is disabled!");
+                Debug.LogWarning($"[WARNING] UnitMovement: Cannot set destination for {gameObject.name} - movement is disabled!");
                 return;
             }
 
             if (agent == null)
             {
-                Debug.LogError($"❌ UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is null!");
+                Debug.LogError($"[ERROR] UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is null!");
                 return;
             }
 
@@ -187,7 +187,7 @@ namespace RTS.Units
             }
             else
             {
-                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is disabled!");
+                Debug.LogWarning($"[WARNING] UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is disabled!");
             }
         }
 

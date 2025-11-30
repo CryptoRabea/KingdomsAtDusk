@@ -51,7 +51,7 @@ namespace RTS.Editor
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log("✓ ShaderPreloader added to scene! Configure critical materials in Inspector.");
+            Debug.Log("[OK] ShaderPreloader added to scene! Configure critical materials in Inspector.");
         }
 
         [MenuItem("Tools/RTS/Build Setup/Add Build Diagnostics to Scene")]
@@ -79,7 +79,7 @@ namespace RTS.Editor
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log("✓ BuildDiagnostics added to scene! Press 'D' in build to show diagnostics.");
+            Debug.Log("[OK] BuildDiagnostics added to scene! Press 'D' in build to show diagnostics.");
         }
 
         [MenuItem("Tools/RTS/Build Setup/Setup All Build Optimizations")]
@@ -113,9 +113,9 @@ namespace RTS.Editor
             EditorUtility.DisplayDialog(
                 "Build Optimization Setup",
                 "Build optimization scripts have been added to your scene!\n\n" +
-                "✓ BuildInitializer - Runs automatically in all builds\n" +
-                "✓ ShaderPreloader - Added to scene (configure materials in Inspector)\n" +
-                "✓ BuildDiagnostics - Press 'D' in build to show diagnostics\n\n" +
+                "[OK] BuildInitializer - Runs automatically in all builds\n" +
+                "[OK] ShaderPreloader - Added to scene (configure materials in Inspector)\n" +
+                "[OK] BuildDiagnostics - Press 'D' in build to show diagnostics\n\n" +
                 "See BUILD_ISSUES_FIX_GUIDE.md for detailed instructions.",
                 "OK");
         }
@@ -155,9 +155,9 @@ namespace RTS.Editor
             bool proceed = EditorUtility.DisplayDialog(
                 "Configure Build Settings",
                 "This will configure recommended build settings for optimal performance:\n\n" +
-                "• Set Color Space to Linear\n" +
-                "• Configure Graphics APIs (DirectX11)\n" +
-                "• Set Fullscreen mode to Fullscreen Window\n\n" +
+                "- Set Color Space to Linear\n" +
+                "- Configure Graphics APIs (DirectX11)\n" +
+                "- Set Fullscreen mode to Fullscreen Window\n\n" +
                 "Continue?",
                 "Yes", "Cancel");
 
@@ -165,7 +165,7 @@ namespace RTS.Editor
 
             // Set color space to Linear
             PlayerSettings.colorSpace = ColorSpace.Linear;
-            Debug.Log("✓ Color Space set to Linear");
+            Debug.Log("[OK] Color Space set to Linear");
 
             // Set graphics APIs for Windows
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,
@@ -174,16 +174,16 @@ namespace RTS.Editor
                     UnityEngine.Rendering.GraphicsDeviceType.Direct3D11,
                     UnityEngine.Rendering.GraphicsDeviceType.Direct3D12
                 });
-            Debug.Log("✓ Graphics APIs set to DirectX11, DirectX12");
+            Debug.Log("[OK] Graphics APIs set to DirectX11, DirectX12");
 
             // Set fullscreen mode
             PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
-            Debug.Log("✓ Fullscreen mode set to Fullscreen Window");
+            Debug.Log("[OK] Fullscreen mode set to Fullscreen Window");
 
             // Set default resolution
             PlayerSettings.defaultScreenWidth = 1920;
             PlayerSettings.defaultScreenHeight = 1080;
-            Debug.Log("✓ Default resolution set to 1920x1080");
+            Debug.Log("[OK] Default resolution set to 1920x1080");
 
             Debug.Log("=== Build settings configured successfully ===");
 
@@ -191,7 +191,7 @@ namespace RTS.Editor
                 "Build Settings Configured",
                 "Build settings have been configured for optimal performance!\n\n" +
                 "Next steps:\n" +
-                "1. Build your game (File → Build Settings → Build)\n" +
+                "1. Build your game (File -> Build Settings -> Build)\n" +
                 "2. Test the build\n" +
                 "3. Press 'D' in build to show diagnostics\n" +
                 "4. Press 'P' to show FPS counter",

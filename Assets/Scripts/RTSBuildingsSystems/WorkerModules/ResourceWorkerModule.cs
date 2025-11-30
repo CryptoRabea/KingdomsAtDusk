@@ -174,7 +174,7 @@ namespace RTS.Buildings.WorkerModules
                 // Apply production bonus
                 ApplyProductionBonus(building, true);
 
-                Debug.Log($"⛏️ Assigned {peasantsPerResourceBuilding} peasants to {buildingComponent.Data?.buildingName ?? "resource building"}");
+                Debug.Log($"[PICKAXE] Assigned {peasantsPerResourceBuilding} peasants to {buildingComponent.Data?.buildingName ?? "resource building"}");
                 return true;
             }
 
@@ -193,7 +193,7 @@ namespace RTS.Buildings.WorkerModules
                 // Remove production bonus
                 ApplyProductionBonus(building, false);
 
-                Debug.Log($"⛏️ Released {workerCount} peasants from resource building");
+                Debug.Log($"[PICKAXE] Released {workerCount} peasants from resource building");
             }
         }
 

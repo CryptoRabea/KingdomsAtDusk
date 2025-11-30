@@ -81,7 +81,7 @@ namespace RTS.UI
         /// </summary>
         private void OnUnitGroupSaved(UnitGroupSavedEvent evt)
         {
-            string message = $"⚔️ {evt.UnitCount} units assigned to Group {evt.GroupNumber}";
+            string message = $"[SWORD] {evt.UnitCount} units assigned to Group {evt.GroupNumber}";
             
             Debug.Log($"[ControlGroups] {message}");
             
@@ -98,12 +98,12 @@ namespace RTS.UI
             
             if (evt.WasDoubleTap)
             {
-                message = $"⚔️ Group {evt.GroupNumber} selected and centered ({evt.UnitCount} units)";
+                message = $"[SWORD] Group {evt.GroupNumber} selected and centered ({evt.UnitCount} units)";
                 PlaySound(doubleClickSound);
             }
             else
             {
-                message = $"⚔️ Group {evt.GroupNumber} selected ({evt.UnitCount} units)";
+                message = $"[SWORD] Group {evt.GroupNumber} selected ({evt.UnitCount} units)";
                 PlaySound(groupRecalledSound);
             }
             
@@ -121,7 +121,7 @@ namespace RTS.UI
         /// </summary>
         private void OnBuildingGroupSaved(BuildingGroupSavedEvent evt)
         {
-            string message = $"🏰 {evt.BuildingName} assigned to Group {evt.GroupNumber}";
+            string message = $"[BUILDING] {evt.BuildingName} assigned to Group {evt.GroupNumber}";
             
             Debug.Log($"[ControlGroups] {message}");
             
@@ -138,12 +138,12 @@ namespace RTS.UI
             
             if (evt.WasDoubleTap)
             {
-                message = $"🏰 {evt.BuildingName} selected and centered";
+                message = $"[BUILDING] {evt.BuildingName} selected and centered";
                 PlaySound(doubleClickSound);
             }
             else
             {
-                message = $"🏰 {evt.BuildingName} selected";
+                message = $"[BUILDING] {evt.BuildingName} selected";
                 PlaySound(groupRecalledSound);
             }
             

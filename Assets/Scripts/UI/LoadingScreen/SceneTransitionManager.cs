@@ -6,7 +6,7 @@ namespace RTS.UI
 {
     /// <summary>
     /// Manages scene transitions with loading screens.
-    /// Handles: Main Menu → Game Scene, and Game Scene → Main Menu
+    /// Handles: Main Menu -> Game Scene, and Game Scene -> Main Menu
     /// </summary>
     public class SceneTransitionManager : MonoBehaviour
     {

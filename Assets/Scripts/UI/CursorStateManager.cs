@@ -191,7 +191,7 @@ namespace KingdomsAtDusk.UI
                 }
             }
 
-            // No unit selected → normal
+            // No unit selected -> normal
             if (selectionManager.SelectionCount == 0)
             {
                 SetCursor(CursorState.Normal);

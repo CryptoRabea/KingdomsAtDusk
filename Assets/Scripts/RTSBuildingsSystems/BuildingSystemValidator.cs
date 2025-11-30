@@ -42,12 +42,12 @@ namespace RTS.Buildings
             var selectionManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
             if (selectionManager == null)
             {
-                Debug.LogError("❌ CRITICAL: No BuildingSelectionManager found in scene!");
+                Debug.LogError("[ERROR] CRITICAL: No BuildingSelectionManager found in scene!");
                 Debug.LogError("   Fix: Add BuildingSelectionManager component to a GameObject (like GameManager)");
                 return;
             }
 
-            Debug.Log($"✅ BuildingSelectionManager found on: {selectionManager.gameObject.name}");
+            Debug.Log($"[OK] BuildingSelectionManager found on: {selectionManager.gameObject.name}");
 
             // Check input actions using reflection
             var clickAction = GetFieldValue<InputActionReference>(selectionManager, "clickAction");
@@ -56,32 +56,32 @@ namespace RTS.Buildings
 
             if (clickAction == null)
             {
-                Debug.LogError("❌ Click Action not assigned!");
+                Debug.LogError("[ERROR] Click Action not assigned!");
                 Debug.LogError("   Fix: Assign 'Click' Input Action Reference in inspector");
             }
             else
             {
-                Debug.Log($"✅ Click Action assigned: {clickAction.action?.name ?? "null"}");
+                Debug.Log($"[OK] Click Action assigned: {clickAction.action?.name ?? "null"}");
             }
 
             if (rightClickAction == null)
             {
-                Debug.LogError("❌ Right Click Action not assigned!");
+                Debug.LogError("[ERROR] Right Click Action not assigned!");
                 Debug.LogError("   Fix: Assign 'Right Click' Input Action Reference in inspector");
             }
             else
             {
-                Debug.Log($"✅ Right Click Action assigned: {rightClickAction.action?.name ?? "null"}");
+                Debug.Log($"[OK] Right Click Action assigned: {rightClickAction.action?.name ?? "null"}");
             }
 
             if (positionAction == null)
             {
-                Debug.LogError("❌ Position Action not assigned!");
+                Debug.LogError("[ERROR] Position Action not assigned!");
                 Debug.LogError("   Fix: Assign 'Position' Input Action Reference in inspector");
             }
             else
             {
-                Debug.Log($"✅ Position Action assigned: {positionAction.action?.name ?? "null"}");
+                Debug.Log($"[OK] Position Action assigned: {positionAction.action?.name ?? "null"}");
             }
 
             // Check layer masks
@@ -90,37 +90,37 @@ namespace RTS.Buildings
 
             if (buildingLayer.value == 0)
             {
-                Debug.LogError("❌ Building Layer not set!");
+                Debug.LogError("[ERROR] Building Layer not set!");
                 Debug.LogError("   Fix: Set building layer mask in inspector (e.g., 'Building' layer)");
             }
             else
             {
-                Debug.Log($"✅ Building Layer mask: {buildingLayer.value}");
+                Debug.Log($"[OK] Building Layer mask: {buildingLayer.value}");
             }
 
             if (groundLayer.value == 0)
             {
-                Debug.LogWarning("⚠️ Ground Layer not set!");
+                Debug.LogWarning("[WARNING] Ground Layer not set!");
                 Debug.LogWarning("   Fix: Set ground layer mask in inspector (e.g., 'Ground' or 'Default' layer)");
             }
             else
             {
-                Debug.Log($"✅ Ground Layer mask: {groundLayer.value}");
+                Debug.Log($"[OK] Ground Layer mask: {groundLayer.value}");
             }
 
             // Check camera
             var mainCamera = GetFieldValue<Camera>(selectionManager, "mainCamera");
             if (mainCamera == null)
             {
-                Debug.LogWarning("⚠️ Main Camera not assigned (will auto-find Camera.main)");
+                Debug.LogWarning("[WARNING] Main Camera not assigned (will auto-find Camera.main)");
                 if (Camera.main == null)
                 {
-                    Debug.LogError("❌ CRITICAL: No Camera.main found in scene!");
+                    Debug.LogError("[ERROR] CRITICAL: No Camera.main found in scene!");
                 }
             }
             else
             {
-                Debug.Log($"✅ Main Camera assigned: {mainCamera.gameObject.name}");
+                Debug.Log($"[OK] Main Camera assigned: {mainCamera.gameObject.name}");
             }
         }
 
@@ -131,7 +131,7 @@ namespace RTS.Buildings
             var buildings = Object.FindObjectsByType<Building>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             if (buildings.Length == 0)
             {
-                Debug.LogWarning("⚠️ No buildings found in scene");
+                Debug.LogWarning("[WARNING] No buildings found in scene");
                 return;
             }
 
@@ -148,7 +148,7 @@ namespace RTS.Buildings
                 // Check BuildingSelectable
                 if (!building.TryGetComponent<BuildingSelectable>(out var selectable))
                 {
-                    Debug.LogError($"❌ {buildingName}: Missing BuildingSelectable component!");
+                    Debug.LogError($"[ERROR] {buildingName}: Missing BuildingSelectable component!");
                     Debug.LogError($"   Fix: Add BuildingSelectable component to {buildingName}");
                     isValid = false;
                 }
@@ -156,7 +156,7 @@ namespace RTS.Buildings
                 // Check Collider
                 if (!building.TryGetComponent<Collider>(out var collider))
                 {
-                    Debug.LogError($"❌ {buildingName}: Missing Collider component!");
+                    Debug.LogError($"[ERROR] {buildingName}: Missing Collider component!");
                     Debug.LogError($"   Fix: Add a Collider (BoxCollider, etc.) to {buildingName}");
                     isValid = false;
                 }
@@ -165,7 +165,7 @@ namespace RTS.Buildings
                 int buildingLayer = building.gameObject.layer;
                 if (buildingLayer == 0) // Default layer
                 {
-                    Debug.LogWarning($"⚠️ {buildingName}: On Default layer (should be on 'Building' layer)");
+                    Debug.LogWarning($"[WARNING] {buildingName}: On Default layer (should be on 'Building' layer)");
                     Debug.LogWarning($"   Fix: Set layer to 'Building' for {buildingName}");
                 }
 
@@ -174,7 +174,7 @@ namespace RTS.Buildings
                 {
                     if (!building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
                     {
-                        Debug.LogError($"❌ {buildingName}: Can train units but missing UnitTrainingQueue!");
+                        Debug.LogError($"[ERROR] {buildingName}: Can train units but missing UnitTrainingQueue!");
                         Debug.LogError($"   Fix: Add UnitTrainingQueue component to {buildingName}");
                         isValid = false;
                     }
@@ -183,7 +183,7 @@ namespace RTS.Buildings
                 if (isValid)
                 {
                     validBuildings++;
-                    Debug.Log($"✅ {buildingName}: Valid");
+                    Debug.Log($"[OK] {buildingName}: Valid");
                 }
                 else
                 {
@@ -201,23 +201,23 @@ namespace RTS.Buildings
             var ui = FindAnyObjectByType<UI.BuildingDetailsUI>();
             if (ui == null)
             {
-                Debug.LogWarning("⚠️ No BuildingDetailsUI found in scene");
+                Debug.LogWarning("[WARNING] No BuildingDetailsUI found in scene");
                 Debug.LogWarning("   This is optional but recommended for training units");
                 return;
             }
 
-            Debug.Log($"✅ BuildingDetailsUI found on: {ui.gameObject.name}");
+            Debug.Log($"[OK] BuildingDetailsUI found on: {ui.gameObject.name}");
 
             // Check critical references
             var panelRoot = GetFieldValue<GameObject>(ui, "panelRoot");
             if (panelRoot == null)
             {
-                Debug.LogError("❌ Panel Root not assigned!");
+                Debug.LogError("[ERROR] Panel Root not assigned!");
                 Debug.LogError("   Fix: Assign the UI panel GameObject in inspector");
             }
             else
             {
-                Debug.Log($"✅ Panel Root assigned: {panelRoot.name}");
+                Debug.Log($"[OK] Panel Root assigned: {panelRoot.name}");
             }
         }
 

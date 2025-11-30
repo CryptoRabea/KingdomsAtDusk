@@ -100,7 +100,7 @@ namespace RTS.Buildings
                 fireEffect.Play();
             }
 
-            Debug.Log($"🔥 Campfire activated at {transform.position}");
+            Debug.Log($"[FIRE] Campfire activated at {transform.position}");
         }
 
         private void UpdatePeasantGathering()
@@ -170,7 +170,7 @@ namespace RTS.Buildings
             float happinessMultiplier = CalculateHappinessMultiplier();
             EventBus.Publish(new CampfireGatheringChangedEvent(gameObject, currentPeasantCount, happinessMultiplier));
 
-            Debug.Log($"🔥 Campfire peasants: {previousCount} → {currentPeasantCount}");
+            Debug.Log($"[FIRE] Campfire peasants: {previousCount} -> {currentPeasantCount}");
         }
 
         private void UpdateBonuses()
