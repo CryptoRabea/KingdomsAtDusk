@@ -21,7 +21,7 @@ namespace RTS.UI
 
         [Header("Buttons")]
         [SerializeField] private Button newGameButton;
-        [SerializeField] private Button continueButton;
+        [SerializeField] private Button loadGameButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button creditsButton;
         [SerializeField] private Button quitButton;
@@ -31,6 +31,9 @@ namespace RTS.UI
 
         [Header("Credits Buttons")]
         [SerializeField] private Button backFromCreditsButton;
+
+        [Header("Save Management")]
+        [SerializeField] private RTS.SaveLoad.SaveManagementPanel saveManagementPanel;
 
         [Header("Version Display")]
         [SerializeField] private TextMeshProUGUI versionText;
@@ -42,8 +45,8 @@ namespace RTS.UI
             if (newGameButton != null)
                 newGameButton.onClick.AddListener(OnNewGameClicked);
 
-            if (continueButton != null)
-                continueButton.onClick.AddListener(OnContinueClicked);
+            if (loadGameButton != null)
+                loadGameButton.onClick.AddListener(OnLoadGameClicked);
 
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClicked);
@@ -69,8 +72,11 @@ namespace RTS.UI
                 versionText.text = $"{versionPrefix}{Application.version}";
             }
 
-            // Check if save game exists for Continue button
-            UpdateContinueButtonState();
+            // Initialize save management panel
+            if (saveManagementPanel != null)
+            {
+                saveManagementPanel.SetMainMenuMode(true);
+            }
 
             Debug.Log("[MainMenu] Main menu initialized");
         }
@@ -86,28 +92,22 @@ namespace RTS.UI
         {
             Debug.Log("[MainMenu] New Game clicked");
 
-            // Delete save game if it exists
-            if (SaveGameExists())
-            {
-                PlayerPrefs.DeleteKey("SaveGameExists");
-            }
-
             // Load game scene
             SceneTransitionManager.Instance.LoadGameScene();
         }
 
-        private void OnContinueClicked()
+        private void OnLoadGameClicked()
         {
-            Debug.Log("[MainMenu] Continue clicked");
+            Debug.Log("[MainMenu] Load Game clicked");
 
-            if (!SaveGameExists())
+            if (saveManagementPanel != null)
             {
-                Debug.LogWarning("No save game found!");
-                return;
+                saveManagementPanel.OpenPanel(isLoading: true);
             }
-
-            // Load game scene with save data
-            SceneTransitionManager.Instance.LoadGameScene();
+            else
+            {
+                Debug.LogWarning("SaveManagementPanel not assigned!");
+            }
         }
 
         private void OnSettingsClicked()
@@ -147,21 +147,6 @@ namespace RTS.UI
             if (panel != null)
             {
                 panel.SetActive(active);
-            }
-        }
-
-        private bool SaveGameExists()
-        {
-            // Simple check - replace with your actual save system
-            return PlayerPrefs.GetInt("SaveGameExists", 0) == 1;
-        }
-
-        private void UpdateContinueButtonState()
-        {
-            if (continueButton != null)
-            {
-                // Disable continue button if no save exists
-                continueButton.interactable = SaveGameExists();
             }
         }
 
