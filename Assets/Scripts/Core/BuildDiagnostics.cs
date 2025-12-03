@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using System.Text;
 
@@ -12,7 +13,7 @@ namespace RTS.Core
     public class BuildDiagnostics : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private KeyCode diagnosticsKey = KeyCode.D;
+        [SerializeField] private Key diagnosticsKey = Key.D;
         [SerializeField] private bool showOnStartup = false;
         [SerializeField] private bool showGUI = true;
 
@@ -47,7 +48,7 @@ namespace RTS.Core
         private void Update()
         {
             // Toggle diagnostics with key
-            if (Input.GetKeyDown(diagnosticsKey))
+            if (Keyboard.current != null && Keyboard.current[diagnosticsKey].wasPressedThisFrame)
             {
                 showDiagnostics = !showDiagnostics;
                 if (showDiagnostics)
@@ -85,8 +86,8 @@ namespace RTS.Core
             sb.AppendLine("--- PERFORMANCE ---");
             sb.AppendLine($"FPS: {fps:F1}");
             sb.AppendLine($"Frame Time: {frameTime:F2}ms");
-            sb.AppendLine($"VSync: {(QualitySettings.vSyncCount > 0 ? "ON [WARNING]" : "OFF [OK]")}");
-            sb.AppendLine($"Target FPS: {(Application.targetFrameRate <= 0 ? "Unlimited [OK]" : Application.targetFrameRate.ToString())}");
+            sb.AppendLine($"VSync: {(QualitySettings.vSyncCount > 0 ? "ON [!]" : "OFF OK")}");
+            sb.AppendLine($"Target FPS: {(Application.targetFrameRate <= 0 ? "Unlimited OK" : Application.targetFrameRate.ToString())}");
             sb.AppendLine($"Time Scale: {Time.timeScale}");
             sb.AppendLine();
 
@@ -133,7 +134,7 @@ namespace RTS.Core
 
             // Texture Streaming
             sb.AppendLine("--- TEXTURE STREAMING ---");
-            sb.AppendLine($"Active: {(QualitySettings.streamingMipmapsActive ? "YES [OK]" : "NO [WARNING]")}");
+            sb.AppendLine($"Active: {(QualitySettings.streamingMipmapsActive ? "YES OK" : "NO [!]")}");
             if (QualitySettings.streamingMipmapsActive)
             {
                 sb.AppendLine($"Memory Budget: {QualitySettings.streamingMipmapsMemoryBudget}MB");
@@ -147,32 +148,32 @@ namespace RTS.Core
 
             if (QualitySettings.vSyncCount > 0)
             {
-                sb.AppendLine("[WARNING] VSync is ON - May limit FPS!");
+                sb.AppendLine("[!] VSync is ON - May limit FPS!");
                 hasIssues = true;
             }
 
             if (Application.targetFrameRate > 0 && Application.targetFrameRate < 60)
             {
-                sb.AppendLine($"[WARNING] Target FPS is {Application.targetFrameRate} - Too low!");
+                sb.AppendLine($"[!] Target FPS is {Application.targetFrameRate} - Too low!");
                 hasIssues = true;
             }
 
             if (fps < 30 && Time.time > 5f)
             {
-                sb.AppendLine($"[WARNING] Low FPS detected ({fps:F0}) - Check GPU selection!");
+                sb.AppendLine($"[!] Low FPS detected ({fps:F0}) - Check GPU selection!");
                 hasIssues = true;
             }
 
             if (!QualitySettings.streamingMipmapsActive)
             {
-                sb.AppendLine("[WARNING] Texture streaming disabled - May cause texture issues!");
+                sb.AppendLine("[!] Texture streaming disabled - May cause texture issues!");
                 hasIssues = true;
             }
 
             if (SystemInfo.graphicsDeviceName.Contains("Intel") &&
                 !SystemInfo.graphicsDeviceName.Contains("Arc"))
             {
-                sb.AppendLine("[WARNING] Using Intel integrated GPU - Check Windows Graphics Settings!");
+                sb.AppendLine("[!] Using Intel integrated GPU - Check Windows Graphics Settings!");
                 hasIssues = true;
             }
 
@@ -180,13 +181,13 @@ namespace RTS.Core
                 SystemInfo.batteryStatus != BatteryStatus.Charging &&
                 SystemInfo.batteryLevel < 0.2f)
             {
-                sb.AppendLine("[WARNING] Low battery - Performance may be throttled!");
+                sb.AppendLine("[!] Low battery - Performance may be throttled!");
                 hasIssues = true;
             }
 
             if (!hasIssues)
             {
-                sb.AppendLine("[OK] No obvious issues detected!");
+                sb.AppendLine("OK No obvious issues detected!");
             }
 
             sb.AppendLine();

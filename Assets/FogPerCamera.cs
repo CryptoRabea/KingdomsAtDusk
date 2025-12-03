@@ -28,7 +28,6 @@ public class FogPerCamera : MonoBehaviour
             RenderSettings.fog = false;
         }
     }
-
     private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
     {
         if (camera == targetCamera)

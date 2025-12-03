@@ -18,12 +18,9 @@ namespace KingdomsAtDusk.FogOfWar
     [System.Serializable]
     public class FogOfWarConfig
     {
-        [Header("Grid Settings")]
-        [Tooltip("Size of each grid cell in world units")]
-        public float cellSize = 2f;
-
-        [Tooltip("World bounds for the fog of war grid")]
-        public Bounds worldBounds = new Bounds(Vector3.zero, new Vector3(2000f, 100f, 2000f));
+        [Header("World Boundaries")]
+        [Tooltip("Game world boundaries - single source of truth")]
+        public GameBoundary gameBoundary = new GameBoundary();
 
         [Header("Vision Settings")]
         [Tooltip("Default vision radius for units without specific vision range")]

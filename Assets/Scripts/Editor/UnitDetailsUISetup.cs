@@ -27,10 +27,10 @@ namespace RTS.Editor
 
             EditorGUILayout.HelpBox(
                 "This tool will create:\n" +
-                "- UnitDetailsUI panel with all stat displays\n" +
-                "- Unit portrait, name, and all stats\n" +
-                "- Health bar with color coding\n" +
-                "- All references will be automatically connected",
+                "• UnitDetailsUI panel with all stat displays\n" +
+                "• Unit portrait, name, and all stats\n" +
+                "• Health bar with color coding\n" +
+                "• All references will be automatically connected",
                 MessageType.Info);
 
             GUILayout.Space(10);
@@ -179,7 +179,7 @@ namespace RTS.Editor
             EditorUtility.SetDirty(componentWrapper);
             Selection.activeGameObject = componentWrapper;
 
-            Debug.Log("[OK] UnitDetailsUI created successfully!");
+            Debug.Log("✅ UnitDetailsUI created successfully!");
             Debug.Log("   - UnitDetailsUI component: ACTIVE (receives events)");
             Debug.Log("   - UnitDetailsPanel visual: INACTIVE (will show when unit selected)");
         }

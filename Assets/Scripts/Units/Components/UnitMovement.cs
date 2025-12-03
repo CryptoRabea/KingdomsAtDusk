@@ -153,13 +153,13 @@ namespace RTS.Units
         {
             if (!isEnabled)
             {
-                Debug.LogWarning($"[WARNING] UnitMovement: Cannot set destination for {gameObject.name} - movement is disabled!");
+                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - movement is disabled!");
                 return;
             }
 
             if (agent == null)
             {
-                Debug.LogError($"[ERROR] UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is null!");
+                Debug.LogError($" UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is null!");
                 return;
             }
 
@@ -187,7 +187,7 @@ namespace RTS.Units
             }
             else
             {
-                Debug.LogWarning($"[WARNING] UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is disabled!");
+                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is disabled!");
             }
         }
 
@@ -493,7 +493,6 @@ namespace RTS.Units
                 }
                 else if (agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathPartial)
                 {
-                    Debug.LogWarning($"Unit {gameObject.name} - partial path to {currentDestination}");
                     // Partial paths are acceptable, but log for debugging
                 }
             }

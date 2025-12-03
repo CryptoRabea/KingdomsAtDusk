@@ -29,6 +29,7 @@ public class FogOfWarManager : MonoBehaviour
         public FogOfWarConfig Config => config;
         public FogOfWarGrid Grid => grid;
         public int LocalPlayerId => localPlayerId;
+        public GameBoundary Boundary => config.gameBoundary;
 
         private void Awake()
         {
@@ -56,11 +57,10 @@ public class FogOfWarManager : MonoBehaviour
             }
 
             Debug.Log($"[FogOfWarManager] Starting initialization...");
-            Debug.Log($"[FogOfWarManager] World Bounds: {config.worldBounds}");
-            Debug.Log($"[FogOfWarManager] Cell Size: {config.cellSize}");
+            Debug.Log($"[FogOfWarManager] Game Boundary: {config.gameBoundary}");
 
-            // Create the grid
-            grid = new FogOfWarGrid(config.worldBounds, config.cellSize);
+            // Create the grid using game boundary
+            grid = new FogOfWarGrid(config.gameBoundary.Bounds, config.gameBoundary.CellSize);
             Debug.Log($"[FogOfWarManager] Grid created: {grid.Width}x{grid.Height} cells");
 
             // Initialize renderers
@@ -89,7 +89,7 @@ public class FogOfWarManager : MonoBehaviour
 
             isInitialized = true;
 
-            Debug.Log($"[FogOfWarManager] [OK] Initialization complete with {visionProviders.Count} vision providers");
+            Debug.Log($"[FogOfWarManager]  Initialization complete with {visionProviders.Count} vision providers");
         }
 
         private void Update()
@@ -339,9 +339,8 @@ public class FogOfWarManager : MonoBehaviour
         {
             if (!config.enableDebugVisualization) return;
 
-            // Draw world bounds
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireCube(config.worldBounds.center, config.worldBounds.size);
+            // Draw world bounds using game boundary
+            config.gameBoundary.DrawGizmos(Color.yellow);
         }
 
         /// <summary>

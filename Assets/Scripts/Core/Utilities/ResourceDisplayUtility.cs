@@ -15,10 +15,10 @@ namespace RTS.Core.Utilities
         // Resource emoji/icon mappings
         private static readonly Dictionary<ResourceType, string> ResourceEmojis = new Dictionary<ResourceType, string>
         {
-            { ResourceType.Wood, "[W]" },
-            { ResourceType.Food, "[F]" },
-            { ResourceType.Gold, "[G]" },
-            { ResourceType.Stone, "[S]" }
+            { ResourceType.Wood, "[Wood]" },
+            { ResourceType.Food, "[Food]" },
+            { ResourceType.Gold, "[Gold]" },
+            { ResourceType.Stone, "[Stone]" }
         };
 
         // Resource color mappings for UI
@@ -34,7 +34,7 @@ namespace RTS.Core.Utilities
 
         /// <summary>
         /// Format resource costs as a display string.
-        /// Example: "[W] 100  [G] 50  [S] 25"
+        /// Example: "[Wood] 100  [Gold] 50  [Stone] 25"
         /// </summary>
         /// <param name="costs">Dictionary of resource costs</param>
         /// <param name="separator">Separator between resources (default: "  ")</param>
@@ -77,7 +77,7 @@ namespace RTS.Core.Utilities
 
         /// <summary>
         /// Format costs for rich text with colors.
-        /// Example: "<color=#8B4513>[W] 100</color>  <color=#FFD700>[G] 50</color>"
+        /// Example: "<color=#8B4513>[Wood] 100</color>  <color=#FFD700>[Gold] 50</color>"
         /// </summary>
         public static string FormatCostsRichText(Dictionary<ResourceType, int> costs, string separator = "  ")
         {

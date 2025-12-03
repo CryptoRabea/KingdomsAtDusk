@@ -1,16 +1,21 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.InputSystem;
+using RTS.Core.Services;
+using RTS.SaveLoad;
 
 namespace RTS.UI
 {
     /// <summary>
     /// Manages the main menu UI with buttons for:
     /// - New Game
-    /// - Continue
+    /// - Continue (Load Game)
     /// - Settings
     /// - Credits
     /// - Quit
+    /// Uses the new Input System for keyboard/gamepad navigation
+    /// Integrates with SaveLoadService for save game management
     /// </summary>
     public class MainMenuManager : MonoBehaviour
     {
@@ -18,10 +23,11 @@ namespace RTS.UI
         [SerializeField] private GameObject mainMenuPanel;
         [SerializeField] private GameObject settingsPanel;
         [SerializeField] private GameObject creditsPanel;
+        [SerializeField] private MainMenuLoadPanel loadPanel;
 
         [Header("Buttons")]
         [SerializeField] private Button newGameButton;
-        [SerializeField] private Button loadGameButton;
+        [SerializeField] private Button continueButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private Button creditsButton;
         [SerializeField] private Button quitButton;
@@ -32,21 +38,67 @@ namespace RTS.UI
         [Header("Credits Buttons")]
         [SerializeField] private Button backFromCreditsButton;
 
-        [Header("Save Management")]
-        [SerializeField] private RTS.SaveLoad.SaveManagementPanel saveManagementPanel;
-
         [Header("Version Display")]
         [SerializeField] private TextMeshProUGUI versionText;
         [SerializeField] private string versionPrefix = "v";
 
+        // Input System
+        private InputSystem_Actions inputActions;
+        private InputAction cancelAction;
+
+        // Services
+        private ISaveLoadService saveLoadService;
+
+        private void Awake()
+        {
+            // Initialize Input System
+            inputActions = new InputSystem_Actions();
+
+            // Get the Cancel action from UI map for ESC/Back navigation
+            cancelAction = inputActions.UI.Cancel;
+        }
+
+        private void OnEnable()
+        {
+            // Enable UI input actions
+            inputActions.UI.Enable();
+
+            // Subscribe to Cancel action (ESC key or gamepad B button)
+            if (cancelAction != null)
+            {
+                cancelAction.performed += OnCancelPerformed;
+            }
+        }
+
+        private void OnDisable()
+        {
+            // Unsubscribe from Cancel action
+            if (cancelAction != null)
+            {
+                cancelAction.performed -= OnCancelPerformed;
+            }
+
+            // Disable UI input actions
+            inputActions.UI.Disable();
+        }
+
         private void Start()
         {
+            // Get save load service
+            saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
+
+            // Try to find load panel if not assigned
+            if (loadPanel == null)
+            {
+                loadPanel = FindAnyObjectByType<MainMenuLoadPanel>(FindObjectsInactive.Include);
+            }
+
             // Setup button listeners
             if (newGameButton != null)
                 newGameButton.onClick.AddListener(OnNewGameClicked);
 
-            if (loadGameButton != null)
-                loadGameButton.onClick.AddListener(OnLoadGameClicked);
+            if (continueButton != null)
+                continueButton.onClick.AddListener(OnContinueClicked);
 
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClicked);
@@ -72,13 +124,28 @@ namespace RTS.UI
                 versionText.text = $"{versionPrefix}{Application.version}";
             }
 
-            // Initialize save management panel
-            if (saveManagementPanel != null)
-            {
-                saveManagementPanel.SetMainMenuMode(true);
-            }
+            // Check if save game exists for Continue button
+            UpdateContinueButtonState();
 
-            Debug.Log("[MainMenu] Main menu initialized");
+            UnityEngine.Debug.Log("[MainMenu] Main menu initialized with Input System and SaveLoad integration");
+        }
+
+        private void OnCancelPerformed(InputAction.CallbackContext context)
+        {
+            // Handle ESC key / Cancel button (gamepad B)
+            if (settingsPanel != null && settingsPanel.activeSelf)
+            {
+                OnBackFromSettings();
+            }
+            else if (creditsPanel != null && creditsPanel.activeSelf)
+            {
+                OnBackFromCredits();
+            }
+            else if (mainMenuPanel != null && mainMenuPanel.activeSelf)
+            {
+                // On main menu, ESC quits the game
+                OnQuitClicked();
+            }
         }
 
         private void ShowMainMenu()
@@ -90,55 +157,67 @@ namespace RTS.UI
 
         private void OnNewGameClicked()
         {
-            Debug.Log("[MainMenu] New Game clicked");
+            UnityEngine.Debug.Log("[MainMenu] New Game clicked");
+
+            // Clear any load-on-start flag
+            PlayerPrefs.DeleteKey("LoadSaveOnStart");
+            PlayerPrefs.Save();
 
             // Load game scene
             SceneTransitionManager.Instance.LoadGameScene();
         }
 
-        private void OnLoadGameClicked()
+        private void OnContinueClicked()
         {
-            Debug.Log("[MainMenu] Load Game clicked");
+            UnityEngine.Debug.Log("[MainMenu] Continue clicked");
 
-            if (saveManagementPanel != null)
+            if (!HasAnySaves())
             {
-                saveManagementPanel.OpenPanel(isLoading: true);
+                UnityEngine.Debug.LogWarning("No save games found!");
+                return;
+            }
+
+            // Open load panel
+            if (loadPanel != null)
+            {
+                SetPanelActive(mainMenuPanel, false);
+                loadPanel.OpenPanel();
             }
             else
             {
-                Debug.LogWarning("SaveManagementPanel not assigned!");
+                UnityEngine.Debug.LogError("Load panel not found!");
             }
         }
 
         private void OnSettingsClicked()
         {
-            Debug.Log("[MainMenu] Settings clicked");
+            UnityEngine.Debug.Log("[MainMenu] Settings clicked");
             SetPanelActive(mainMenuPanel, false);
             SetPanelActive(settingsPanel, true);
         }
 
         private void OnCreditsClicked()
         {
-            Debug.Log("[MainMenu] Credits clicked");
+            UnityEngine.Debug.Log("[MainMenu] Credits clicked");
             SetPanelActive(mainMenuPanel, false);
             SetPanelActive(creditsPanel, true);
         }
 
         private void OnQuitClicked()
         {
-            Debug.Log("[MainMenu] Quit clicked");
+            UnityEngine.Debug.Log("[MainMenu] Quit clicked");
             SceneTransitionManager.Instance.QuitGame();
         }
 
         private void OnBackFromSettings()
         {
-            Debug.Log("[MainMenu] Back from Settings");
+            UnityEngine.Debug.Log("[MainMenu] Back from Settings");
             ShowMainMenu();
         }
 
         private void OnBackFromCredits()
         {
-            Debug.Log("[MainMenu] Back from Credits");
+            UnityEngine.Debug.Log("[MainMenu] Back from Credits");
             ShowMainMenu();
         }
 
@@ -147,6 +226,24 @@ namespace RTS.UI
             if (panel != null)
             {
                 panel.SetActive(active);
+            }
+        }
+
+        private bool HasAnySaves()
+        {
+            if (saveLoadService == null)
+                return false;
+
+            string[] saves = saveLoadService.GetAllSaves();
+            return saves != null && saves.Length > 0;
+        }
+
+        private void UpdateContinueButtonState()
+        {
+            if (continueButton != null)
+            {
+                // Disable continue button if no saves exist
+                continueButton.interactable = HasAnySaves();
             }
         }
 

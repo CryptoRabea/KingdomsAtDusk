@@ -154,8 +154,8 @@ public class RTSCameraController : MonoBehaviour
     {
         Vector3 dir = new Vector3(moveInput.x, 0, moveInput.y);
 
-        // Edge scrolling - Check UI and viewport bounds
-        if (useEdgeScroll && Mouse.current != null && !IsMouseOverUI())
+        // Edge scrolling - Check at exact screen edges, even over UI
+        if (useEdgeScroll && Mouse.current != null)
         {
             Vector2 mousePos = Mouse.current.position.ReadValue();
 
@@ -167,36 +167,29 @@ public class RTSCameraController : MonoBehaviour
                 return;
             }
 
-            // Calculate viewport boundaries in screen space
-            float viewportBottomY = Screen.height * viewportYOffset;
-            float viewportTopY = Screen.height * (viewportYOffset + viewportHeight);
-
-            // Check if mouse is within the viewport's Y range (not in UI area below)
-            bool isInViewportY = mousePos.y >= viewportBottomY && mousePos.y <= viewportTopY;
-
-            if (isInViewportY)
+            // Check all four edges of the screen, regardless of UI or viewport
+            // Top edge
+            if (mousePos.y >= Screen.height - panBorderThickness)
             {
-                // Vertical scrolling - Check top and bottom edges of viewport
-                if (mousePos.y >= viewportTopY - panBorderThickness)
-                {
-                    dir.z += 1; // Scroll forward (camera moves up)
-                }
+                dir.z += 1; // Scroll forward (camera moves up)
+            }
 
-                if (mousePos.y <= viewportBottomY + panBorderThickness)
-                {
-                    dir.z -= 1; // Scroll backward (camera moves down)
-                }
+            // Bottom edge
+            if (mousePos.y <= panBorderThickness)
+            {
+                dir.z -= 1; // Scroll backward (camera moves down)
+            }
 
-                // Horizontal scrolling - Check left and right edges of screen
-                if (mousePos.x >= Screen.width - panBorderThickness)
-                {
-                    dir.x += 1; // Scroll right
-                }
+            // Right edge
+            if (mousePos.x >= Screen.width - panBorderThickness)
+            {
+                dir.x += 1; // Scroll right
+            }
 
-                if (mousePos.x <= panBorderThickness)
-                {
-                    dir.x -= 1; // Scroll left
-                }
+            // Left edge
+            if (mousePos.x <= panBorderThickness)
+            {
+                dir.x -= 1; // Scroll left
             }
         }
 

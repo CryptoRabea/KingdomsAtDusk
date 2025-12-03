@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LylekGames.Tools
 {
@@ -16,19 +17,21 @@ namespace LylekGames.Tools
         {
             controller.Move(gravity * Time.deltaTime);
 
-            if (Input.GetKey(KeyCode.W))
+            if (Keyboard.current == null) return;
+
+            if (Keyboard.current[Key.W].isPressed)
             {
                 controller.Move(transform.forward * speed * Time.deltaTime);
             }
-            else if (Input.GetKey(KeyCode.A))
+            else if (Keyboard.current[Key.A].isPressed)
             {
                 controller.Move(-transform.right * speed * Time.deltaTime);
             }
-            else if (Input.GetKey(KeyCode.D))
+            else if (Keyboard.current[Key.D].isPressed)
             {
                 controller.Move(transform.right * speed * Time.deltaTime);
             }
-            else if (Input.GetKey(KeyCode.S))
+            else if (Keyboard.current[Key.S].isPressed)
             {
                 controller.Move(-transform.forward * speed * Time.deltaTime);
             }

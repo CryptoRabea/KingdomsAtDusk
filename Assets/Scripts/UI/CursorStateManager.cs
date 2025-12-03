@@ -173,6 +173,17 @@ namespace KingdomsAtDusk.UI
                 return;
             }
 
+            // Ensure we have a valid camera reference
+            if (mainCamera == null)
+            {
+                mainCamera = Camera.main;
+                if (mainCamera == null)
+                {
+                    SetCursor(CursorState.Normal);
+                    return;
+                }
+            }
+
             Ray ray = mainCamera.ScreenPointToRay(pos);
 
             // Buildings
@@ -191,7 +202,17 @@ namespace KingdomsAtDusk.UI
                 }
             }
 
-            // No unit selected -> normal
+            // No unit selected → normal
+            if (selectionManager == null)
+            {
+                selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
+                if (selectionManager == null)
+                {
+                    SetCursor(CursorState.Normal);
+                    return;
+                }
+            }
+
             if (selectionManager.SelectionCount == 0)
             {
                 SetCursor(CursorState.Normal);
@@ -228,15 +249,9 @@ namespace KingdomsAtDusk.UI
                 pos.y < 0 || pos.y > Screen.height)
                 return CursorState.Normal;
 
-            float viewBottom = Screen.height * viewportYOffset;
-            float viewTop = Screen.height * (viewportYOffset + viewportHeight);
-
-            // Only apply scrolling inside the viewport area
-            if (pos.y < viewBottom || pos.y > viewTop)
-                return CursorState.Normal;
-
-            bool top = pos.y >= viewTop - edgeScrollBorderThickness;
-            bool bottom = pos.y <= viewBottom + edgeScrollBorderThickness;
+            // Check all four edges of the screen, regardless of UI or viewport
+            bool top = pos.y >= Screen.height - edgeScrollBorderThickness;
+            bool bottom = pos.y <= edgeScrollBorderThickness;
             bool left = pos.x <= edgeScrollBorderThickness;
             bool right = pos.x >= Screen.width - edgeScrollBorderThickness;
 

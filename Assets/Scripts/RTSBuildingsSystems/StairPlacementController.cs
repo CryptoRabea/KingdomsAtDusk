@@ -320,7 +320,7 @@ namespace RTS.Buildings
                 stairComponent.enabled = true;
             }
 
-            Debug.Log($"[OK] Placed stair at {newStair.transform.position}");
+            Debug.Log($" Placed stair at {newStair.transform.position}");
 
             // Continue placing or cancel
             CancelStairPlacement();

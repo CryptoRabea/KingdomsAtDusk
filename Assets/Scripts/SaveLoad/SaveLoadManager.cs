@@ -34,12 +34,48 @@ namespace RTS.SaveLoad
             EnsureSaveDirectoryExists();
         }
 
+        private void Start()
+        {
+            // Check if we should auto-load a save
+            CheckAutoLoad();
+        }
+
         private void Update()
         {
             // Track playtime
             if (Time.timeScale > 0)
             {
                 playTime += Time.deltaTime;
+            }
+        }
+
+        private void CheckAutoLoad()
+        {
+            // Check if there's a save to auto-load
+            if (PlayerPrefs.HasKey("LoadSaveOnStart"))
+            {
+                string saveToLoad = PlayerPrefs.GetString("LoadSaveOnStart");
+                PlayerPrefs.DeleteKey("LoadSaveOnStart");
+                PlayerPrefs.Save();
+
+                if (!string.IsNullOrEmpty(saveToLoad))
+                {
+                    Debug.Log($"Auto-loading save: {saveToLoad}");
+                    // Use a small delay to ensure all systems are initialized
+                    StartCoroutine(DelayedLoad(saveToLoad));
+                }
+            }
+        }
+
+        private System.Collections.IEnumerator DelayedLoad(string saveName)
+        {
+            // Wait for one frame to ensure all systems are ready
+            yield return null;
+
+            bool success = LoadGame(saveName);
+            if (!success)
+            {
+                Debug.LogError($"Failed to auto-load save: {saveName}");
             }
         }
 
@@ -85,7 +121,7 @@ namespace RTS.SaveLoad
                 string filePath = settings.GetSaveFilePath(saveName);
                 File.WriteAllText(filePath, json);
 
-                Log($"[OK] Game saved successfully: {filePath}");
+                Log($" Game saved successfully: {filePath}");
 
                 // Publish save event
                 EventBus.Publish(new GameSavedEvent(saveName, isAutoSave, isQuickSave));
@@ -94,7 +130,7 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[ERROR] Failed to save game: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($" Failed to save game: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -108,7 +144,7 @@ namespace RTS.SaveLoad
                 string filePath = settings.GetSaveFilePath(saveName);
                 if (!File.Exists(filePath))
                 {
-                    Debug.LogError($"[ERROR] Save file not found: {filePath}");
+                    Debug.LogError($" Save file not found: {filePath}");
                     return false;
                 }
 
@@ -134,7 +170,7 @@ namespace RTS.SaveLoad
                 // Restore game state
                 RestoreGameState(saveData);
 
-                Log($"[OK] Game loaded successfully: {saveName}");
+                Log($" Game loaded successfully: {saveName}");
 
                 // Publish load event
                 EventBus.Publish(new GameLoadedEvent(saveName));
@@ -143,7 +179,7 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[ERROR] Failed to load game: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($" Failed to load game: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -635,15 +671,17 @@ namespace RTS.SaveLoad
 
             Log($"Restoring {buildingsData.Count} buildings...");
 
+            int restoredCount = 0;
+
             foreach (var buildingData in buildingsData)
             {
                 try
                 {
-                    // Find the BuildingDataSO by name
-                    BuildingDataSO data = Resources.LoadAll<BuildingDataSO>("").FirstOrDefault(b => b.name == buildingData.buildingDataName);
+                    // Find the BuildingDataSO by name using multiple strategies
+                    BuildingDataSO data = FindBuildingDataSO(buildingData.buildingDataName);
                     if (data == null || data.buildingPrefab == null)
                     {
-                        Debug.LogWarning($"Could not find BuildingDataSO or prefab for: {buildingData.buildingDataName}");
+                        Debug.LogError($"Could not find BuildingDataSO or prefab for: {buildingData.buildingDataName}");
                         continue;
                     }
 
@@ -666,14 +704,16 @@ namespace RTS.SaveLoad
 
                     // Store in entity map for cross-referencing
                     loadedEntitiesMap[buildingData.instanceID] = buildingObj;
+                    restoredCount++;
+                    Log($"  ✓ Restored building: {buildingData.buildingDataName} at {buildingData.position.ToVector3()}");
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"Failed to restore building: {ex.Message}");
+                    Debug.LogError($"Failed to restore building {buildingData.buildingDataName}: {ex.Message}\n{ex.StackTrace}");
                 }
             }
 
-            Log($"Restored {loadedEntitiesMap.Count} buildings");
+            Log($"Restored {restoredCount}/{buildingsData.Count} buildings");
         }
 
         private void RestoreUnitsData(List<UnitSaveData> unitsData)
@@ -683,15 +723,17 @@ namespace RTS.SaveLoad
 
             Log($"Restoring {unitsData.Count} units...");
 
+            int restoredCount = 0;
+
             foreach (var unitData in unitsData)
             {
                 try
                 {
-                    // Find the UnitConfigSO by name
-                    UnitConfigSO config = Resources.LoadAll<UnitConfigSO>("").FirstOrDefault(u => u.name == unitData.unitConfigName);
+                    // Find the UnitConfigSO by name using multiple strategies
+                    UnitConfigSO config = FindUnitConfigSO(unitData.unitConfigName);
                     if (config == null || config.unitPrefab == null)
                     {
-                        Debug.LogWarning($"Could not find UnitConfigSO or prefab for: {unitData.unitConfigName}");
+                        Debug.LogError($"Could not find UnitConfigSO or prefab for: {unitData.unitConfigName}");
                         continue;
                     }
 
@@ -700,6 +742,9 @@ namespace RTS.SaveLoad
                     unitObj.transform.localScale = unitData.scale.ToVector3();
                     unitObj.layer = unitData.layer;
                     unitObj.tag = unitData.tag;
+
+                    // Publish spawn event for UnitSelectionManager cache
+                    EventBus.Publish(new UnitSpawnedEvent(unitObj, unitObj.transform.position));
 
                     // Restore health
                     var health = unitObj.GetComponent<UnitHealth>();
@@ -727,17 +772,19 @@ namespace RTS.SaveLoad
 
                     // Store in entity map
                     loadedEntitiesMap[unitData.instanceID] = unitObj;
+                    restoredCount++;
+                    Log($"  ✓ Restored unit: {unitData.unitConfigName} at {unitData.position.ToVector3()}");
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"Failed to restore unit: {ex.Message}");
+                    Debug.LogError($"Failed to restore unit {unitData.unitConfigName}: {ex.Message}\n{ex.StackTrace}");
                 }
             }
 
             // Second pass: restore targets and AI state (after all units are loaded)
             RestoreUnitReferences(unitsData);
 
-            Log($"Restored units");
+            Log($"Restored {restoredCount}/{unitsData.Count} units");
         }
 
         private void RestoreUnitReferences(List<UnitSaveData> unitsData)
@@ -796,6 +843,166 @@ namespace RTS.SaveLoad
         #endregion
 
         #region Utility Methods
+
+        /// <summary>
+        /// Find BuildingDataSO using multiple fallback strategies.
+        /// </summary>
+        private BuildingDataSO FindBuildingDataSO(string buildingDataName)
+        {
+            if (string.IsNullOrEmpty(buildingDataName))
+            {
+                Debug.LogError("BuildingDataName is null or empty!");
+                return null;
+            }
+
+            Log($"Searching for BuildingDataSO: {buildingDataName}");
+
+            // Strategy 1: Try Resources.LoadAll (only works if assets are in Resources folder)
+            BuildingDataSO[] allBuildingsInResources = Resources.LoadAll<BuildingDataSO>("");
+            Log($"  Strategy 1 (Resources): Found {allBuildingsInResources.Length} BuildingDataSO assets");
+            if (allBuildingsInResources.Length > 0)
+            {
+                foreach (var b in allBuildingsInResources)
+                {
+                    Log($"    - {b.name}");
+                }
+            }
+
+            BuildingDataSO result = allBuildingsInResources.FirstOrDefault(b => b.name == buildingDataName);
+            if (result != null)
+            {
+                Log($"  ✓ Found via Resources: {result.name}");
+                return result;
+            }
+
+            // Strategy 2: Search in known Resources subfolders
+            string[] resourcePaths = new string[]
+            {
+                "Buildings",
+                "ScriptableObjects/Buildings",
+                "Data/Buildings",
+                "BuildingData",
+                "SO/Buildings"
+            };
+
+            foreach (var path in resourcePaths)
+            {
+                BuildingDataSO[] assets = Resources.LoadAll<BuildingDataSO>(path);
+                Log($"  Strategy 2 (Resources/{path}): Found {assets.Length} assets");
+                result = assets.FirstOrDefault(b => b.name == buildingDataName);
+                if (result != null)
+                {
+                    Log($"  ✓ Found in Resources/{path}: {result.name}");
+                    return result;
+                }
+            }
+
+            // Strategy 3: Find existing Building in scene and get its Data
+            Building[] existingBuildings = FindObjectsByType<Building>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Log($"  Strategy 3 (Scene Search): Found {existingBuildings.Length} existing buildings");
+            foreach (var building in existingBuildings)
+            {
+                if (building.Data != null && building.Data.name == buildingDataName)
+                {
+                    Log($"  ✓ Found via existing building in scene: {building.Data.name}");
+                    return building.Data;
+                }
+            }
+
+            // Strategy 4: Try Object.FindObjectsByType to find any BuildingDataSO instances
+            BuildingDataSO[] allLoadedAssets = FindObjectsByType<BuildingDataSO>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Log($"  Strategy 4 (FindObjectsByType): Found {allLoadedAssets.Length} loaded assets");
+            result = allLoadedAssets.FirstOrDefault(b => b.name == buildingDataName);
+            if (result != null)
+            {
+                Log($"  ✓ Found via FindObjectsByType: {result.name}");
+                return result;
+            }
+
+            Debug.LogError($"  ✗ Could not find BuildingDataSO '{buildingDataName}' using any strategy!");
+            Debug.LogError($"  SOLUTION: Move your BuildingDataSO assets to Assets/Resources/Buildings/ folder or create a BuildingDataRegistry ScriptableObject");
+            return null;
+        }
+
+        /// <summary>
+        /// Find UnitConfigSO using multiple fallback strategies.
+        /// </summary>
+        private UnitConfigSO FindUnitConfigSO(string unitConfigName)
+        {
+            if (string.IsNullOrEmpty(unitConfigName))
+            {
+                Debug.LogError("UnitConfigName is null or empty!");
+                return null;
+            }
+
+            Log($"Searching for UnitConfigSO: {unitConfigName}");
+
+            // Strategy 1: Try Resources.LoadAll (only works if assets are in Resources folder)
+            UnitConfigSO[] allUnitsInResources = Resources.LoadAll<UnitConfigSO>("");
+            Log($"  Strategy 1 (Resources): Found {allUnitsInResources.Length} UnitConfigSO assets");
+            if (allUnitsInResources.Length > 0)
+            {
+                foreach (var u in allUnitsInResources)
+                {
+                    Log($"    - {u.name}");
+                }
+            }
+
+            UnitConfigSO result = allUnitsInResources.FirstOrDefault(u => u.name == unitConfigName);
+            if (result != null)
+            {
+                Log($"  ✓ Found via Resources: {result.name}");
+                return result;
+            }
+
+            // Strategy 2: Search in known Resources subfolders
+            string[] resourcePaths = new string[]
+            {
+                "Units",
+                "ScriptableObjects/Units",
+                "Data/Units",
+                "UnitConfigs",
+                "SO/Units"
+            };
+
+            foreach (var path in resourcePaths)
+            {
+                UnitConfigSO[] assets = Resources.LoadAll<UnitConfigSO>(path);
+                Log($"  Strategy 2 (Resources/{path}): Found {assets.Length} assets");
+                result = assets.FirstOrDefault(u => u.name == unitConfigName);
+                if (result != null)
+                {
+                    Log($"  ✓ Found in Resources/{path}: {result.name}");
+                    return result;
+                }
+            }
+
+            // Strategy 3: Find existing Unit in scene and get its Config
+            UnitAIController[] existingUnits = FindObjectsByType<UnitAIController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Log($"  Strategy 3 (Scene Search): Found {existingUnits.Length} existing units");
+            foreach (var unit in existingUnits)
+            {
+                if (unit.Config != null && unit.Config.name == unitConfigName)
+                {
+                    Log($"  ✓ Found via existing unit in scene: {unit.Config.name}");
+                    return unit.Config;
+                }
+            }
+
+            // Strategy 4: Try Object.FindObjectsByType to find any UnitConfigSO instances
+            UnitConfigSO[] allLoadedAssets = FindObjectsByType<UnitConfigSO>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Log($"  Strategy 4 (FindObjectsByType): Found {allLoadedAssets.Length} loaded assets");
+            result = allLoadedAssets.FirstOrDefault(u => u.name == unitConfigName);
+            if (result != null)
+            {
+                Log($"  ✓ Found via FindObjectsByType: {result.name}");
+                return result;
+            }
+
+            Debug.LogError($"  ✗ Could not find UnitConfigSO '{unitConfigName}' using any strategy!");
+            Debug.LogError($"  SOLUTION: Move your UnitConfigSO assets to Assets/Resources/Units/ folder or create a UnitConfigRegistry ScriptableObject");
+            return null;
+        }
 
         private string GetPrefabPath(GameObject prefab)
         {

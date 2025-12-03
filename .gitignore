@@ -1,7 +1,7 @@
 # Unity
 [Ll]ibrary/
 [Tt]emp/
-
+Library/
 
 # VS / Rider
 .vscode/
@@ -79,3 +79,15 @@ Assets/Advance Studios/Medieval Castle/Art.meta
 *.meta
 /Assets/Polytope Studio
 /Assets/BigRookGames
+Logs/AssetImportWorker0.log
+Logs/AssetImportWorker0.log
+Logs/AssetImportWorker1.log
+Logs/shadercompiler-UnityShaderCompiler.exe28.log
+*.log
+Logs/AssetImportWorker2.log
+*.log
+Logs/AssetImportWorker2.log
+Logs/AssetImportWorker3.log
+/Logs
+/Logs
+/Logs

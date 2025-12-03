@@ -153,7 +153,7 @@ namespace RTS.Managers
         {
             if (waveNumber % bossWaveInterval == 0)
             {
-                return $"[WARNING] BOSS WAVE {waveNumber}! Prepare for battle!";
+                return $"⚠️ BOSS WAVE {waveNumber}! Prepare for battle!";
             }
             else if (waveNumber >= waveNumberForTanks)
             {

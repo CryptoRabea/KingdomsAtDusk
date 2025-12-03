@@ -32,12 +32,12 @@ namespace RTS.SaveLoad.Editor
             EditorGUILayout.LabelField("Save/Load System Auto Setup", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
                 "This tool will automatically create and configure the entire Save/Load system:\n\n" +
-                "[OK] SaveLoadSettings ScriptableObject\n" +
-                "[OK] SaveLoadSystem GameObject with all components\n" +
-                "[OK] In-game menu with Resume, Save, Load, Back to Main Menu, Save & Quit, Quit without Saving\n" +
-                "[OK] SaveListItem prefab\n" +
-                "[OK] Auto-wire all references\n" +
-                "[OK] Integrate with GameManager",
+                "- SaveLoadSettings ScriptableObject\n" +
+                "- SaveLoadSystem GameObject with all components\n" +
+                "- In-game menu with Resume, Save, Load, Back to Main Menu, Save & Quit, Quit without Saving\n" +
+                "- SaveListItem prefab\n" +
+                "- Auto-wire all references\n" +
+                "- Integrate with GameManager",
                 MessageType.Info
             );
 
@@ -126,10 +126,10 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.DisplayDialog(
                     "Setup Complete!",
                     "Save/Load system has been fully configured!\n\n" +
-                    "[OK] SaveLoadSettings created\n" +
-                    "[OK] UI Menu created (hidden by default)\n" +
-                    "[OK] SaveListItem prefab created\n" +
-                    "[OK] All references wired\n\n" +
+                    "- SaveLoadSettings created\n" +
+                    "- UI Menu created (hidden by default)\n" +
+                    "- SaveListItem prefab created\n" +
+                    "- All references wired\n\n" +
                     "Press Play and use:\n" +
                     "F5 - Quick Save\n" +
                     "F9 - Quick Load\n" +
@@ -137,7 +137,7 @@ namespace RTS.SaveLoad.Editor
                     "OK"
                 );
 
-                Debug.Log("[OK] Save/Load system setup complete!");
+                Debug.Log(" Save/Load system setup complete!");
                 Selection.activeGameObject = systemObj;
             }
             catch (System.Exception e)
@@ -205,7 +205,7 @@ namespace RTS.SaveLoad.Editor
             AssetDatabase.CreateAsset(settings, SETTINGS_PATH);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"[OK] Created SaveLoadSettings at {SETTINGS_PATH}");
+            Debug.Log($" Created SaveLoadSettings at {SETTINGS_PATH}");
             return settings;
         }
 
@@ -222,28 +222,182 @@ namespace RTS.SaveLoad.Editor
                 canvas = CreateCanvas();
             }
 
-            // Create menu panel
-            GameObject menuPanel = new GameObject("SaveLoadMenuPanel");
-            menuPanel.AddComponent<RectTransform>(); // Add RectTransform for UI element
-            menuPanel.transform.SetParent(canvas.transform, false);
+            // Create main container with SaveLoadMenu component
+            GameObject menuContainer = new GameObject("SaveLoadMenuSystem");
+            menuContainer.AddComponent<RectTransform>();
+            menuContainer.transform.SetParent(canvas.transform, false);
 
-            // Add CanvasGroup for fading
-            var canvasGroup = menuPanel.AddComponent<CanvasGroup>();
+            // Create Main Menu Panel
+            GameObject mainMenuPanel = CreateMainMenuPanel(menuContainer, itemPrefab);
 
-            // Setup RectTransform (full screen, centered)
-            var menuRect = menuPanel.GetComponent<RectTransform>();
-            menuRect.anchorMin = Vector2.zero;
-            menuRect.anchorMax = Vector2.one;
-            menuRect.sizeDelta = Vector2.zero;
-            menuRect.anchoredPosition = Vector2.zero;
+            // Create Save Panel
+            GameObject savePanel = CreateSavePanel(menuContainer, itemPrefab);
 
-            // Add background image
-            var bgImage = menuPanel.AddComponent<Image>();
+            // Create Load Panel
+            GameObject loadPanel = CreateLoadPanel(menuContainer, itemPrefab);
+
+            // Add SaveLoadMenu component to container
+            var saveLoadMenu = menuContainer.AddComponent<SaveLoadMenu>();
+
+            // Wire all references using SerializedObject
+            var serializedMenu = new SerializedObject(saveLoadMenu);
+
+            // Main panels
+            serializedMenu.FindProperty("menuPanel").objectReferenceValue = mainMenuPanel;
+            serializedMenu.FindProperty("savePanel").objectReferenceValue = savePanel;
+            serializedMenu.FindProperty("loadPanel").objectReferenceValue = loadPanel;
+
+            // Save Panel UI
+            serializedMenu.FindProperty("saveNameInput").objectReferenceValue = savePanel.transform.Find("ContentPanel/SaveNameInput").GetComponent<TMP_InputField>();
+            serializedMenu.FindProperty("performSaveButton").objectReferenceValue = savePanel.transform.Find("ContentPanel/PerformSaveButton").GetComponent<Button>();
+            serializedMenu.FindProperty("cancelSaveButton").objectReferenceValue = savePanel.transform.Find("ContentPanel/CancelSaveButton").GetComponent<Button>();
+            serializedMenu.FindProperty("saveListContentSave").objectReferenceValue = savePanel.transform.Find("ContentPanel/SaveListScrollView/Viewport/Content");
+            serializedMenu.FindProperty("savePanelTitle").objectReferenceValue = savePanel.transform.Find("ContentPanel/Title").GetComponent<TextMeshProUGUI>();
+
+            // Load Panel UI
+            serializedMenu.FindProperty("saveListContentLoad").objectReferenceValue = loadPanel.transform.Find("ContentPanel/SaveListScrollView/Viewport/Content");
+            serializedMenu.FindProperty("performLoadButton").objectReferenceValue = loadPanel.transform.Find("ContentPanel/PerformLoadButton").GetComponent<Button>();
+            serializedMenu.FindProperty("cancelLoadButton").objectReferenceValue = loadPanel.transform.Find("ContentPanel/CancelLoadButton").GetComponent<Button>();
+            serializedMenu.FindProperty("loadPanelTitle").objectReferenceValue = loadPanel.transform.Find("ContentPanel/Title").GetComponent<TextMeshProUGUI>();
+
+            // Shared buttons (in main menu)
+            serializedMenu.FindProperty("showSavePanelButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/ShowSavePanelButton").GetComponent<Button>();
+            serializedMenu.FindProperty("showLoadPanelButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/ShowLoadPanelButton").GetComponent<Button>();
+            serializedMenu.FindProperty("deleteButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/ActionButtons/DeleteButton").GetComponent<Button>();
+            serializedMenu.FindProperty("renameButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/ActionButtons/RenameButton").GetComponent<Button>();
+            serializedMenu.FindProperty("resumeButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/ResumeButton").GetComponent<Button>();
+            serializedMenu.FindProperty("backToMainMenuButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/BackToMainMenuButton").GetComponent<Button>();
+            serializedMenu.FindProperty("saveAndQuitButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/SaveAndQuitButton").GetComponent<Button>();
+            serializedMenu.FindProperty("quitWithoutSavingButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/QuitWithoutSavingButton").GetComponent<Button>();
+            serializedMenu.FindProperty("closeButton").objectReferenceValue = mainMenuPanel.transform.Find("ContentPanel/CloseButton").GetComponent<Button>();
+
+            // Prefab and settings
+            serializedMenu.FindProperty("saveListItemPrefab").objectReferenceValue = itemPrefab;
+            serializedMenu.FindProperty("pauseGameWhenOpen").boolValue = true;
+            serializedMenu.FindProperty("mainMenuSceneName").stringValue = "MainMenu";
+
+            serializedMenu.ApplyModifiedProperties();
+            EditorUtility.SetDirty(saveLoadMenu);
+
+            // Initially hide all panels
+            mainMenuPanel.SetActive(false);
+            savePanel.SetActive(false);
+            loadPanel.SetActive(false);
+
+            Debug.Log(" Created Save/Load UI with separate Save/Load/Main panels");
+            return saveLoadMenu;
+        }
+
+        private Canvas CreateCanvas()
+        {
+            GameObject canvasObj = new GameObject("Canvas");
+            Canvas canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObj.AddComponent<CanvasScaler>();
+            canvasObj.AddComponent<GraphicRaycaster>();
+
+            Debug.Log(" Created Canvas");
+            return canvas;
+        }
+
+        private GameObject CreateMainMenuPanel(GameObject parent, GameObject itemPrefab)
+        {
+            GameObject menuPanel = CreatePanelBase(parent, "MainMenuPanel");
+            GameObject contentPanel = menuPanel.transform.Find("ContentPanel").gameObject;
+
+            // Create title
+            CreateTitle(contentPanel, "Game Menu");
+
+            // Create main buttons
+            CreateMenuButton(contentPanel, "ResumeButton", "Resume Game", new Color(0.2f, 0.6f, 0.2f, 1f));
+            CreateMenuButton(contentPanel, "ShowSavePanelButton", "Save Game", new Color(0.2f, 0.5f, 0.7f, 1f));
+            CreateMenuButton(contentPanel, "ShowLoadPanelButton", "Load Game", new Color(0.5f, 0.4f, 0.7f, 1f));
+
+            // Create action buttons (Delete, Rename)
+            GameObject actionButtons = new GameObject("ActionButtons");
+            actionButtons.transform.SetParent(contentPanel.transform, false);
+            var actionRect = actionButtons.AddComponent<RectTransform>();
+            actionRect.sizeDelta = new Vector2(0, 50);
+            var horizontalLayout = actionButtons.AddComponent<HorizontalLayoutGroup>();
+            horizontalLayout.spacing = 10;
+            horizontalLayout.childControlWidth = true;
+            horizontalLayout.childForceExpandWidth = true;
+            var layoutElement = actionButtons.AddComponent<LayoutElement>();
+            layoutElement.minHeight = 50;
+
+            CreateButton(actionButtons, "DeleteButton", "Delete Save", new Color(0.8f, 0.2f, 0.2f, 1f));
+            CreateButton(actionButtons, "RenameButton", "Rename Save", new Color(0.5f, 0.5f, 0.2f, 1f));
+
+            // Create utility buttons
+            CreateMenuButton(contentPanel, "BackToMainMenuButton", "Back to Main Menu", new Color(0.6f, 0.4f, 0.2f, 1f));
+            CreateMenuButton(contentPanel, "SaveAndQuitButton", "Save and Quit", new Color(0.4f, 0.5f, 0.6f, 1f));
+            CreateMenuButton(contentPanel, "QuitWithoutSavingButton", "Quit Without Saving", new Color(0.8f, 0.2f, 0.2f, 1f));
+            CreateMenuButton(contentPanel, "CloseButton", "Close (ESC)", new Color(0.5f, 0.5f, 0.5f, 1f));
+
+            return menuPanel;
+        }
+
+        private GameObject CreateSavePanel(GameObject parent, GameObject itemPrefab)
+        {
+            GameObject savePanel = CreatePanelBase(parent, "SavePanel");
+            GameObject contentPanel = savePanel.transform.Find("ContentPanel").gameObject;
+
+            // Create title
+            CreateTitle(contentPanel, "Save Game");
+
+            // Create save name input
+            CreateSaveNameInput(contentPanel, "SaveNameInput");
+
+            // Create save list
+            CreateSaveList(contentPanel);
+
+            // Create buttons
+            CreateMenuButton(contentPanel, "PerformSaveButton", "Save", new Color(0.2f, 0.6f, 0.2f, 1f));
+            CreateMenuButton(contentPanel, "CancelSaveButton", "Cancel", new Color(0.5f, 0.5f, 0.5f, 1f));
+
+            return savePanel;
+        }
+
+        private GameObject CreateLoadPanel(GameObject parent, GameObject itemPrefab)
+        {
+            GameObject loadPanel = CreatePanelBase(parent, "LoadPanel");
+            GameObject contentPanel = loadPanel.transform.Find("ContentPanel").gameObject;
+
+            // Create title
+            CreateTitle(contentPanel, "Load Game");
+
+            // Create save list
+            CreateSaveList(contentPanel);
+
+            // Create buttons
+            CreateMenuButton(contentPanel, "PerformLoadButton", "Load", new Color(0.2f, 0.4f, 0.8f, 1f));
+            CreateMenuButton(contentPanel, "CancelLoadButton", "Cancel", new Color(0.5f, 0.5f, 0.5f, 1f));
+
+            return loadPanel;
+        }
+
+        private GameObject CreatePanelBase(GameObject parent, string name)
+        {
+            GameObject panel = new GameObject(name);
+            panel.AddComponent<RectTransform>();
+            panel.transform.SetParent(parent.transform, false);
+
+            var panelRect = panel.GetComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.sizeDelta = Vector2.zero;
+            panelRect.anchoredPosition = Vector2.zero;
+
+            // Add background
+            var bgImage = panel.AddComponent<Image>();
             bgImage.color = new Color(0, 0, 0, 0.8f);
 
-            // Create content panel (centered, fixed size)
+            // Add CanvasGroup
+            panel.AddComponent<CanvasGroup>();
+
+            // Create content panel
             GameObject contentPanel = new GameObject("ContentPanel");
-            contentPanel.transform.SetParent(menuPanel.transform, false);
+            contentPanel.transform.SetParent(panel.transform, false);
 
             var contentRect = contentPanel.AddComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -264,71 +418,7 @@ namespace RTS.SaveLoad.Editor
             verticalLayout.childForceExpandHeight = false;
             verticalLayout.childForceExpandWidth = true;
 
-            // Create title
-            CreateTitle(contentPanel, "Game Menu");
-
-            // Create main action buttons (Resume, Save, Load, etc.)
-            var resumeButton = CreateMenuButton(contentPanel, "ResumeButton", "Resume Game", new Color(0.2f, 0.6f, 0.2f, 1f));
-
-            // Create save name input section
-            var inputField = CreateSaveNameInput(contentPanel);
-
-            // Create action buttons (Save, Load, Delete)
-            var actionButtons = CreateActionButtons(contentPanel);
-
-            // Create save list
-            var scrollView = CreateSaveList(contentPanel);
-
-            // Create utility buttons
-            var backToMainMenuButton = CreateMenuButton(contentPanel, "BackToMainMenuButton", "Back to Main Menu", new Color(0.6f, 0.4f, 0.2f, 1f));
-            var saveAndQuitButton = CreateMenuButton(contentPanel, "SaveAndQuitButton", "Save and Quit", new Color(0.4f, 0.5f, 0.6f, 1f));
-            var quitWithoutSavingButton = CreateMenuButton(contentPanel, "QuitWithoutSavingButton", "Quit Without Saving", new Color(0.8f, 0.2f, 0.2f, 1f));
-
-            // Create close button
-            var closeButton = CreateMenuButton(contentPanel, "CloseButton", "Close (ESC)", new Color(0.5f, 0.5f, 0.5f, 1f));
-
-            // Add SaveLoadMenu component
-            var saveLoadMenu = menuPanel.AddComponent<SaveLoadMenu>();
-
-            // Wire UI references to menu component using SerializedObject for proper serialization
-            var serializedMenu = new SerializedObject(saveLoadMenu);
-
-            serializedMenu.FindProperty("menuPanel").objectReferenceValue = menuPanel;
-            serializedMenu.FindProperty("saveNameInput").objectReferenceValue = inputField;
-            serializedMenu.FindProperty("resumeButton").objectReferenceValue = resumeButton;
-            serializedMenu.FindProperty("saveButton").objectReferenceValue = actionButtons.transform.Find("SaveButton").GetComponent<Button>();
-            serializedMenu.FindProperty("loadButton").objectReferenceValue = actionButtons.transform.Find("LoadButton").GetComponent<Button>();
-            serializedMenu.FindProperty("deleteButton").objectReferenceValue = actionButtons.transform.Find("DeleteButton").GetComponent<Button>();
-            serializedMenu.FindProperty("backToMainMenuButton").objectReferenceValue = backToMainMenuButton;
-            serializedMenu.FindProperty("saveAndQuitButton").objectReferenceValue = saveAndQuitButton;
-            serializedMenu.FindProperty("quitWithoutSavingButton").objectReferenceValue = quitWithoutSavingButton;
-            serializedMenu.FindProperty("closeButton").objectReferenceValue = closeButton;
-            serializedMenu.FindProperty("saveListContent").objectReferenceValue = scrollView.transform.Find("Viewport/Content");
-            serializedMenu.FindProperty("saveListItemPrefab").objectReferenceValue = itemPrefab;
-            serializedMenu.FindProperty("pauseGameWhenOpen").boolValue = true;
-            serializedMenu.FindProperty("mainMenuSceneName").stringValue = "MainMenu";
-
-            serializedMenu.ApplyModifiedProperties();
-
-            EditorUtility.SetDirty(saveLoadMenu);
-
-            // Initially hide the menu
-            menuPanel.SetActive(false);
-
-            Debug.Log("[OK] Created Save/Load UI with all references wired");
-            return saveLoadMenu;
-        }
-
-        private Canvas CreateCanvas()
-        {
-            GameObject canvasObj = new GameObject("Canvas");
-            Canvas canvas = canvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasObj.AddComponent<CanvasScaler>();
-            canvasObj.AddComponent<GraphicRaycaster>();
-
-            Debug.Log("[OK] Created Canvas");
-            return canvas;
+            return panel;
         }
 
         private void CreateTitle(GameObject parent, string text)
@@ -386,9 +476,9 @@ namespace RTS.SaveLoad.Editor
             return button;
         }
 
-        private TMP_InputField CreateSaveNameInput(GameObject parent)
+        private TMP_InputField CreateSaveNameInput(GameObject parent, string name)
         {
-            GameObject inputObj = new GameObject("SaveNameInputField");
+            GameObject inputObj = new GameObject(name);
             inputObj.transform.SetParent(parent.transform, false);
 
             var inputRect = inputObj.AddComponent<RectTransform>();
@@ -437,31 +527,6 @@ namespace RTS.SaveLoad.Editor
             return inputField;
         }
 
-        private GameObject CreateActionButtons(GameObject parent)
-        {
-            GameObject buttonPanel = new GameObject("ActionButtons");
-            buttonPanel.transform.SetParent(parent.transform, false);
-
-            var panelRect = buttonPanel.AddComponent<RectTransform>();
-            panelRect.sizeDelta = new Vector2(0, 50);
-
-            var horizontalLayout = buttonPanel.AddComponent<HorizontalLayoutGroup>();
-            horizontalLayout.spacing = 10;
-            horizontalLayout.childControlHeight = true;
-            horizontalLayout.childControlWidth = true;
-            horizontalLayout.childForceExpandHeight = true;
-            horizontalLayout.childForceExpandWidth = true;
-
-            var layoutElement = buttonPanel.AddComponent<LayoutElement>();
-            layoutElement.minHeight = 50;
-
-            // Create buttons
-            CreateButton(buttonPanel, "SaveButton", "Save", new Color(0.2f, 0.6f, 0.2f, 1f));
-            CreateButton(buttonPanel, "LoadButton", "Load", new Color(0.2f, 0.4f, 0.8f, 1f));
-            CreateButton(buttonPanel, "DeleteButton", "Delete", new Color(0.8f, 0.2f, 0.2f, 1f));
-
-            return buttonPanel;
-        }
 
         private Button CreateButton(GameObject parent, string name, string text, Color color)
         {
@@ -635,7 +700,7 @@ namespace RTS.SaveLoad.Editor
             PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);
             DestroyImmediate(itemObj);
 
-            Debug.Log($"[OK] Created SaveListItem prefab at {prefabPath}");
+            Debug.Log($" Created SaveListItem prefab at {prefabPath}");
             return AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         }
 
@@ -673,7 +738,7 @@ namespace RTS.SaveLoad.Editor
             systemObj.AddComponent<AutoSaveSystem>();
             systemObj.AddComponent<SaveLoadInputHandler>();
 
-            Debug.Log("[OK] Created SaveLoadSystem GameObject with all components");
+            Debug.Log(" Created SaveLoadSystem GameObject with all components");
             return systemObj;
         }
 
@@ -692,7 +757,7 @@ namespace RTS.SaveLoad.Editor
                 serializedManager.FindProperty("mainCamera").objectReferenceValue = Camera.main;
                 serializedManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(manager);
-                Debug.Log("[OK] Wired SaveLoadManager");
+                Debug.Log("- Wired SaveLoadManager");
             }
 
             // Wire AutoSaveSystem using SerializedObject
@@ -703,7 +768,7 @@ namespace RTS.SaveLoad.Editor
                 serializedAutoSave.FindProperty("settings").objectReferenceValue = settings;
                 serializedAutoSave.ApplyModifiedProperties();
                 EditorUtility.SetDirty(autoSave);
-                Debug.Log("[OK] Wired AutoSaveSystem");
+                Debug.Log("- Wired AutoSaveSystem");
             }
 
             // Wire SaveLoadInputHandler using SerializedObject
@@ -711,10 +776,10 @@ namespace RTS.SaveLoad.Editor
             if (inputHandler != null)
             {
                 var serializedInputHandler = new SerializedObject(inputHandler);
-                serializedInputHandler.FindProperty("saveLoadMenu").objectReferenceValue = menu;
+                serializedInputHandler.FindProperty("inGameMenu").objectReferenceValue = menu;
                 serializedInputHandler.ApplyModifiedProperties();
                 EditorUtility.SetDirty(inputHandler);
-                Debug.Log("[OK] Wired SaveLoadInputHandler");
+                Debug.Log("- Wired SaveLoadInputHandler");
             }
 
             // Double-check SaveLoadMenu has prefab (should already be set in CreateSaveLoadUI)
@@ -731,11 +796,11 @@ namespace RTS.SaveLoad.Editor
                 }
 
                 EditorUtility.SetDirty(menu);
-                Debug.Log("[OK] Verified SaveLoadMenu prefab reference");
+                Debug.Log("- Verified SaveLoadMenu prefab reference");
             }
 
             EditorUtility.SetDirty(systemObj);
-            Debug.Log("[OK] All references wired successfully");
+            Debug.Log(" All references wired successfully");
         }
 
         private void AutoWireReferences()
@@ -756,9 +821,9 @@ namespace RTS.SaveLoad.Editor
                 EditorUtility.DisplayDialog(
                     "Missing Components",
                     $"Could not find all components:\n" +
-                    $"Settings: {(settings != null ? "[OK]" : "[X]")}\n" +
-                    $"Menu: {(menu != null ? "[OK]" : "[X]")}\n" +
-                    $"Item Prefab: {(itemPrefab != null ? "[OK]" : "[X]")}",
+                    $"Settings: {(settings != null ? "-" : "X")}\n" +
+                    $"Menu: {(menu != null ? "-" : "X")}\n" +
+                    $"Item Prefab: {(itemPrefab != null ? "-" : "X")}",
                     "OK"
                 );
                 return;
@@ -788,7 +853,7 @@ namespace RTS.SaveLoad.Editor
                 serializedGameManager.FindProperty("saveLoadManager").objectReferenceValue = manager;
                 serializedGameManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(gameManager.gameObject);
-                Debug.Log("[OK] Integrated with GameManager");
+                Debug.Log(" Integrated with GameManager");
             }
         }
 

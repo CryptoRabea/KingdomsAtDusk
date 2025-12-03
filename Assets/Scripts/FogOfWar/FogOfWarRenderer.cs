@@ -7,7 +7,7 @@ using KingdomsAtDusk.FogOfWar;
 /// Renders fog of war overlay on the game view using a mesh-based approach
 /// </summary>
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    public class FogOfWarRenderer : MonoBehaviour
+    public class FogOfWarRenderer : MonoBehaviour, IFogRenderer
     {
         [Header("Settings")]
         [SerializeField] private Material fogMaterial;
@@ -22,6 +22,15 @@ using KingdomsAtDusk.FogOfWar;
         private Color[] texturePixels;
         private bool isDirty;
         private Queue<Vector2Int> updateQueue = new Queue<Vector2Int>();
+        private bool isInitialized;
+
+        // IFogRenderer implementation
+        public bool IsInitialized => isInitialized;
+        public bool IsEnabled
+        {
+            get => meshRenderer != null && meshRenderer.enabled;
+            set => SetEnabled(value);
+        }
 
         public void Initialize(FogOfWarManager manager)
         {
@@ -47,12 +56,13 @@ using KingdomsAtDusk.FogOfWar;
                 meshRenderer.material.SetTexture("_FogTex", fogTexture);
             }
 
+            isInitialized = true;
             Debug.Log("[FogOfWarRenderer] Initialized");
         }
 
         private void CreateFogMesh()
         {
-            Bounds bounds = manager.Config.worldBounds;
+            Bounds bounds = manager.Boundary.Bounds;
 
             // Create a simple quad mesh covering the world bounds
             fogMesh = new Mesh();
@@ -116,11 +126,16 @@ using KingdomsAtDusk.FogOfWar;
             isDirty = true;
         }
 
-        private void Update()
+        public void UpdateRenderer()
         {
             if (!isDirty || !meshRenderer.enabled) return;
 
             UpdateFogTexture();
+        }
+
+        private void Update()
+        {
+            UpdateRenderer();
         }
 
         private void UpdateFogTexture()

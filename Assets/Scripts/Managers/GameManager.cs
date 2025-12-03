@@ -1,6 +1,7 @@
 using UnityEngine;
 using RTS.Core.Services;
 using RTS.Core.Pooling;
+using Assets.Scripts.UI.FloatingNumbers;
 
 namespace RTS.Managers
 {
@@ -23,6 +24,9 @@ namespace RTS.Managers
 
         [Header("Save/Load System")]
         [SerializeField] private RTS.SaveLoad.SaveLoadManager saveLoadManager;
+
+        [Header("UI Systems")]
+        [SerializeField] private FloatingNumbersManager floatingNumbersManager;
 
         [Header("Settings")]
         [SerializeField] private bool initializeOnAwake = true;
@@ -78,6 +82,9 @@ namespace RTS.Managers
 
             // 6. Save/Load system
             InitializeSaveLoadManager();
+
+            // 7. UI systems (floating numbers, etc.)
+            InitializeFloatingNumbersManager();
 
             Debug.Log("All services initialized successfully!");
         }
@@ -189,6 +196,24 @@ namespace RTS.Managers
 
             ServiceLocator.Register<ISaveLoadService>(saveLoadManager);
             Debug.Log("SaveLoadManager registered as ISaveLoadService");
+        }
+
+        private void InitializeFloatingNumbersManager()
+        {
+            if (floatingNumbersManager == null)
+            {
+                // Try to find it in the scene
+                floatingNumbersManager = FindAnyObjectByType<FloatingNumbersManager>();
+
+                if (floatingNumbersManager == null)
+                {
+                    Debug.Log("FloatingNumbersManager not assigned and not found in scene - floating numbers disabled");
+                    return;
+                }
+            }
+
+            ServiceLocator.Register<IFloatingNumberService>(floatingNumbersManager);
+            Debug.Log("FloatingNumbersManager registered as IFloatingNumberService");
         }
 
         private void OnDestroy()

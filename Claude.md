@@ -1,7 +1,7 @@
 # Kingdoms at Dusk - Development Guide
 
 **Project**: Kingdoms at Dusk
-**Unity Version**: Unity 6000.2.10f1
+**Unity Version**: Unity 2022.3
 **Genre**: Real-Time Strategy (RTS)
 
 ---
@@ -30,15 +30,10 @@
 - ✅ ALWAYS use `InputAction` callbacks and bindings
 
 ### Use Modern Unity APIs
-**Object Finding**:
-- ❌ DO NOT use `Object.FindObjectsOfType<T>()` (deprecated)
-- ✅ ALWAYS use `Object.FindObjectsByType<T>(FindObjectsSortMode sortMode)`
-  - Use `FindObjectsSortMode.None` for better performance when sorting is not needed
-  - Use `FindObjectsSortMode.InstanceID` only when you need sorted results
 
 **Other Deprecations**:
 - Check Unity console warnings regularly and update deprecated APIs immediately
-- Refer to Unity 6 migration guides for API changes
+- Refer to Unity 2022.3 migration guides for API changes
 
 ---
 

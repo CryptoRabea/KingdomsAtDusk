@@ -139,7 +139,7 @@ namespace RTS.Buildings.WorkerModules
                 // Apply construction speed bonus
                 ApplyConstructionBonus(building, true);
 
-                Debug.Log($"[HAMMER] Assigned {peasantsPerBuilding} peasants to {buildingComponent.Data?.buildingName ?? "building"}");
+                Debug.Log($"🔨 Assigned {peasantsPerBuilding} peasants to {buildingComponent.Data?.buildingName ?? "building"}");
                 return true;
             }
 
@@ -158,7 +158,7 @@ namespace RTS.Buildings.WorkerModules
                 // Remove construction bonus
                 ApplyConstructionBonus(building, false);
 
-                Debug.Log($"[HAMMER] Released {workerCount} peasants from building");
+                Debug.Log($"🔨 Released {workerCount} peasants from building");
             }
         }
 

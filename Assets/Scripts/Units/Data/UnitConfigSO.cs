@@ -11,7 +11,9 @@ namespace RTS.Units
     {
         [Header("Identity")]
         public string unitName = "Unit";
-        
+        [TextArea(2, 4)]
+        public string description = "A unit";
+
         [Header("Health")]
         public float maxHealth = 100f;
         [Header("Retreat Settings")]
@@ -29,7 +31,9 @@ namespace RTS.Units
         public float attackRange = 2f;
         public float attackDamage = 10f;
         public float attackRate = 1f; // attacks per second
-        
+        [Tooltip("Defence value - reduces incoming damage")]
+        public int defence = 0;
+
         [Header("AI")]
         public float detectionRange = 10f; // how far the unit can see enemies
         public float visionRevealRange;
@@ -44,5 +48,21 @@ namespace RTS.Units
         [Header("Visual")]
         public GameObject unitPrefab;
         public Sprite unitIcon;
+
+        [Header("Tooltip Display Options")]
+        [Tooltip("Show HP in tooltip?")]
+        public bool showHP = true;
+
+        [Tooltip("Show Defence in tooltip?")]
+        public bool showDefence = false;
+
+        [Tooltip("Show Attack Damage in tooltip?")]
+        public bool showAttackDamage = true;
+
+        [Tooltip("Show Attack Range in tooltip?")]
+        public bool showAttackRange = true;
+
+        [Tooltip("Show Attack Speed in tooltip?")]
+        public bool showAttackSpeed = true;
     }
 }

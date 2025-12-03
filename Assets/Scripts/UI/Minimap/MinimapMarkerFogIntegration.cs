@@ -71,8 +71,8 @@ namespace RTS.UI.Minimap
                 return;
             }
 
-            // Use fog of war world bounds
-            Bounds bounds = FogOfWarManager.Instance.Config.worldBounds;
+            // Use fog of war world bounds from GameBoundary
+            Bounds bounds = FogOfWarManager.Instance.Boundary.Bounds;
             worldMin = new Vector2(bounds.min.x, bounds.min.z);
             worldMax = new Vector2(bounds.max.x, bounds.max.z);
 

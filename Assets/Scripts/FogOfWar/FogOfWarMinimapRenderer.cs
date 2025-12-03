@@ -6,7 +6,7 @@ using UnityEngine.UI;
     /// <summary>
     /// Renders fog of war on the minimap using a texture overlay
     /// </summary>
-    public class FogOfWarMinimapRenderer : MonoBehaviour
+    public class FogOfWarMinimapRenderer : MonoBehaviour, IFogRenderer
     {
         [Header("References")]
         [SerializeField] private RawImage fogOverlay;
@@ -19,6 +19,15 @@ using UnityEngine.UI;
         private Texture2D fogTexture;
         private Color[] texturePixels;
         private bool isDirty;
+        private bool isInitialized;
+
+        // IFogRenderer implementation
+        public bool IsInitialized => isInitialized;
+        public bool IsEnabled
+        {
+            get => enableMinimapFog;
+            set => SetEnabled(value);
+        }
 
         public void Initialize(FogOfWarManager manager)
         {
@@ -41,6 +50,7 @@ using UnityEngine.UI;
                 fogOverlay.gameObject.SetActive(true);
             }
 
+            isInitialized = true;
             Debug.Log("[FogOfWarMinimapRenderer] Initialized");
         }
 
@@ -70,11 +80,16 @@ using UnityEngine.UI;
             isDirty = true;
         }
 
-        private void Update()
+        public void UpdateRenderer()
         {
             if (!enableMinimapFog || !isDirty) return;
 
             UpdateMinimapTexture();
+        }
+
+        private void Update()
+        {
+            UpdateRenderer();
         }
 
         private void UpdateMinimapTexture()

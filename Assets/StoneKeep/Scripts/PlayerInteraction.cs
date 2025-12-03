@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LylekGames.Tools
 {
@@ -8,13 +9,13 @@ namespace LylekGames.Tools
     {
         public GameObject raycastFrom;
 
-        public KeyCode interactKey;
+        public Key interactKey;
 
         private RaycastHit hit;
 
         public void Update()
         {
-            if (Input.GetKeyDown(interactKey))
+            if (Keyboard.current != null && Keyboard.current[interactKey].wasPressedThisFrame)
             {
                 if (Physics.Raycast(raycastFrom.transform.position, raycastFrom.transform.forward, out hit, 3f))
                 {

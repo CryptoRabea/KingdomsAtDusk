@@ -53,18 +53,18 @@ namespace RTS.Buildings
             }
             else if (!autoCreateFlag)
             {
-                Debug.LogWarning($"[WARNING] RallyPointFlag: autoCreateFlag is FALSE for {gameObject.name} - flag will not be created!");
+                Debug.LogWarning($"⚠️ RallyPointFlag: autoCreateFlag is FALSE for {gameObject.name} - flag will not be created!");
             }
 
             // Hide flag initially
             if (flagVisual != null)
             {
                 flagVisual.SetActive(false);
-                Debug.Log($"[OK] RallyPointFlag: Flag visual created and hidden for {gameObject.name}");
+                Debug.Log($" RallyPointFlag: Flag visual created and hidden for {gameObject.name}");
             }
             else
             {
-                Debug.LogError($"[ERROR] RallyPointFlag: Flag visual is NULL after Awake for {gameObject.name}!");
+                Debug.LogError($" RallyPointFlag: Flag visual is NULL after Awake for {gameObject.name}!");
             }
         }
 
@@ -128,14 +128,14 @@ namespace RTS.Buildings
                 isVisible = true;
                 flagVisual.SetActive(true);
                 UpdateFlagPosition();
-                Debug.Log($"[OK] RallyPointFlag: Showing flag for {gameObject.name} at {rallyPoint.position}");
+                Debug.Log($" RallyPointFlag: Showing flag for {gameObject.name} at {rallyPoint.position}");
             }
             else
             {
                 if (flagVisual == null)
-                    Debug.LogWarning($"[WARNING] RallyPointFlag: Cannot show flag for {gameObject.name}: flagVisual is null");
+                    Debug.LogWarning($"⚠️ RallyPointFlag: Cannot show flag for {gameObject.name}: flagVisual is null");
                 if (rallyPoint == null)
-                    Debug.LogWarning($"[WARNING] RallyPointFlag: Cannot show flag for {gameObject.name}: rallyPoint is null (training queue has no rally point set)");
+                    Debug.LogWarning($"⚠️ RallyPointFlag: Cannot show flag for {gameObject.name}: rallyPoint is null (training queue has no rally point set)");
             }
         }
 
@@ -190,11 +190,11 @@ namespace RTS.Buildings
             {
                 rallyPoint.position = position;
                 UpdateFlagPosition();
-                Debug.Log($"[OK] RallyPointFlag: Updated rally point position to {position} for {gameObject.name}");
+                Debug.Log($" RallyPointFlag: Updated rally point position to {position} for {gameObject.name}");
             }
             else
             {
-                Debug.LogWarning($"[WARNING] RallyPointFlag: Cannot set rally point position for {gameObject.name}: rallyPoint is still null even after getting from training queue");
+                Debug.LogWarning($"⚠️ RallyPointFlag: Cannot set rally point position for {gameObject.name}: rallyPoint is still null even after getting from training queue");
             }
         }
 
@@ -226,7 +226,7 @@ namespace RTS.Buildings
                     Destroy(col);
                 }
 
-                Debug.Log($"[OK] RallyPointFlag: Created flag visual from PREFAB for {gameObject.name}");
+                Debug.Log($" RallyPointFlag: Created flag visual from PREFAB for {gameObject.name}");
             }
             else
             {
@@ -249,7 +249,7 @@ namespace RTS.Buildings
                 Renderer poleRenderer = pole.GetComponent<Renderer>();
                 if (poleRenderer != null)
                 {
-                    // [OK] FIX: Use sharedMaterial to avoid creating instances during render pass
+                    //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     poleRenderer.sharedMaterial.color = new Color(0.3f, 0.3f, 0.3f);
                 }
 
@@ -269,12 +269,12 @@ namespace RTS.Buildings
                 Renderer flagRenderer = flag.GetComponent<Renderer>();
                 if (flagRenderer != null)
                 {
-                    // [OK] FIX: Use sharedMaterial to avoid creating instances during render pass
+                    //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     flagRenderer.sharedMaterial.color = flagColor;
                 }
 
                 flagVisual = flagParent;
-                Debug.Log($"[OK] RallyPointFlag: Created flag visual from PRIMITIVES for {gameObject.name}");
+                Debug.Log($" RallyPointFlag: Created flag visual from PRIMITIVES for {gameObject.name}");
             }
         }
 

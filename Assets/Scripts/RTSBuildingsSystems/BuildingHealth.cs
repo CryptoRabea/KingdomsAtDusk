@@ -1,5 +1,6 @@
 using UnityEngine;
 using RTS.Core.Events;
+using RTS.Core.Services;
 
 namespace RTS.Buildings
 {
@@ -21,6 +22,7 @@ namespace RTS.Buildings
 
         private Building building;
         private bool isDead = false;
+        private bool hpBarRegistered = false;
 
         public float MaxHealth => maxHealth;
         public float CurrentHealth => currentHealth;
@@ -41,6 +43,37 @@ namespace RTS.Buildings
             {
                 maxHealth = building.Data.maxHealth;
                 currentHealth = maxHealth;
+            }
+
+            // Register HP bar with floating numbers service
+            RegisterHPBar();
+        }
+
+        private void RegisterHPBar()
+        {
+            if (hpBarRegistered) return;
+
+            var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
+            if (floatingNumberService != null)
+            {
+                floatingNumberService.RegisterHPBar(
+                    gameObject,
+                    () => currentHealth,
+                    () => maxHealth
+                );
+                hpBarRegistered = true;
+            }
+        }
+
+        private void UnregisterHPBar()
+        {
+            if (!hpBarRegistered) return;
+
+            var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
+            if (floatingNumberService != null)
+            {
+                floatingNumberService.UnregisterHPBar(gameObject);
+                hpBarRegistered = false;
             }
         }
 
@@ -127,6 +160,10 @@ namespace RTS.Buildings
             if (isDead) return;
 
             isDead = true;
+
+            // Unregister HP bar
+            UnregisterHPBar();
+
             Debug.Log($"{gameObject.name} has been destroyed!");
 
             // Spawn destruction effect
@@ -159,6 +196,11 @@ namespace RTS.Buildings
         {
             currentHealth = 0f;
             Die();
+        }
+
+        private void OnDestroy()
+        {
+            UnregisterHPBar();
         }
     }
 

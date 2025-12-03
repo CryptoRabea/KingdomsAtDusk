@@ -138,7 +138,7 @@ namespace RTS.Editor
                 GUILayout.Label("Paths:", EditorStyles.miniBoldLabel);
                 foreach (string path in system.paths)
                 {
-                    EditorGUILayout.LabelField("  - " + path, EditorStyles.miniLabel);
+                    EditorGUILayout.LabelField("  • " + path, EditorStyles.miniLabel);
                 }
 
                 if (showDependencies && system.dependencies.Count > 0)
@@ -147,7 +147,7 @@ namespace RTS.Editor
                     GUILayout.Label("Dependencies:", EditorStyles.miniBoldLabel);
                     foreach (string dep in system.dependencies)
                     {
-                        EditorGUILayout.LabelField("  -> " + dep, EditorStyles.miniLabel);
+                        EditorGUILayout.LabelField("  → " + dep, EditorStyles.miniLabel);
                     }
                 }
 
@@ -426,16 +426,16 @@ namespace RTS.Editor
 ## Installation
 1. Open your Unity project
 2. Import this .unitypackage file:
-   Assets -> Import Package -> Custom Package
+   Assets → Import Package → Custom Package
 3. Select all files and click Import
 
 ## Dependencies
 {(system.dependencies.Count > 0 ?
-    string.Join("\n", system.dependencies.Select(d => $"- {d}")) :
-    "- None (standalone system)")}
+    string.Join("\n", system.dependencies.Select(d => $"• {d}")) :
+    "• None (standalone system)")}
 
 ## Included Files
-{string.Join("\n", system.paths.Select(p => $"- {p}"))}
+{string.Join("\n", system.paths.Select(p => $"• {p}"))}
 
 ## File Count
 {system.estimatedFileCount} files
@@ -469,7 +469,7 @@ This folder contains {systems.Count} exported game systems.
 Each system is packaged as a standalone .unitypackage file.
 
 ## Exported Systems
-{string.Join("\n", systems.Select(s => $"- {s.name} - {s.description}"))}
+{string.Join("\n", systems.Select(s => $"• {s.name} - {s.description}"))}
 
 ## Import Order (Recommended)
 1. Core Services (required by most systems)

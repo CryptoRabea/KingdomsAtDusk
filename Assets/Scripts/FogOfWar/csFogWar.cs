@@ -10,11 +10,11 @@
 
 
 using System;                       // Convert
+using System.Collections.Generic;   // List
 using System.IO;                    // Directory
 using System.Linq;                  // Enumerable
-using System.Collections.Generic;   // List
-using UnityEngine;                  // Monobehaviour
 using UnityEditor;                  // Handles
+using UnityEngine;                  // Monobehaviour
 
 
 
@@ -22,13 +22,6 @@ namespace FischlWorks_FogWar
 {
 
 
-
-    /// The non-static high-level monobehaviour interface of the AOS Fog of War module.
-
-    /// This class holds serialized data for various configuration properties,\n
-    /// and is resposible for scanning / saving / loading the LevelData object.\n
-    /// The class handles the update frequency of the fog, plus some shader businesses.\n
-    /// Various public interfaces related to FogRevealer's FOV are also available.
     public class csFogWar : MonoBehaviour
     {
         /// A class for storing the base level data.
@@ -46,8 +39,10 @@ namespace FischlWorks_FogWar
             }
 
             // Indexer definition
-            public LevelColumn this[int index] {
-                get {
+            public LevelColumn this[int index]
+            {
+                get
+                {
                     if (index >= 0 && index < levelRow.Count)
                     {
                         return levelRow[index];
@@ -59,7 +54,8 @@ namespace FischlWorks_FogWar
                         return null;
                     }
                 }
-                set {
+                set
+                {
                     if (index >= 0 && index < levelRow.Count)
                     {
                         levelRow[index] = value;
@@ -103,8 +99,10 @@ namespace FischlWorks_FogWar
             }
 
             // Indexer definition
-            public ETileState this[int index] {
-                get {
+            public ETileState this[int index]
+            {
+                get
+                {
                     if (index >= 0 && index < levelColumn.Count)
                     {
                         return levelColumn[index];
@@ -116,7 +114,8 @@ namespace FischlWorks_FogWar
                         return ETileState.Empty;
                     }
                 }
-                set {
+                set
+                {
                     if (index >= 0 && index < levelColumn.Count)
                     {
                         levelColumn[index] = value;
@@ -148,6 +147,7 @@ namespace FischlWorks_FogWar
 
             public Vector2Int GetCurrentLevelCoordinates(csFogWar fogWar)
             {
+
                 currentLevelCoordinates = new Vector2Int(
                     fogWar.GetUnitX(revealerTransform.position.x),
                     fogWar.GetUnitY(revealerTransform.position.z));
@@ -170,8 +170,10 @@ namespace FischlWorks_FogWar
             public bool _UpdateOnlyOnMove => updateOnlyOnMove;
 
             private Vector2Int currentLevelCoordinates = new Vector2Int();
-            public Vector2Int _CurrentLevelCoordinates {
-                get {
+            public Vector2Int _CurrentLevelCoordinates
+            {
+                get
+                {
                     lastSeenAt = currentLevelCoordinates;
 
                     return currentLevelCoordinates;
@@ -495,7 +497,7 @@ namespace FischlWorks_FogWar
             {
                 bufferPixels[i] = Color.Lerp(bufferPixels[i], targetPixels[i], fogLerpSpeed * Time.deltaTime);
             }
-            
+
             fogPlaneTextureLerpBuffer.SetPixels32(bufferPixels);
 
             fogPlaneTextureLerpBuffer.Apply();
@@ -674,7 +676,7 @@ namespace FischlWorks_FogWar
 
             if (additionalRadius == 0)
             {
-                return shadowcaster.fogField[levelCoordinates.x][levelCoordinates.y] == 
+                return shadowcaster.fogField[levelCoordinates.x][levelCoordinates.y] ==
                     Shadowcaster.LevelColumn.ETileVisibility.Revealed;
             }
 
@@ -685,7 +687,7 @@ namespace FischlWorks_FogWar
                 for (int yIterator = -1; yIterator < additionalRadius + 1; yIterator++)
                 {
                     if (CheckLevelGridRange(new Vector2Int(
-                        levelCoordinates.x + xIterator, 
+                        levelCoordinates.x + xIterator,
                         levelCoordinates.y + yIterator)) == false)
                     {
                         scanResult = 0;
@@ -694,7 +696,7 @@ namespace FischlWorks_FogWar
                     }
 
                     scanResult += Convert.ToInt32(
-                        shadowcaster.fogField[levelCoordinates.x + xIterator][levelCoordinates.y + yIterator] == 
+                        shadowcaster.fogField[levelCoordinates.x + xIterator][levelCoordinates.y + yIterator] ==
                         Shadowcaster.LevelColumn.ETileVisibility.Revealed);
                 }
             }
@@ -725,8 +727,8 @@ namespace FischlWorks_FogWar
         public Vector3 GetWorldVector(Vector2Int worldCoordinates)
         {
             return new Vector3(
-                GetWorldX(worldCoordinates.x + (levelDimensionX / 2)), 
-                0, 
+                GetWorldX(worldCoordinates.x + (levelDimensionX / 2)),
+                0,
                 GetWorldY(worldCoordinates.y + (levelDimensionY / 2)));
         }
 
@@ -856,7 +858,8 @@ namespace FischlWorks_FogWar
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
     public class ShowIfAttribute : PropertyAttribute
     {
-        public string _BaseCondition {
+        public string _BaseCondition
+        {
             get { return mBaseCondition; }
         }
 
@@ -873,7 +876,8 @@ namespace FischlWorks_FogWar
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
     public class BigHeaderAttribute : PropertyAttribute
     {
-        public string _Text {
+        public string _Text
+        {
             get { return mText; }
         }
 

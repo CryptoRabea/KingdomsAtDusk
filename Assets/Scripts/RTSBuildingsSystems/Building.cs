@@ -110,7 +110,7 @@ namespace RTS.Buildings
                 EventBus.Publish(new BuildingCompletedEvent(gameObject, data.buildingName));
             }
 
-            Debug.Log($"[OK] {data?.buildingName ?? "Building"} construction complete!");
+            Debug.Log($" {data?.buildingName ?? "Building"} construction complete!");
         }
 
         private void GenerateResources()
@@ -126,7 +126,7 @@ namespace RTS.Buildings
             // Add resources to the player
             resourceService.AddResources(resources);
 
-            Debug.Log($"[OK] {data.buildingName} generated {data.resourceAmount} {data.resourceType}");
+            Debug.Log($" {data.buildingName} generated {data.resourceAmount} {data.resourceType}");
 
             // Publish event (optional - for UI updates, sound effects, etc.)
             EventBus.Publish(new ResourcesGeneratedEvent(

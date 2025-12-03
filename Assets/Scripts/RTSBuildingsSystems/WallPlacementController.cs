@@ -92,7 +92,7 @@ namespace RTS.Buildings
         private List<Vector3> placedWallPositions = new List<Vector3>();
 
         /// <summary>
-        /// Checks if a wall segment placed between (start->end) would overlap any buildings.
+        /// Checks if a wall segment placed between (start→end) would overlap any buildings.
         /// Uses capsule collision detection along the wall path.
         /// </summary>
         private bool WouldOverlapBuildings(Vector3 start, Vector3 end)
@@ -148,12 +148,12 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Checks if a wall segment placed between (start->end) would overlap an existing wall.
+        /// Checks if a wall segment placed between (start→end) would overlap an existing wall.
         /// Allows connecting EXACTLY at endpoints or midpoints, but blocks overlapping the body.
         /// </summary>
         private bool WouldOverlapExistingWall(Vector3 start, Vector3 end)
         {
-            // [OK] Allow closing a square: if we're trying to connect back to our first pole, that's okay!
+            //  Allow closing a square: if we're trying to connect back to our first pole, that's okay!
             bool closingLoop = firstPoleSet && (Vector3.Distance(end, firstPolePosition) < 0.5f || Vector3.Distance(start, firstPolePosition) < 0.5f);
 
             // First check against walls we're currently placing (placedWallSegments)
@@ -162,7 +162,7 @@ namespace RTS.Buildings
                 Vector3 existingStart = seg.GetStartPosition(wallLengthAxis);
                 Vector3 existingEnd = seg.GetEndPosition(wallLengthAxis);
 
-                // 1. If connecting exactly to endpoints -> allowed
+                // 1. If connecting exactly to endpoints → allowed
                 float endpointTolerance = closingLoop ? 0.5f : 0.01f; // More lenient when closing loops
                 if (Vector3.Distance(start, existingStart) < endpointTolerance ||
                     Vector3.Distance(start, existingEnd) < endpointTolerance ||
@@ -172,7 +172,7 @@ namespace RTS.Buildings
                     continue; // endpoint connections allowed
                 }
 
-                // 1b. If connecting exactly to midpoint -> allowed
+                // 1b. If connecting exactly to midpoint → allowed
                 Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
                 if (Vector3.Distance(start, existingMid) < endpointTolerance ||
                     Vector3.Distance(end, existingMid) < endpointTolerance)
@@ -201,10 +201,10 @@ namespace RTS.Buildings
             if (distance < 0.01f)
                 return false;
 
-            // [OK] When closing a loop, we don't need to check physics overlap since we already verified endpoint connections
+            //  When closing a loop, we don't need to check physics overlap since we already verified endpoint connections
             if (closingLoop)
             {
-                Debug.Log("[LOCK] Closing loop detected - allowing connection back to first pole");
+                Debug.Log("🔒 Closing loop detected - allowing connection back to first pole");
                 return false;
             }
 
@@ -234,10 +234,10 @@ namespace RTS.Buildings
                 WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
                 if (wallSystem != null)
                 {
-                    // [OK] Calculate actual endpoints considering the wall's scale
+                    //  Calculate actual endpoints considering the wall's scale
                     if (TryGetWallEndpoints(wallSystem, out Vector3 existingStart, out Vector3 existingEnd))
                     {
-                        // 1. If connecting exactly to endpoints -> allowed
+                        // 1. If connecting exactly to endpoints → allowed
                         float endpointTolerance = closingLoop ? 0.5f : 0.01f;
                         if (Vector3.Distance(start, existingStart) < endpointTolerance ||
                             Vector3.Distance(start, existingEnd) < endpointTolerance ||
@@ -247,7 +247,7 @@ namespace RTS.Buildings
                             continue; // endpoint connections allowed
                         }
 
-                        // 1b. If connecting exactly to midpoint -> allowed
+                        // 1b. If connecting exactly to midpoint → allowed
                         Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
                         if (Vector3.Distance(start, existingMid) < endpointTolerance ||
                             Vector3.Distance(end, existingMid) < endpointTolerance)
@@ -303,10 +303,10 @@ namespace RTS.Buildings
             Vector2 dA = (A2 - A1).normalized;
             Vector2 dB = (B2 - B1).normalized;
 
-            // 1. If they are parallel -> NOT intersecting
+            // 1. If they are parallel → NOT intersecting
             float cross = dA.x * dB.y - dA.y * dB.x;
             if (Mathf.Abs(cross) < 0.0001f)
-                return false; // Parallel or nearly parallel -> allowed
+                return false; // Parallel or nearly parallel → allowed
 
             // 2. Standard intersection only if not parallel
             bool ccw(Vector2 p1, Vector2 p2, Vector2 p3) =>
@@ -343,7 +343,7 @@ namespace RTS.Buildings
             float bMin = Vector2.Dot(B1, dirA);
             float bMax = Vector2.Dot(B2, dirA);
 
-            // [OK] Sort min/max in case walls are oriented in opposite directions
+            //  Sort min/max in case walls are oriented in opposite directions
             if (aMin > aMax) { float temp = aMin; aMin = aMax; aMax = temp; }
             if (bMin > bMax) { float temp = bMin; bMin = bMax; bMax = temp; }
 
@@ -353,11 +353,11 @@ namespace RTS.Buildings
             if (overlap <= 0)
                 return false;
 
-            // [FIRE] NEW RULE — ignore tiny overlaps
+            // 🔥 NEW RULE — ignore tiny overlaps
             if (overlap < minParallelOverlap)
                 return false;
 
-            return true; // Real overlap -> block building
+            return true; // Real overlap → block building
         }
 
 
@@ -465,7 +465,7 @@ namespace RTS.Buildings
             isPlacingWall = true;
             firstPoleSet = false;
 
-            // [OK] Auto-detect wall mesh length
+            //  Auto-detect wall mesh length
             if (useAutoMeshSize)
             {
                 wallMeshLength = DetectWallMeshLength(wallData.buildingPrefab);
@@ -521,7 +521,7 @@ namespace RTS.Buildings
         #region Mesh Detection
 
         /// <summary>
-        /// [OK] Detect the actual length of the wall mesh along the configured axis.
+        ///  Detect the actual length of the wall mesh along the configured axis.
         /// This is used to place walls end-to-end perfectly.
         /// </summary>
         private float DetectWallMeshLength(GameObject wallPrefab)
@@ -533,7 +533,7 @@ namespace RTS.Buildings
                 Bounds bounds = meshFilter.sharedMesh.bounds;
                 Transform meshTransform = meshFilter.transform;
 
-                // [OK] Get the length along the configured axis
+                //  Get the length along the configured axis
                 float boundsSize = 0f;
                 float meshScale = 1f;
                 float prefabScale = 1f;
@@ -632,7 +632,7 @@ namespace RTS.Buildings
 
         private void UpdateWallPreview(Vector3 secondPolePos)
         {
-            // [OK] CHECK FOG OF WAR: Only allow placement in currently visible areas
+            //  CHECK FOG OF WAR: Only allow placement in currently visible areas
             bool notVisible = false;
             if (FogOfWarManager.Instance != null)
             {
@@ -657,7 +657,7 @@ namespace RTS.Buildings
 
             currentWallRotation = CalculateWallRotation(firstPolePosition, secondPolePos);
 
-            // [OK] Calculate segments with perfect mesh-based fitting
+            //  Calculate segments with perfect mesh-based fitting
             List<WallSegmentData> segmentData = CalculateWallSegmentsWithScaling(firstPolePosition, secondPolePos);
             requiredSegments = segmentData.Count;
 
@@ -702,7 +702,7 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// [OK] Calculate wall segments with perfect end-to-end placement and adaptive scaling.
+        ///  Calculate wall segments with perfect end-to-end placement and adaptive scaling.
         /// Last segment scales to fill remaining distance exactly.
         /// </summary>
         private List<WallSegmentData> CalculateWallSegmentsWithScaling(Vector3 start, Vector3 end)
@@ -915,7 +915,7 @@ namespace RTS.Buildings
 
             firstPolePosition = SnapToGrid(mouseWorldPos);
 
-            // [OK] CHECK FOG OF WAR: Only allow placing first pole in currently visible areas
+            //  CHECK FOG OF WAR: Only allow placing first pole in currently visible areas
             if (FogOfWarManager.Instance != null)
             {
                 if (!FogOfWarManager.Instance.IsVisible(firstPolePosition))
@@ -973,7 +973,7 @@ namespace RTS.Buildings
             bool snappedToExistingWall = TrySnapToNearbyWall(secondPolePos, out Vector3 finalSecondPolePos);
             secondPolePos = finalSecondPolePos;
 
-            // [OK] CHECK FOG OF WAR: Only allow placement in currently visible areas
+            //  CHECK FOG OF WAR: Only allow placement in currently visible areas
             if (FogOfWarManager.Instance != null)
             {
                 bool firstPoleVisible = FogOfWarManager.Instance.IsVisible(firstPolePosition);
@@ -1003,7 +1003,7 @@ namespace RTS.Buildings
             Vector3 finalEuler = baseEuler + prefabEulerOffset;
             Quaternion finalRotation = Quaternion.Euler(finalEuler);
 
-            // [OK] Calculate segments with perfect scaling
+            //  Calculate segments with perfect scaling
             List<WallSegmentData> segmentData = CalculateWallSegmentsWithScaling(firstPolePosition, secondPolePos);
 
             float totalDist = Vector3.Distance(firstPolePosition, secondPolePos);
@@ -1013,20 +1013,20 @@ namespace RTS.Buildings
             foreach (var data in segmentData)
             {
                 GameObject newWall = Instantiate(currentWallData.buildingPrefab, data.position, finalRotation);
-                newWall.transform.localScale = data.scale; // [OK] Apply scale
+                newWall.transform.localScale = data.scale; //  Apply scale
 
                 if (newWall.TryGetComponent(out Building buildingComponent))
                 {
                     buildingComponent.SetData(currentWallData);
                 }
 
-                // [OK] Add NavMeshObstacle for navigation blocking (it will calculate bounds from collider before we disable it)
+                //  Add NavMeshObstacle for navigation blocking (it will calculate bounds from collider before we disable it)
                 if (newWall.GetComponent<WallNavMeshObstacle>() == null)
                 {
                     newWall.AddComponent<WallNavMeshObstacle>();
                 }
 
-                // [OK] Disable colliders on placed walls - they're not needed for gameplay
+                //  Disable colliders on placed walls - they're not needed for gameplay
                 // NavMeshObstacle has already calculated its bounds from the collider
                 foreach (var col in newWall.GetComponentsInChildren<Collider>())
                 {
@@ -1052,7 +1052,7 @@ namespace RTS.Buildings
                 }
             }
 
-            Debug.Log($"[OK] Placed {segmentData.Count} wall segments with perfect fit!");
+            Debug.Log($" Placed {segmentData.Count} wall segments with perfect fit!");
 
             EventBus.Publish(new ResourcesSpentEvent(
                 totalCost.GetValueOrDefault(ResourceType.Wood, 0),
@@ -1064,7 +1064,7 @@ namespace RTS.Buildings
 
             if (snappedToExistingWall && autoCompleteOnSnap)
             {
-                Debug.Log("[LOCK] Wall loop completed! Auto-canceling placement.");
+                Debug.Log("🔒 Wall loop completed! Auto-canceling placement.");
                 CancelWallPlacement();
             }
             else
@@ -1273,7 +1273,7 @@ namespace RTS.Buildings
                 WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
                 if (wallSystem != null)
                 {
-                    // [OK] Calculate actual endpoints considering the wall's scale
+                    //  Calculate actual endpoints considering the wall's scale
                     if (TryGetWallEndpoints(wallSystem, out Vector3 wallStart, out Vector3 wallEnd))
                     {
                         Vector3 wallCenter = wallSystem.transform.position;
@@ -1336,7 +1336,7 @@ namespace RTS.Buildings
             {
                 if (renderer != null)
                 {
-                    // [OK] FIX: Use sharedMaterial to avoid creating instances during render pass
+                    //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     renderer.sharedMaterial = material;
                 }
             }

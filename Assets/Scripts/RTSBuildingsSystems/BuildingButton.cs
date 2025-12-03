@@ -7,26 +7,30 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace RTS.UI
 {
     /// <summary>
-    /// Enhanced Building Button with resource icons and permanent color states.
-    /// Gets resource icons from ResourceUI configuration.
+    /// Enhanced Building Button with icon-only display and tooltip on hover.
+    /// Shows only the building icon - all info displayed in tooltip.
     /// </summary>
-    public class BuildingButton : MonoBehaviour
+    public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("UI Components")]
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI costText;
+        [SerializeField] private TextMeshProUGUI nameText; // Hidden - kept for backwards compatibility
+        [SerializeField] private TextMeshProUGUI costText; // Hidden - kept for backwards compatibility
         [SerializeField] private TextMeshProUGUI hotkeyText;
         [SerializeField] private Image iconImage;
         [SerializeField] private Image backgroundImage;
         [SerializeField] private Button button;
 
         [Header("Resource Cost Display")]
-        [SerializeField] private Transform costContainer; // Container for individual resource cost entries
-        [SerializeField] private GameObject resourceCostPrefab; // Prefab with Icon + Text
+        [SerializeField] private Transform costContainer; // Hidden - kept for backwards compatibility
+        [SerializeField] private GameObject resourceCostPrefab; // Kept for backwards compatibility
+
+        [Header("Tooltip")]
+        [SerializeField] private UniversalTooltip tooltip; // Reference to tooltip component
 
         [Header("Visual Settings")]
         [SerializeField] private Color affordableColor = new Color(0.2f, 0.8f, 0.2f, 1f); // Green
@@ -35,8 +39,12 @@ namespace RTS.UI
         [SerializeField] private Color selectedColor = new Color(0.2f, 0.5f, 1f, 1f); // Blue
         [SerializeField] private Color pressedColor = new Color(0.2f, 0.5f, 1f, 1f); // Blue
 
+        [Header("Display Settings")]
+        [SerializeField] private bool showIconOnly = true; // NEW: Show only icon, hide text
+        [SerializeField] private bool showTooltipOnHover = true; // NEW: Show tooltip on hover
+
         [Header("State Management")]
-        [SerializeField] private bool maintainColorState = true; // NEW: Keep colors permanent
+        [SerializeField] private bool maintainColorState = true; // Keep colors permanent
 
         private BuildingDataSO buildingData;
         private int buildingIndex;
@@ -49,11 +57,17 @@ namespace RTS.UI
         private bool isSelected;
         private bool isHovered;
 
-        public void Initialize(BuildingDataSO data, int index, BuildingHUD hud)
+        public void Initialize(BuildingDataSO data, int index, BuildingHUD hud, UniversalTooltip tooltipReference = null)
         {
             buildingData = data;
             buildingIndex = index;
             parentHUD = hud;
+
+            // Set tooltip reference if provided
+            if (tooltipReference != null)
+            {
+                tooltip = tooltipReference;
+            }
 
             // Get resource service from ServiceLocator
             resourceService = ServiceLocator.TryGet<IResourcesService>();
@@ -75,6 +89,14 @@ namespace RTS.UI
 
             // Initial affordability check
             UpdateState(resourceService);
+        }
+
+        /// <summary>
+        /// Set the tooltip reference (can be called after initialization)
+        /// </summary>
+        public void SetTooltip(UniversalTooltip tooltipReference)
+        {
+            tooltip = tooltipReference;
         }
 
         private void OnDestroy()
@@ -119,34 +141,47 @@ namespace RTS.UI
         {
             if (buildingData == null) return;
 
-            // Update name
-            if (nameText != null)
+            // Icon-only mode: Hide text elements
+            if (showIconOnly)
             {
-                nameText.text = buildingData.buildingName;
+                if (nameText != null) nameText.gameObject.SetActive(false);
+                if (costText != null) costText.gameObject.SetActive(false);
+                if (costContainer != null) costContainer.gameObject.SetActive(false);
+            }
+            else
+            {
+                // Legacy mode: Show all elements
+                if (nameText != null)
+                {
+                    nameText.gameObject.SetActive(true);
+                    nameText.text = buildingData.buildingName;
+                }
+
+                // Update cost display
+                if (costContainer != null && resourceCostPrefab != null)
+                {
+                    costContainer.gameObject.SetActive(true);
+                    UpdateCostDisplayWithIcons();
+                }
+                else if (costText != null)
+                {
+                    costText.gameObject.SetActive(true);
+                    // Fallback to simple text display using utility
+                    costText.text = ResourceDisplayUtility.FormatCosts(buildingData.GetCosts());
+                }
             }
 
-            // Update building icon
+            // Update building icon (always visible)
             if (iconImage != null && buildingData.icon != null)
             {
                 iconImage.sprite = buildingData.icon;
                 iconImage.enabled = true;
             }
 
-            // Update hotkey hint
+            // Update hotkey hint (always visible if present)
             if (hotkeyText != null)
             {
                 hotkeyText.text = $"[{buildingIndex + 1}]";
-            }
-
-            // Update cost display
-            if (costContainer != null && resourceCostPrefab != null)
-            {
-                UpdateCostDisplayWithIcons();
-            }
-            else if (costText != null)
-            {
-                // Fallback to simple text display using utility
-                costText.text = ResourceDisplayUtility.FormatCosts(buildingData.GetCosts());
             }
         }
 
@@ -263,12 +298,20 @@ namespace RTS.UI
             }
         }
 
-        #region Mouse Hover Effects
+        #region Mouse Hover Effects (Unity Event System)
 
-        public void OnPointerEnter()
+        public void OnPointerEnter(PointerEventData eventData)
         {
             isHovered = true;
 
+            // Show tooltip
+            if (showTooltipOnHover && tooltip != null && buildingData != null)
+            {
+                var tooltipData = TooltipData.FromBuilding(buildingData);
+                tooltip.Show(tooltipData);
+            }
+
+            // Visual feedback
             if (backgroundImage != null && button != null && button.interactable)
             {
                 if (!maintainColorState)
@@ -286,10 +329,17 @@ namespace RTS.UI
             }
         }
 
-        public void OnPointerExit()
+        public void OnPointerExit(PointerEventData eventData)
         {
             isHovered = false;
 
+            // Hide tooltip
+            if (showTooltipOnHover && tooltip != null)
+            {
+                tooltip.Hide();
+            }
+
+            // Visual feedback
             if (!maintainColorState)
             {
                 // OLD BEHAVIOR: Reset to affordable/unaffordable

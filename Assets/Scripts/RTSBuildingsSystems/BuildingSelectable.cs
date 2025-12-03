@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
+using KAD.RTSBuildingsSystems;
 
 namespace RTS.Buildings
 {
@@ -19,15 +20,21 @@ namespace RTS.Buildings
         private bool isSelected;
         private Renderer[] renderers;
         private Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
-        // [OK] FIX: Use MaterialPropertyBlock to avoid creating material instances during render pass
+        //  FIX: Use MaterialPropertyBlock to avoid creating material instances during render pass
         private MaterialPropertyBlock propertyBlock;
         private static readonly int ColorPropertyID = Shader.PropertyToID("_Color");
         private static readonly int BaseColorPropertyID = Shader.PropertyToID("_BaseColor");
+
+        // Optional advanced visualizer component
+        private BuildingSelectionVisualizer selectionVisualizer;
 
         public bool IsSelected { get { return isSelected; } }
 
         private void Awake()
         {
+            // Check for optional advanced visualizer component
+            selectionVisualizer = GetComponent<BuildingSelectionVisualizer>();
+
             if (useColorHighlight)
             {
                 renderers = GetComponentsInChildren<Renderer>();
@@ -37,7 +44,7 @@ namespace RTS.Buildings
                 {
                     if (rend != null && rend.sharedMaterial != null)
                     {
-                        // [OK] FIX: Use sharedMaterial instead of material
+                        //  FIX: Use sharedMaterial instead of material
                         originalColors[rend] = rend.sharedMaterial.color;
                     }
                 }
@@ -50,23 +57,31 @@ namespace RTS.Buildings
 
             isSelected = true;
 
-            // Visual feedback
-            if (selectionIndicator != null)
+            // Use advanced visualizer if available
+            if (selectionVisualizer != null)
             {
-                selectionIndicator.SetActive(true);
+                selectionVisualizer.ShowSelection();
             }
-
-            if (useColorHighlight && propertyBlock != null)
+            else
             {
-                foreach (var rend in renderers)
+                // Fallback to legacy visual feedback
+                if (selectionIndicator != null)
                 {
-                    if (rend != null)
+                    selectionIndicator.SetActive(true);
+                }
+
+                if (useColorHighlight && propertyBlock != null)
+                {
+                    foreach (var rend in renderers)
                     {
-                        // [OK] FIX: Use MaterialPropertyBlock to change color without creating instances
-                        rend.GetPropertyBlock(propertyBlock);
-                        propertyBlock.SetColor(ColorPropertyID, selectedColor);
-                        propertyBlock.SetColor(BaseColorPropertyID, selectedColor);
-                        rend.SetPropertyBlock(propertyBlock);
+                        if (rend != null)
+                        {
+                            //  FIX: Use MaterialPropertyBlock to change color without creating instances
+                            rend.GetPropertyBlock(propertyBlock);
+                            propertyBlock.SetColor(ColorPropertyID, selectedColor);
+                            propertyBlock.SetColor(BaseColorPropertyID, selectedColor);
+                            rend.SetPropertyBlock(propertyBlock);
+                        }
                     }
                 }
             }
@@ -80,23 +95,31 @@ namespace RTS.Buildings
 
             isSelected = false;
 
-            // Remove visual feedback
-            if (selectionIndicator != null)
+            // Use advanced visualizer if available
+            if (selectionVisualizer != null)
             {
-                selectionIndicator.SetActive(false);
+                selectionVisualizer.HideSelection();
             }
-
-            if (useColorHighlight && propertyBlock != null)
+            else
             {
-                foreach (var rend in renderers)
+                // Fallback to legacy visual feedback removal
+                if (selectionIndicator != null)
                 {
-                    if (rend != null && originalColors.TryGetValue(rend, out Color original))
+                    selectionIndicator.SetActive(false);
+                }
+
+                if (useColorHighlight && propertyBlock != null)
+                {
+                    foreach (var rend in renderers)
                     {
-                        // [OK] FIX: Use MaterialPropertyBlock to restore original color
-                        rend.GetPropertyBlock(propertyBlock);
-                        propertyBlock.SetColor(ColorPropertyID, original);
-                        propertyBlock.SetColor(BaseColorPropertyID, original);
-                        rend.SetPropertyBlock(propertyBlock);
+                        if (rend != null && originalColors.TryGetValue(rend, out Color original))
+                        {
+                            //  FIX: Use MaterialPropertyBlock to restore original color
+                            rend.GetPropertyBlock(propertyBlock);
+                            propertyBlock.SetColor(ColorPropertyID, original);
+                            propertyBlock.SetColor(BaseColorPropertyID, original);
+                            rend.SetPropertyBlock(propertyBlock);
+                        }
                     }
                 }
             }

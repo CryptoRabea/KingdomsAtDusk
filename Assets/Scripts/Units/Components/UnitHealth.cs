@@ -1,5 +1,6 @@
 using UnityEngine;
 using RTS.Core.Events;
+using RTS.Core.Services;
 
 namespace RTS.Units
 {
@@ -12,9 +13,10 @@ namespace RTS.Units
         [Header("Health Settings")]
         [SerializeField] private float maxHealth = 100f;
         [SerializeField] private bool isInvulnerable = false;
-        
+
         private float currentHealth;
         private bool isDead = false;
+        private bool hpBarRegistered = false;
 
         public float MaxHealth => maxHealth;
         public float CurrentHealth => currentHealth;
@@ -25,6 +27,28 @@ namespace RTS.Units
         private void Awake()
         {
             currentHealth = maxHealth;
+        }
+
+        private void Start()
+        {
+            // Register HP bar with floating numbers service
+            RegisterHPBar();
+        }
+
+        private void RegisterHPBar()
+        {
+            if (hpBarRegistered) return;
+
+            var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
+            if (floatingNumberService != null)
+            {
+                floatingNumberService.RegisterHPBar(
+                    gameObject,
+                    () => currentHealth,
+                    () => maxHealth
+                );
+                hpBarRegistered = true;
+            }
         }
 
         #region Damage & Healing
@@ -91,6 +115,17 @@ namespace RTS.Units
                 {
                     EventBus.Publish(new HealingAppliedEvent(healer, gameObject, actualHealing));
                 }
+
+                // Stop blood dripping if healed above threshold
+                var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
+                if (floatingNumberService != null && floatingNumberService.Settings != null)
+                {
+                    float healthPercent = currentHealth / maxHealth;
+                    if (healthPercent > floatingNumberService.Settings.BloodDrippingThreshold)
+                    {
+                        floatingNumberService.StopBloodDripping(gameObject);
+                    }
+                }
             }
         }
 
@@ -140,6 +175,9 @@ namespace RTS.Units
 
             isDead = true;
 
+            // Unregister HP bar
+            UnregisterHPBar();
+
             // Determine if this was an enemy (check layer or tag)
             bool wasEnemy = gameObject.layer == LayerMask.NameToLayer("Enemy");
 
@@ -147,6 +185,23 @@ namespace RTS.Units
 
             // Notify other components
             SendMessage("OnUnitDied", SendMessageOptions.DontRequireReceiver);
+        }
+
+        private void UnregisterHPBar()
+        {
+            if (!hpBarRegistered) return;
+
+            var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
+            if (floatingNumberService != null)
+            {
+                floatingNumberService.UnregisterHPBar(gameObject);
+                hpBarRegistered = false;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            UnregisterHPBar();
         }
 
         #endregion

@@ -53,7 +53,7 @@ namespace RTSBuildingsSystems.Editor
             // Select the new spawn point
             Selection.activeGameObject = spawnPointObj;
 
-            Debug.Log($"[OK] Added spawn point to {selected.name} at position {spawnPointObj.transform.localPosition}");
+            Debug.Log($" Added spawn point to {selected.name} at position {spawnPointObj.transform.localPosition}");
 
             // Mark scene dirty if not a prefab
             if (!PrefabUtility.IsPartOfPrefabAsset(selected))
@@ -133,7 +133,7 @@ namespace RTSBuildingsSystems.Editor
                     PrefabUtility.SaveAsPrefabAsset(prefabContents, path);
                     addedCount++;
 
-                    Debug.Log($"[OK] Added spawn point to {prefab.name}");
+                    Debug.Log($" Added spawn point to {prefab.name}");
                 }
                 catch (System.Exception e)
                 {

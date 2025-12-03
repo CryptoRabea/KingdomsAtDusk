@@ -1,6 +1,6 @@
+using RTS.Core.Services;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using RTS.Core.Services;
 
 namespace RTS.SaveLoad
 {
@@ -13,7 +13,7 @@ namespace RTS.SaveLoad
     public class SaveLoadInputHandler : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private RTS.UI.InGameMenu inGameMenu;
+        [SerializeField] private SaveLoadMenu inGameMenu;
 
         private ISaveLoadService saveLoadService;
         private IGameStateService gameStateService;
@@ -37,10 +37,10 @@ namespace RTS.SaveLoad
 
             if (inGameMenu == null)
             {
-                inGameMenu = FindAnyObjectByType<RTS.UI.InGameMenu>(FindObjectsInactive.Include);
+                inGameMenu = FindAnyObjectByType<SaveLoadMenu>(FindObjectsInactive.Include);
                 if (inGameMenu == null)
                 {
-                    Debug.LogWarning("SaveLoadInputHandler: InGameMenu not found in scene!");
+                    Debug.LogWarning("SaveLoadInputHandler: SaveLoadMenu not found in scene!");
                 }
             }
         }
@@ -49,13 +49,13 @@ namespace RTS.SaveLoad
         {
             if (inputActions != null)
             {
-                // Enable the SaveLoad action map
-                inputActions.SaveLoad.Enable();
+                // Enable the Player action map
+                inputActions.Player.Enable();
 
                 // Subscribe to actions
-                inputActions.SaveLoad.F5.performed += OnF5Pressed;
-                inputActions.SaveLoad.F9.performed += OnF9Pressed;
-                inputActions.SaveLoad.F10.performed += OnF10Pressed;
+                inputActions.Player.F5.performed += OnF5Pressed;
+                inputActions.Player.F9.performed += OnF9Pressed;
+                inputActions.Player.F10.performed += OnF10Pressed;
             }
         }
 
@@ -64,12 +64,12 @@ namespace RTS.SaveLoad
             if (inputActions != null)
             {
                 // Unsubscribe from actions
-                inputActions.SaveLoad.F5.performed -= OnF5Pressed;
-                inputActions.SaveLoad.F9.performed -= OnF9Pressed;
-                inputActions.SaveLoad.F10.performed -= OnF10Pressed;
+                inputActions.Player.F5.performed -= OnF5Pressed;
+                inputActions.Player.F9.performed -= OnF9Pressed;
+                inputActions.Player.F10.performed -= OnF10Pressed;
 
-                // Disable the SaveLoad action map
-                inputActions.SaveLoad.Disable();
+                // Disable the Player action map
+                inputActions.Player.Disable();
             }
         }
 
@@ -81,24 +81,36 @@ namespace RTS.SaveLoad
 
         private void OnF5Pressed(InputAction.CallbackContext context)
         {
+            Debug.Log("[SaveLoadInputHandler] F5 pressed (Quick Save)");
+
             // Don't process if menu is open
             if (inGameMenu != null && inGameMenu.IsOpen)
+            {
+                Debug.Log("[SaveLoadInputHandler] Menu is open, ignoring F5");
                 return;
+            }
 
             HandleQuickSave();
         }
 
         private void OnF9Pressed(InputAction.CallbackContext context)
         {
+            Debug.Log("[SaveLoadInputHandler] F9 pressed (Quick Load)");
+
             // Don't process if menu is open
             if (inGameMenu != null && inGameMenu.IsOpen)
+            {
+                Debug.Log("[SaveLoadInputHandler] Menu is open, ignoring F9");
                 return;
+            }
 
             HandleQuickLoad();
         }
 
         private void OnF10Pressed(InputAction.CallbackContext context)
         {
+            Debug.Log("[SaveLoadInputHandler] F10 pressed (Toggle Menu)");
+
             // Toggle in-game menu
             ToggleMenu();
         }
@@ -154,9 +166,17 @@ namespace RTS.SaveLoad
         private void ToggleMenu()
         {
             if (inGameMenu == null)
+            {
+                Debug.LogError("[SaveLoadInputHandler] InGameMenu is null!");
                 return;
+            }
 
-            inGameMenu.ToggleMenu();
+            Debug.Log($"[SaveLoadInputHandler] Toggling menu. Current state: {(inGameMenu.IsOpen ? "Open" : "Closed")}");
+
+            if (inGameMenu.IsOpen)
+                inGameMenu.CloseMenu();
+            else
+                inGameMenu.OpenMenu();
         }
 
         private void ShowNotification(string message, bool isError = false)

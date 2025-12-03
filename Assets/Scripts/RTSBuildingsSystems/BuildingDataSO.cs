@@ -95,6 +95,35 @@ namespace RTS.Buildings
         public float repairCostMultiplier = 0.5f; // 50% of build cost to repair
         public float visionRevealRange;
 
+        [Header("Combat Stats (Optional)")]
+        [Tooltip("Defence value - reduces incoming damage")]
+        public int defence = 0;
+
+        [Tooltip("Attack damage dealt to enemies")]
+        public int attackDamage = 0;
+
+        [Tooltip("Maximum attack range")]
+        public float attackRange = 0f;
+
+        [Tooltip("Attacks per second")]
+        public float attackSpeed = 1f;
+
+        [Header("Tooltip Display Options")]
+        [Tooltip("Show HP in tooltip?")]
+        public bool showHP = false;
+
+        [Tooltip("Show Defence in tooltip?")]
+        public bool showDefence = false;
+
+        [Tooltip("Show Attack Damage in tooltip?")]
+        public bool showAttackDamage = false;
+
+        [Tooltip("Show Attack Range in tooltip?")]
+        public bool showAttackRange = false;
+
+        [Tooltip("Show Attack Speed in tooltip?")]
+        public bool showAttackSpeed = false;
+
         [Header("Unit Training (Optional)")]
         [Tooltip("Can this building train units?")]
         public bool canTrainUnits = false;

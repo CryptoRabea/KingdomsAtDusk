@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using RTS.Buildings;
 using RTS.Core.Services;
@@ -12,8 +13,9 @@ namespace RTS.UI
     /// <summary>
     /// UI button for training a specific unit type.
     /// Displays unit info, cost, and affordability.
+    /// Supports tooltip on hover.
     /// </summary>
-    public class TrainUnitButton : MonoBehaviour
+    public class TrainUnitButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("UI References")]
         [SerializeField] private Button button;
@@ -21,6 +23,10 @@ namespace RTS.UI
         [SerializeField] private TextMeshProUGUI unitNameText;
         [SerializeField] private TextMeshProUGUI costText;
         [SerializeField] private TextMeshProUGUI trainingTimeText;
+
+        [Header("Tooltip")]
+        [SerializeField] private UniversalTooltip tooltip; // Reference to tooltip component
+        [SerializeField] private bool showTooltipOnHover = true;
 
         [Header("Visual Feedback")]
         [SerializeField] private Color affordableColor = Color.white;
@@ -60,10 +66,16 @@ namespace RTS.UI
         /// <summary>
         /// Initialize the button with unit data and the training queue.
         /// </summary>
-        public void Initialize(TrainableUnitData data, UnitTrainingQueue queue)
+        public void Initialize(TrainableUnitData data, UnitTrainingQueue queue, UniversalTooltip tooltipReference = null)
         {
             unitData = data;
             trainingQueue = queue;
+
+            // Set tooltip reference if provided
+            if (tooltipReference != null)
+            {
+                tooltip = tooltipReference;
+            }
 
             if (unitData?.unitConfig == null)
             {
@@ -74,6 +86,14 @@ namespace RTS.UI
 
             UpdateDisplay();
             UpdateAffordability(); // Initial affordability check
+        }
+
+        /// <summary>
+        /// Set the tooltip reference (can be called after initialization)
+        /// </summary>
+        public void SetTooltip(UniversalTooltip tooltipReference)
+        {
+            tooltip = tooltipReference;
         }
 
         private void UpdateDisplay()
@@ -143,5 +163,28 @@ namespace RTS.UI
                 }
             }
         }
+
+        #region Tooltip Hover (Unity Event System)
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            // Show tooltip
+            if (showTooltipOnHover && tooltip != null && unitData != null)
+            {
+                var tooltipData = TooltipData.FromUnit(unitData);
+                tooltip.Show(tooltipData);
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            // Hide tooltip
+            if (showTooltipOnHover && tooltip != null)
+            {
+                tooltip.Hide();
+            }
+        }
+
+        #endregion
     }
 }

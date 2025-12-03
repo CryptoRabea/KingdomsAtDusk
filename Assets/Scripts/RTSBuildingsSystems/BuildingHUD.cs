@@ -24,6 +24,7 @@ namespace RTS.UI
         [Header("References")]
         [SerializeField] private Transform buildingButtonContainer;
         [SerializeField] private GameObject buildingButtonPrefab;
+        [SerializeField] private UniversalTooltip buildingTooltip; // Tooltip for building buttons
 
         [Header("UI Panels")]
         [SerializeField] private GameObject buildingPanel;
@@ -128,7 +129,7 @@ namespace RTS.UI
                 return;
             }
 
-            // [OK] GET BUILDINGS FROM BUILDINGMANAGER - NO DUPLICATE ARRAY!
+            //  GET BUILDINGS FROM BUILDINGMANAGER - NO DUPLICATE ARRAY!
             BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             if (availableBuildings == null || availableBuildings.Length == 0)
@@ -185,7 +186,8 @@ namespace RTS.UI
                 buildingButton = buttonObj.AddComponent<BuildingButton>();
             }
 
-            buildingButton.Initialize(buildingData, index, this);
+            // Initialize with tooltip reference
+            buildingButton.Initialize(buildingData, index, this, buildingTooltip);
             buildingButtons.Add(buildingButton);
 
             // Add click listener
@@ -230,7 +232,7 @@ namespace RTS.UI
                 return;
             }
 
-            // [OK] GET BUILDINGS FROM BUILDINGMANAGER
+            //  GET BUILDINGS FROM BUILDINGMANAGER
             BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             if (buildingIndex >= availableBuildings.Length)
@@ -263,7 +265,7 @@ namespace RTS.UI
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
 
-            // [OK] GET BUILDINGS FROM BUILDINGMANAGER
+            //  GET BUILDINGS FROM BUILDINGMANAGER
             BuildingDataSO[] availableBuildings = buildingManager.GetAllBuildingData();
 
             for (int i = 0; i < buildingHotkeyStrings.Length && i < availableBuildings.Length; i++)

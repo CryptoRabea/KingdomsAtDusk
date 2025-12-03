@@ -71,7 +71,7 @@ namespace RTS.SaveLoad
 
             if (success)
             {
-                Debug.Log($"[OK] Auto-save successful: {autoSaveName}");
+                Debug.Log($" Auto-save successful: {autoSaveName}");
 
                 // Move to next slot
                 currentAutoSaveIndex = (currentAutoSaveIndex + 1) % settings.maxAutoSaves;
@@ -81,7 +81,7 @@ namespace RTS.SaveLoad
             }
             else
             {
-                Debug.LogError($"[ERROR] Auto-save failed: {autoSaveName}");
+                Debug.LogError($" Auto-save failed: {autoSaveName}");
             }
         }
 

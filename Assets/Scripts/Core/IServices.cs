@@ -238,4 +238,79 @@ namespace RTS.Core.Services
         public bool isQuickSave;
     }
 
+    /// <summary>
+    /// Interface for floating numbers and HP bars system.
+    /// Displays damage, healing, resources, and health bars above game entities.
+    /// </summary>
+    public interface IFloatingNumberService
+    {
+        /// <summary>
+        /// Show a damage number at the specified world position.
+        /// </summary>
+        void ShowDamageNumber(Vector3 worldPosition, float damageAmount, bool isCritical = false);
+
+        /// <summary>
+        /// Show a healing number at the specified world position.
+        /// </summary>
+        void ShowHealNumber(Vector3 worldPosition, float healAmount);
+
+        /// <summary>
+        /// Show a resource gain number at the specified world position.
+        /// </summary>
+        void ShowResourceNumber(Vector3 worldPosition, ResourceType resourceType, int amount);
+
+        /// <summary>
+        /// Show a repair number at the specified world position.
+        /// </summary>
+        void ShowRepairNumber(Vector3 worldPosition, float repairAmount);
+
+        /// <summary>
+        /// Show an experience gain number (for future XP system).
+        /// </summary>
+        void ShowExperienceNumber(Vector3 worldPosition, int xpAmount);
+
+        /// <summary>
+        /// Register a GameObject to have an HP bar displayed above it.
+        /// </summary>
+        /// <param name="target">The GameObject to track</param>
+        /// <param name="getCurrentHealth">Function to get current health</param>
+        /// <param name="getMaxHealth">Function to get max health</param>
+        void RegisterHPBar(GameObject target, System.Func<float> getCurrentHealth, System.Func<float> getMaxHealth);
+
+        /// <summary>
+        /// Unregister a GameObject's HP bar.
+        /// </summary>
+        void UnregisterHPBar(GameObject target);
+
+        /// <summary>
+        /// Get the current settings configuration.
+        /// </summary>
+        KAD.UI.FloatingNumbers.FloatingNumbersSettings Settings { get; }
+
+        /// <summary>
+        /// Refresh settings (call after modifying settings).
+        /// </summary>
+        void RefreshSettings();
+
+        /// <summary>
+        /// Show blood gush particle effect.
+        /// </summary>
+        void ShowBloodGush(Vector3 worldPosition, Vector3 direction, int particleCount = -1);
+
+        /// <summary>
+        /// Show blood decal on ground.
+        /// </summary>
+        void ShowBloodDecal(Vector3 worldPosition);
+
+        /// <summary>
+        /// Start blood dripping for a wounded unit.
+        /// </summary>
+        void StartBloodDripping(GameObject target, System.Func<float> getCurrentHealth, System.Func<float> getMaxHealth);
+
+        /// <summary>
+        /// Stop blood dripping for a unit.
+        /// </summary>
+        void StopBloodDripping(GameObject target);
+    }
+
 }

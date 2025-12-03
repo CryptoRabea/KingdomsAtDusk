@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using TMPro;
 using RTS.UI;
+using UnityEngine.InputSystem.UI;
 
 namespace RTS.Editor
 {
@@ -34,10 +35,10 @@ namespace RTS.Editor
 
             EditorGUILayout.HelpBox(
                 "This tool will create:\n" +
-                "- Main Menu scene with UI\n" +
-                "- Loading Screen prefab\n" +
-                "- Scene Transition Manager\n" +
-                "- All necessary scripts and components",
+                "• Main Menu scene with UI\n" +
+                "• Loading Screen prefab\n" +
+                "• Scene Transition Manager\n" +
+                "• All necessary scripts and components",
                 MessageType.Info);
 
             EditorGUILayout.Space();
@@ -144,7 +145,7 @@ namespace RTS.Editor
             {
                 GameObject eventSystemObj = new GameObject("EventSystem");
                 eventSystemObj.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                eventSystemObj.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                eventSystemObj.AddComponent<InputSystemUIInputModule>();
             }
 
             // Create Background

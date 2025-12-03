@@ -2,15 +2,15 @@
  * MinimapFogOfWarIntegration.cs
  * Integrates Fog of War with Minimap system
  * Hides enemy markers that are not in revealed fog areas
- * 
+ *
  * IMPORTANT: Attach to the same GameObject as MiniMapControllerPro
  */
 
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using FischlWorks_FogWar;
 using RTS.UI;
+using KingdomsAtDusk.FogOfWar;
 
 namespace RTS.FogOfWar
 {
@@ -23,19 +23,10 @@ namespace RTS.FogOfWar
     public class MinimapFogOfWarIntegration : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private csFogWar fogWarSystem;
-        [Tooltip("If null, will search for csFogWar in scene")]
-
-        [Header("World Bounds (Optional - Auto-detects from Fog System)")]
-        [SerializeField] private Vector2 customWorldMin = Vector2.zero;
-        [Tooltip("Leave at 0 to auto-calculate from fog system")]
-        
-        [SerializeField] private Vector2 customWorldMax = Vector2.zero;
-        [Tooltip("Leave at 0 to auto-calculate from fog system")]
+        [SerializeField] private FogOfWarManager fogWarManager;
+        [Tooltip("If null, will search for FogOfWarManager in scene")]
 
         [Header("Visibility Settings")]
-        [SerializeField] private int visibilityCheckRadius = 0;
-        [Tooltip("Additional radius around marker position to check (0 = exact position only)")]
 
         [SerializeField] private int updateInterval = 2;
         [Tooltip("Update fog visibility every N frames (higher = better performance)")]
@@ -69,20 +60,25 @@ namespace RTS.FogOfWar
                 return;
             }
 
-            // Find fog war system if not assigned
-            if (fogWarSystem == null)
+            // Find fog war manager if not assigned
+            if (fogWarManager == null)
             {
-                fogWarSystem = FindFirstObjectByType<csFogWar>();
+                fogWarManager = FogOfWarManager.Instance;
 
-                if (fogWarSystem == null)
+                if (fogWarManager == null)
                 {
-                    Debug.LogError("[MinimapFogOfWarIntegration] No csFogWar component found in scene!");
+                    fogWarManager = FindFirstObjectByType<FogOfWarManager>();
+                }
+
+                if (fogWarManager == null)
+                {
+                    Debug.LogError("[MinimapFogOfWarIntegration] No FogOfWarManager found in scene!");
                     enabled = false;
                     return;
                 }
 
                 if (showDebugLogs)
-                    Debug.Log("[MinimapFogOfWarIntegration] Found csFogWar component automatically");
+                    Debug.Log("[MinimapFogOfWarIntegration] Found FogOfWarManager automatically");
             }
         }
 
@@ -92,7 +88,7 @@ namespace RTS.FogOfWar
 
         private void LateUpdate()
         {
-            if (fogWarSystem == null || minimapController == null) return;
+            if (fogWarManager == null || minimapController == null) return;
 
             // Update at intervals for performance
             frameCounter++;
@@ -217,7 +213,7 @@ namespace RTS.FogOfWar
         {
             // Convert minimap local position to world position
             Vector2 localPos = marker.anchoredPosition;
-            
+
             // Get minimap dimensions
             RectTransform minimapRect = minimapController.GetComponent<RectTransform>();
             Vector2 minimapSize = minimapRect.rect.size;
@@ -226,47 +222,27 @@ namespace RTS.FogOfWar
             float normalizedX = (localPos.x + minimapSize.x / 2f) / minimapSize.x;
             float normalizedY = (localPos.y + minimapSize.y / 2f) / minimapSize.y;
 
-            // Get world bounds
-            float worldMinX, worldMaxX, worldMinZ, worldMaxZ;
+            // Use GameBoundary to convert normalized position to world position
+            Vector2 normalized2D = new Vector2(normalizedX, normalizedY);
+            Vector3 worldPosition = fogWarManager.Boundary.GetWorldPosition(normalized2D);
 
-            if (customWorldMin != Vector2.zero || customWorldMax != Vector2.zero)
-            {
-                // Use custom bounds if specified
-                worldMinX = customWorldMin.x;
-                worldMaxX = customWorldMax.x;
-                worldMinZ = customWorldMin.y;
-                worldMaxZ = customWorldMax.y;
-            }
-            else
-            {
-                // Auto-calculate from fog war system
-                worldMinX = fogWarSystem._LevelMidPoint.position.x - (fogWarSystem._UnitScale * fogWarSystem.levelData.levelDimensionX / 2f);
-                worldMaxX = fogWarSystem._LevelMidPoint.position.x + (fogWarSystem._UnitScale * fogWarSystem.levelData.levelDimensionX / 2f);
-                worldMinZ = fogWarSystem._LevelMidPoint.position.z - (fogWarSystem._UnitScale * fogWarSystem.levelData.levelDimensionY / 2f);
-                worldMaxZ = fogWarSystem._LevelMidPoint.position.z + (fogWarSystem._UnitScale * fogWarSystem.levelData.levelDimensionY / 2f);
-            }
-
-            // Convert to world position
-            float worldX = Mathf.Lerp(worldMinX, worldMaxX, normalizedX);
-            float worldZ = Mathf.Lerp(worldMinZ, worldMaxZ, normalizedY);
-
-            return new Vector3(worldX, 0, worldZ);
+            return worldPosition;
         }
 
         private bool CheckFogVisibility(Vector3 worldPosition)
         {
-            if (fogWarSystem == null) return true; // Fallback: show if no fog system
+            if (fogWarManager == null) return true; // Fallback: show if no fog system
 
-            // Check if position is within fog grid range
-            if (!fogWarSystem.CheckWorldGridRange(worldPosition))
+            // Check if position is within game boundaries
+            if (!fogWarManager.Boundary.Contains(worldPosition))
             {
-                // Position outside fog grid - treat as not visible
+                // Position outside boundaries - treat as not visible
                 return false;
             }
 
-            // Use fog war system's CheckVisibility method
-            // This checks if the position is currently revealed (not explored, but actively visible)
-            bool isVisible = fogWarSystem.CheckVisibility(worldPosition, visibilityCheckRadius);
+            // Use fog war manager's IsVisible method
+            // This checks if the position is currently visible (not just explored)
+            bool isVisible = fogWarManager.IsVisible(worldPosition);
 
             return isVisible;
         }

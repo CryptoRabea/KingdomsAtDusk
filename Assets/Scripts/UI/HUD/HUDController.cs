@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using RTS.UI.HUD;
 
 namespace RTS.UI.HUD
@@ -31,6 +32,13 @@ namespace RTS.UI.HUD
         [Header("References")]
         [SerializeField] private MainHUDFramework hudFramework;
 
+        [Header("Hotkeys (Optional)")]
+        [SerializeField] private bool enableHotkeys = true;
+        [SerializeField] private Key toggleInventoryKey = Key.I;
+        [SerializeField] private Key toggleMinimapKey = Key.M;
+        [SerializeField] private Key toggleTopBarKey = Key.T;
+        [SerializeField] private Key toggleAllUIKey = Key.F1;
+
         [Header("Presets")]
         [SerializeField] private HUDConfiguration[] presetConfigurations;
         [SerializeField] private HUDLayoutPreset[] presetLayouts;
@@ -57,6 +65,32 @@ namespace RTS.UI.HUD
             if (hudFramework == null)
             {
                 Debug.LogError("HUDController: No MainHUDFramework found in scene!");
+            }
+        }
+
+        private void Update()
+        {
+            if (!enableHotkeys || Keyboard.current == null) return;
+
+            // Toggle hotkeys
+            if (Keyboard.current[toggleInventoryKey].wasPressedThisFrame)
+            {
+                ToggleInventory();
+            }
+
+            if (Keyboard.current[toggleMinimapKey].wasPressedThisFrame)
+            {
+                ToggleMinimap();
+            }
+
+            if (Keyboard.current[toggleTopBarKey].wasPressedThisFrame)
+            {
+                ToggleTopBar();
+            }
+
+            if (Keyboard.current[toggleAllUIKey].wasPressedThisFrame)
+            {
+                ToggleAllUI();
             }
         }
 

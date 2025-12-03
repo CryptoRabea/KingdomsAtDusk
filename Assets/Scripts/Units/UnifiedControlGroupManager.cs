@@ -14,9 +14,9 @@ namespace RTS.Core
     /// Assigning one type to a group automatically clears the other type.
     /// 
     /// Usage:
-    /// - Select units -> Ctrl+1 -> Group 1 now contains units
-    /// - Select building -> Ctrl+1 -> Group 1 now contains building (units cleared!)
-    /// - Press 1 -> Recalls whatever is in group 1 (units or building)
+    /// - Select units → Ctrl+1 → Group 1 now contains units
+    /// - Select building → Ctrl+1 → Group 1 now contains building (units cleared!)
+    /// - Press 1 → Recalls whatever is in group 1 (units or building)
     /// 
     /// ADD THIS TO ONE GAMEOBJECT IN YOUR SCENE (like "GameManager").
     /// REPLACES: UnitGroupManager and BuildingGroupManager (remove those if present)
@@ -180,7 +180,7 @@ namespace RTS.Core
                 }
 
                 if (showDebugMessages)
-                    Debug.Log($"[SWORD] Saved {groups[groupNumber].Units.Count} units to group {groupNumber} (overwrote previous assignment)");
+                    Debug.Log($"⚔️ Saved {groups[groupNumber].Units.Count} units to group {groupNumber} (overwrote previous assignment)");
 
                 EventBus.Publish(new UnitGroupSavedEvent(groupNumber, groups[groupNumber].Units.Count));
             }
@@ -191,7 +191,7 @@ namespace RTS.Core
                 groups[groupNumber].Building = buildingSelectionManager.CurrentlySelectedBuilding;
 
                 if (showDebugMessages)
-                    Debug.Log($"[BUILDING] Saved building '{groups[groupNumber].Building.gameObject.name}' to group {groupNumber} (overwrote previous assignment)");
+                    Debug.Log($"🏰 Saved building '{groups[groupNumber].Building.gameObject.name}' to group {groupNumber} (overwrote previous assignment)");
 
                 EventBus.Publish(new BuildingGroupSavedEvent(groupNumber, groups[groupNumber].Building.gameObject.name));
             }
@@ -282,7 +282,7 @@ namespace RTS.Core
             }
 
             if (showDebugMessages)
-                Debug.Log($"[SWORD] Recalled unit group {groupNumber}: {validUnits.Count} units");
+                Debug.Log($"⚔️ Recalled unit group {groupNumber}: {validUnits.Count} units");
 
             // Center camera on group if double-tapped
             if (isDoubleTap && validUnits.Count > 0)
@@ -318,7 +318,7 @@ namespace RTS.Core
             group.Building.Select();
 
             if (showDebugMessages)
-                Debug.Log($"[BUILDING] Recalled building group {groupNumber}: {group.Building.gameObject.name}");
+                Debug.Log($"🏰 Recalled building group {groupNumber}: {group.Building.gameObject.name}");
 
             // Center camera on building if double-tapped
             if (isDoubleTap)
@@ -389,7 +389,7 @@ namespace RTS.Core
             }
 
             if (showDebugMessages)
-                Debug.Log($"[CAMERA] Centered camera on {units.Count} units");
+                Debug.Log($"📷 Centered camera on {units.Count} units");
         }
 
         /// <summary>
@@ -414,7 +414,7 @@ namespace RTS.Core
             }
 
             if (showDebugMessages)
-                Debug.Log($"[CAMERA] Centered camera on building '{building.gameObject.name}'");
+                Debug.Log($"📷 Centered camera on building '{building.gameObject.name}'");
         }
 
         /// <summary>
