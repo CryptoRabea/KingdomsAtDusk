@@ -97,3 +97,5 @@ Logs/AssetImportWorker3.log
 /Logs
 /Logs
 /Logs
+*.tif
+*.mp3
