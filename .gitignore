@@ -1,0 +1,99 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+Library/
+Logs/
+
+# VS / Rider
+.vscode/
+.idea/
+*.sln
+*.pidb
+*.booproj
+
+# Auto-generated
+*.suo
+*.pidb.meta
+*.booproj.meta
+
+# Cache
+*.apk
+*.aab
+*.DS_Store
+
+# Unity generated folders
+Sysroot/
+
+# IDE
+.vscode/
+.idea/
+*.sln
+*.pidb
+*.booproj
+
+# Packages & builds
+*.unitypackage
+*.apk
+*.aab
+*.zip
+*.rar
+*.7z
+*.Fbx
+*.png
+*.asset
+*.mat
+*.prefab
+*.jpg
+*.exr
+*.tga
+*.unity
+*.lighting
+*.terrainlayer
+*.controller
+*.vsconfig
+*.config
+*.csproj
+*.slnx
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Excluded asset packs
+Assets/2D Casual UI/
+Assets/Palmov Island/
+Assets/Other Models/
+Assets/3D Cartoon Village/
+Assets/Materials/
+Assets/TextMesh pro/
+Assets/60 free icons pack/
+Assets/Medieval Buildings and Objects/
+Assets/StrategyGameResourceIcons/
+Assets/VanillaLoopStudio/
+
+
+.vs/
+Assets/Advance Studios/Medieval Castle/Art.meta
+*.meta
+*.anim
+*.wav
+*.pdf
+*.txt
+/Assets/ConstructableMedievalHouses
+*.meta
+/Assets/Polytope Studio
+/Assets/BigRookGames
+Logs/AssetImportWorker0.log
+Logs/AssetImportWorker0.log
+Logs/AssetImportWorker1.log
+Logs/shadercompiler-UnityShaderCompiler.exe28.log
+*.log
+Logs/AssetImportWorker2.log
+*.log
+Logs/AssetImportWorker2.log
+Logs/AssetImportWorker3.log
+/Logs
+/Logs
+/Logs
+/Logs
