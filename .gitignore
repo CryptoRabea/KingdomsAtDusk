@@ -99,3 +99,17 @@ Logs/AssetImportWorker3.log
 /Logs
 *.tif
 *.mp3
+*.dll
+*.shadersubgraph
+*.asmdef
+*.bmp
+*.pwlpk
+*.shader
+*.shadergraph
+*.hlsl
+*.hdr
+*.psd
+*.template
+*.json
+/Assets/Procedural Worlds
+/Packages

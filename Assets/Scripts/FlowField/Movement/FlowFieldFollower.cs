@@ -218,7 +218,7 @@ namespace FlowField.Movement
             }
 
             // Apply velocity to rigidbody
-            rb.velocity = new Vector3(currentVelocity.x, rb.velocity.y, currentVelocity.z);
+            rb.linearVelocity = new Vector3(currentVelocity.x, rb.linearVelocity.y, currentVelocity.z);
 
             // Rotate to face movement direction
             if (currentVelocity.sqrMagnitude > 0.01f)
@@ -252,7 +252,7 @@ namespace FlowField.Movement
                 );
             }
 
-            rb.velocity = new Vector3(currentVelocity.x, rb.velocity.y, currentVelocity.z);
+            rb.linearVelocity = new Vector3(currentVelocity.x, rb.linearVelocity.y, currentVelocity.z);
         }
 
         /// <summary>
