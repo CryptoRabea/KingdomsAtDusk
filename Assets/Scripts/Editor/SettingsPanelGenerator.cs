@@ -15,7 +15,7 @@ namespace RTSGame.Editor
     public class SettingsPanelGenerator : EditorWindow
     {
         private Canvas targetCanvas;
-        private Font defaultFont;
+        private TMP_FontAsset tmpFont;
 
         // Colors
         private Color panelColor = new Color(0.1f, 0.1f, 0.1f, 0.95f);
@@ -87,6 +87,43 @@ namespace RTSGame.Editor
             accentColor = EditorGUILayout.ColorField("Accent Color", accentColor);
         }
 
+        private void LoadDefaultFont()
+        {
+            // Try to find LiberationSans SDF (default TMP font)
+            string[] guids = AssetDatabase.FindAssets("LiberationSans SDF t:TMP_FontAsset");
+            if (guids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                tmpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
+                Debug.Log($"[SettingsPanelGenerator] Found TMP font: {tmpFont.name}");
+                return;
+            }
+
+            // Try to find any TMP font asset
+            guids = AssetDatabase.FindAssets("t:TMP_FontAsset");
+            if (guids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                tmpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
+                Debug.Log($"[SettingsPanelGenerator] Found TMP font: {tmpFont.name}");
+                return;
+            }
+
+            Debug.LogError("[SettingsPanelGenerator] No TMP font found! Please import TMP Essential Resources.");
+        }
+
+        private void ConfigureTextMeshPro(TextMeshProUGUI text, string content, int fontSize, Color color, TextAlignmentOptions alignment = TextAlignmentOptions.Left)
+        {
+            text.font = tmpFont;
+            text.text = content;
+            text.fontSize = fontSize;
+            text.color = color;
+            text.alignment = alignment;
+            text.enableWordWrapping = false;
+            text.overflowMode = TextOverflowModes.Overflow;
+            text.raycastTarget = false; // Optimization - text doesn't need raycasts
+        }
+
         private void DeleteExistingSettingsPanel()
         {
             if (targetCanvas == null)
@@ -137,7 +174,24 @@ namespace RTSGame.Editor
                 DestroyImmediate(existing.gameObject);
             }
 
-            EditorUtility.DisplayProgressBar("Generating Settings Panel", "Creating main panel...", 0f);
+            EditorUtility.DisplayProgressBar("Generating Settings Panel", "Loading fonts...", 0f);
+
+            // Find or load default TMP font
+            LoadDefaultFont();
+
+            if (tmpFont == null)
+            {
+                EditorUtility.ClearProgressBar();
+                EditorUtility.DisplayDialog(
+                    "Font Not Found",
+                    "Could not find a TextMeshPro font asset. Please import TextMeshPro essentials first:\n\n" +
+                    "Window → TextMeshPro → Import TMP Essential Resources",
+                    "OK"
+                );
+                return;
+            }
+
+            EditorUtility.DisplayProgressBar("Generating Settings Panel", "Creating main panel...", 0.1f);
 
             try
             {
@@ -315,10 +369,7 @@ namespace RTSGame.Editor
             textRect.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
-            text.text = tabName;
-            text.fontSize = 16;
-            text.alignment = TextAlignmentOptions.Center;
-            text.color = Color.white;
+            ConfigureTextMeshPro(text, tabName, 16, Color.white, TextAlignmentOptions.Center);
 
             return button;
         }
@@ -636,10 +687,8 @@ namespace RTSGame.Editor
             layout.preferredHeight = 30;
 
             TextMeshProUGUI tmp = label.AddComponent<TextMeshProUGUI>();
-            tmp.text = text;
-            tmp.fontSize = 18;
+            ConfigureTextMeshPro(tmp, text, 18, accentColor);
             tmp.fontStyle = FontStyles.Bold;
-            tmp.color = accentColor;
 
             return label;
         }
@@ -700,9 +749,7 @@ namespace RTSGame.Editor
             labelLayout.flexibleWidth = 1;
 
             TextMeshProUGUI text = label.AddComponent<TextMeshProUGUI>();
-            text.text = labelText;
-            text.fontSize = 14;
-            text.color = Color.white;
+            ConfigureTextMeshPro(text, labelText, 14, Color.white);
 
             return toggleObj;
         }
@@ -738,20 +785,15 @@ namespace RTSGame.Editor
             GameObject label = new GameObject("Label");
             label.transform.SetParent(labelRow.transform, false);
 
-            TextMeshProUGUI labelText = label.AddComponent<TextMeshProUGUI>();
-            labelText.text = labelText;
-            labelText.fontSize = 14;
-            labelText.color = Color.white;
+            TextMeshProUGUI labelTextComp = label.AddComponent<TextMeshProUGUI>();
+            ConfigureTextMeshPro(labelTextComp, labelText, 14, Color.white);
 
             // Value text
             GameObject valueText = new GameObject("ValueText");
             valueText.transform.SetParent(labelRow.transform, false);
 
             TextMeshProUGUI valueTextComp = valueText.AddComponent<TextMeshProUGUI>();
-            valueTextComp.text = defaultValue.ToString("F2");
-            valueTextComp.fontSize = 14;
-            valueTextComp.color = accentColor;
-            valueTextComp.alignment = TextAlignmentOptions.Right;
+            ConfigureTextMeshPro(valueTextComp, defaultValue.ToString("F2"), 14, accentColor, TextAlignmentOptions.Right);
 
             // Slider
             GameObject slider = new GameObject("Slider");
@@ -849,9 +891,7 @@ namespace RTSGame.Editor
             label.transform.SetParent(dropdownObj.transform, false);
 
             TextMeshProUGUI labelTextComp = label.AddComponent<TextMeshProUGUI>();
-            labelTextComp.text = labelText;
-            labelTextComp.fontSize = 14;
-            labelTextComp.color = Color.white;
+            ConfigureTextMeshPro(labelTextComp, labelText, 14, Color.white);
 
             LayoutElement labelLayout = label.AddComponent<LayoutElement>();
             labelLayout.preferredHeight = 20;
@@ -882,9 +922,7 @@ namespace RTSGame.Editor
             ddLabelRect.offsetMax = new Vector2(-25, 0);
 
             TextMeshProUGUI ddLabelText = ddLabel.AddComponent<TextMeshProUGUI>();
-            ddLabelText.text = "Option";
-            ddLabelText.fontSize = 14;
-            ddLabelText.color = Color.white;
+            ConfigureTextMeshPro(ddLabelText, "Option", 14, Color.white);
 
             // Arrow
             GameObject arrow = new GameObject("Arrow");
@@ -897,10 +935,7 @@ namespace RTSGame.Editor
             arrowRect.anchoredPosition = new Vector2(-15, 0);
 
             TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
-            arrowText.text = "▼";
-            arrowText.fontSize = 12;
-            arrowText.color = Color.white;
-            arrowText.alignment = TextAlignmentOptions.Center;
+            ConfigureTextMeshPro(arrowText, "▼", 12, Color.white, TextAlignmentOptions.Center);
 
             // Template (simplified)
             GameObject template = new GameObject("Template");
@@ -964,9 +999,7 @@ namespace RTSGame.Editor
             itemLabelRect.offsetMax = new Vector2(-10, 0);
 
             TextMeshProUGUI itemText = itemLabel.AddComponent<TextMeshProUGUI>();
-            itemText.text = "Option";
-            itemText.fontSize = 14;
-            itemText.color = Color.white;
+            ConfigureTextMeshPro(itemText, "Option", 14, Color.white);
 
             tempScroll.content = contentRect;
             tempScroll.viewport = vpRect;
@@ -1012,10 +1045,7 @@ namespace RTSGame.Editor
             textRect.sizeDelta = Vector2.zero;
 
             TextMeshProUGUI textComp = textObj.AddComponent<TextMeshProUGUI>();
-            textComp.text = text;
-            textComp.fontSize = 16;
-            textComp.alignment = TextAlignmentOptions.Center;
-            textComp.color = Color.white;
+            ConfigureTextMeshPro(textComp, text, 16, Color.white, TextAlignmentOptions.Center);
 
             return button;
         }
