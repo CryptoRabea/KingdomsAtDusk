@@ -108,7 +108,12 @@ namespace RTS.UI
             buildingComponent = evt.Building.GetComponent<Building>();
             trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
 
-
+            // Don't show details for walls - let WallUpgradeUI handle them
+            if (IsWall(evt.Building))
+            {
+                HidePanel();
+                return;
+            }
 
             if (buildingComponent != null && buildingComponent.Data != null)
             {
@@ -117,6 +122,12 @@ namespace RTS.UI
             else
             {
             }
+        }
+
+        private bool IsWall(GameObject building)
+        {
+            // Check if this building has WallConnectionSystem component
+            return building.GetComponent<WallConnectionSystem>() != null;
         }
 
         private void OnBuildingDeselected(BuildingDeselectedEvent evt)
