@@ -38,6 +38,7 @@ namespace RTS.UI
 
         [Header("References")]
         [SerializeField] private BuildingSelectionManager selectionManager;
+        [SerializeField] private UniversalTooltip unitTooltip;
 
 
 
@@ -245,7 +246,7 @@ namespace RTS.UI
 
                 if (buttonObj.TryGetComponent<TrainUnitButton>(out var button))
                 {
-                    button.Initialize(trainableUnit, trainingQueue);
+                    button.Initialize(trainableUnit, trainingQueue, unitTooltip);
                     spawnedButtons.Add(buttonObj);
                 }
             }
