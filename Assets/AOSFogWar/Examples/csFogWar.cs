@@ -273,6 +273,9 @@ namespace FischlWorks_FogWar
 
         private const string levelScanDataPath = "/LevelData";
 
+        // Store the initial fixed position of levelMidPoint to keep fog in world space
+        private Vector3 fixedLevelMidPoint;
+
 
 
         // --- --- ---
@@ -359,6 +362,9 @@ namespace FischlWorks_FogWar
 
         private void InitializeVariables()
         {
+            // Store the initial fixed position to keep fog in world space
+            fixedLevelMidPoint = levelMidPoint.position;
+
             // This is for faster development iteration purposes
             if (obstacleLayers.value == 0)
             {
@@ -381,9 +387,9 @@ namespace FischlWorks_FogWar
             fogPlane.name = "[RUNTIME] Fog_Plane";
 
             fogPlane.transform.position = new Vector3(
-                levelMidPoint.position.x,
-                levelMidPoint.position.y + fogPlaneHeight,
-                levelMidPoint.position.z);
+                fixedLevelMidPoint.x,
+                fixedLevelMidPoint.y + fogPlaneHeight,
+                fixedLevelMidPoint.z);
 
             fogPlane.transform.localScale = new Vector3(
                 (levelDimensionX * unitScale) / 10.0f,
@@ -417,10 +423,7 @@ namespace FischlWorks_FogWar
 
         private void UpdateFog()
         {
-            fogPlane.transform.position = new Vector3(
-                levelMidPoint.position.x,
-                levelMidPoint.position.y + fogPlaneHeight,
-                levelMidPoint.position.z);
+            // Fog plane stays at fixed world position - do not update it every frame
 
             FogRefreshRateTimer += Time.deltaTime;
 
@@ -536,7 +539,7 @@ namespace FischlWorks_FogWar
                     bool isObstacleHit = Physics.BoxCast(
                         new Vector3(
                             GetWorldX(xIterator),
-                            levelMidPoint.position.y + rayStartHeight,
+                            fixedLevelMidPoint.y + rayStartHeight,
                             GetWorldY(yIterator)),
                         new Vector3(
                             (unitScale - scanSpacingPerUnit) / 2.0f,
@@ -747,10 +750,10 @@ namespace FischlWorks_FogWar
         {
             if (levelData.levelDimensionX % 2 == 0)
             {
-                return (levelMidPoint.position.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
+                return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
             }
 
-            return (levelMidPoint.position.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
+            return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
         }
 
 
@@ -758,7 +761,7 @@ namespace FischlWorks_FogWar
         /// Converts world coordinate to unit world coordinates.
         public int GetUnitX(float xValue)
         {
-            return Mathf.RoundToInt((xValue - levelMidPoint.position.x) / unitScale);
+            return Mathf.RoundToInt((xValue - fixedLevelMidPoint.x) / unitScale);
         }
 
 
@@ -768,10 +771,10 @@ namespace FischlWorks_FogWar
         {
             if (levelData.levelDimensionY % 2 == 0)
             {
-                return (levelMidPoint.position.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
+                return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
             }
 
-            return (levelMidPoint.position.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
+            return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
         }
 
 
@@ -779,7 +782,7 @@ namespace FischlWorks_FogWar
         /// Converts world coordinate to unit world coordinates.
         public int GetUnitY(float yValue)
         {
-            return Mathf.RoundToInt((yValue - levelMidPoint.position.z) / unitScale);
+            return Mathf.RoundToInt((yValue - fixedLevelMidPoint.z) / unitScale);
         }
 
 
@@ -817,7 +820,7 @@ namespace FischlWorks_FogWar
                         Handles.DrawWireCube(
                             new Vector3(
                                 GetWorldX(xIterator),
-                                levelMidPoint.position.y,
+                                fixedLevelMidPoint.y,
                                 GetWorldY(yIterator)),
                             new Vector3(
                                 unitScale - scanSpacingPerUnit,
@@ -831,7 +834,7 @@ namespace FischlWorks_FogWar
                         Gizmos.DrawSphere(
                             new Vector3(
                                 GetWorldX(xIterator),
-                                levelMidPoint.position.y,
+                                fixedLevelMidPoint.y,
                                 GetWorldY(yIterator)),
                             unitScale / 5.0f);
                     }
@@ -843,7 +846,7 @@ namespace FischlWorks_FogWar
                         Gizmos.DrawSphere(
                             new Vector3(
                                 GetWorldX(xIterator),
-                                levelMidPoint.position.y,
+                                fixedLevelMidPoint.y,
                                 GetWorldY(yIterator)),
                             unitScale / 3.0f);
                     }
