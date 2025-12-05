@@ -205,17 +205,86 @@ namespace RTS.Buildings
                 }
             }
 
-            // DISABLED: Physics-based overlap check
-            // The geometric segment-based checks above are sufficient and more accurate.
-            // With wall colliders now enabled, the physics check was causing false positives
-            // when trying to connect walls end-to-end. The geometric checks handle all
-            // wall-to-wall overlap cases correctly.
+            // Physics-based overlap check for detecting existing walls in the scene
+            // (The geometric checks above only detect walls placed in current session)
 
-            // The geometric checks above already handle:
-            // - Endpoint connections (allowed)
-            // - Midpoint connections (allowed)
-            // - Segment intersections (blocked)
-            // - Collinear overlaps (blocked)
+            if (closingLoop)
+            {
+                Debug.Log("🔒 Closing loop detected - allowing connection back to first pole");
+                return false;
+            }
+
+            float capsuleRadius = 0.3f;
+            Vector3 capsulePoint1 = start + Vector3.up * 0.5f;
+            Vector3 capsulePoint2 = end + Vector3.up * 0.5f;
+
+            int hitCount = Physics.OverlapCapsuleNonAlloc(
+                capsulePoint1,
+                capsulePoint2,
+                capsuleRadius,
+                _overlapResults,
+                ~groundLayer
+            );
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                var col = _overlapResults[i];
+                if (col.transform.IsChildOf(transform))
+                    continue;
+
+                if (col is TerrainCollider)
+                    continue;
+
+                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
+                if (wallSystem != null)
+                {
+                    if (TryGetWallEndpoints(wallSystem, out Vector3 existingStart, out Vector3 existingEnd))
+                    {
+                        // INCREASED tolerance for enabled colliders
+                        // Colliders may overlap slightly at connection points
+                        float endpointTolerance = 1.0f; // Increased from 0.01f to allow proper connections
+
+                        if (Vector3.Distance(start, existingStart) < endpointTolerance ||
+                            Vector3.Distance(start, existingEnd) < endpointTolerance ||
+                            Vector3.Distance(end, existingStart) < endpointTolerance ||
+                            Vector3.Distance(end, existingEnd) < endpointTolerance)
+                        {
+                            continue; // Allow endpoint connections
+                        }
+
+                        Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
+                        if (Vector3.Distance(start, existingMid) < endpointTolerance ||
+                            Vector3.Distance(end, existingMid) < endpointTolerance)
+                        {
+                            continue; // Allow midpoint connections
+                        }
+
+                        if (SegmentsIntersect2D(start, end, existingStart, existingEnd))
+                        {
+                            Debug.Log($"Wall would intersect existing wall: {col.gameObject.name}");
+                            return true;
+                        }
+
+                        if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
+                        {
+                            Debug.Log($"Wall would overlap existing wall (collinear): {col.gameObject.name}");
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        Vector3 wallPos = wallSystem.transform.position;
+
+                        if (Vector3.Distance(start, wallPos) < 1.0f || Vector3.Distance(end, wallPos) < 1.0f)
+                        {
+                            continue; // Allow placement near wall position
+                        }
+
+                        Debug.Log($"Wall would overlap existing wall: {col.gameObject.name} at {wallPos}");
+                        return true;
+                    }
+                }
+            }
 
             return false;
         }
