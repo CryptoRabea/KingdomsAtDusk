@@ -46,6 +46,11 @@ namespace RTS.Managers
         [SerializeField] private bool enableTowerWallSnapping = true;
         [SerializeField] private bool autoReplaceWalls = true;
 
+        [Header("Gate Placement")]
+        [SerializeField] private GatePlacementHelper gatePlacementHelper;
+        [SerializeField] private bool enableGateWallSnapping = true;
+        [SerializeField] private bool autoReplaceWallsForGates = true;
+
         [Header("Building Data - SOURCE OF TRUTH")]
         [Tooltip("Assign BuildingDataSO assets here, NOT prefabs!")]
         [SerializeField] private BuildingDataSO[] buildingDataArray;
@@ -68,6 +73,15 @@ namespace RTS.Managers
         private TowerDataSO currentTowerData;
         private GameObject wallToReplace;
         private bool isSnappedToWall = false;
+        private WallReplacementData wallReplacementData;
+
+        // Gate placement state
+        private bool isPlacingGate = false;
+        private GateDataSO currentGateData;
+        private GameObject wallToReplaceForGate;
+        private bool isGateSnappedToWall = false;
+        private WallReplacementData gateWallReplacementData;
+        private Quaternion gateSnappedRotation = Quaternion.identity;
 
         // Input
         private Mouse mouse;
@@ -215,12 +229,24 @@ namespace RTS.Managers
                 {
                     isPlacingTower = true;
                     currentTowerData = towerData;
+                    isPlacingGate = false;
+                    currentGateData = null;
                     Debug.Log($"Started placing tower: {buildingData.buildingName} (Type: {towerData.towerType})");
+                }
+                else if (buildingData is GateDataSO gateData)
+                {
+                    isPlacingGate = true;
+                    currentGateData = gateData;
+                    isPlacingTower = false;
+                    currentTowerData = null;
+                    Debug.Log($"Started placing gate: {buildingData.buildingName} (Type: {gateData.animationType})");
                 }
                 else
                 {
                     isPlacingTower = false;
                     currentTowerData = null;
+                    isPlacingGate = false;
+                    currentGateData = null;
                 }
 
                 CreateBuildingPreview();
@@ -254,6 +280,14 @@ namespace RTS.Managers
             currentTowerData = null;
             wallToReplace = null;
             isSnappedToWall = false;
+            wallReplacementData = null;
+
+            isPlacingGate = false;
+            currentGateData = null;
+            wallToReplaceForGate = null;
+            isGateSnappedToWall = false;
+            gateWallReplacementData = null;
+            gateSnappedRotation = Quaternion.identity;
 
             currentBuildingRotation = 0f;
         }
@@ -327,6 +361,7 @@ namespace RTS.Managers
                     position.z = Mathf.Round(position.z / gridSize) * gridSize;
                 }
 
+                // Handle tower wall snapping
                 if (isPlacingTower && currentTowerData != null && enableTowerWallSnapping && towerPlacementHelper != null)
                 {
                     if (towerPlacementHelper.TrySnapToWall(position, currentTowerData, out Vector3 wallSnapPos, out GameObject wall))
@@ -339,6 +374,26 @@ namespace RTS.Managers
                     {
                         wallToReplace = null;
                         isSnappedToWall = false;
+                    }
+                }
+
+                // Handle gate wall snapping
+                if (isPlacingGate && currentGateData != null && enableGateWallSnapping && gatePlacementHelper != null)
+                {
+                    if (gatePlacementHelper.TrySnapToWall(position, currentGateData, out Vector3 gateSnapPos, out Quaternion gateSnapRot, out GameObject gateWall))
+                    {
+                        position = gateSnapPos;
+                        wallToReplaceForGate = gateWall;
+                        isGateSnappedToWall = true;
+                        gateSnappedRotation = gateSnapRot;
+
+                        // Update preview rotation to match wall
+                        previewBuilding.transform.rotation = gateSnapRot;
+                    }
+                    else
+                    {
+                        wallToReplaceForGate = null;
+                        isGateSnappedToWall = false;
                     }
                 }
 
@@ -464,11 +519,33 @@ namespace RTS.Managers
                 Debug.LogWarning("ResourceService not available, placing building anyway!");
             }
 
-            if (isPlacingTower && wallToReplace != null && autoReplaceWalls && isSnappedToWall)
+            // Handle wall replacement for towers
+            if (isPlacingTower && wallToReplace != null && autoReplaceWalls && isSnappedToWall && towerPlacementHelper != null)
             {
                 Debug.Log($"Replacing wall at {wallToReplace.transform.position} with tower {currentTowerData.buildingName}");
+
+                // Store wall connection data before destroying
+                wallReplacementData = towerPlacementHelper.ReplaceWallWithTower(wallToReplace, currentTowerData);
+
+                // Destroy the wall
                 Destroy(wallToReplace);
                 wallToReplace = null;
+            }
+
+            // Handle wall replacement for gates
+            if (isPlacingGate && wallToReplaceForGate != null && autoReplaceWallsForGates && isGateSnappedToWall && gatePlacementHelper != null)
+            {
+                Debug.Log($"Replacing wall at {wallToReplaceForGate.transform.position} with gate {currentGateData.buildingName}");
+
+                // Store wall connection data before destroying
+                gateWallReplacementData = gatePlacementHelper.ReplaceWallWithGate(wallToReplaceForGate, currentGateData);
+
+                // Destroy the wall
+                Destroy(wallToReplaceForGate);
+                wallToReplaceForGate = null;
+
+                // Use the snapped rotation for the gate
+                rotation = gateSnappedRotation;
             }
 
             GameObject newBuilding = Instantiate(currentBuildingData.buildingPrefab, position, rotation);
@@ -495,6 +572,30 @@ namespace RTS.Managers
                 {
                     towerComponent.SetTowerData(currentTowerData);
                     Debug.Log($"✅ Assigned {currentTowerData.buildingName} tower data (Type: {currentTowerData.towerType})");
+                }
+
+                // Apply wall connections to tower if it replaced a wall
+                if (wallReplacementData != null && towerPlacementHelper != null)
+                {
+                    towerPlacementHelper.ApplyWallConnectionsToTower(newBuilding, wallReplacementData);
+                    wallReplacementData = null;
+                }
+            }
+
+            if (isPlacingGate)
+            {
+                var gateComponent = newBuilding.GetComponent<Gate>();
+                if (gateComponent != null && currentGateData != null)
+                {
+                    gateComponent.SetGateData(currentGateData);
+                    Debug.Log($"✅ Assigned {currentGateData.buildingName} gate data (Type: {currentGateData.animationType})");
+                }
+
+                // Apply wall connections to gate if it replaced a wall
+                if (gateWallReplacementData != null && gatePlacementHelper != null)
+                {
+                    gatePlacementHelper.ApplyWallConnectionsToGate(newBuilding, gateWallReplacementData);
+                    gateWallReplacementData = null;
                 }
             }
 

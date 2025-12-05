@@ -12,6 +12,11 @@ namespace RTS.UI
     /// <summary>
     /// Displays detailed information about a selected unit.
     /// Shows unit stats from UnitConfigSO when a unit is selected.
+    ///
+    /// MULTI-UNIT SELECTION:
+    /// - This component shows details for the FIRST selected unit
+    /// - Use MultiUnitSelectionUI alongside this to display all selected units as icons with HP bars
+    /// - Both components work together: UnitDetailsUI shows detailed stats, MultiUnitSelectionUI shows the grid of icons
     /// </summary>
     public class UnitDetailsUI : MonoBehaviour
     {

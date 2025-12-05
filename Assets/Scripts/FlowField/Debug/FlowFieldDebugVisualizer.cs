@@ -1,6 +1,6 @@
-using UnityEngine;
 using FlowField.Core;
 using FlowField.Movement;
+using UnityEngine;
 
 namespace FlowField.Debug
 {

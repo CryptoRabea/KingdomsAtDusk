@@ -5,46 +5,47 @@ using System.Linq;
 namespace RTS.Buildings
 {
     /// <summary>
-    /// Helper component for BuildingManager to handle tower-specific placement.
-    /// Handles wall snapping and wall replacement logic.
+    /// Helper component for BuildingManager to handle gate-specific placement.
+    /// Handles wall snapping and wall replacement logic for gates.
     /// </summary>
-    public class TowerPlacementHelper : MonoBehaviour
+    public class GatePlacementHelper : MonoBehaviour
     {
         [Header("Wall Detection")]
-        #pragma warning disable CS0414 // Field is assigned but never used - reserved for future wall detection feature
         [SerializeField] private float wallDetectionRadius = 2f;
-        #pragma warning restore CS0414
         [SerializeField] private LayerMask wallLayer; // Optional: specific layer for walls
 
         [Header("Visual Feedback")]
-        [SerializeField] private Color wallSnapColor = Color.cyan;
+        [SerializeField] private Color wallSnapColor = Color.magenta;
         [SerializeField] private float snapIndicatorSize = 0.5f;
 
         // State
         private Vector3 snappedPosition;
+        private Quaternion snappedRotation;
         private bool isSnappedToWall = false;
         private GameObject nearestWall;
 
         public bool IsSnappedToWall => isSnappedToWall;
         public GameObject NearestWall => nearestWall;
         public Vector3 SnappedPosition => snappedPosition;
+        public Quaternion SnappedRotation => snappedRotation;
 
         /// <summary>
         /// Try to snap position to nearest wall within range.
-        /// Returns true if snapped, and outputs the snapped position and wall object.
+        /// Returns true if snapped, and outputs the snapped position, rotation, and wall object.
         /// </summary>
-        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out GameObject outWall)
+        public bool TrySnapToWall(Vector3 position, GateDataSO gateData, out Vector3 outPosition, out Quaternion outRotation, out GameObject outWall)
         {
             outPosition = position;
+            outRotation = Quaternion.identity;
             outWall = null;
 
-            if (towerData == null || !towerData.canReplaceWalls)
+            if (gateData == null || !gateData.canReplaceWalls)
             {
                 return false;
             }
 
             // Find all walls in detection radius
-            List<GameObject> nearbyWalls = FindNearbyWalls(position, towerData.wallSnapDistance);
+            List<GameObject> nearbyWalls = FindNearbyWalls(position, gateData.wallSnapDistance);
 
             if (nearbyWalls.Count == 0)
             {
@@ -68,6 +69,7 @@ namespace RTS.Buildings
             if (nearest != null)
             {
                 outPosition = nearest.transform.position;
+                outRotation = nearest.transform.rotation; // Gate inherits wall rotation
                 outWall = nearest;
                 return true;
             }
@@ -123,16 +125,16 @@ namespace RTS.Buildings
         /// Update snap preview (for visual feedback).
         /// Call this during placement preview update.
         /// </summary>
-        public void UpdateSnapPreview(Vector3 currentPosition, TowerDataSO towerData)
+        public void UpdateSnapPreview(Vector3 currentPosition, GateDataSO gateData)
         {
-            isSnappedToWall = TrySnapToWall(currentPosition, towerData, out snappedPosition, out nearestWall);
+            isSnappedToWall = TrySnapToWall(currentPosition, gateData, out snappedPosition, out snappedRotation, out nearestWall);
         }
 
         /// <summary>
-        /// Replace a wall with a tower.
-        /// Stores wall connection data and returns it for the tower to inherit.
+        /// Replace a wall with a gate.
+        /// Stores wall connection data and returns it for the gate to inherit.
         /// </summary>
-        public WallReplacementData ReplaceWallWithTower(GameObject wall, TowerDataSO towerData)
+        public WallReplacementData ReplaceWallWithGate(GameObject wall, GateDataSO gateData)
         {
             if (wall == null)
             {
@@ -150,13 +152,13 @@ namespace RTS.Buildings
             if (wallConnection != null)
             {
                 connectedWalls = wallConnection.GetConnectedWalls();
-                Debug.Log($"Wall has {connectedWalls.Count} connections that will be transferred to tower");
+                Debug.Log($"Wall has {connectedWalls.Count} connections that will be transferred to gate");
             }
 
             var wallBuilding = wall.GetComponent<Building>();
             string wallName = wallBuilding != null ? wallBuilding.Data?.buildingName : "Wall";
 
-            Debug.Log($"Replacing {wallName} at {wallPosition} with {towerData.buildingName}");
+            Debug.Log($"Replacing {wallName} at {wallPosition} with {gateData.buildingName}");
 
             // Create replacement data
             var replacementData = new WallReplacementData
@@ -171,26 +173,26 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Apply wall connections to a tower that replaced a wall.
-        /// This makes the tower act as a wall segment for connection purposes.
+        /// Apply wall connections to a gate that replaced a wall.
+        /// This makes the gate act as a wall segment for connection purposes.
         /// </summary>
-        public void ApplyWallConnectionsToTower(GameObject tower, WallReplacementData replacementData)
+        public void ApplyWallConnectionsToGate(GameObject gate, WallReplacementData replacementData)
         {
-            if (tower == null || replacementData == null) return;
+            if (gate == null || replacementData == null) return;
 
-            // Add WallConnectionSystem to tower so it maintains wall continuity
-            var towerWallConnection = tower.GetComponent<WallConnectionSystem>();
-            if (towerWallConnection == null)
+            // Add WallConnectionSystem to gate so it maintains wall continuity
+            var gateWallConnection = gate.GetComponent<WallConnectionSystem>();
+            if (gateWallConnection == null)
             {
-                towerWallConnection = tower.AddComponent<WallConnectionSystem>();
+                gateWallConnection = gate.AddComponent<WallConnectionSystem>();
             }
 
-            Debug.Log($"Tower placed at wall position, will connect to {replacementData.connectedWalls?.Count ?? 0} neighboring walls");
+            Debug.Log($"Gate placed at wall position, will connect to {replacementData.connectedWalls?.Count ?? 0} neighboring walls");
 
             // Force update connections after a short delay to ensure all systems are initialized
-            if (towerWallConnection != null)
+            if (gateWallConnection != null)
             {
-                StartCoroutine(DelayedConnectionUpdate(towerWallConnection));
+                StartCoroutine(DelayedConnectionUpdate(gateWallConnection));
             }
         }
 
@@ -244,6 +246,11 @@ namespace RTS.Buildings
 
                 // Draw line to wall
                 Gizmos.DrawLine(snappedPosition, nearestWall.transform.position);
+
+                // Draw rotation indicator
+                Gizmos.color = Color.blue;
+                Vector3 forward = snappedRotation * Vector3.forward;
+                Gizmos.DrawRay(snappedPosition, forward * 2f);
             }
         }
 
@@ -300,17 +307,5 @@ namespace RTS.Buildings
         }
 
         #endregion
-    }
-
-    /// <summary>
-    /// Data structure for storing wall replacement information.
-    /// Used when replacing a wall with a tower or gate.
-    /// </summary>
-    public class WallReplacementData
-    {
-        public GameObject originalWall;
-        public Vector3 position;
-        public Quaternion rotation;
-        public List<WallConnectionSystem> connectedWalls;
     }
 }
