@@ -12,6 +12,7 @@ namespace RTS.Units.AI
         Dead,
         Healing,
         Patrolling,
-        ReturningToOrigin
+        ReturningToOrigin,
+        Flee
     }
 }

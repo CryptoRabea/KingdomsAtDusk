@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEngine.Animations.Rigging;
 using RTS.Core.Events;
 using System.Collections;
+using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 namespace RTS.Units.Animation
 {
@@ -11,8 +11,14 @@ namespace RTS.Units.Animation
     /// Event-driven and performance-optimized.
     /// </summary>
     [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(AI.UnitAIController))]
+    [RequireComponent(typeof(UnitAnimationController))]
+    [RequireComponent(typeof(UnitMovement))]
+    [RequireComponent(typeof(UnitHealth))]
+    [RequireComponent(typeof(UnitAnimatorProfileLoader))]
     public class UnitPersonalityController : MonoBehaviour
     {
+        private static WaitForSeconds _waitForSeconds3 = new WaitForSeconds(3f);
         [Header("References")]
         [SerializeField] private Animator animator;
         [SerializeField] private UnitAnimatorProfileLoader profileLoader;
@@ -265,7 +271,7 @@ namespace RTS.Units.Animation
         private IEnumerator ResetVictoryState()
         {
             // Wait for victory animation to complete
-            yield return new WaitForSeconds(3f);
+            yield return _waitForSeconds3;
             isVictorious = false;
         }
 
@@ -343,7 +349,7 @@ namespace RTS.Units.Animation
             AI.UnitStateType newState = (AI.UnitStateType)evt.NewState;
 
             // Trigger retreat animation when fleeing
-            if (newState == AI.UnitStateType.Flee)
+            if (newState == AI.UnitStateType.Retreating)
             {
                 TriggerRetreat(true);
             }
