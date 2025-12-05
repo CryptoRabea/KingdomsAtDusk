@@ -52,8 +52,7 @@ namespace RTS.Units.Animation
             }
 
             // Step 4: Configure Animator
-            var animator = selected.GetComponent<Animator>();
-            if (animator != null)
+            if (selected.TryGetComponent<Animator>(out var animator))
             {
                 animator.applyRootMotion = false;
                 animator.updateMode = AnimatorUpdateMode.Normal;
@@ -276,7 +275,7 @@ namespace RTS.Units.Animation
         }
 
         [MenuItem("Tools/RTS/Archer/Open Setup Guide")]
-        static void OpenSetupGuide()
+        public static void OpenSetupGuide()
         {
             string guidePath = "ARCHER_ANIMATION_SETUP_GUIDE.md";
 
@@ -328,8 +327,7 @@ namespace RTS.Units.Animation
             int changed = 0;
             foreach (GameObject obj in selected)
             {
-                ArcherCombatMode combatMode = obj.GetComponent<ArcherCombatMode>();
-                if (combatMode != null)
+                if (obj.TryGetComponent<ArcherCombatMode>(out var combatMode))
                 {
                     combatMode.ToggleCombatMode();
                     EditorUtility.SetDirty(combatMode);
@@ -353,8 +351,7 @@ namespace RTS.Units.Animation
             int changed = 0;
             foreach (GameObject obj in selected)
             {
-                ArcherCombatMode combatMode = obj.GetComponent<ArcherCombatMode>();
-                if (combatMode != null)
+                if (obj.TryGetComponent<ArcherCombatMode>(out var combatMode))
                 {
                     combatMode.SetCombatMode(mode);
                     EditorUtility.SetDirty(combatMode);
