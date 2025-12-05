@@ -155,7 +155,7 @@ namespace RTS.Buildings
                     rb = particleObj.AddComponent<Rigidbody>();
                 }
                 rb.useGravity = false;
-                rb.drag = 2f;
+                rb.linearDamping = 2f;
             }
         }
 
@@ -198,7 +198,7 @@ namespace RTS.Buildings
                             if (rb != null)
                             {
                                 Vector3 direction = (particle.targetPosition - particle.gameObject.transform.position).normalized;
-                                rb.velocity = direction * particleSpeed;
+                                rb.linearVelocity = direction * particleSpeed;
                             }
                         }
                         else
