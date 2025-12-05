@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine.InputSystem;
 using RTS.Core.Services;
 using RTS.SaveLoad;
+using RTSGame.UI.Settings;
 
 namespace RTS.UI
 {
@@ -24,6 +25,9 @@ namespace RTS.UI
         [SerializeField] private GameObject settingsPanel;
         [SerializeField] private GameObject creditsPanel;
         [SerializeField] private MainMenuLoadPanel loadPanel;
+
+        [Header("Advanced Settings (Optional)")]
+        [SerializeField] private SettingsPanel settingsPanelController;
 
         [Header("Buttons")]
         [SerializeField] private Button newGameButton;
@@ -91,6 +95,12 @@ namespace RTS.UI
             if (loadPanel == null)
             {
                 loadPanel = FindAnyObjectByType<MainMenuLoadPanel>(FindObjectsInactive.Include);
+            }
+
+            // Try to find settings panel controller if not assigned
+            if (settingsPanelController == null && settingsPanel != null)
+            {
+                settingsPanelController = settingsPanel.GetComponent<SettingsPanel>();
             }
 
             // Setup button listeners
@@ -193,7 +203,17 @@ namespace RTS.UI
         {
             UnityEngine.Debug.Log("[MainMenu] Settings clicked");
             SetPanelActive(mainMenuPanel, false);
-            SetPanelActive(settingsPanel, true);
+
+            // Use the advanced settings panel controller if available
+            if (settingsPanelController != null)
+            {
+                settingsPanelController.Open();
+            }
+            else
+            {
+                // Fallback to simple panel activation
+                SetPanelActive(settingsPanel, true);
+            }
         }
 
         private void OnCreditsClicked()
@@ -212,6 +232,13 @@ namespace RTS.UI
         private void OnBackFromSettings()
         {
             UnityEngine.Debug.Log("[MainMenu] Back from Settings");
+
+            // Close the advanced settings panel if it's being used
+            if (settingsPanelController != null)
+            {
+                settingsPanelController.Close();
+            }
+
             ShowMainMenu();
         }
 
