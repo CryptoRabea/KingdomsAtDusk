@@ -205,86 +205,17 @@ namespace RTS.Buildings
                 }
             }
 
-            Vector3 direction = end - start;
-            float distance = direction.magnitude;
+            // DISABLED: Physics-based overlap check
+            // The geometric segment-based checks above are sufficient and more accurate.
+            // With wall colliders now enabled, the physics check was causing false positives
+            // when trying to connect walls end-to-end. The geometric checks handle all
+            // wall-to-wall overlap cases correctly.
 
-            if (distance < 0.01f)
-                return false;
-
-            if (closingLoop)
-            {
-                Debug.Log("🔒 Closing loop detected - allowing connection back to first pole");
-                return false;
-            }
-
-            float capsuleRadius = 0.3f;
-            Vector3 capsulePoint1 = start + Vector3.up * 0.5f;
-            Vector3 capsulePoint2 = end + Vector3.up * 0.5f;
-
-            int hitCount = Physics.OverlapCapsuleNonAlloc(
-                capsulePoint1,
-                capsulePoint2,
-                capsuleRadius,
-                _overlapResults,
-                ~groundLayer
-            );
-
-            for (int i = 0; i < hitCount; i++)
-            {
-                var col = _overlapResults[i];
-                if (col.transform.IsChildOf(transform))
-                    continue;
-
-                if (col is TerrainCollider)
-                    continue;
-
-                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
-                if (wallSystem != null)
-                {
-                    if (TryGetWallEndpoints(wallSystem, out Vector3 existingStart, out Vector3 existingEnd))
-                    {
-                        float endpointTolerance = closingLoop ? 0.5f : 0.01f;
-                        if (Vector3.Distance(start, existingStart) < endpointTolerance ||
-                            Vector3.Distance(start, existingEnd) < endpointTolerance ||
-                            Vector3.Distance(end, existingStart) < endpointTolerance ||
-                            Vector3.Distance(end, existingEnd) < endpointTolerance)
-                        {
-                            continue;
-                        }
-
-                        Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
-                        if (Vector3.Distance(start, existingMid) < endpointTolerance ||
-                            Vector3.Distance(end, existingMid) < endpointTolerance)
-                        {
-                            continue;
-                        }
-
-                        if (SegmentsIntersect2D(start, end, existingStart, existingEnd))
-                        {
-                            Debug.Log($"Wall would intersect existing wall: {col.gameObject.name}");
-                            return true;
-                        }
-
-                        if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
-                        {
-                            Debug.Log($"Wall would overlap existing wall (collinear): {col.gameObject.name}");
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        Vector3 wallPos = wallSystem.transform.position;
-
-                        if (Vector3.Distance(start, wallPos) < 0.5f || Vector3.Distance(end, wallPos) < 0.5f)
-                        {
-                            continue;
-                        }
-
-                        Debug.Log($"Wall would overlap existing wall: {col.gameObject.name} at {wallPos}");
-                        return true;
-                    }
-                }
-            }
+            // The geometric checks above already handle:
+            // - Endpoint connections (allowed)
+            // - Midpoint connections (allowed)
+            // - Segment intersections (blocked)
+            // - Collinear overlaps (blocked)
 
             return false;
         }

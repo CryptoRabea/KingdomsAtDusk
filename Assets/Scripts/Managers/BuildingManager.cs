@@ -672,24 +672,27 @@ namespace RTS.Managers
                     continue;
                 }
 
-                // Special handling for towers: Allow placement if snapping to a wall that will be replaced
-                if (isPlacingTower && wallToReplace != null)
+                // IMPORTANT: Skip all walls from collision detection
+                // Walls use their own specialized overlap detection (WouldOverlapExistingWall)
+                // which uses geometric segment-based checks instead of physics colliders.
+                // This allows proper wall-to-wall connections and tower placement near walls.
+                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
+                if (wallSystem != null)
                 {
-                    // Check if this collision is with the wall we're about to replace
-                    if (col.gameObject == wallToReplace || col.transform.IsChildOf(wallToReplace.transform))
+                    // Special case: If placing a tower/gate that will replace THIS specific wall, allow it
+                    if (isPlacingTower && wallToReplace != null &&
+                        (col.gameObject == wallToReplace || col.transform.IsChildOf(wallToReplace.transform)))
                     {
-                        continue; // Skip this collision - we're replacing this wall
+                        continue; // Skip - we're replacing this wall
                     }
-                }
+                    if (isPlacingGate && wallToReplaceForGate != null &&
+                        (col.gameObject == wallToReplaceForGate || col.transform.IsChildOf(wallToReplaceForGate.transform)))
+                    {
+                        continue; // Skip - we're replacing this wall
+                    }
 
-                // Special handling for gates: Allow placement if snapping to a wall that will be replaced
-                if (isPlacingGate && wallToReplaceForGate != null)
-                {
-                    // Check if this collision is with the wall we're about to replace
-                    if (col.gameObject == wallToReplaceForGate || col.transform.IsChildOf(wallToReplaceForGate.transform))
-                    {
-                        continue; // Skip this collision - we're replacing this wall
-                    }
+                    // Skip all other walls - they have their own validation system
+                    continue;
                 }
 
                 Debug.Log($"Cannot place: colliding with {col.gameObject.name} (Layer: {LayerMask.LayerToName(col.gameObject.layer)})");
