@@ -33,6 +33,10 @@ namespace RTS.UI
         [Header("Formation")]
         [SerializeField] private TMP_Dropdown formationDropdown;
         [SerializeField] private FormationGroupManager formationGroupManager;
+        [SerializeField] private Button customFormationButton;
+        [SerializeField] private Button createFormationButton;
+        [SerializeField] private FormationSelectorUI formationSelector;
+        [SerializeField] private FormationBuilderUI formationBuilder;
 
         [Header("Health Bar")]
         [SerializeField] private Image healthBarFill;
@@ -93,6 +97,17 @@ namespace RTS.UI
 
             // Initialize formation dropdown
             InitializeFormationDropdown();
+
+            // Setup custom formation buttons
+            if (customFormationButton != null)
+            {
+                customFormationButton.onClick.AddListener(OnCustomFormationButtonClicked);
+            }
+
+            if (createFormationButton != null)
+            {
+                createFormationButton.onClick.AddListener(OnCreateFormationButtonClicked);
+            }
         }
 
         private void InitializeFormationDropdown()
@@ -318,6 +333,38 @@ namespace RTS.UI
             if (unitDetailsPanel != null)
             {
                 unitDetailsPanel.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Called when the custom formation button is clicked
+        /// Opens the formation selector to browse and select saved formations
+        /// </summary>
+        private void OnCustomFormationButtonClicked()
+        {
+            if (formationSelector != null)
+            {
+                formationSelector.OpenSelector();
+            }
+            else
+            {
+                Debug.LogWarning("FormationSelectorUI is not assigned in UnitDetailsUI!");
+            }
+        }
+
+        /// <summary>
+        /// Called when the create formation button is clicked
+        /// Opens the formation builder to create a new custom formation
+        /// </summary>
+        private void OnCreateFormationButtonClicked()
+        {
+            if (formationBuilder != null)
+            {
+                formationBuilder.OpenBuilder();
+            }
+            else
+            {
+                Debug.LogWarning("FormationBuilderUI is not assigned in UnitDetailsUI!");
             }
         }
     }

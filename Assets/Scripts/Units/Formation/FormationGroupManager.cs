@@ -12,6 +12,7 @@ namespace RTS.Units.Formation
     {
         [Header("Current Formation")]
         [SerializeField] private FormationType currentFormation = FormationType.Box;
+        private string currentCustomFormationId = null;
 
         [Header("Settings")]
         [SerializeField] private FormationSettingsSO defaultFormationSettings;
@@ -28,6 +29,8 @@ namespace RTS.Units.Formation
                 if (currentFormation != value)
                 {
                     currentFormation = value;
+                    // Clear custom formation when switching to preset
+                    currentCustomFormationId = null;
                     Debug.Log($"Formation changed to: {currentFormation}");
 
                     // Publish event for UI updates
@@ -39,7 +42,56 @@ namespace RTS.Units.Formation
             }
         }
 
+        public string CurrentCustomFormationId => currentCustomFormationId;
+
+        public bool IsUsingCustomFormation => !string.IsNullOrEmpty(currentCustomFormationId);
+
         public FormationSettingsSO FormationSettings => defaultFormationSettings;
+
+        /// <summary>
+        /// Set the current formation to a custom formation.
+        /// </summary>
+        public void SetCustomFormation(string formationId)
+        {
+            CustomFormationData formation = CustomFormationManager.Instance.GetFormation(formationId);
+            if (formation != null)
+            {
+                currentCustomFormationId = formationId;
+                // Set to None to indicate custom formation is active
+                currentFormation = FormationType.None;
+                Debug.Log($"Custom formation '{formation.name}' set");
+
+                // Immediately reshape units if any are selected
+                ReshapeSelectedUnits();
+            }
+            else
+            {
+                Debug.LogWarning($"Custom formation with ID {formationId} not found!");
+            }
+        }
+
+        /// <summary>
+        /// Get the current custom formation data.
+        /// </summary>
+        public CustomFormationData GetCurrentCustomFormation()
+        {
+            if (string.IsNullOrEmpty(currentCustomFormationId))
+                return null;
+
+            return CustomFormationManager.Instance.GetFormation(currentCustomFormationId);
+        }
+
+        /// <summary>
+        /// Clear custom formation and revert to preset formation.
+        /// </summary>
+        public void ClearCustomFormation()
+        {
+            if (!string.IsNullOrEmpty(currentCustomFormationId))
+            {
+                currentCustomFormationId = null;
+                CurrentFormation = FormationType.Box; // Revert to default
+            }
+        }
 
         private void OnEnable()
         {
@@ -87,10 +139,6 @@ namespace RTS.Units.Formation
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
-            // Don't reshape if formation is None
-            if (currentFormation == FormationType.None)
-                return;
-
             // Calculate center of currently selected units
             Vector3 centerPosition = CalculateGroupCenter();
 
@@ -107,13 +155,49 @@ namespace RTS.Units.Formation
                 facingDirection.Normalize();
             }
 
-            List<Vector3> formationPositions = FormationManager.CalculateFormationPositions(
-                centerPosition,
-                unitCount,
-                currentFormation,
-                spacing,
-                facingDirection
-            );
+            List<Vector3> formationPositions;
+
+            // Check if using custom formation
+            if (IsUsingCustomFormation)
+            {
+                CustomFormationData customFormation = GetCurrentCustomFormation();
+                if (customFormation != null)
+                {
+                    formationPositions = FormationManager.CalculateCustomFormationPositions(
+                        centerPosition,
+                        unitCount,
+                        customFormation,
+                        spacing,
+                        facingDirection
+                    );
+                    Debug.Log($"Using custom formation: {customFormation.name}");
+                }
+                else
+                {
+                    Debug.LogWarning("Custom formation not found, falling back to Box");
+                    formationPositions = FormationManager.CalculateFormationPositions(
+                        centerPosition,
+                        unitCount,
+                        FormationType.Box,
+                        spacing,
+                        facingDirection
+                    );
+                }
+            }
+            else
+            {
+                // Don't reshape if formation is None and no custom formation
+                if (currentFormation == FormationType.None)
+                    return;
+
+                formationPositions = FormationManager.CalculateFormationPositions(
+                    centerPosition,
+                    unitCount,
+                    currentFormation,
+                    spacing,
+                    facingDirection
+                );
+            }
 
             // Validate positions if enabled
             if (defaultFormationSettings != null && defaultFormationSettings.validatePositions)
@@ -149,7 +233,8 @@ namespace RTS.Units.Formation
                 index++;
             }
 
-            Debug.Log($"Reshaped {selectionManager.SelectionCount} units into {currentFormation} formation");
+            string formationName = IsUsingCustomFormation ? GetCurrentCustomFormation()?.name : currentFormation.ToString();
+            Debug.Log($"Reshaped {selectionManager.SelectionCount} units into {formationName} formation");
         }
 
         /// <summary>
