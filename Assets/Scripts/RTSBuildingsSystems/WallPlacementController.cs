@@ -241,33 +241,44 @@ namespace RTS.Buildings
                     if (TryGetWallEndpoints(wallSystem, out Vector3 existingStart, out Vector3 existingEnd))
                     {
                         // INCREASED tolerance for enabled colliders
-                        // Colliders may overlap slightly at connection points
-                        float endpointTolerance = 1.0f; // Increased from 0.01f to allow proper connections
+                        // Colliders may overlap significantly at connection points
+                        float endpointTolerance = 2.0f; // Increased to 2.0f to account for wall mesh size
 
-                        if (Vector3.Distance(start, existingStart) < endpointTolerance ||
-                            Vector3.Distance(start, existingEnd) < endpointTolerance ||
-                            Vector3.Distance(end, existingStart) < endpointTolerance ||
-                            Vector3.Distance(end, existingEnd) < endpointTolerance)
+                        float distStartToExistingStart = Vector3.Distance(start, existingStart);
+                        float distStartToExistingEnd = Vector3.Distance(start, existingEnd);
+                        float distEndToExistingStart = Vector3.Distance(end, existingStart);
+                        float distEndToExistingEnd = Vector3.Distance(end, existingEnd);
+
+                        Debug.Log($"Wall connection check: distances = [{distStartToExistingStart:F2}, {distStartToExistingEnd:F2}, {distEndToExistingStart:F2}, {distEndToExistingEnd:F2}] tolerance={endpointTolerance}");
+
+                        if (distStartToExistingStart < endpointTolerance ||
+                            distStartToExistingEnd < endpointTolerance ||
+                            distEndToExistingStart < endpointTolerance ||
+                            distEndToExistingEnd < endpointTolerance)
                         {
+                            Debug.Log($"✅ Allowing wall connection to {col.gameObject.name} (endpoint match)");
                             continue; // Allow endpoint connections
                         }
 
                         Vector3 existingMid = (existingStart + existingEnd) * 0.5f;
-                        if (Vector3.Distance(start, existingMid) < endpointTolerance ||
-                            Vector3.Distance(end, existingMid) < endpointTolerance)
+                        float distStartToMid = Vector3.Distance(start, existingMid);
+                        float distEndToMid = Vector3.Distance(end, existingMid);
+
+                        if (distStartToMid < endpointTolerance || distEndToMid < endpointTolerance)
                         {
+                            Debug.Log($"✅ Allowing wall connection to {col.gameObject.name} (midpoint match)");
                             continue; // Allow midpoint connections
                         }
 
                         if (SegmentsIntersect2D(start, end, existingStart, existingEnd))
                         {
-                            Debug.Log($"Wall would intersect existing wall: {col.gameObject.name}");
+                            Debug.Log($"❌ Wall would intersect existing wall: {col.gameObject.name}");
                             return true;
                         }
 
                         if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
                         {
-                            Debug.Log($"Wall would overlap existing wall (collinear): {col.gameObject.name}");
+                            Debug.Log($"❌ Wall would overlap existing wall (collinear): {col.gameObject.name}");
                             return true;
                         }
                     }
