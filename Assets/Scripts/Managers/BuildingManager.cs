@@ -156,6 +156,36 @@ namespace RTS.Managers
             // Find BuildingSelectionManager
             buildingSelectionManager = Object.FindAnyObjectByType<RTS.Buildings.BuildingSelectionManager>();
 
+            // Auto-create placement helpers if missing
+            if (towerPlacementHelper == null)
+            {
+                towerPlacementHelper = GetComponent<TowerPlacementHelper>();
+                if (towerPlacementHelper == null)
+                {
+                    towerPlacementHelper = gameObject.AddComponent<TowerPlacementHelper>();
+                    Debug.Log("BuildingManager: Auto-created TowerPlacementHelper component");
+                }
+            }
+
+            if (gatePlacementHelper == null)
+            {
+                gatePlacementHelper = GetComponent<GatePlacementHelper>();
+                if (gatePlacementHelper == null)
+                {
+                    gatePlacementHelper = gameObject.AddComponent<GatePlacementHelper>();
+                    Debug.Log("BuildingManager: Auto-created GatePlacementHelper component");
+                }
+            }
+
+            if (wallPlacementController == null)
+            {
+                wallPlacementController = GetComponent<WallPlacementController>();
+                if (wallPlacementController == null)
+                {
+                    Debug.LogWarning("BuildingManager: No WallPlacementController found. Wall placement will not work.");
+                }
+            }
+
             // Validate building data
             ValidateBuildingData();
         }
