@@ -45,6 +45,12 @@ namespace RTS.Units.Animation
                 Debug.Log("✅ Added ArcherAimIK");
             }
 
+            // Step 4: Add ArcherCombatMode
+            if (AddComponent<ArcherCombatMode>(selected, "ArcherCombatMode", ref step))
+            {
+                Debug.Log("✅ Added ArcherCombatMode");
+            }
+
             // Step 4: Configure Animator
             var animator = selected.GetComponent<Animator>();
             if (animator != null)
@@ -288,6 +294,80 @@ namespace RTS.Units.Animation
                     "OK"
                 );
             }
+        }
+
+        [MenuItem("Tools/RTS/Archer/Combat Mode/Set: Must Stand Still")]
+        static void SetModeStandStill()
+        {
+            SetCombatModeForSelected(CombatMovementMode.MustStandStill);
+        }
+
+        [MenuItem("Tools/RTS/Archer/Combat Mode/Set: Can Shoot While Moving")]
+        static void SetModeShootWhileMoving()
+        {
+            SetCombatModeForSelected(CombatMovementMode.CanShootWhileMoving);
+        }
+
+        [MenuItem("Tools/RTS/Archer/Combat Mode/Set: Adaptive")]
+        static void SetModeAdaptive()
+        {
+            SetCombatModeForSelected(CombatMovementMode.Adaptive);
+        }
+
+        [MenuItem("Tools/RTS/Archer/Combat Mode/Toggle Mode")]
+        static void ToggleCombatMode()
+        {
+            GameObject[] selected = Selection.gameObjects;
+
+            if (selected.Length == 0)
+            {
+                EditorUtility.DisplayDialog("No Selection", "Please select archer GameObjects.", "OK");
+                return;
+            }
+
+            int changed = 0;
+            foreach (GameObject obj in selected)
+            {
+                ArcherCombatMode combatMode = obj.GetComponent<ArcherCombatMode>();
+                if (combatMode != null)
+                {
+                    combatMode.ToggleCombatMode();
+                    EditorUtility.SetDirty(combatMode);
+                    changed++;
+                }
+            }
+
+            Debug.Log($"Toggled combat mode on {changed} archers");
+        }
+
+        private static void SetCombatModeForSelected(CombatMovementMode mode)
+        {
+            GameObject[] selected = Selection.gameObjects;
+
+            if (selected.Length == 0)
+            {
+                EditorUtility.DisplayDialog("No Selection", "Please select archer GameObjects.", "OK");
+                return;
+            }
+
+            int changed = 0;
+            foreach (GameObject obj in selected)
+            {
+                ArcherCombatMode combatMode = obj.GetComponent<ArcherCombatMode>();
+                if (combatMode != null)
+                {
+                    combatMode.SetCombatMode(mode);
+                    EditorUtility.SetDirty(combatMode);
+                    changed++;
+                }
+            }
+
+            Debug.Log($"Set {changed} archers to {mode} mode");
+            EditorUtility.DisplayDialog(
+                "Combat Mode Changed",
+                $"Changed {changed} archer(s) to:\n{mode}",
+                "OK"
+            );
         }
 
         private static bool AddComponent<T>(GameObject target, string componentName, ref int step) where T : Component

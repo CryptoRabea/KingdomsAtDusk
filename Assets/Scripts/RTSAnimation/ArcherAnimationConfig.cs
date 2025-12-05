@@ -29,6 +29,20 @@ namespace RTS.Units.Animation
         [Tooltip("Can archer aim while moving?")]
         public bool allowAimWhileMoving = false;
 
+        [Header("Combat Movement Mode")]
+        [Tooltip("Combat movement mode: MustStandStill, CanShootWhileMoving, or Adaptive")]
+        public CombatMovementMode defaultCombatMode = CombatMovementMode.CanShootWhileMoving;
+
+        [Tooltip("Use standing combat animations even while moving")]
+        public bool useStandingAnimationsWhileMoving = false;
+
+        [Tooltip("Reduce movement speed while in combat")]
+        public bool reduceSpeedWhileShooting = true;
+
+        [Tooltip("Movement speed multiplier during combat (0-1)")]
+        [Range(0f, 1f)]
+        public float combatSpeedMultiplier = 0.5f;
+
         [Header("Movement")]
         [Tooltip("Use 8-way directional movement (vs free blend)")]
         public bool use8WayMovement = true;
