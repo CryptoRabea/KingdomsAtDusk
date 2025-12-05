@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Linq;
 using RTS.Core.Services;
+using RTSGame.UI.Settings;
 
 namespace RTS.SaveLoad
 {
@@ -39,10 +40,15 @@ namespace RTS.SaveLoad
         [SerializeField] private Button deleteButton;
         [SerializeField] private Button renameButton;
         [SerializeField] private Button resumeButton;
+        [SerializeField] private Button settingsButton;
         [SerializeField] private Button backToMainMenuButton;
         [SerializeField] private Button saveAndQuitButton;
         [SerializeField] private Button quitWithoutSavingButton;
         [SerializeField] private Button closeButton;
+
+        [Header("Settings Panel (Optional)")]
+        [SerializeField] private SettingsPanel settingsPanelController;
+        [SerializeField] private GameObject settingsPanel;
 
         [Header("Settings")]
         [SerializeField] private bool pauseGameWhenOpen = true;
@@ -89,6 +95,8 @@ namespace RTS.SaveLoad
                 deleteButton.onClick.AddListener(OnDeleteButtonClicked);
             if (renameButton != null)
                 renameButton.onClick.AddListener(OnRenameButtonClicked);
+            if (settingsButton != null)
+                settingsButton.onClick.AddListener(OnSettingsButtonClicked);
             if (backToMainMenuButton != null)
                 backToMainMenuButton.onClick.AddListener(OnBackToMainMenuClicked);
             if (saveAndQuitButton != null)
@@ -116,6 +124,18 @@ namespace RTS.SaveLoad
             if (saveLoadService == null)
             {
                 Debug.LogError("SaveLoadMenu: ISaveLoadService not found!");
+            }
+
+            // Try to find settings panel controller if not assigned
+            if (settingsPanelController == null && settingsPanel != null)
+            {
+                settingsPanelController = settingsPanel.GetComponent<SettingsPanel>();
+            }
+
+            // Try to find settings panel in scene if not assigned
+            if (settingsPanelController == null)
+            {
+                settingsPanelController = FindAnyObjectByType<SettingsPanel>(FindObjectsInactive.Include);
             }
         }
 
@@ -510,6 +530,36 @@ namespace RTS.SaveLoad
         private void OnResumeButtonClicked()
         {
             CloseMenu();
+        }
+
+        private void OnSettingsButtonClicked()
+        {
+            Debug.Log("[SaveLoadMenu] Settings button clicked");
+
+            // Hide the save/load menu temporarily
+            if (menuPanel != null)
+                menuPanel.SetActive(false);
+            if (savePanel != null)
+                savePanel.SetActive(false);
+            if (loadPanel != null)
+                loadPanel.SetActive(false);
+
+            // Open the settings panel
+            if (settingsPanelController != null)
+            {
+                settingsPanelController.Open();
+            }
+            else if (settingsPanel != null)
+            {
+                // Fallback to simple panel activation
+                settingsPanel.SetActive(true);
+            }
+            else
+            {
+                Debug.LogWarning("[SaveLoadMenu] Settings panel not found!");
+                // Show the menu again since we can't open settings
+                ShowMode(MenuMode.Main);
+            }
         }
 
         private void OnBackToMainMenuClicked()

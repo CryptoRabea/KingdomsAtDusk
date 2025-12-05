@@ -28,6 +28,10 @@ namespace RTS.Managers
         [Header("UI Systems")]
         [SerializeField] private FloatingNumbersManager floatingNumbersManager;
 
+        [Header("Settings & Audio")]
+        [SerializeField] private RTSGame.Managers.RTSSettingsManager settingsManager;
+        [SerializeField] private RTSGame.Managers.AudioManager audioManager;
+
         [Header("Settings")]
         [SerializeField] private bool initializeOnAwake = true;
 
@@ -80,10 +84,16 @@ namespace RTS.Managers
             // 5. Building management system
             InitializeBuildingManager();
 
-            // 6. Save/Load system
+            // 6. Audio system (before settings, as settings depends on audio)
+            InitializeAudioManager();
+
+            // 7. Settings system
+            InitializeSettingsManager();
+
+            // 8. Save/Load system
             InitializeSaveLoadManager();
 
-            // 7. UI systems (floating numbers, etc.)
+            // 9. UI systems (floating numbers, etc.)
             InitializeFloatingNumbersManager();
 
             Debug.Log("All services initialized successfully!");
@@ -214,6 +224,48 @@ namespace RTS.Managers
 
             ServiceLocator.Register<IFloatingNumberService>(floatingNumbersManager);
             Debug.Log("FloatingNumbersManager registered as IFloatingNumberService");
+        }
+
+        private void InitializeAudioManager()
+        {
+            if (audioManager == null)
+            {
+                // Try to find it in the scene
+                audioManager = FindAnyObjectByType<RTSGame.Managers.AudioManager>();
+
+                if (audioManager == null)
+                {
+                    // Create one if it doesn't exist
+                    var audioObj = new GameObject("AudioManager");
+                    audioObj.transform.SetParent(transform);
+                    audioManager = audioObj.AddComponent<RTSGame.Managers.AudioManager>();
+                    Debug.Log("AudioManager created automatically");
+                }
+            }
+
+            ServiceLocator.Register<IAudioService>(audioManager);
+            Debug.Log("AudioManager registered as IAudioService");
+        }
+
+        private void InitializeSettingsManager()
+        {
+            if (settingsManager == null)
+            {
+                // Try to find it in the scene
+                settingsManager = FindAnyObjectByType<RTSGame.Managers.RTSSettingsManager>();
+
+                if (settingsManager == null)
+                {
+                    // Create one if it doesn't exist
+                    var settingsObj = new GameObject("RTSSettingsManager");
+                    settingsObj.transform.SetParent(transform);
+                    settingsManager = settingsObj.AddComponent<RTSGame.Managers.RTSSettingsManager>();
+                    Debug.Log("RTSSettingsManager created automatically");
+                }
+            }
+
+            ServiceLocator.Register<ISettingsService>(settingsManager);
+            Debug.Log("RTSSettingsManager registered as ISettingsService");
         }
 
         private void OnDestroy()
