@@ -4,6 +4,7 @@ using RTS.Core.Services;
 using RTSGame.Settings;
 using System;
 using System.IO;
+using AudioSettings = RTSGame.Settings.AudioSettings;
 
 namespace RTSGame.Managers
 {

@@ -3,6 +3,7 @@ using UnityEngine.Audio;
 using RTS.Core.Services;
 using RTSGame.Settings;
 using System.Collections.Generic;
+using AudioSettings = RTSGame.Settings.AudioSettings;
 
 namespace RTSGame.Managers
 {

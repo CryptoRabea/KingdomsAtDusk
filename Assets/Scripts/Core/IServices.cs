@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using RTSGame.Settings;
+using AudioSettings = RTSGame.Settings.AudioSettings;
 
 namespace RTS.Core.Services
 {
