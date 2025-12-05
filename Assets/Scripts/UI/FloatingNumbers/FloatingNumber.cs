@@ -53,6 +53,24 @@ namespace KAD.UI.FloatingNumbers
             AnimationCurve fadeCurve,
             System.Action<FloatingNumber> onComplete)
         {
+            // Ensure components are initialized (in case Awake hasn't been called yet)
+            if (textMesh == null)
+            {
+                textMesh = GetComponent<TextMeshProUGUI>();
+            }
+            if (rectTransform == null)
+            {
+                rectTransform = GetComponent<RectTransform>();
+            }
+            if (canvasGroup == null)
+            {
+                canvasGroup = GetComponent<CanvasGroup>();
+                if (canvasGroup == null)
+                {
+                    canvasGroup = gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
             // Set text properties
             textMesh.text = text;
             textMesh.color = color;
