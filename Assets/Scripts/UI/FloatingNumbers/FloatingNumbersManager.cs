@@ -50,10 +50,12 @@ namespace Assets.Scripts.UI.FloatingNumbers
             // Ensure settings exist
             if (settings == null)
             {
-                Debug.LogError("FloatingNumbersSettings is not assigned! Floating numbers will not work properly.");
+                Debug.LogError("FloatingNumbersSettings is not assigned! Creating temporary settings with defaults.");
                 // Create default settings
                 settings = ScriptableObject.CreateInstance<FloatingNumbersSettings>();
-                Debug.LogWarning("Created temporary FloatingNumbersSettings with default values.");
+                // Initialize with default values by calling ResetToDefaults
+                settings.ResetToDefaults();
+                Debug.LogWarning("Created temporary FloatingNumbersSettings. Please assign a proper settings asset in the inspector!");
             }
 
             InitializeCanvases();
@@ -589,6 +591,11 @@ namespace Assets.Scripts.UI.FloatingNumbers
         private void OnDamageDealt(DamageDealtEvent evt)
         {
             if (evt.Target == null || evt.Target.transform == null) return;
+            if (settings == null)
+            {
+                Debug.LogWarning("FloatingNumbersSettings is null in OnDamageDealt - cannot show effects");
+                return;
+            }
 
             Vector3 position = evt.Target.transform.position + Vector3.up;
 

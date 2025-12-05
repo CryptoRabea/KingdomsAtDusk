@@ -262,6 +262,10 @@ namespace KAD.UI.FloatingNumbers
             floatHeight = 2f;
             fontSize = 24;
 
+            // Create default animation curves
+            scaleAnimationCurve = AnimationCurve.EaseInOut(0, 0.5f, 1, 1f);
+            fadeAnimationCurve = AnimationCurve.Linear(0, 1, 1, 0);
+
             damageColor = new Color(1f, 0.2f, 0.2f, 1f);
             healColor = new Color(0.2f, 1f, 0.2f, 1f);
             resourceGainColor = new Color(1f, 0.84f, 0f, 1f);
@@ -273,6 +277,9 @@ namespace KAD.UI.FloatingNumbers
             hpBarWidth = 1f;
             hpBarHeight = 0.15f;
             hpBarOffset = 2f;
+            hpBarBackgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+            hpBarHealthyColor = new Color(0.2f, 1f, 0.2f, 1f);
+            hpBarLowHealthColor = new Color(1f, 0.2f, 0.2f, 1f);
             lowHealthThreshold = 0.3f;
 
             maxActiveNumbers = 50;
