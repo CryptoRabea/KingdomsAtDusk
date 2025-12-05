@@ -978,10 +978,25 @@ namespace RTS.Buildings
                     newWall.AddComponent<WallNavMeshObstacle>();
                 }
 
-                foreach (var col in newWall.GetComponentsInChildren<Collider>())
+                // Add BuildingSelectable component if missing (for wall selection)
+                if (newWall.GetComponent<BuildingSelectable>() == null)
                 {
-                    col.enabled = false;
+                    newWall.AddComponent<BuildingSelectable>();
                 }
+
+                // Ensure wall is on the Building layer (layer 6) for proper selection
+                // This allows BuildingSelectionManager to detect walls with raycasts
+                int buildingLayer = LayerMask.NameToLayer("Building");
+                if (buildingLayer != -1)
+                {
+                    newWall.layer = buildingLayer;
+                }
+
+                // IMPORTANT: Keep colliders ENABLED so walls can be:
+                // 1. Selected by BuildingSelectionManager
+                // 2. Detected for tower placement snapping
+                // 3. Prevent building overlaps
+                // Colliders are needed for proper wall functionality!
 
                 placedWallSegments.Add(new PlacedWallSegment(data.position, data.length, finalRotation));
                 placedWallPositions.Add(data.position);
