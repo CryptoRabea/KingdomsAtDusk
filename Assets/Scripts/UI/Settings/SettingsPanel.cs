@@ -191,8 +191,8 @@ namespace RTSGame.UI.Settings
         private void Awake()
         {
             // Get services
-            settingsService = ServiceLocator.Instance?.Get<ISettingsService>();
-            audioService = ServiceLocator.Instance?.Get<IAudioService>();
+            settingsService = ServiceLocator.TryGet<ISettingsService>();
+            audioService = ServiceLocator.TryGet<IAudioService>();
 
             // Setup buttons
             SetupTabButtons();
@@ -676,7 +676,7 @@ namespace RTSGame.UI.Settings
             if (antiAliasingDropdown != null) settings.AntiAliasing = (AntiAliasingMode)antiAliasingDropdown.value;
             if (renderScaleSlider != null) settings.RenderScale = renderScaleSlider.value;
             if (shadowDistanceSlider != null) settings.ShadowDistance = shadowDistanceSlider.value;
-            if (shadowQualityDropdown != null) settings.ShadowResolution = (ShadowQuality)shadowQualityDropdown.value;
+            if (shadowQualityDropdown != null) settings.ShadowResolution = (ShadowResolutionQuality)shadowQualityDropdown.value;
             if (textureQualityDropdown != null) settings.TextureQuality = (TextureQuality)textureQualityDropdown.value;
             if (anisotropicDropdown != null) settings.AnisotropicFiltering = (AnisotropicMode)anisotropicDropdown.value;
             if (terrainQualityDropdown != null) settings.TerrainQuality = (TerrainQuality)terrainQualityDropdown.value;
