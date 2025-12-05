@@ -145,8 +145,7 @@ namespace RTS.UI
             }
 
             // Setup item
-            var listItem = itemObj.GetComponent<FormationListItem>();
-            if (listItem == null)
+            if (!itemObj.TryGetComponent<FormationListItem>(out var listItem))
             {
                 listItem = itemObj.AddComponent<FormationListItem>();
             }

@@ -738,10 +738,10 @@ namespace RTSGame.Editor
             GameObject label = new GameObject("Label");
             label.transform.SetParent(labelRow.transform, false);
 
-            TextMeshProUGUI labelText = label.AddComponent<TextMeshProUGUI>();
-            labelText.text = labelText;
-            labelText.fontSize = 14;
-            labelText.color = Color.white;
+            TextMeshProUGUI labelTextComp = label.AddComponent<TextMeshProUGUI>();
+            labelTextComp.text = labelText;
+            labelTextComp.fontSize = 14;
+            labelTextComp.color = Color.white;
 
             // Value text
             GameObject valueText = new GameObject("ValueText");

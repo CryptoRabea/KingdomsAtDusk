@@ -71,7 +71,7 @@ namespace RTS.Units.Formation
             foreach (var pos in positions)
             {
                 // Scale by spacing and apply to center position
-                Vector3 offset = (right * pos.position.x * spacing) + (forward * pos.position.y * spacing);
+                Vector3 offset = (pos.position.x * spacing * right) + (pos.position.y * spacing * forward);
                 Vector3 worldPos = centerPosition + offset;
                 worldPositions.Add(worldPos);
             }

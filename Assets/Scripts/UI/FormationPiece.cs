@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 namespace RTS.UI
 {
+    [RequireComponent(typeof(RectTransform))]
+    [RequireComponent(typeof(CanvasGroup))]
+    [RequireComponent(typeof(Image))]
     /// <summary>
     /// Represents a draggable piece in the formation builder
     /// </summary>

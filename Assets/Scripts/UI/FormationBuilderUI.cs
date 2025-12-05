@@ -64,8 +64,7 @@ namespace RTS.UI
                 gridBackground.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
 
                 // Add event trigger for right-click piece placement
-                EventTrigger trigger = gridPanel.GetComponent<EventTrigger>();
-                if (trigger == null)
+                if (!gridPanel.TryGetComponent<EventTrigger>(out var trigger))
                 {
                     trigger = gridPanel.gameObject.AddComponent<EventTrigger>();
                 }
@@ -80,8 +79,7 @@ namespace RTS.UI
             // Setup garbage bin visual
             if (garbageBin != null)
             {
-                Image binImage = garbageBin.GetComponent<Image>();
-                if (binImage == null)
+                if (!garbageBin.TryGetComponent<Image>(out var binImage))
                 {
                     binImage = garbageBin.gameObject.AddComponent<Image>();
                 }
@@ -220,9 +218,8 @@ namespace RTS.UI
 
             // Instantiate piece
             GameObject pieceObj = Instantiate(piecePrefab, gridPanel);
-            FormationPiece piece = pieceObj.GetComponent<FormationPiece>();
-
-            if (piece == null)
+            
+            if (!pieceObj.TryGetComponent<FormationPiece>(out var piece))
             {
                 piece = pieceObj.AddComponent<FormationPiece>();
             }
@@ -256,9 +253,8 @@ namespace RTS.UI
 
                 // Instantiate piece
                 GameObject pieceObj = Instantiate(piecePrefab, gridPanel);
-                FormationPiece piece = pieceObj.GetComponent<FormationPiece>();
-
-                if (piece == null)
+                
+                if (!pieceObj.TryGetComponent<FormationPiece>(out var piece))
                 {
                     piece = pieceObj.AddComponent<FormationPiece>();
                 }

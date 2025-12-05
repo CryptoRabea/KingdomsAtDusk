@@ -391,8 +391,7 @@ namespace RTSGame.Managers
             Canvas[] canvases = FindObjectsOfType<Canvas>();
             foreach (var canvas in canvases)
             {
-                var scaler = canvas.GetComponent<UnityEngine.UI.CanvasScaler>();
-                if (scaler != null)
+                if (canvas.TryGetComponent<UnityEngine.UI.CanvasScaler>(out var scaler))
                 {
                     scaler.scaleFactor = UI.UIScale;
                 }
