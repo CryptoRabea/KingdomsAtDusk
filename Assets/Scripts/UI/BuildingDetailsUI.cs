@@ -68,13 +68,13 @@ namespace RTS.UI
 
         private void Start()
         {
-           
+
 
             // Find selection manager if not assigned
             if (selectionManager == null)
             {
                 selectionManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
-              
+
             }
 
             // Set up rally point button click handler
@@ -85,6 +85,12 @@ namespace RTS.UI
                     button.onClick.AddListener(OnSetRallyPointButtonClicked);
                 }
                 setRallyPointButton.SetActive(false); // Hide initially
+            }
+
+            // Validate training progress bar configuration
+            if (trainingProgressBar != null && trainingProgressBar.type != Image.Type.Filled)
+            {
+                Debug.LogWarning("BuildingDetailsUI: trainingProgressBar Image Type should be set to 'Filled' for fillAmount to work properly. Current type: " + trainingProgressBar.type);
             }
 
             HidePanel();
@@ -273,7 +279,16 @@ namespace RTS.UI
 
                 if (trainingProgressBar != null)
                 {
-                    trainingProgressBar.fillAmount = trainingQueue.CurrentTraining.Progress;
+                    // Get progress and clamp it to [0, 1] range to avoid visual glitches
+                    float progress = trainingQueue.CurrentTraining.Progress;
+
+                    // Handle edge cases (division by zero, NaN, infinity)
+                    if (float.IsNaN(progress) || float.IsInfinity(progress))
+                    {
+                        progress = 0f;
+                    }
+
+                    trainingProgressBar.fillAmount = Mathf.Clamp01(progress);
                 }
 
                 // Update current training unit icon
