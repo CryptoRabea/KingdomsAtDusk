@@ -79,6 +79,7 @@ namespace RTS.Units.Animation
         public ArcherCombatState CombatState => combatState;
         public ArcherMovementState MovementState => movementState;
         public int LODLevel => currentLODLevel;
+        public Animator Animator => animator;
 
         #region Initialization
 
