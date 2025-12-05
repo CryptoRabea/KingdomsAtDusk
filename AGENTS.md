@@ -1,8 +1,8 @@
 <!-- UNITY CODE ASSIST INSTRUCTIONS START -->
-- Project name: KingdomsAtDusk
-- Unity version: Unity 6000.2.10f1
+- Project name: KingdomsAtDuskU_6.3
+- Unity version: Unity 6000.3.0f1
 - Active game object:
-  - Name: [RUNTIME] Fog_Plane
-  - Tag: Untagged
+  - Name: Main Camera
+  - Tag: MainCamera
   - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
