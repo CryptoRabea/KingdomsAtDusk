@@ -348,18 +348,27 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         public void ShowDamageNumber(Vector3 worldPosition, float damageAmount, bool isCritical = false)
         {
+            Debug.Log($"[FloatingNumbersManager] ShowDamageNumber called. Settings null? {settings == null}");
+
             if (settings == null)
             {
                 Debug.LogWarning("FloatingNumbersSettings is null - cannot show damage number");
                 return;
             }
 
-            if (!settings.ShowDamageNumbers) return;
+            Debug.Log($"[FloatingNumbersManager] ShowDamageNumbers setting: {settings.ShowDamageNumbers}");
+
+            if (!settings.ShowDamageNumbers)
+            {
+                Debug.LogWarning("[FloatingNumbersManager] ShowDamageNumbers is disabled in settings!");
+                return;
+            }
 
             Vector2 screenPos = WorldToCanvasPosition(worldPosition);
             Color color = isCritical ? settings.CriticalColor : settings.DamageColor;
             string text = $"-{Mathf.RoundToInt(damageAmount)}";
 
+            Debug.Log($"[FloatingNumbersManager] Calling ShowNumber with text: {text}, screenPos: {screenPos}, color: {color}");
             ShowNumber(text, screenPos, color);
         }
 
@@ -508,6 +517,8 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void ShowNumber(string text, Vector2 screenPosition, Color color)
         {
+            Debug.Log($"[FloatingNumbersManager] ShowNumber called. Text: {text}, Position: {screenPosition}");
+
             if (settings == null)
             {
                 Debug.LogWarning("Cannot show number - settings is null");
@@ -517,6 +528,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
             // Check if we've hit the max active numbers limit
             if (activeNumbers.Count >= settings.MaxActiveNumbers)
             {
+                Debug.LogWarning($"[FloatingNumbersManager] Hit max active numbers limit ({settings.MaxActiveNumbers}). Current: {activeNumbers.Count}");
                 // Force oldest number to complete
                 if (activeNumbers.Count > 0)
                 {
@@ -524,6 +536,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 }
             }
 
+            Debug.Log($"[FloatingNumbersManager] Getting floating number from pool...");
             FloatingNumber number = GetFloatingNumber();
             if (number == null)
             {
@@ -531,6 +544,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 return;
             }
 
+            Debug.Log($"[FloatingNumbersManager] Got floating number: {number.gameObject.name}. Initializing...");
             activeNumbers.Add(number);
 
             number.Initialize(
@@ -544,6 +558,8 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 settings.FadeAnimationCurve,
                 ReturnFloatingNumber
             );
+
+            Debug.Log($"[FloatingNumbersManager] FloatingNumber initialized and should be active. GameObject active: {number.gameObject.activeSelf}");
         }
 
         private Vector2 WorldToCanvasPosition(Vector3 worldPosition)
