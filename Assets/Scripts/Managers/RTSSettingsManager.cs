@@ -230,8 +230,8 @@ namespace RTSGame.Managers
             var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
             if (floatingNumberService != null)
             {
-                floatingNumberService.Settings.enableHPBars = Graphics.HealthBars;
-                floatingNumberService.Settings.enableDamageNumbers = UI?.DamageNumbers ?? true;
+                floatingNumberService.Settings.SetShowHPBars(Graphics.HealthBars);
+                floatingNumberService.Settings.SetShowDamageNumbers(UI?.DamageNumbers ?? true);
                 floatingNumberService.RefreshSettings();
             }
         }
@@ -311,7 +311,7 @@ namespace RTSGame.Managers
             if (Audio == null) return;
 
             // Get audio service
-            var audioService = ServiceLocator.Instance?.Get<IAudioService>();
+            var audioService = ServiceLocator.TryGet<IAudioService>();
             if (audioService != null)
             {
                 audioService.ApplySettings(Audio);
