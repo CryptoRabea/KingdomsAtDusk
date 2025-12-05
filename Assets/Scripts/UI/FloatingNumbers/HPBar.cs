@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using FischlWorks_FogWar;
 
 namespace KAD.UI.FloatingNumbers
 {
@@ -23,6 +24,10 @@ namespace KAD.UI.FloatingNumbers
         private float currentHealthPercentage = 1f;
         private bool isInitialized;
         private int frameCounter;
+
+        // Fog of war system reference (cached)
+        private csFogWar fogWarSystem;
+        private bool fogWarChecked = false;
 
         private void Awake()
         {
@@ -191,12 +196,57 @@ namespace KAD.UI.FloatingNumbers
             {
                 shouldShow = false;
             }
+            // Hide if target is not visible in fog of war (for enemy units/buildings)
+            else if (!IsTargetVisibleInFog())
+            {
+                shouldShow = false;
+            }
             // Future: Hide if only showing for selected units and this unit is not selected
             // This would require integration with the selection system
 
             canvasGroup.alpha = shouldShow ? 1f : 0f;
             canvasGroup.interactable = shouldShow;
             canvasGroup.blocksRaycasts = shouldShow;
+        }
+
+        /// <summary>
+        /// Check if the target is visible in fog of war.
+        /// Returns true if target is on a friendly layer or if visible in fog.
+        /// </summary>
+        private bool IsTargetVisibleInFog()
+        {
+            if (target == null)
+                return false;
+
+            // Try to get fog war system if not already cached
+            if (!fogWarChecked)
+            {
+                fogWarSystem = Object.FindFirstObjectByType<csFogWar>();
+                fogWarChecked = true;
+            }
+
+            // If no fog of war system exists, always show (fog of war disabled)
+            if (fogWarSystem == null)
+                return true;
+
+            // Check if target is on Enemy layer - only hide enemy HP bars in fog
+            int enemyLayer = LayerMask.NameToLayer("Enemy");
+            if (target.layer != enemyLayer)
+            {
+                // Friendly units/buildings always show their HP bars
+                return true;
+            }
+
+            // For enemy units/buildings, check fog of war visibility
+            if (!fogWarSystem.CheckWorldGridRange(target.transform.position))
+            {
+                // Target is outside fog of war grid, hide it
+                return false;
+            }
+
+            // Check if the target position is visible in the fog of war
+            // Use additionalRadius of 0 to check exact position
+            return fogWarSystem.CheckVisibility(target.transform.position, 0);
         }
 
         /// <summary>
