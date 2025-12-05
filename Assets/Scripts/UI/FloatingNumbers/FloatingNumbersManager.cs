@@ -46,6 +46,16 @@ namespace Assets.Scripts.UI.FloatingNumbers
         private void Awake()
         {
             mainCamera = Camera.main;
+
+            // Ensure settings exist
+            if (settings == null)
+            {
+                Debug.LogError("FloatingNumbersSettings is not assigned! Floating numbers will not work properly.");
+                // Create default settings
+                settings = ScriptableObject.CreateInstance<FloatingNumbersSettings>();
+                Debug.LogWarning("Created temporary FloatingNumbersSettings with default values.");
+            }
+
             InitializeCanvases();
             WarmupPools();
         }
@@ -328,6 +338,12 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         public void ShowDamageNumber(Vector3 worldPosition, float damageAmount, bool isCritical = false)
         {
+            if (settings == null)
+            {
+                Debug.LogWarning("FloatingNumbersSettings is null - cannot show damage number");
+                return;
+            }
+
             if (!settings.ShowDamageNumbers) return;
 
             Vector2 screenPos = WorldToCanvasPosition(worldPosition);
@@ -482,6 +498,12 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void ShowNumber(string text, Vector2 screenPosition, Color color)
         {
+            if (settings == null)
+            {
+                Debug.LogWarning("Cannot show number - settings is null");
+                return;
+            }
+
             // Check if we've hit the max active numbers limit
             if (activeNumbers.Count >= settings.MaxActiveNumbers)
             {
@@ -493,6 +515,12 @@ namespace Assets.Scripts.UI.FloatingNumbers
             }
 
             FloatingNumber number = GetFloatingNumber();
+            if (number == null)
+            {
+                Debug.LogWarning("Failed to get FloatingNumber from pool");
+                return;
+            }
+
             activeNumbers.Add(number);
 
             number.Initialize(
@@ -563,7 +591,50 @@ namespace Assets.Scripts.UI.FloatingNumbers
             if (evt.Target == null || evt.Target.transform == null) return;
 
             Vector3 position = evt.Target.transform.position + Vector3.up;
+
+            // Show damage number
             ShowDamageNumber(position, evt.Damage);
+
+            // Show blood gush effect
+            if (settings.EnableBloodEffects && settings.ShowBloodGush)
+            {
+                Vector3 direction = Vector3.zero;
+                if (evt.Attacker != null && evt.Attacker.transform != null)
+                {
+                    // Direction from attacker to target
+                    direction = (evt.Target.transform.position - evt.Attacker.transform.position).normalized;
+                }
+                else
+                {
+                    // Random direction if no attacker
+                    direction = new Vector3(Random.Range(-1f, 1f), Random.Range(0f, 1f), Random.Range(-1f, 1f)).normalized;
+                }
+
+                ShowBloodGush(position, direction);
+            }
+
+            // Show blood decal on ground
+            if (settings.EnableBloodEffects)
+            {
+                Vector3 groundPosition = evt.Target.transform.position;
+                groundPosition.y = 0.01f; // Just above ground
+                ShowBloodDecal(groundPosition);
+            }
+
+            // Start blood dripping if unit is heavily wounded
+            var unitHealth = evt.Target.GetComponent<RTS.Units.UnitHealth>();
+            if (unitHealth != null)
+            {
+                float healthPercent = unitHealth.CurrentHealth / unitHealth.MaxHealth;
+                if (healthPercent <= settings.BloodDrippingThreshold)
+                {
+                    StartBloodDripping(
+                        evt.Target,
+                        () => unitHealth.CurrentHealth,
+                        () => unitHealth.MaxHealth
+                    );
+                }
+            }
         }
 
         private void OnHealingApplied(HealingAppliedEvent evt)
