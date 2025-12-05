@@ -45,18 +45,25 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void Awake()
         {
+            Debug.Log("[FloatingNumbersManager] Awake called");
             mainCamera = Camera.main;
 
             // Ensure settings exist
             if (settings == null)
             {
-                Debug.LogError("FloatingNumbersSettings is not assigned! Creating temporary settings with defaults.");
+                Debug.LogError("[FloatingNumbersManager] FloatingNumbersSettings is not assigned! Creating temporary settings with defaults.");
                 // Create default settings
                 settings = ScriptableObject.CreateInstance<FloatingNumbersSettings>();
                 // Initialize with default values by calling ResetToDefaults
                 settings.ResetToDefaults();
-                Debug.LogWarning("Created temporary FloatingNumbersSettings. Please assign a proper settings asset in the inspector!");
+                Debug.LogWarning("[FloatingNumbersManager] Created temporary FloatingNumbersSettings. Please assign a proper settings asset in the inspector!");
             }
+            else
+            {
+                Debug.Log("[FloatingNumbersManager] Settings are assigned properly");
+            }
+
+            Debug.Log($"[FloatingNumbersManager] Settings null? {settings == null}, ShowDamageNumbers: {(settings != null ? settings.ShowDamageNumbers.ToString() : "N/A")}");
 
             InitializeCanvases();
             WarmupPools();
@@ -64,6 +71,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void OnEnable()
         {
+            Debug.Log($"[FloatingNumbersManager] OnEnable called. Settings null? {settings == null}");
             SubscribeToEvents();
         }
 
@@ -590,14 +598,22 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void OnDamageDealt(DamageDealtEvent evt)
         {
-            if (evt.Target == null || evt.Target.transform == null) return;
+            Debug.Log($"[FloatingNumbersManager] OnDamageDealt called. Settings null? {settings == null}");
+
+            if (evt.Target == null || evt.Target.transform == null)
+            {
+                Debug.LogWarning("[FloatingNumbersManager] OnDamageDealt: Target is null");
+                return;
+            }
+
             if (settings == null)
             {
-                Debug.LogWarning("FloatingNumbersSettings is null in OnDamageDealt - cannot show effects");
+                Debug.LogError("[FloatingNumbersManager] FloatingNumbersSettings is null in OnDamageDealt - cannot show effects. This should not happen!");
                 return;
             }
 
             Vector3 position = evt.Target.transform.position + Vector3.up;
+            Debug.Log($"[FloatingNumbersManager] Showing damage number at position {position}, damage: {evt.Damage}");
 
             // Show damage number
             ShowDamageNumber(position, evt.Damage);
@@ -617,6 +633,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
                     direction = new Vector3(Random.Range(-1f, 1f), Random.Range(0f, 1f), Random.Range(-1f, 1f)).normalized;
                 }
 
+                Debug.Log($"[FloatingNumbersManager] Showing blood gush effect");
                 ShowBloodGush(position, direction);
             }
 
@@ -625,6 +642,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
             {
                 Vector3 groundPosition = evt.Target.transform.position;
                 groundPosition.y = 0.01f; // Just above ground
+                Debug.Log($"[FloatingNumbersManager] Showing blood decal");
                 ShowBloodDecal(groundPosition);
             }
 
@@ -635,6 +653,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 float healthPercent = unitHealth.CurrentHealth / unitHealth.MaxHealth;
                 if (healthPercent <= settings.BloodDrippingThreshold)
                 {
+                    Debug.Log($"[FloatingNumbersManager] Starting blood dripping for {evt.Target.name}");
                     StartBloodDripping(
                         evt.Target,
                         () => unitHealth.CurrentHealth,
