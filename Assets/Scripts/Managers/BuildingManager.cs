@@ -672,6 +672,26 @@ namespace RTS.Managers
                     continue;
                 }
 
+                // Special handling for towers: Allow placement if snapping to a wall that will be replaced
+                if (isPlacingTower && wallToReplace != null)
+                {
+                    // Check if this collision is with the wall we're about to replace
+                    if (col.gameObject == wallToReplace || col.transform.IsChildOf(wallToReplace.transform))
+                    {
+                        continue; // Skip this collision - we're replacing this wall
+                    }
+                }
+
+                // Special handling for gates: Allow placement if snapping to a wall that will be replaced
+                if (isPlacingGate && wallToReplaceForGate != null)
+                {
+                    // Check if this collision is with the wall we're about to replace
+                    if (col.gameObject == wallToReplaceForGate || col.transform.IsChildOf(wallToReplaceForGate.transform))
+                    {
+                        continue; // Skip this collision - we're replacing this wall
+                    }
+                }
+
                 Debug.Log($"Cannot place: colliding with {col.gameObject.name} (Layer: {LayerMask.LayerToName(col.gameObject.layer)})");
                 return false;
             }
