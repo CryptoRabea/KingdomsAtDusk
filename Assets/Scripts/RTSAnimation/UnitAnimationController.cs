@@ -31,6 +31,10 @@ namespace RTS.Units.Animation
         private UnitHealth health;
         private AI.UnitAIController aiController;
 
+        // Optional modular system components
+        private UnitPersonalityController personalityController;
+        private UnitAnimatorProfileLoader profileLoader;
+
         // Animation state tracking
         private AnimationState currentAnimState = AnimationState.Idle;
         private bool isDead = false;
@@ -43,6 +47,13 @@ namespace RTS.Units.Animation
         private static readonly int IsDeadHash = Animator.StringToHash("IsDead");
         private static readonly int HitTriggerHash = Animator.StringToHash("Hit");
         private static readonly int IdleTriggerHash = Animator.StringToHash("Idle");
+
+        // Personality parameters (new modular system)
+        private static readonly int DoIdleActionHash = Animator.StringToHash("DoIdleAction");
+        private static readonly int IdleVariantHash = Animator.StringToHash("IdleVariant");
+        private static readonly int VictoryHash = Animator.StringToHash("Victory");
+        private static readonly int RetreatHash = Animator.StringToHash("Retreat");
+        private static readonly int LookWeightHash = Animator.StringToHash("LookWeight");
 
         public AnimationState CurrentState => currentAnimState;
         public Animator Animator => animator;
@@ -94,6 +105,10 @@ namespace RTS.Units.Animation
             combat = GetComponent<UnitCombat>();
             health = GetComponent<UnitHealth>();
             aiController = GetComponent<AI.UnitAIController>();
+
+            // Get optional modular system components
+            personalityController = GetComponent<UnitPersonalityController>();
+            profileLoader = GetComponent<UnitAnimatorProfileLoader>();
 
             // Set initial state
             SetAnimationState(AnimationState.Idle);
@@ -400,6 +415,38 @@ namespace RTS.Units.Animation
             if (animator == null) return 0f;
 
             return animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        }
+
+        /// <summary>
+        /// Check if the modular personality system is enabled on this unit.
+        /// </summary>
+        public bool HasPersonalityController()
+        {
+            return personalityController != null;
+        }
+
+        /// <summary>
+        /// Check if the modular profile loader is enabled on this unit.
+        /// </summary>
+        public bool HasProfileLoader()
+        {
+            return profileLoader != null;
+        }
+
+        /// <summary>
+        /// Get the personality controller (if available).
+        /// </summary>
+        public UnitPersonalityController GetPersonalityController()
+        {
+            return personalityController;
+        }
+
+        /// <summary>
+        /// Get the profile loader (if available).
+        /// </summary>
+        public UnitAnimatorProfileLoader GetProfileLoader()
+        {
+            return profileLoader;
         }
 
         #endregion
