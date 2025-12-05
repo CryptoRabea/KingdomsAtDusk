@@ -45,6 +45,9 @@ namespace RTS.Units
         private bool isStuck = false;
         private float pathPendingTimer;
 
+        // Speed modification
+        private float speedMultiplier = 1f;
+
         // IsMoving is based on actual velocity and movement intent, not explicit stuck check
         // When unit gets stuck, it physically stops, making velocity = 0 and IsMoving naturally becomes false
         public bool IsMoving => agent != null && (hasMovementIntent || agent.velocity.sqrMagnitude > 0.01f);
@@ -515,6 +518,35 @@ namespace RTS.Units
             }
 
             Debug.Log($"Unit {gameObject.name} stuck state reset");
+        }
+
+        /// <summary>
+        /// Set movement speed multiplier (for combat, abilities, etc.)
+        /// </summary>
+        public void SetSpeedMultiplier(float multiplier)
+        {
+            speedMultiplier = Mathf.Clamp(multiplier, 0f, 2f);
+
+            if (agent != null)
+            {
+                agent.speed = moveSpeed * speedMultiplier;
+            }
+        }
+
+        /// <summary>
+        /// Get current speed multiplier
+        /// </summary>
+        public float GetSpeedMultiplier()
+        {
+            return speedMultiplier;
+        }
+
+        /// <summary>
+        /// Reset speed multiplier to 1.0 (normal speed)
+        /// </summary>
+        public void ResetSpeedMultiplier()
+        {
+            SetSpeedMultiplier(1f);
         }
 
         #endregion

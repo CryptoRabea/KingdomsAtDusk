@@ -41,6 +41,7 @@ namespace RTS.Units.Animation
         private UnitMovement movement;
         private UnitCombat combat;
         private UnitHealth health;
+        private ArcherCombatMode combatMode;
         private Camera mainCamera;
         private Renderer[] renderers;
 
@@ -114,6 +115,7 @@ namespace RTS.Units.Animation
             movement = GetComponent<UnitMovement>();
             combat = GetComponent<UnitCombat>();
             health = GetComponent<UnitHealth>();
+            combatMode = GetComponent<ArcherCombatMode>();
             mainCamera = Camera.main;
             renderers = GetComponentsInChildren<Renderer>();
 
@@ -238,9 +240,16 @@ namespace RTS.Units.Animation
             bool hasTarget = combat.CurrentTarget != null;
             bool inRange = combat.IsInAttackRange;
 
-            if (!hasTarget || !inRange)
+            // Check combat mode restrictions
+            bool canShoot = true;
+            if (combatMode != null)
             {
-                // Return to idle if no target
+                canShoot = combatMode.CanShootNow;
+            }
+
+            if (!hasTarget || !inRange || !canShoot)
+            {
+                // Return to idle if no target or can't shoot
                 if (combatState != ArcherCombatState.Idle)
                 {
                     ResetCombatState();
