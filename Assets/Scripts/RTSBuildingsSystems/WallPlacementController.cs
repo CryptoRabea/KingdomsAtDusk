@@ -148,17 +148,21 @@ namespace RTS.Buildings
                 if (col is TerrainCollider)
                     continue;
 
+                // IMPORTANT: Check for walls FIRST before checking for buildings
+                // Walls have both WallConnectionSystem AND Building components
+                // We want to skip walls (they have their own validation) and only block non-wall buildings
+                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
+                if (wallSystem != null)
+                {
+                    continue; // Skip walls - they're validated by WouldOverlapExistingWall()
+                }
+
+                // Now check for non-wall buildings
                 Building building = col.GetComponentInParent<Building>();
                 if (building != null)
                 {
                     Debug.Log($"Wall would overlap building: {col.gameObject.name}");
                     return true;
-                }
-
-                WallConnectionSystem wallSystem = col.GetComponentInParent<WallConnectionSystem>();
-                if (wallSystem != null)
-                {
-                    continue;
                 }
             }
 
