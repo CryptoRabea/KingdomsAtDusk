@@ -60,7 +60,7 @@ namespace RTSGame.Settings
         TAA
     }
 
-    public enum ShadowQuality
+    public enum ShadowResolutionQuality
     {
         Off,
         Low,

@@ -51,7 +51,7 @@ namespace RTSGame.Settings
         public AntiAliasingMode AntiAliasing = AntiAliasingMode.TAA;
         public float RenderScale = 1.0f;
         public float ShadowDistance = 100f;
-        public ShadowQuality ShadowResolution = ShadowQuality.High;
+        public ShadowResolutionQuality ShadowResolution = ShadowResolutionQuality.High;
         public TextureQuality TextureQuality = TextureQuality.Full;
         public AnisotropicMode AnisotropicFiltering = AnisotropicMode.PerTexture;
         public TerrainQuality TerrainQuality = TerrainQuality.High;

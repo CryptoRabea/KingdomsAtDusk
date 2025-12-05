@@ -169,10 +169,11 @@ namespace RTSGame.Managers
             QualitySettings.shadowDistance = Graphics.ShadowDistance;
             QualitySettings.shadowResolution = Graphics.ShadowResolution switch
             {
-                ShadowQuality.Low => UnityEngine.ShadowResolution.Low,
-                ShadowQuality.Medium => UnityEngine.ShadowResolution.Medium,
-                ShadowQuality.High => UnityEngine.ShadowResolution.High,
-                ShadowQuality.VeryHigh => UnityEngine.ShadowResolution.VeryHigh,
+                ShadowResolutionQuality.Off => UnityEngine.ShadowResolution.Low,
+                ShadowResolutionQuality.Low => UnityEngine.ShadowResolution.Low,
+                ShadowResolutionQuality.Medium => UnityEngine.ShadowResolution.Medium,
+                ShadowResolutionQuality.High => UnityEngine.ShadowResolution.High,
+                ShadowResolutionQuality.VeryHigh => UnityEngine.ShadowResolution.VeryHigh,
                 _ => UnityEngine.ShadowResolution.Medium
             };
 
@@ -226,7 +227,7 @@ namespace RTSGame.Managers
             Debug.Log($"[RTSSettingsManager] RTS Graphics: Outlines={Graphics.UnitHighlightOutlines}, Health Bars={Graphics.HealthBars}");
 
             // Example: Update floating number service if it exists
-            var floatingNumberService = ServiceLocator.Instance?.Get<IFloatingNumberService>();
+            var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
             if (floatingNumberService != null)
             {
                 floatingNumberService.Settings.enableHPBars = Graphics.HealthBars;
@@ -243,7 +244,7 @@ namespace RTSGame.Managers
             {
                 case QualityPreset.Low:
                     Graphics.ShadowDistance = 50f;
-                    Graphics.ShadowResolution = ShadowQuality.Low;
+                    Graphics.ShadowResolution = ShadowResolutionQuality.Low;
                     Graphics.TextureQuality = TextureQuality.Half;
                     Graphics.AntiAliasing = AntiAliasingMode.Off;
                     Graphics.RenderScale = 0.75f;
@@ -256,7 +257,7 @@ namespace RTSGame.Managers
 
                 case QualityPreset.Medium:
                     Graphics.ShadowDistance = 75f;
-                    Graphics.ShadowResolution = ShadowQuality.Medium;
+                    Graphics.ShadowResolution = ShadowResolutionQuality.Medium;
                     Graphics.TextureQuality = TextureQuality.Half;
                     Graphics.AntiAliasing = AntiAliasingMode.FXAA;
                     Graphics.RenderScale = 1.0f;
@@ -269,7 +270,7 @@ namespace RTSGame.Managers
 
                 case QualityPreset.High:
                     Graphics.ShadowDistance = 100f;
-                    Graphics.ShadowResolution = ShadowQuality.High;
+                    Graphics.ShadowResolution = ShadowResolutionQuality.High;
                     Graphics.TextureQuality = TextureQuality.Full;
                     Graphics.AntiAliasing = AntiAliasingMode.TAA;
                     Graphics.RenderScale = 1.0f;
@@ -282,7 +283,7 @@ namespace RTSGame.Managers
 
                 case QualityPreset.Ultra:
                     Graphics.ShadowDistance = 150f;
-                    Graphics.ShadowResolution = ShadowQuality.VeryHigh;
+                    Graphics.ShadowResolution = ShadowResolutionQuality.VeryHigh;
                     Graphics.TextureQuality = TextureQuality.Full;
                     Graphics.AntiAliasing = AntiAliasingMode.TAA;
                     Graphics.RenderScale = 1.2f;
