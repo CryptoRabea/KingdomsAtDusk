@@ -988,9 +988,16 @@ namespace RTS.Buildings
                     buildingComponent.SetData(currentWallData);
                 }
 
+                // Add NavMesh obstacle (legacy support)
                 if (newWall.GetComponent<WallNavMeshObstacle>() == null)
                 {
                     newWall.AddComponent<WallNavMeshObstacle>();
+                }
+
+                // Add FlowField obstacle (new system)
+                if (newWall.GetComponent<FlowField.Obstacles.WallFlowFieldObstacle>() == null)
+                {
+                    newWall.AddComponent<FlowField.Obstacles.WallFlowFieldObstacle>();
                 }
 
                 // Add BuildingSelectable component if missing (for wall selection)
