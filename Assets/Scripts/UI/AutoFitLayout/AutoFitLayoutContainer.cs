@@ -5,15 +5,16 @@ using System.Collections.Generic;
 namespace RTS.UI.AutoFit
 {
     /// <summary>
-    /// Universal auto-fit layout container that ensures contents never overflow.
-    /// Works with any layout type (Grid, Horizontal, Vertical) and any shape (Square, Rectangle, Circle, Triangle).
-    /// Can be reused across any project.
+    /// Universal auto-fit layout container that ensures contents NEVER overflow the container bounds.
+    /// Hides overflow items instead of showing them outside the yellow frame.
     ///
-    /// Usage:
-    /// 1. Add this component to a container GameObject
-    /// 2. Set the container shape and max size
-    /// 3. Put your UI elements inside
-    /// 4. The tool automatically scales them to fit!
+    /// Key Features:
+    /// - Respects min/max cell sizes (never goes smaller than min or larger than max)
+    /// - Respects min/max container sizes
+    /// - Hides overflow items that don't fit
+    /// - Configurable rows/columns (0 = unlimited)
+    /// - Directional flow (left-to-right, right-to-left, top-to-bottom, bottom-to-top)
+    /// - NEVER shows content outside container bounds
     /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(RectTransform))]
@@ -28,31 +29,68 @@ namespace RTS.UI.AutoFit
             Custom
         }
 
-        [Header("Container Settings")]
+        public enum FlowDirection
+        {
+            LeftToRight,
+            RightToLeft,
+            TopToBottom,
+            BottomToTop
+        }
+
+        public enum LayoutPreference
+        {
+            PreferHorizontal,  // Fill rows first
+            PreferVertical     // Fill columns first
+        }
+
+        [Header("Container Bounds")]
+        [Tooltip("Shape of the container")]
         [SerializeField] private ContainerShape shape = ContainerShape.Square;
 
-        [Tooltip("Maximum width of the container in pixels")]
-        [SerializeField] private float maxWidth = 300f;
+        [Tooltip("Minimum container width (0 = no limit)")]
+        [SerializeField] private float minContainerWidth = 100f;
 
-        [Tooltip("Maximum height of the container in pixels")]
-        [SerializeField] private float maxHeight = 300f;
+        [Tooltip("Maximum container width")]
+        [SerializeField] private float maxContainerWidth = 500f;
 
-        [Tooltip("Padding inside the container")]
+        [Tooltip("Minimum container height (0 = no limit)")]
+        [SerializeField] private float minContainerHeight = 100f;
+
+        [Tooltip("Maximum container height")]
+        [SerializeField] private float maxContainerHeight = 500f;
+
+        [Tooltip("Inner padding")]
         [SerializeField] private float padding = 10f;
 
-        [Header("Content Scaling")]
-        [SerializeField] private float minContentSize = 16f;
-        [SerializeField] private float maxContentSize = 128f;
+        [Header("Cell Size Constraints")]
+        [Tooltip("Minimum size for each cell/icon")]
+        [SerializeField] private float minCellSize = 32f;
 
-        [Tooltip("Auto-detect layout component (Grid, Horizontal, Vertical)")]
-        [SerializeField] private bool autoDetectLayout = true;
+        [Tooltip("Maximum size for each cell/icon")]
+        [SerializeField] private float maxCellSize = 128f;
 
-        [Header("Shape Specific Settings")]
-        [Tooltip("For Circle: How much to reduce usable area (0-1)")]
-        [SerializeField, Range(0f, 1f)] private float circleInscribeFactor = 0.707f; // √2/2 for inscribed square
+        [Tooltip("Spacing between cells")]
+        [SerializeField] private float cellSpacing = 8f;
 
-        [Tooltip("For Triangle: Aspect ratio adjustment")]
-        [SerializeField, Range(0.5f, 2f)] private float triangleAspectRatio = 0.866f; // Equilateral triangle
+        [Header("Grid Configuration")]
+        [Tooltip("Number of columns (0 = unlimited, auto-calculate)")]
+        [SerializeField] private int fixedColumns = 0;
+
+        [Tooltip("Number of rows (0 = unlimited, auto-calculate)")]
+        [SerializeField] private int fixedRows = 0;
+
+        [Tooltip("Prefer horizontal or vertical layout")]
+        [SerializeField] private LayoutPreference layoutPreference = LayoutPreference.PreferHorizontal;
+
+        [Tooltip("Direction items flow")]
+        [SerializeField] private FlowDirection flowDirection = FlowDirection.LeftToRight;
+
+        [Header("Overflow Handling")]
+        [Tooltip("Hide items that don't fit instead of showing outside bounds")]
+        [SerializeField] private bool hideOverflow = true;
+
+        [Tooltip("Show warning when items are hidden")]
+        [SerializeField] private bool warnOnOverflow = true;
 
         [Header("Advanced")]
         [SerializeField] private bool updateInEditMode = true;
@@ -60,14 +98,14 @@ namespace RTS.UI.AutoFit
 
         private RectTransform rectTransform;
         private GridLayoutGroup gridLayout;
-        private HorizontalLayoutGroup horizontalLayout;
-        private VerticalLayoutGroup verticalLayout;
-        private LayoutElement layoutElement;
+        private List<RectTransform> children = new List<RectTransform>();
+        private int visibleChildCount = 0;
+        private int hiddenChildCount = 0;
 
         private void Awake()
         {
             rectTransform = GetComponent<RectTransform>();
-            CacheLayoutComponents();
+            gridLayout = GetComponent<GridLayoutGroup>();
         }
 
         private void Start()
@@ -93,13 +131,13 @@ namespace RTS.UI.AutoFit
             UpdateLayout();
         }
 
-        private void OnRectTransformDimensionsChange()
+        private void OnTransformChildrenChanged()
         {
             UpdateLayout();
         }
 
         /// <summary>
-        /// Main method that updates the container and content to fit within the shape.
+        /// Main layout update method - NEVER allows content outside container bounds.
         /// </summary>
         public void UpdateLayout()
         {
@@ -108,92 +146,75 @@ namespace RTS.UI.AutoFit
                 rectTransform = GetComponent<RectTransform>();
             }
 
-            if (autoDetectLayout)
+            // Get all children
+            CacheChildren();
+
+            if (children.Count == 0)
             {
-                CacheLayoutComponents();
+                return;
             }
 
             // Calculate container size based on shape
             Vector2 containerSize = CalculateContainerSize();
-
-            // Apply container size
             rectTransform.sizeDelta = containerSize;
 
-            // Calculate and apply content sizing
-            UpdateContentSizing(containerSize);
+            // Calculate usable area (accounting for padding and shape)
+            Vector2 usableArea = CalculateUsableArea(containerSize);
+
+            // Calculate grid dimensions and cell size
+            CalculateGridLayout(usableArea, children.Count, out int columns, out int rows, out float cellSize);
+
+            // Apply layout and hide overflow
+            ApplyLayoutAndHideOverflow(columns, rows, cellSize, usableArea);
 
             if (debugMode)
             {
-                Debug.Log($"[AutoFitLayout] Shape: {shape}, Container: {containerSize}, Content updated");
+                Debug.Log($"[AutoFitLayout] Container: {containerSize}, Grid: {columns}x{rows}, Cell: {cellSize}px, Visible: {visibleChildCount}/{children.Count}");
+            }
+
+            if (warnOnOverflow && hiddenChildCount > 0)
+            {
+                Debug.LogWarning($"[AutoFitLayout] {hiddenChildCount} items hidden due to space constraints. Increase container size or decrease min cell size.");
             }
         }
 
         /// <summary>
-        /// Calculates the optimal container size based on the selected shape.
+        /// Calculates the container size based on shape constraints.
         /// </summary>
         private Vector2 CalculateContainerSize()
         {
+            float width = maxContainerWidth;
+            float height = maxContainerHeight;
+
             switch (shape)
             {
                 case ContainerShape.Square:
-                    float squareSize = Mathf.Min(maxWidth, maxHeight);
+                    float squareSize = Mathf.Min(maxContainerWidth, maxContainerHeight);
+                    squareSize = Mathf.Max(squareSize, Mathf.Max(minContainerWidth, minContainerHeight));
                     return new Vector2(squareSize, squareSize);
 
                 case ContainerShape.Rectangle:
-                    return new Vector2(maxWidth, maxHeight);
+                    width = Mathf.Clamp(width, minContainerWidth, maxContainerWidth);
+                    height = Mathf.Clamp(height, minContainerHeight, maxContainerHeight);
+                    return new Vector2(width, height);
 
                 case ContainerShape.Circle:
-                    float circleSize = Mathf.Min(maxWidth, maxHeight);
+                    float circleSize = Mathf.Min(maxContainerWidth, maxContainerHeight);
+                    circleSize = Mathf.Max(circleSize, Mathf.Max(minContainerWidth, minContainerHeight));
                     return new Vector2(circleSize, circleSize);
 
                 case ContainerShape.Triangle:
-                    // Equilateral triangle in a bounding box
-                    float triWidth = Mathf.Min(maxWidth, maxHeight);
-                    float triHeight = triWidth * triangleAspectRatio;
+                    float triWidth = Mathf.Clamp(maxContainerWidth, minContainerWidth, maxContainerWidth);
+                    float triHeight = Mathf.Clamp(maxContainerHeight, minContainerHeight, maxContainerHeight);
                     return new Vector2(triWidth, triHeight);
 
-                case ContainerShape.Custom:
-                    return new Vector2(maxWidth, maxHeight);
-
                 default:
-                    return new Vector2(maxWidth, maxHeight);
+                    return new Vector2(width, height);
             }
         }
 
         /// <summary>
-        /// Updates content sizing based on container size and layout type.
-        /// </summary>
-        private void UpdateContentSizing(Vector2 containerSize)
-        {
-            // Calculate usable area based on shape
-            Vector2 usableArea = CalculateUsableArea(containerSize);
-
-            // Count children
-            int childCount = CountActiveChildren();
-            if (childCount == 0) return;
-
-            // Update based on layout type
-            if (gridLayout != null)
-            {
-                UpdateGridLayout(usableArea, childCount);
-            }
-            else if (horizontalLayout != null)
-            {
-                UpdateHorizontalLayout(usableArea, childCount);
-            }
-            else if (verticalLayout != null)
-            {
-                UpdateVerticalLayout(usableArea, childCount);
-            }
-            else
-            {
-                // No layout group - try to fit children manually
-                UpdateManualLayout(usableArea, childCount);
-            }
-        }
-
-        /// <summary>
-        /// Calculates the usable area within the container based on shape.
+        /// Calculates usable area within the container based on shape.
         /// </summary>
         private Vector2 CalculateUsableArea(Vector2 containerSize)
         {
@@ -202,13 +223,13 @@ namespace RTS.UI.AutoFit
             switch (shape)
             {
                 case ContainerShape.Circle:
-                    // Inscribed square in circle
-                    float inscribedSize = usableSize.x * circleInscribeFactor;
+                    // Inscribed square in circle (0.707 = √2/2)
+                    float inscribedSize = usableSize.x * 0.707f;
                     return new Vector2(inscribedSize, inscribedSize);
 
                 case ContainerShape.Triangle:
                     // Reduce usable area for triangle shape
-                    return usableSize * 0.8f; // 80% of bounding box
+                    return usableSize * 0.8f;
 
                 default:
                     return usableSize;
@@ -216,165 +237,201 @@ namespace RTS.UI.AutoFit
         }
 
         /// <summary>
-        /// Updates GridLayoutGroup to fit within the container.
+        /// Calculates optimal grid dimensions and cell size within constraints.
+        /// NEVER goes below minCellSize - hides overflow instead.
         /// </summary>
-        private void UpdateGridLayout(Vector2 usableArea, int childCount)
+        private void CalculateGridLayout(Vector2 usableArea, int itemCount, out int columns, out int rows, out float cellSize)
         {
-            if (gridLayout == null) return;
+            // Start with fixed columns/rows if specified
+            columns = fixedColumns > 0 ? fixedColumns : 0;
+            rows = fixedRows > 0 ? fixedRows : 0;
 
-            // Calculate optimal grid dimensions
-            int columns = Mathf.CeilToInt(Mathf.Sqrt(childCount));
-            int rows = Mathf.CeilToInt((float)childCount / columns);
-
-            // Calculate cell size to fit within usable area
-            float cellWidth = (usableArea.x - (gridLayout.spacing.x * (columns - 1))) / columns;
-            float cellHeight = (usableArea.y - (gridLayout.spacing.y * (rows - 1))) / rows;
-
-            // For square cells, use the smaller dimension
-            float cellSize = Mathf.Min(cellWidth, cellHeight);
-            cellSize = Mathf.Clamp(cellSize, minContentSize, maxContentSize);
-
-            // Update grid layout
-            gridLayout.cellSize = new Vector2(cellSize, cellSize);
-
-            if (gridLayout.constraint == GridLayoutGroup.Constraint.FixedColumnCount)
+            // If both are undefined, calculate based on preference
+            if (columns == 0 && rows == 0)
             {
-                gridLayout.constraintCount = columns;
-            }
-            else if (gridLayout.constraint == GridLayoutGroup.Constraint.FixedRowCount)
-            {
-                gridLayout.constraintCount = rows;
-            }
-
-            if (debugMode)
-            {
-                Debug.Log($"[AutoFitLayout] Grid: {columns}x{rows}, Cell: {cellSize}px");
-            }
-        }
-
-        /// <summary>
-        /// Updates HorizontalLayoutGroup to fit within the container.
-        /// </summary>
-        private void UpdateHorizontalLayout(Vector2 usableArea, int childCount)
-        {
-            if (horizontalLayout == null) return;
-
-            // Calculate item width
-            float totalSpacing = horizontalLayout.spacing * (childCount - 1);
-            float itemWidth = (usableArea.x - totalSpacing) / childCount;
-            itemWidth = Mathf.Clamp(itemWidth, minContentSize, maxContentSize);
-
-            // Apply to children with LayoutElement
-            foreach (RectTransform child in transform)
-            {
-                if (!child.gameObject.activeSelf) continue;
-
-                LayoutElement element = child.GetComponent<LayoutElement>();
-                if (element == null)
+                if (layoutPreference == LayoutPreference.PreferHorizontal)
                 {
-                    element = child.gameObject.AddComponent<LayoutElement>();
+                    // Calculate columns first, then rows
+                    columns = CalculateOptimalColumns(usableArea.x, itemCount);
+                    rows = Mathf.CeilToInt((float)itemCount / columns);
                 }
-
-                element.preferredWidth = itemWidth;
-                element.preferredHeight = Mathf.Min(usableArea.y, maxContentSize);
-            }
-
-            if (debugMode)
-            {
-                Debug.Log($"[AutoFitLayout] Horizontal: {childCount} items, Width: {itemWidth}px");
-            }
-        }
-
-        /// <summary>
-        /// Updates VerticalLayoutGroup to fit within the container.
-        /// </summary>
-        private void UpdateVerticalLayout(Vector2 usableArea, int childCount)
-        {
-            if (verticalLayout == null) return;
-
-            // Calculate item height
-            float totalSpacing = verticalLayout.spacing * (childCount - 1);
-            float itemHeight = (usableArea.y - totalSpacing) / childCount;
-            itemHeight = Mathf.Clamp(itemHeight, minContentSize, maxContentSize);
-
-            // Apply to children with LayoutElement
-            foreach (RectTransform child in transform)
-            {
-                if (!child.gameObject.activeSelf) continue;
-
-                LayoutElement element = child.GetComponent<LayoutElement>();
-                if (element == null)
+                else
                 {
-                    element = child.gameObject.AddComponent<LayoutElement>();
-                }
-
-                element.preferredHeight = itemHeight;
-                element.preferredWidth = Mathf.Min(usableArea.x, maxContentSize);
-            }
-
-            if (debugMode)
-            {
-                Debug.Log($"[AutoFitLayout] Vertical: {childCount} items, Height: {itemHeight}px");
-            }
-        }
-
-        /// <summary>
-        /// Manual layout when no layout group is present.
-        /// </summary>
-        private void UpdateManualLayout(Vector2 usableArea, int childCount)
-        {
-            // Simple grid-like arrangement
-            int columns = Mathf.CeilToInt(Mathf.Sqrt(childCount));
-            int rows = Mathf.CeilToInt((float)childCount / columns);
-
-            float cellWidth = usableArea.x / columns;
-            float cellHeight = usableArea.y / rows;
-            float cellSize = Mathf.Min(cellWidth, cellHeight);
-            cellSize = Mathf.Clamp(cellSize, minContentSize, maxContentSize);
-
-            int index = 0;
-            foreach (RectTransform child in transform)
-            {
-                if (!child.gameObject.activeSelf) continue;
-
-                int col = index % columns;
-                int row = index / columns;
-
-                child.sizeDelta = new Vector2(cellSize, cellSize);
-                child.anchoredPosition = new Vector2(
-                    padding + col * cellWidth + cellSize * 0.5f,
-                    -(padding + row * cellHeight + cellSize * 0.5f)
-                );
-
-                index++;
-            }
-        }
-
-        /// <summary>
-        /// Caches layout components for performance.
-        /// </summary>
-        private void CacheLayoutComponents()
-        {
-            gridLayout = GetComponent<GridLayoutGroup>();
-            horizontalLayout = GetComponent<HorizontalLayoutGroup>();
-            verticalLayout = GetComponent<VerticalLayoutGroup>();
-            layoutElement = GetComponent<LayoutElement>();
-        }
-
-        /// <summary>
-        /// Counts active children in the container.
-        /// </summary>
-        private int CountActiveChildren()
-        {
-            int count = 0;
-            foreach (RectTransform child in transform)
-            {
-                if (child.gameObject.activeSelf)
-                {
-                    count++;
+                    // Calculate rows first, then columns
+                    rows = CalculateOptimalRows(usableArea.y, itemCount);
+                    columns = Mathf.CeilToInt((float)itemCount / rows);
                 }
             }
-            return count;
+            else if (columns == 0)
+            {
+                // Rows fixed, calculate columns
+                columns = Mathf.CeilToInt((float)itemCount / rows);
+            }
+            else if (rows == 0)
+            {
+                // Columns fixed, calculate rows
+                rows = Mathf.CeilToInt((float)itemCount / columns);
+            }
+
+            // Calculate cell size that fits within usable area
+            float maxCellWidth = (usableArea.x - (cellSpacing * (columns - 1))) / columns;
+            float maxCellHeight = (usableArea.y - (cellSpacing * (rows - 1))) / rows;
+
+            // Use the smaller dimension for square cells
+            cellSize = Mathf.Min(maxCellWidth, maxCellHeight);
+
+            // CRITICAL: Clamp to min/max cell size - NEVER go below min
+            cellSize = Mathf.Clamp(cellSize, minCellSize, maxCellSize);
+
+            // If cell size is at minimum but items still don't fit, we'll hide overflow
+        }
+
+        /// <summary>
+        /// Calculates optimal number of columns based on available width.
+        /// </summary>
+        private int CalculateOptimalColumns(float availableWidth, int itemCount)
+        {
+            // Try to fit as many columns as possible with max cell size
+            int maxColumns = Mathf.FloorToInt((availableWidth + cellSpacing) / (maxCellSize + cellSpacing));
+            maxColumns = Mathf.Max(1, maxColumns);
+
+            // Don't create more columns than items
+            return Mathf.Min(maxColumns, itemCount);
+        }
+
+        /// <summary>
+        /// Calculates optimal number of rows based on available height.
+        /// </summary>
+        private int CalculateOptimalRows(float availableHeight, int itemCount)
+        {
+            // Try to fit as many rows as possible with max cell size
+            int maxRows = Mathf.FloorToInt((availableHeight + cellSpacing) / (maxCellSize + cellSpacing));
+            maxRows = Mathf.Max(1, maxRows);
+
+            // Don't create more rows than items
+            return Mathf.Min(maxRows, itemCount);
+        }
+
+        /// <summary>
+        /// Applies the calculated layout and hides items that don't fit.
+        /// NEVER shows content outside the container bounds.
+        /// </summary>
+        private void ApplyLayoutAndHideOverflow(int columns, int rows, float cellSize, Vector2 usableArea)
+        {
+            visibleChildCount = 0;
+            hiddenChildCount = 0;
+
+            // Maximum items that can fit
+            int maxVisibleItems = columns * rows;
+
+            // Update GridLayoutGroup if present
+            if (gridLayout != null)
+            {
+                gridLayout.cellSize = new Vector2(cellSize, cellSize);
+                gridLayout.spacing = new Vector2(cellSpacing, cellSpacing);
+                gridLayout.padding = new RectOffset((int)padding, (int)padding, (int)padding, (int)padding);
+
+                // Set constraint based on layout preference
+                if (fixedColumns > 0 || layoutPreference == LayoutPreference.PreferHorizontal)
+                {
+                    gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+                    gridLayout.constraintCount = columns;
+                }
+                else
+                {
+                    gridLayout.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+                    gridLayout.constraintCount = rows;
+                }
+
+                // Set start corner based on flow direction
+                gridLayout.startCorner = GetStartCorner(flowDirection);
+                gridLayout.childAlignment = GetChildAlignment(flowDirection);
+            }
+
+            // Show/hide children based on what fits
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (hideOverflow && i >= maxVisibleItems)
+                {
+                    // Hide overflow items
+                    children[i].gameObject.SetActive(false);
+                    hiddenChildCount++;
+                }
+                else
+                {
+                    // Show items that fit
+                    children[i].gameObject.SetActive(true);
+                    visibleChildCount++;
+
+                    // Ensure child has proper size
+                    LayoutElement layoutElement = children[i].GetComponent<LayoutElement>();
+                    if (layoutElement == null && gridLayout == null)
+                    {
+                        layoutElement = children[i].gameObject.AddComponent<LayoutElement>();
+                    }
+
+                    if (layoutElement != null)
+                    {
+                        layoutElement.preferredWidth = cellSize;
+                        layoutElement.preferredHeight = cellSize;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets GridLayoutGroup start corner based on flow direction.
+        /// </summary>
+        private GridLayoutGroup.Corner GetStartCorner(FlowDirection direction)
+        {
+            switch (direction)
+            {
+                case FlowDirection.LeftToRight:
+                    return GridLayoutGroup.Corner.UpperLeft;
+                case FlowDirection.RightToLeft:
+                    return GridLayoutGroup.Corner.UpperRight;
+                case FlowDirection.TopToBottom:
+                    return GridLayoutGroup.Corner.UpperLeft;
+                case FlowDirection.BottomToTop:
+                    return GridLayoutGroup.Corner.LowerLeft;
+                default:
+                    return GridLayoutGroup.Corner.UpperLeft;
+            }
+        }
+
+        /// <summary>
+        /// Gets child alignment based on flow direction.
+        /// </summary>
+        private TextAnchor GetChildAlignment(FlowDirection direction)
+        {
+            switch (direction)
+            {
+                case FlowDirection.LeftToRight:
+                    return TextAnchor.UpperLeft;
+                case FlowDirection.RightToLeft:
+                    return TextAnchor.UpperRight;
+                case FlowDirection.TopToBottom:
+                    return TextAnchor.UpperLeft;
+                case FlowDirection.BottomToTop:
+                    return TextAnchor.LowerLeft;
+                default:
+                    return TextAnchor.MiddleCenter;
+            }
+        }
+
+        /// <summary>
+        /// Caches all children for processing.
+        /// </summary>
+        private void CacheChildren()
+        {
+            children.Clear();
+            foreach (RectTransform child in transform)
+            {
+                if (child != null)
+                {
+                    children.Add(child);
+                }
+            }
         }
 
         /// <summary>
@@ -387,7 +444,7 @@ namespace RTS.UI.AutoFit
         }
 
         /// <summary>
-        /// Sets the container shape programmatically.
+        /// Sets the container shape.
         /// </summary>
         public void SetShape(ContainerShape newShape)
         {
@@ -396,22 +453,51 @@ namespace RTS.UI.AutoFit
         }
 
         /// <summary>
-        /// Sets the maximum size programmatically.
+        /// Sets container size limits.
         /// </summary>
-        public void SetMaxSize(float width, float height)
+        public void SetContainerSizeLimits(float minWidth, float maxWidth, float minHeight, float maxHeight)
         {
-            maxWidth = width;
-            maxHeight = height;
+            minContainerWidth = minWidth;
+            maxContainerWidth = maxWidth;
+            minContainerHeight = minHeight;
+            maxContainerHeight = maxHeight;
             UpdateLayout();
         }
 
         /// <summary>
-        /// Sets the padding programmatically.
+        /// Sets cell size limits.
         /// </summary>
-        public void SetPadding(float newPadding)
+        public void SetCellSizeLimits(float minSize, float maxSize)
         {
-            padding = newPadding;
+            minCellSize = minSize;
+            maxCellSize = maxSize;
             UpdateLayout();
+        }
+
+        /// <summary>
+        /// Sets fixed grid dimensions (0 = auto).
+        /// </summary>
+        public void SetGridDimensions(int cols, int rows)
+        {
+            fixedColumns = cols;
+            fixedRows = rows;
+            UpdateLayout();
+        }
+
+        /// <summary>
+        /// Gets the number of currently visible children.
+        /// </summary>
+        public int GetVisibleChildCount()
+        {
+            return visibleChildCount;
+        }
+
+        /// <summary>
+        /// Gets the number of hidden children (overflow).
+        /// </summary>
+        public int GetHiddenChildCount()
+        {
+            return hiddenChildCount;
         }
 
 #if UNITY_EDITOR
@@ -419,11 +505,13 @@ namespace RTS.UI.AutoFit
         {
             if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
 
+            // Draw container bounds in yellow
             Gizmos.color = Color.yellow;
 
             Vector3 center = rectTransform.position;
             Vector3 size = new Vector3(rectTransform.rect.width, rectTransform.rect.height, 0);
 
+            // Draw bounds based on shape
             switch (shape)
             {
                 case ContainerShape.Square:
@@ -439,6 +527,11 @@ namespace RTS.UI.AutoFit
                     DrawTriangleGizmo(center, size);
                     break;
             }
+
+            // Draw usable area in green
+            Gizmos.color = Color.green;
+            Vector2 usableArea = CalculateUsableArea(rectTransform.sizeDelta);
+            Gizmos.DrawWireCube(center, new Vector3(usableArea.x, usableArea.y, 0));
         }
 
         private void DrawCircleGizmo(Vector3 center, float radius)
