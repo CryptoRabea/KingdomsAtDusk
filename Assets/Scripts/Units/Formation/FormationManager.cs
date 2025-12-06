@@ -69,6 +69,57 @@ namespace RTS.Units.Formation
             return positions;
         }
 
+        /// <summary>
+        /// Calculate formation positions from a custom formation.
+        /// </summary>
+        /// <param name="centerPosition">Center point of the formation</param>
+        /// <param name="unitCount">Number of units in the formation</param>
+        /// <param name="customFormation">Custom formation data</param>
+        /// <param name="spacing">Distance multiplier for spacing</param>
+        /// <param name="facingDirection">Direction the formation should face</param>
+        /// <returns>List of positions for each unit</returns>
+        public static List<Vector3> CalculateCustomFormationPositions(
+            Vector3 centerPosition,
+            int unitCount,
+            CustomFormationData customFormation,
+            float spacing = 2f,
+            Vector3? facingDirection = null)
+        {
+            if (customFormation == null || customFormation.positions.Count == 0)
+            {
+                Debug.LogWarning("Custom formation is null or empty, using Box formation as fallback");
+                return CalculateBoxFormation(centerPosition, unitCount, spacing);
+            }
+
+            Vector3 facing = facingDirection ?? Vector3.forward;
+            List<Vector3> positions = customFormation.CalculateWorldPositions(centerPosition, spacing, facing);
+
+            // If we have more units than formation positions, repeat the pattern
+            while (positions.Count < unitCount)
+            {
+                int index = positions.Count % customFormation.positions.Count;
+                FormationPosition formPos = customFormation.positions[index];
+
+                Vector3 right = Vector3.Cross(Vector3.up, facing).normalized;
+                Vector3 forward = facing.normalized;
+
+                // Add slight offset to avoid overlap
+                float offsetMultiplier = 1f + (positions.Count / customFormation.positions.Count) * 0.5f;
+                Vector3 offset = (right * formPos.position.x * spacing * offsetMultiplier) +
+                                (forward * formPos.position.y * spacing * offsetMultiplier);
+                Vector3 worldPos = centerPosition + offset;
+                positions.Add(worldPos);
+            }
+
+            // If we have fewer units than formation positions, trim the list
+            if (positions.Count > unitCount)
+            {
+                positions = positions.GetRange(0, unitCount);
+            }
+
+            return positions;
+        }
+
         #region Formation Calculations
 
         private static List<Vector3> CalculateLineFormation(Vector3 center, int count, float spacing, Vector3? facingDirection)

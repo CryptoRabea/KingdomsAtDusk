@@ -17,12 +17,24 @@ namespace RTS.UI.Minimap
         private int updateIndex = 0;
         private bool isDirty = false;
 
+        // FIX: Cache for camera view bounds to sync with actual camera view
+        private Bounds? cachedCameraBounds = null;
+
         public int MarkerCount => markers.Count;
 
         protected MinimapMarkerManager(MinimapConfig config, RectTransform minimapRect)
         {
             this.config = config;
             this.minimapRect = minimapRect;
+        }
+
+        /// <summary>
+        /// Set the actual camera view bounds for accurate marker positioning.
+        /// Call this when the minimap camera is set up or when bounds change.
+        /// </summary>
+        public void SetCameraViewBounds(Bounds bounds)
+        {
+            cachedCameraBounds = bounds;
         }
 
         /// <summary>
@@ -78,10 +90,31 @@ namespace RTS.UI.Minimap
         /// </summary>
         protected Vector2 WorldToMinimapPosition(Vector3 worldPosition)
         {
+            // FIX: Use camera view bounds if available, otherwise fall back to config bounds
+            float minX, maxX, minZ, maxZ;
+
+            if (cachedCameraBounds.HasValue)
+            {
+                // Use actual camera view bounds for accurate positioning
+                Bounds bounds = cachedCameraBounds.Value;
+                minX = bounds.min.x;
+                maxX = bounds.max.x;
+                minZ = bounds.min.z;
+                maxZ = bounds.max.z;
+            }
+            else
+            {
+                // Fallback to config bounds
+                minX = config.worldMin.x;
+                maxX = config.worldMax.x;
+                minZ = config.worldMin.y;  // worldMin.y represents Z in 2D
+                maxZ = config.worldMax.y;  // worldMax.y represents Z in 2D
+            }
+
             // Convert world position to normalized position (0-1)
             Vector2 normalizedPos = new Vector2(
-                Mathf.InverseLerp(config.worldMin.x, config.worldMax.x, worldPosition.x),
-                Mathf.InverseLerp(config.worldMin.y, config.worldMax.y, worldPosition.z)
+                Mathf.InverseLerp(minX, maxX, worldPosition.x),
+                Mathf.InverseLerp(minZ, maxZ, worldPosition.z)
             );
 
             // Convert to local minimap coordinates

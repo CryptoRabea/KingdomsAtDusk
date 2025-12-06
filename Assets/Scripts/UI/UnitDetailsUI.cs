@@ -14,9 +14,9 @@ namespace RTS.UI
     /// Shows unit stats from UnitConfigSO when a unit is selected.
     ///
     /// MULTI-UNIT SELECTION:
-    /// - This component shows details for the FIRST selected unit
-    /// - Use MultiUnitSelectionUI alongside this to display all selected units as icons with HP bars
-    /// - Both components work together: UnitDetailsUI shows detailed stats, MultiUnitSelectionUI shows the grid of icons
+    /// - When 1 unit selected: Shows detailed stats
+    /// - When 2+ units selected: Shows grid of unit icons with HP bars
+    /// - Formation buttons remain visible in both modes
     /// </summary>
     public class UnitDetailsUI : MonoBehaviour
     {
@@ -30,9 +30,18 @@ namespace RTS.UI
         [SerializeField] private TextMeshProUGUI attackSpeedText;
         [SerializeField] private TextMeshProUGUI attackRangeText;
 
+        [Header("Multi-Unit Selection")]
+        [SerializeField] private GameObject singleUnitStatsContainer;
+        [SerializeField] private GameObject multiUnitSelectionContainer;
+        [SerializeField] private MultiUnitSelectionUI multiUnitSelectionUI;
+
         [Header("Formation")]
         [SerializeField] private TMP_Dropdown formationDropdown;
         [SerializeField] private FormationGroupManager formationGroupManager;
+        [SerializeField] private Button customFormationButton;
+        [SerializeField] private Button createFormationButton;
+        [SerializeField] private FormationSelectorUI formationSelector;
+        [SerializeField] private FormationBuilderUI formationBuilder;
 
         [Header("Health Bar")]
         [SerializeField] private Image healthBarFill;
@@ -42,6 +51,7 @@ namespace RTS.UI
 
         private GameObject currentSelectedUnit;
         private UnitHealth currentUnitHealth;
+        private int currentSelectionCount = 0;
 
         private void OnEnable()
         {
@@ -93,6 +103,17 @@ namespace RTS.UI
 
             // Initialize formation dropdown
             InitializeFormationDropdown();
+
+            // Setup custom formation buttons
+            if (customFormationButton != null)
+            {
+                customFormationButton.onClick.AddListener(OnCustomFormationButtonClicked);
+            }
+
+            if (createFormationButton != null)
+            {
+                createFormationButton.onClick.AddListener(OnCreateFormationButtonClicked);
+            }
         }
 
         private void InitializeFormationDropdown()
@@ -177,10 +198,22 @@ namespace RTS.UI
 
         private void OnSelectionChanged(SelectionChangedEvent evt)
         {
+            currentSelectionCount = evt.SelectionCount;
+
             // Hide details when selection is cleared
             if (evt.SelectionCount == 0)
             {
                 HideUnitDetails();
+            }
+            else if (evt.SelectionCount == 1)
+            {
+                // Show single unit stats
+                ShowSingleUnitMode();
+            }
+            else
+            {
+                // Show multi-unit selection grid
+                ShowMultiUnitMode();
             }
         }
 
@@ -314,10 +347,81 @@ namespace RTS.UI
         {
             currentSelectedUnit = null;
             currentUnitHealth = null;
+            currentSelectionCount = 0;
 
             if (unitDetailsPanel != null)
             {
                 unitDetailsPanel.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Show single unit stats mode (hides multi-unit grid)
+        /// </summary>
+        private void ShowSingleUnitMode()
+        {
+            if (singleUnitStatsContainer != null)
+            {
+                singleUnitStatsContainer.SetActive(true);
+            }
+
+            if (multiUnitSelectionContainer != null)
+            {
+                multiUnitSelectionContainer.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Show multi-unit selection grid mode (hides single unit stats)
+        /// </summary>
+        private void ShowMultiUnitMode()
+        {
+            if (singleUnitStatsContainer != null)
+            {
+                singleUnitStatsContainer.SetActive(false);
+            }
+
+            if (multiUnitSelectionContainer != null)
+            {
+                multiUnitSelectionContainer.SetActive(true);
+            }
+
+            // Force refresh the multi-unit UI
+            if (multiUnitSelectionUI != null)
+            {
+                multiUnitSelectionUI.ForceRefresh();
+            }
+        }
+
+        /// <summary>
+        /// Called when the custom formation button is clicked
+        /// Opens the formation selector to browse and select saved formations
+        /// </summary>
+        private void OnCustomFormationButtonClicked()
+        {
+            if (formationSelector != null)
+            {
+                formationSelector.OpenSelector();
+            }
+            else
+            {
+                Debug.LogWarning("FormationSelectorUI is not assigned in UnitDetailsUI!");
+            }
+        }
+
+        /// <summary>
+        /// Called when the create formation button is clicked
+        /// Opens the formation builder to create a new custom formation
+        /// </summary>
+        private void OnCreateFormationButtonClicked()
+        {
+            if (formationBuilder != null)
+            {
+                formationBuilder.OpenBuilder();
+            }
+            else
+            {
+                Debug.LogWarning("FormationBuilderUI is not assigned in UnitDetailsUI!");
             }
         }
     }

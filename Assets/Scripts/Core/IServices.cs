@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using RTSGame.Settings;
+using AudioSettings = RTSGame.Settings.AudioSettings;
 
 namespace RTS.Core.Services
 {
@@ -311,6 +313,80 @@ namespace RTS.Core.Services
         /// Stop blood dripping for a unit.
         /// </summary>
         void StopBloodDripping(GameObject target);
+    }
+
+    /// <summary>
+    /// Interface for audio management system.
+    /// Manages all audio channels (Master, Music, SFX, UI, Voice) and audio devices.
+    /// </summary>
+    public interface IAudioService
+    {
+        // Volume Control
+        float MasterVolume { get; set; }
+        float MusicVolume { get; set; }
+        float SFXVolume { get; set; }
+        float UIVolume { get; set; }
+        float VoiceVolume { get; set; }
+
+        // Audio Settings
+        float SpatialBlend { get; set; }
+        DynamicRange DynamicRange { get; set; }
+        BattleSFXIntensity BattleSFXIntensity { get; set; }
+        UnitVoiceStyle UnitVoiceStyle { get; set; }
+        bool AlertNotifications { get; set; }
+
+        // Audio Device Management
+        string CurrentAudioDevice { get; }
+        string[] GetAvailableAudioDevices();
+        void SetAudioDevice(string deviceName);
+
+        // Playback Control
+        void PlayMusic(string musicName);
+        void StopMusic();
+        void PlaySFX(string sfxName, Vector3 position = default);
+        void PlayUISFX(string sfxName);
+        void PlayVoice(string voiceName);
+
+        // Utility
+        void ApplySettings(AudioSettings settings);
+        void RefreshAudioSources();
+    }
+
+    /// <summary>
+    /// Interface for game settings management system.
+    /// Manages all game settings including graphics, audio, gameplay, controls, etc.
+    /// </summary>
+    public interface ISettingsService
+    {
+        // Settings Access
+        GameSettings CurrentSettings { get; }
+        GeneralSettings General { get; }
+        GraphicsSettings Graphics { get; }
+        AudioSettings Audio { get; }
+        GameplaySettings Gameplay { get; }
+        ControlSettings Controls { get; }
+        UISettings UI { get; }
+        AccessibilitySettings Accessibility { get; }
+        NetworkSettings Network { get; }
+        SystemSettings System { get; }
+
+        // Settings Management
+        void LoadSettings();
+        void SaveSettings();
+        void ResetToDefaults();
+        void ApplySettings();
+        void ApplyGraphicsSettings();
+        void ApplyAudioSettings();
+        void ApplyGameplaySettings();
+        void ApplyControlSettings();
+        void ApplyUISettings();
+
+        // Quality Presets
+        void ApplyQualityPreset(QualityPreset preset);
+
+        // Events
+        event System.Action OnSettingsChanged;
+        event System.Action<QualityPreset> OnQualityPresetChanged;
     }
 
 }

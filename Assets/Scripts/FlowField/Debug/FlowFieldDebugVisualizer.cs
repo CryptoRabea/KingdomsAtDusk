@@ -102,7 +102,8 @@ namespace FlowField.Debug
                         Gizmos.color = unwalkableColor;
                     }
 
-                    Gizmos.DrawCube(worldPos, Vector3.one * grid.cellSize * 0.8f);
+                    Gizmos.DrawCube(worldPos, 
+                        0.8f * grid.cellSize * Vector3.one);
                 }
             }
         }
@@ -122,7 +123,7 @@ namespace FlowField.Debug
                         float costNormalized = Mathf.Clamp01(cell.bestCost / 100f);
                         Gizmos.color = Color.Lerp(lowCostColor, highCostColor, costNormalized);
 
-                        Gizmos.DrawCube(worldPos, Vector3.one * grid.cellSize * 0.6f);
+                        Gizmos.DrawCube(worldPos, 0.6f * grid.cellSize * Vector3.one);
                     }
                 }
             }
@@ -153,7 +154,8 @@ namespace FlowField.Debug
 
         private void DrawUnitVelocities()
         {
-            FlowFieldFollower[] units = FindObjectsOfType<FlowFieldFollower>();
+            // Use FindObjectsByType instead of deprecated FindObjectsOfType
+            FlowFieldFollower[] units = Object.FindObjectsByType<FlowFieldFollower>(FindObjectsSortMode.None);
 
             foreach (var unit in units)
             {

@@ -590,9 +590,16 @@ namespace RTS.Managers
                 Debug.LogWarning($"Building prefab for {currentBuildingData.buildingName} doesn't have Building component!");
             }
 
+            // Add NavMesh obstacle (legacy support)
             if (newBuilding.GetComponent<BuildingNavMeshObstacle>() == null)
             {
                 newBuilding.AddComponent<BuildingNavMeshObstacle>();
+            }
+
+            // Add FlowField obstacle (new system)
+            if (newBuilding.GetComponent<FlowField.Obstacles.BuildingFlowFieldObstacle>() == null)
+            {
+                newBuilding.AddComponent<FlowField.Obstacles.BuildingFlowFieldObstacle>();
             }
 
             if (isPlacingTower)

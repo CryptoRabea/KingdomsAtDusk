@@ -91,6 +91,14 @@ namespace RTS.UI
 
             // Initialize marker managers
             InitializeMarkerManagers();
+
+            // FIX: Update marker managers with camera view bounds after camera setup
+            if (config.renderWorldMap && miniMapCamera != null)
+            {
+                Bounds cameraBounds = GetCameraViewBounds();
+                buildingMarkerManager?.SetCameraViewBounds(cameraBounds);
+                unitMarkerManager?.SetCameraViewBounds(cameraBounds);
+            }
         }
 
         private void Start()
@@ -295,7 +303,15 @@ namespace RTS.UI
             // Configure camera
             miniMapCamera.targetTexture = miniMapRenderTexture;
             miniMapCamera.orthographic = true;
-            miniMapCamera.orthographicSize = config.WorldSize.y / 2f;
+
+            // FIX: Calculate orthographic size to fit entire world bounds
+            // For a square render texture, ensure both X and Z dimensions fit
+            float worldWidth = config.WorldSize.x;   // X dimension
+            float worldDepth = config.WorldSize.y;   // Z dimension (worldSize.y represents Z in 2D)
+
+            // Use the larger dimension to ensure entire world is visible
+            // This prevents distortion and ensures markers align correctly
+            miniMapCamera.orthographicSize = Mathf.Max(worldWidth, worldDepth) / 2f;
 
             // Position camera above world center
             Vector3 worldCenter = config.WorldCenter;
@@ -308,7 +324,7 @@ namespace RTS.UI
             miniMapCamera.backgroundColor = config.backgroundColor;
             miniMapCamera.depth = -10;
 
-          
+
             // Remove audio listener
             if (miniMapCamera.TryGetComponent<AudioListener>(out var listener))
             {
@@ -368,11 +384,15 @@ namespace RTS.UI
                 return Vector3.zero;
             }
 
-            // Convert to world position
+            // FIX: Account for camera's actual view bounds vs configured world bounds
+            // Get the actual camera view bounds
+            Bounds cameraBounds = GetCameraViewBounds();
+
+            // Convert to world position using camera's actual view
             Vector3 worldPos = new Vector3(
-                Mathf.Lerp(config.worldMin.x, config.worldMax.x, normalizedPos.x),
-                cameraController.transform.position.y,
-                Mathf.Lerp(config.worldMin.y, config.worldMax.y, normalizedPos.y)
+                Mathf.Lerp(cameraBounds.min.x, cameraBounds.max.x, normalizedPos.x),
+                cameraController != null ? cameraController.transform.position.y : 0f,
+                Mathf.Lerp(cameraBounds.min.z, cameraBounds.max.z, normalizedPos.y)
             );
 
             return worldPos;
@@ -383,9 +403,12 @@ namespace RTS.UI
         /// </summary>
         public Vector2 WorldToMinimapScreen(Vector3 worldPosition)
         {
+            // FIX: Use camera's actual view bounds for accurate positioning
+            Bounds cameraBounds = GetCameraViewBounds();
+
             Vector2 normalizedPos = new Vector2(
-                Mathf.InverseLerp(config.worldMin.x, config.worldMax.x, worldPosition.x),
-                Mathf.InverseLerp(config.worldMin.y, config.worldMax.y, worldPosition.z)
+                Mathf.InverseLerp(cameraBounds.min.x, cameraBounds.max.x, worldPosition.x),
+                Mathf.InverseLerp(cameraBounds.min.z, cameraBounds.max.z, worldPosition.z)
             );
 
             Vector2 localPos = new Vector2(
@@ -394,6 +417,38 @@ namespace RTS.UI
             );
 
             return localPos;
+        }
+
+        /// <summary>
+        /// Get the actual world bounds visible by the minimap camera.
+        /// This accounts for orthographic size and aspect ratio.
+        /// </summary>
+        private Bounds GetCameraViewBounds()
+        {
+            if (miniMapCamera == null)
+            {
+                // Fallback to config bounds if camera not set up yet
+                return new Bounds(
+                    config.WorldCenter,
+                    new Vector3(config.WorldSize.x, 0, config.WorldSize.y)
+                );
+            }
+
+            // For orthographic camera looking down (90 degrees on X axis):
+            // - Camera's vertical extent (in world Z) = orthographicSize * 2
+            // - Camera's horizontal extent (in world X) = orthographicSize * aspect * 2
+            // - For square render texture, aspect = 1.0
+
+            float orthoSize = miniMapCamera.orthographicSize;
+            float aspect = 1.0f; // Square render texture
+
+            float viewWidth = orthoSize * aspect * 2f;  // World X extent
+            float viewDepth = orthoSize * 2f;            // World Z extent
+
+            Vector3 center = config.WorldCenter;
+            Vector3 size = new Vector3(viewWidth, 0, viewDepth);
+
+            return new Bounds(center, size);
         }
 
         private void MoveCameraToPosition(Vector3 targetPosition)

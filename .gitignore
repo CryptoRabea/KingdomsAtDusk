@@ -98,6 +98,9 @@ Logs/AssetImportWorker3.log
 /Logs
 /Logs
 *.mp3
+*.shadergraph
+*.dwlt
+
 
 /Assets/Procedural Worlds
 /Packages
