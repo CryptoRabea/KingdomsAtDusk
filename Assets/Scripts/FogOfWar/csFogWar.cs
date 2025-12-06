@@ -750,10 +750,12 @@ namespace FischlWorks_FogWar
         {
             if (levelData.levelDimensionX % 2 == 0)
             {
-                return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
+                // Even dimensions: cells are offset by 0.5 because there's no exact center
+                return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
             }
 
-            return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
+            // Odd dimensions: center cell aligns exactly with midpoint
+            return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
         }
 
 
@@ -771,10 +773,12 @@ namespace FischlWorks_FogWar
         {
             if (levelData.levelDimensionY % 2 == 0)
             {
-                return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
+                // Even dimensions: cells are offset by 0.5 because there's no exact center
+                return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
             }
 
-            return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
+            // Odd dimensions: center cell aligns exactly with midpoint
+            return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
         }
 
 
