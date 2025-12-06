@@ -100,7 +100,7 @@ namespace RTS.Buildings
         public int defence = 0;
 
         [Tooltip("Attack damage dealt to enemies")]
-        public int attackDamage = 0;
+        public float attackDamage = 0f;
 
         [Tooltip("Maximum attack range")]
         public float attackRange = 0f;
