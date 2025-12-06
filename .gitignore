@@ -105,3 +105,8 @@ Logs/AssetImportWorker3.log
 /Assets/Procedural Worlds
 /Packages
 *.psd
+*.glb
+*.mtl
+*.obj
+*.gif
+*.blend
