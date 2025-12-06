@@ -520,4 +520,32 @@ namespace RTS.Core.Events
             Reason = reason;
         }
     }
+
+    // ==================== ANIMAL EVENTS ====================
+
+    public struct AnimalSpawnedEvent
+    {
+        public GameObject Animal;
+        public RTS.Animals.AnimalType AnimalType;
+        public Vector3 Position;
+
+        public AnimalSpawnedEvent(GameObject animal, RTS.Animals.AnimalType animalType, Vector3 position)
+        {
+            Animal = animal;
+            AnimalType = animalType;
+            Position = position;
+        }
+    }
+
+    public struct AnimalDiedEvent
+    {
+        public GameObject Animal;
+        public RTS.Animals.AnimalType AnimalType;
+
+        public AnimalDiedEvent(GameObject animal, RTS.Animals.AnimalType animalType)
+        {
+            Animal = animal;
+            AnimalType = animalType;
+        }
+    }
 }
