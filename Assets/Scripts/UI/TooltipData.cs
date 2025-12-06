@@ -28,7 +28,7 @@ namespace RTS.UI
         public int defence;
 
         public bool showAttackDamage;
-        public int attackDamage;
+        public float attackDamage;
 
         public bool showAttackRange;
         public float attackRange;
