@@ -2,10 +2,13 @@
   "dependencies": {
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.navigation": "2.0.9",
+    "com.unity.animation.rigging": "1.4.0",
+    "com.unity.feature.characters-animation": "1.0.0",
     "com.unity.feature.worldbuilding": "1.0.1",
     "com.unity.ide.visualstudio": "2.0.25",
     "com.unity.inputsystem": "1.16.0",
     "com.unity.multiplayer.center": "1.0.1",
+    "com.unity.postprocessing": "3.5.1",
     "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",

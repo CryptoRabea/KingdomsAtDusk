@@ -8,19 +8,17 @@ namespace RTS.UI
 {
     /// <summary>
     /// Displays multiple selected units as icons with HP bars in a grid layout.
-    /// Similar to RTS games like Warcraft 3 where selected units are shown as portraits.
+    /// Integrates with UnitDetailsUI - replaces stats section when 2+ units selected.
+    /// Formation buttons remain visible.
     /// </summary>
     public class MultiUnitSelectionUI : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private GameObject multiUnitPanel;
         [SerializeField] private Transform unitIconContainer;
         [SerializeField] private GameObject unitIconPrefab;
 
         [Header("Layout Settings")]
         [SerializeField] private int maxIconsToDisplay = 12;
-        [SerializeField] private bool autoHideWhenEmpty = true;
-        [SerializeField] private bool showOnlyWhenMultiple = true;
 
         [Header("Grid Layout (Optional)")]
         [Tooltip("If assigned, will be used to configure grid layout dynamically")]
@@ -47,12 +45,6 @@ namespace RTS.UI
 
         private void Start()
         {
-            // Hide panel initially
-            if (multiUnitPanel != null)
-            {
-                multiUnitPanel.SetActive(false);
-            }
-
             // Validate references
             if (unitIconContainer == null)
             {
@@ -104,6 +96,7 @@ namespace RTS.UI
 
         /// <summary>
         /// Refresh the entire display based on current selection.
+        /// Called by UnitDetailsUI when switching to multi-unit mode.
         /// </summary>
         private void RefreshDisplay()
         {
@@ -113,28 +106,19 @@ namespace RTS.UI
             {
                 Debug.LogWarning("[MultiUnitSelectionUI] UnitSelectionManager not found!");
                 ClearAllIcons();
-                HidePanel();
                 return;
             }
 
             var selectedUnits = selectionManager.SelectedUnits;
 
-            // Check if we should show the panel
-            bool shouldShow = selectedUnits.Count > 0;
-            if (showOnlyWhenMultiple)
-            {
-                shouldShow = selectedUnits.Count > 1;
-            }
-
-            if (!shouldShow)
-            {
-                ClearAllIcons();
-                HidePanel();
-                return;
-            }
-
             // Clear existing icons
             ClearAllIcons();
+
+            // Only show icons if we have units selected
+            if (selectedUnits.Count == 0)
+            {
+                return;
+            }
 
             // Create icons for each selected unit (up to max)
             int iconsToCreate = Mathf.Min(selectedUnits.Count, maxIconsToDisplay);
@@ -146,9 +130,6 @@ namespace RTS.UI
                     CreateIconForUnit(unit.gameObject);
                 }
             }
-
-            // Show the panel
-            ShowPanel();
         }
 
         /// <summary>
@@ -191,12 +172,6 @@ namespace RTS.UI
                     ReturnIconToPool(activeIcons[i].gameObject);
                     activeIcons.RemoveAt(i);
                 }
-            }
-
-            // Hide panel if no icons left
-            if (activeIcons.Count == 0 && autoHideWhenEmpty)
-            {
-                HidePanel();
             }
         }
 
@@ -245,28 +220,6 @@ namespace RTS.UI
             {
                 icon.SetActive(false);
                 icon.transform.SetParent(transform, false);
-            }
-        }
-
-        /// <summary>
-        /// Show the multi-unit panel.
-        /// </summary>
-        private void ShowPanel()
-        {
-            if (multiUnitPanel != null && !multiUnitPanel.activeSelf)
-            {
-                multiUnitPanel.SetActive(true);
-            }
-        }
-
-        /// <summary>
-        /// Hide the multi-unit panel.
-        /// </summary>
-        private void HidePanel()
-        {
-            if (multiUnitPanel != null && multiUnitPanel.activeSelf)
-            {
-                multiUnitPanel.SetActive(false);
             }
         }
 

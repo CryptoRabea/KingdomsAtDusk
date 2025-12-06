@@ -177,9 +177,32 @@ namespace RTS.UI
                 GameObject costItem = Instantiate(costItemPrefab, costsContainer.transform);
                 activeCostItems.Add(costItem);
 
-                // Find icon and text components
+                // Find icon component - try "Icon" child first, then get from root
                 Image iconImage = costItem.transform.Find("Icon")?.GetComponent<Image>();
+                if (iconImage == null)
+                {
+                    iconImage = costItem.GetComponentInChildren<Image>();
+                }
+
+                // Find text component - try multiple common names
                 TextMeshProUGUI costText = costItem.transform.Find("Text")?.GetComponent<TextMeshProUGUI>();
+                if (costText == null)
+                {
+                    costText = costItem.transform.Find("CostText")?.GetComponent<TextMeshProUGUI>();
+                }
+                if (costText == null)
+                {
+                    costText = costItem.transform.Find("Amount")?.GetComponent<TextMeshProUGUI>();
+                }
+                if (costText == null)
+                {
+                    costText = costItem.transform.Find("Value")?.GetComponent<TextMeshProUGUI>();
+                }
+                if (costText == null)
+                {
+                    // Last resort - get any TextMeshProUGUI component in children
+                    costText = costItem.GetComponentInChildren<TextMeshProUGUI>();
+                }
 
                 // Set icon
                 if (iconImage != null)
@@ -191,6 +214,10 @@ namespace RTS.UI
                 if (costText != null)
                 {
                     costText.text = cost.Value.ToString();
+                }
+                else
+                {
+                    Debug.LogWarning($"UniversalTooltip: Could not find TextMeshProUGUI component in cost item prefab for {cost.Key}. Make sure the prefab has a TextMeshProUGUI component.");
                 }
 
                 costItem.SetActive(true);

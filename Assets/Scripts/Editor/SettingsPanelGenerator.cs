@@ -786,7 +786,9 @@ namespace RTSGame.Editor
             label.transform.SetParent(labelRow.transform, false);
 
             TextMeshProUGUI labelTextComp = label.AddComponent<TextMeshProUGUI>();
-            ConfigureTextMeshPro(labelTextComp, labelText, 14, Color.white);
+            labelTextComp.text = labelText;
+            labelTextComp.fontSize = 14;
+            labelTextComp.color = Color.white;
 
             // Value text
             GameObject valueText = new GameObject("ValueText");

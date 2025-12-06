@@ -24,6 +24,9 @@ namespace RTS.UI
         [SerializeField] private TextMeshProUGUI queueCountText;
         [SerializeField] private Image trainingProgressBar;
         [SerializeField] private TextMeshProUGUI currentTrainingText;
+        [SerializeField] private Image currentTrainingUnitIcon;
+        [SerializeField] private Transform queueIconsContainer;
+        [SerializeField] private GameObject queueIconPrefab;
 
         [Header("Unit Training Buttons")]
         [SerializeField] private Transform unitButtonContainer;
@@ -35,6 +38,7 @@ namespace RTS.UI
 
         [Header("References")]
         [SerializeField] private BuildingSelectionManager selectionManager;
+        [SerializeField] private UniversalTooltip unitTooltip;
 
 
 
@@ -42,6 +46,7 @@ namespace RTS.UI
         private Building buildingComponent;
         private UnitTrainingQueue trainingQueue;
         private List<GameObject> spawnedButtons = new List<GameObject>();
+        private List<GameObject> spawnedQueueIcons = new List<GameObject>();
         private bool isSettingRallyPoint = false;
 
         private void OnEnable()
@@ -63,13 +68,13 @@ namespace RTS.UI
 
         private void Start()
         {
-           
+
 
             // Find selection manager if not assigned
             if (selectionManager == null)
             {
                 selectionManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
-              
+
             }
 
             // Set up rally point button click handler
@@ -80,6 +85,12 @@ namespace RTS.UI
                     button.onClick.AddListener(OnSetRallyPointButtonClicked);
                 }
                 setRallyPointButton.SetActive(false); // Hide initially
+            }
+
+            // Validate training progress bar configuration
+            if (trainingProgressBar != null && trainingProgressBar.type != Image.Type.Filled)
+            {
+                Debug.LogWarning("BuildingDetailsUI: trainingProgressBar Image Type should be set to 'Filled' for fillAmount to work properly. Current type: " + trainingProgressBar.type);
             }
 
             HidePanel();
@@ -241,7 +252,7 @@ namespace RTS.UI
 
                 if (buttonObj.TryGetComponent<TrainUnitButton>(out var button))
                 {
-                    button.Initialize(trainableUnit, trainingQueue);
+                    button.Initialize(trainableUnit, trainingQueue, unitTooltip);
                     spawnedButtons.Add(buttonObj);
                 }
             }
@@ -257,7 +268,7 @@ namespace RTS.UI
                 queueCountText.text = $"Queue: {trainingQueue.QueueCount}";
             }
 
-            // Update current training progress
+            // Update current training progress and icon
             if (trainingQueue.CurrentTraining != null)
             {
                 if (currentTrainingText != null)
@@ -268,7 +279,31 @@ namespace RTS.UI
 
                 if (trainingProgressBar != null)
                 {
-                    trainingProgressBar.fillAmount = trainingQueue.CurrentTraining.Progress;
+                    // Get progress and clamp it to [0, 1] range to avoid visual glitches
+                    float progress = trainingQueue.CurrentTraining.Progress;
+
+                    // Handle edge cases (division by zero, NaN, infinity)
+                    if (float.IsNaN(progress) || float.IsInfinity(progress))
+                    {
+                        progress = 0f;
+                    }
+
+                    trainingProgressBar.fillAmount = Mathf.Clamp01(progress);
+                }
+
+                // Update current training unit icon
+                if (currentTrainingUnitIcon != null)
+                {
+                    var unitIcon = trainingQueue.CurrentTraining.unitData?.unitConfig?.unitIcon;
+                    if (unitIcon != null)
+                    {
+                        currentTrainingUnitIcon.sprite = unitIcon;
+                        currentTrainingUnitIcon.enabled = true;
+                    }
+                    else
+                    {
+                        currentTrainingUnitIcon.enabled = false;
+                    }
                 }
             }
             else
@@ -282,7 +317,60 @@ namespace RTS.UI
                 {
                     trainingProgressBar.fillAmount = 0f;
                 }
+
+                // Hide current training icon
+                if (currentTrainingUnitIcon != null)
+                {
+                    currentTrainingUnitIcon.enabled = false;
+                }
             }
+
+            // Update queued unit icons
+            UpdateQueuedUnitIcons();
+        }
+
+        private void UpdateQueuedUnitIcons()
+        {
+            // Clear existing queue icons
+            ClearQueueIcons();
+
+            if (trainingQueue == null || queueIconsContainer == null || queueIconPrefab == null)
+            {
+                return;
+            }
+
+            // Display icons for units in the queue (excluding the current training unit)
+            foreach (var queueEntry in trainingQueue.Queue)
+            {
+                if (queueEntry?.unitData?.unitConfig?.unitIcon == null)
+                {
+                    continue;
+                }
+
+                // Instantiate queue icon
+                GameObject iconObj = Instantiate(queueIconPrefab, queueIconsContainer);
+
+                // Try to get the Image component and set the sprite
+                if (iconObj.TryGetComponent<Image>(out var iconImage))
+                {
+                    iconImage.sprite = queueEntry.unitData.unitConfig.unitIcon;
+                    iconImage.enabled = true;
+                }
+
+                spawnedQueueIcons.Add(iconObj);
+            }
+        }
+
+        private void ClearQueueIcons()
+        {
+            foreach (var icon in spawnedQueueIcons)
+            {
+                if (icon != null)
+                {
+                    Destroy(icon);
+                }
+            }
+            spawnedQueueIcons.Clear();
         }
 
         private void ClearTrainingButtons()
@@ -306,6 +394,7 @@ namespace RTS.UI
             }
 
             ClearTrainingButtons();
+            ClearQueueIcons();
 
             // Reset rally point mode when hiding panel
             if (isSettingRallyPoint && selectionManager != null)
