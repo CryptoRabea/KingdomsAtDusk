@@ -119,7 +119,7 @@ namespace RTSGame.Editor
             text.fontSize = fontSize;
             text.color = color;
             text.alignment = alignment;
-            text.enableWordWrapping = false;
+            text.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
             text.overflowMode = TextOverflowModes.Overflow;
             text.raycastTarget = false; // Optimization - text doesn't need raycasts
         }

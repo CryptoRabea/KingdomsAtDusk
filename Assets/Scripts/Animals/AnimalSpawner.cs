@@ -43,7 +43,7 @@ namespace RTS.Animals
             // Find biome manager if not assigned
             if (biomeManager == null)
             {
-                biomeManager = FindObjectOfType<BiomeManager>();
+                biomeManager = FindFirstObjectByType<BiomeManager>();
             }
 
             Debug.Log("AnimalSpawner initialized");

@@ -285,14 +285,14 @@ namespace FlowField.Editor
             prefabsToUpdate.Clear();
 
             // Find all NavMeshAgents in scene
-            NavMeshAgent[] agents = FindObjectsOfType<NavMeshAgent>(true);
+            NavMeshAgent[] agents = FindObjectsByType<NavMeshAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var agent in agents)
             {
                 unitsWithNavMesh.Add(agent.gameObject);
             }
 
             // Find all NavMeshObstacles in scene
-            NavMeshObstacle[] obstacles = FindObjectsOfType<NavMeshObstacle>(true);
+            NavMeshObstacle[] obstacles = FindObjectsByType<NavMeshObstacle>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var obstacle in obstacles)
             {
                 // Check if it's a building or wall
@@ -313,7 +313,7 @@ namespace FlowField.Editor
             }
 
             // Find all NavMeshSurfaces
-            navMeshSurfaces.AddRange(FindObjectsOfType<NavMeshSurface>(true));
+            navMeshSurfaces.AddRange(FindObjectsByType<NavMeshSurface>(FindObjectsInactive.Include, FindObjectsSortMode.None));
 
             // Find prefabs with NavMesh components
             ScanPrefabs();
@@ -488,7 +488,7 @@ namespace FlowField.Editor
 
         private void EnsureFlowFieldManager()
         {
-            FlowFieldManager existing = FindObjectOfType<FlowFieldManager>();
+            FlowFieldManager existing = FindFirstObjectByType<FlowFieldManager>();
             if (existing != null)
             {
                 UnityEngine.Debug.Log("FlowFieldManager already exists in scene");

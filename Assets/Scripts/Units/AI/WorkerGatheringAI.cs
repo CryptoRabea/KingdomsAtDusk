@@ -342,7 +342,7 @@ namespace KingdomsAtDusk.Units.AI
         /// </summary>
         private ResourceNode FindNearestResourceNode()
         {
-            ResourceNode[] allNodes = FindObjectsOfType<ResourceNode>();
+            ResourceNode[] allNodes = FindObjectsByType<ResourceNode>(FindObjectsSortMode.None);
             ResourceNode nearest = null;
             float nearestDistance = float.MaxValue;
 
@@ -372,7 +372,7 @@ namespace KingdomsAtDusk.Units.AI
         /// </summary>
         private GameObject FindNearestResourceBuilding()
         {
-            var buildings = FindObjectsOfType<Building>();
+            var buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
             GameObject nearest = null;
             float nearestDistance = float.MaxValue;
 

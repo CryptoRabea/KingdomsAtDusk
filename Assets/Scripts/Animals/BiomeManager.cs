@@ -36,7 +36,7 @@ namespace RTS.Animals
             // Find terrain if not assigned
             if (terrain == null)
             {
-                terrain = FindObjectOfType<Terrain>();
+                terrain = FindFirstObjectByType<Terrain>();
             }
 
             Debug.Log($"BiomeManager initialized with {biomeLookup.Count} biomes");

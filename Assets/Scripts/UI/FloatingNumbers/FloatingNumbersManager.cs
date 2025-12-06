@@ -129,7 +129,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
             TextMeshProUGUI textMesh = prefab.AddComponent<TextMeshProUGUI>();
             textMesh.fontSize = settings.FontSize;
             textMesh.alignment = TextAlignmentOptions.Center;
-            textMesh.enableWordWrapping = false;
+            textMesh.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
             textMesh.fontStyle = FontStyles.Bold;
 
             prefab.AddComponent<FloatingNumber>();

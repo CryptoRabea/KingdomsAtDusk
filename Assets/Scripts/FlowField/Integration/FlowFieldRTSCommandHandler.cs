@@ -145,7 +145,7 @@ namespace Assets.Scripts.FlowField.Integration
 
             // Integration with existing selection system
             // Try to find UnitSelectionManager
-            var selectionManager = FindObjectOfType<UnitSelectionManager>();
+            var selectionManager = FindFirstObjectByType<UnitSelectionManager>();
 
             if (selectionManager != null)
             {

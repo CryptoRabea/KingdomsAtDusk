@@ -151,7 +151,10 @@ namespace RTSGame.Managers
                 _ => FullScreenMode.ExclusiveFullScreen
             };
 
-            Screen.SetResolution(Graphics.ResolutionWidth, Graphics.ResolutionHeight, fullscreenMode, Graphics.RefreshRate);
+            RefreshRate refreshRate = new RefreshRate();
+            refreshRate.numerator = (uint)Graphics.RefreshRate;
+            refreshRate.denominator = 1;
+            Screen.SetResolution(Graphics.ResolutionWidth, Graphics.ResolutionHeight, fullscreenMode, refreshRate);
 
             // VSync
             QualitySettings.vSyncCount = Graphics.VSync switch
@@ -388,7 +391,7 @@ namespace RTSGame.Managers
             if (UI == null) return;
 
             // Apply UI scale
-            Canvas[] canvases = FindObjectsOfType<Canvas>();
+            Canvas[] canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
             foreach (var canvas in canvases)
             {
                 if (canvas.TryGetComponent<UnityEngine.UI.CanvasScaler>(out var scaler))

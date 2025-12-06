@@ -94,7 +94,7 @@ namespace RTS.Units.Animation
         /// </summary>
         private void RegisterExistingUnits()
         {
-            var allPersonalityControllers = FindObjectsOfType<UnitPersonalityController>();
+            var allPersonalityControllers = FindObjectsByType<UnitPersonalityController>(FindObjectsSortMode.None);
 
             foreach (var controller in allPersonalityControllers)
             {

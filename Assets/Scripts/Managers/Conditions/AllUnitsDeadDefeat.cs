@@ -72,7 +72,7 @@ namespace RTS.Core.Conditions
         private int CountPlayerUnits()
         {
             // Find all units with UnitHealth component on player layer
-            var allUnits = GameObject.FindObjectsOfType<UnitHealth>();
+            var allUnits = GameObject.FindObjectsByType<UnitHealth>(FindObjectsSortMode.None);
             return allUnits.Count(unit =>
                 unit != null &&
                 !unit.IsDead &&

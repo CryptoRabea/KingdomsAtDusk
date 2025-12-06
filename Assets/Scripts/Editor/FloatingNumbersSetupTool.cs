@@ -153,7 +153,7 @@ namespace RTS.Editor
             }
 
             // Check if FloatingNumbersManager already exists
-            FloatingNumbersManager existingManager = FindObjectOfType<FloatingNumbersManager>();
+            FloatingNumbersManager existingManager = FindFirstObjectByType<FloatingNumbersManager>();
             if (existingManager != null)
             {
                 statusMessage = "FloatingNumbersManager already exists in scene!";
