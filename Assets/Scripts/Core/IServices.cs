@@ -389,4 +389,17 @@ namespace RTS.Core.Services
         event System.Action<QualityPreset> OnQualityPresetChanged;
     }
 
+    /// <summary>
+    /// Interface for animal spawning system.
+    /// Manages wildlife spawning across different biomes.
+    /// </summary>
+    public interface IAnimalSpawnerService
+    {
+        void StartSpawning();
+        void StopSpawning();
+        void SpawnAnimal(RTS.Animals.AnimalConfigSO config, Vector3 position);
+        int GetAnimalCount();
+        int GetAnimalCount(RTS.Animals.AnimalType type);
+    }
+
 }
