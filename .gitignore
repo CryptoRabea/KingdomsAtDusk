@@ -104,3 +104,4 @@ Logs/AssetImportWorker3.log
 
 /Assets/Procedural Worlds
 /Packages
+*.psd
