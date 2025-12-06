@@ -1,0 +1,23 @@
+{
+  "name": "com.rts.autofitlayout",
+  "displayName": "Auto-Fit Layout Container",
+  "version": "1.0.0",
+  "unity": "2020.3",
+  "description": "Universal UI layout constraint system that ensures contents never overflow. Works with any layout type (Grid, Horizontal, Vertical) and any container shape (Square, Rectangle, Circle, Triangle). Perfect for RTS games, inventories, radial menus, and any UI that needs precise layout control.",
+  "keywords": [
+    "ui",
+    "layout",
+    "auto-fit",
+    "container",
+    "grid",
+    "square",
+    "circle",
+    "responsive",
+    "rts"
+  ],
+  "category": "UI",
+  "dependencies": {},
+  "author": {
+    "name": "RTS UI Systems"
+  }
+}
