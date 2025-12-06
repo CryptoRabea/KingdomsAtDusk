@@ -11,28 +11,40 @@ namespace RTS.UI.AutoFit.Editor
     public class AutoFitLayoutContainerEditor : UnityEditor.Editor
     {
         private SerializedProperty shapeProp;
-        private SerializedProperty maxWidthProp;
-        private SerializedProperty maxHeightProp;
+        private SerializedProperty minContainerWidthProp;
+        private SerializedProperty maxContainerWidthProp;
+        private SerializedProperty minContainerHeightProp;
+        private SerializedProperty maxContainerHeightProp;
         private SerializedProperty paddingProp;
-        private SerializedProperty minContentSizeProp;
-        private SerializedProperty maxContentSizeProp;
-        private SerializedProperty autoDetectLayoutProp;
-        private SerializedProperty circleInscribeFactorProp;
-        private SerializedProperty triangleAspectRatioProp;
+        private SerializedProperty minCellSizeProp;
+        private SerializedProperty maxCellSizeProp;
+        private SerializedProperty cellSpacingProp;
+        private SerializedProperty fixedColumnsProp;
+        private SerializedProperty fixedRowsProp;
+        private SerializedProperty layoutPreferenceProp;
+        private SerializedProperty flowDirectionProp;
+        private SerializedProperty hideOverflowProp;
+        private SerializedProperty warnOnOverflowProp;
         private SerializedProperty updateInEditModeProp;
         private SerializedProperty debugModeProp;
 
         private void OnEnable()
         {
             shapeProp = serializedObject.FindProperty("shape");
-            maxWidthProp = serializedObject.FindProperty("maxWidth");
-            maxHeightProp = serializedObject.FindProperty("maxHeight");
+            minContainerWidthProp = serializedObject.FindProperty("minContainerWidth");
+            maxContainerWidthProp = serializedObject.FindProperty("maxContainerWidth");
+            minContainerHeightProp = serializedObject.FindProperty("minContainerHeight");
+            maxContainerHeightProp = serializedObject.FindProperty("maxContainerHeight");
             paddingProp = serializedObject.FindProperty("padding");
-            minContentSizeProp = serializedObject.FindProperty("minContentSize");
-            maxContentSizeProp = serializedObject.FindProperty("maxContentSize");
-            autoDetectLayoutProp = serializedObject.FindProperty("autoDetectLayout");
-            circleInscribeFactorProp = serializedObject.FindProperty("circleInscribeFactor");
-            triangleAspectRatioProp = serializedObject.FindProperty("triangleAspectRatio");
+            minCellSizeProp = serializedObject.FindProperty("minCellSize");
+            maxCellSizeProp = serializedObject.FindProperty("maxCellSize");
+            cellSpacingProp = serializedObject.FindProperty("cellSpacing");
+            fixedColumnsProp = serializedObject.FindProperty("fixedColumns");
+            fixedRowsProp = serializedObject.FindProperty("fixedRows");
+            layoutPreferenceProp = serializedObject.FindProperty("layoutPreference");
+            flowDirectionProp = serializedObject.FindProperty("flowDirection");
+            hideOverflowProp = serializedObject.FindProperty("hideOverflow");
+            warnOnOverflowProp = serializedObject.FindProperty("warnOnOverflow");
             updateInEditModeProp = serializedObject.FindProperty("updateInEditMode");
             debugModeProp = serializedObject.FindProperty("debugMode");
         }
@@ -46,54 +58,60 @@ namespace RTS.UI.AutoFit.Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Auto-Fit Layout Container", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "This component automatically scales container contents to fit within the specified shape. " +
-                "Works with Grid, Horizontal, Vertical layouts, or manual arrangement.",
+                "NEVER shows content outside container bounds. Hides overflow items instead.\n" +
+                "Respects min/max cell sizes and container sizes.",
                 MessageType.Info
             );
 
             EditorGUILayout.Space();
 
-            // Container Settings
-            EditorGUILayout.LabelField("Container Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(shapeProp, new GUIContent("Shape", "Shape of the container"));
+            // Container Bounds
+            EditorGUILayout.LabelField("Container Bounds", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(shapeProp, new GUIContent("Shape"));
 
-            // Show appropriate size fields based on shape
-            AutoFitLayoutContainer.ContainerShape shape = (AutoFitLayoutContainer.ContainerShape)shapeProp.enumValueIndex;
-
-            if (shape == AutoFitLayoutContainer.ContainerShape.Square ||
-                shape == AutoFitLayoutContainer.ContainerShape.Circle)
-            {
-                EditorGUILayout.PropertyField(maxWidthProp, new GUIContent("Max Size", "Maximum size (width = height)"));
-                maxHeightProp.floatValue = maxWidthProp.floatValue;
-            }
-            else
-            {
-                EditorGUILayout.PropertyField(maxWidthProp, new GUIContent("Max Width"));
-                EditorGUILayout.PropertyField(maxHeightProp, new GUIContent("Max Height"));
-            }
-
-            EditorGUILayout.PropertyField(paddingProp, new GUIContent("Padding", "Inner padding"));
+            EditorGUILayout.PropertyField(minContainerWidthProp, new GUIContent("Min Container Width"));
+            EditorGUILayout.PropertyField(maxContainerWidthProp, new GUIContent("Max Container Width"));
+            EditorGUILayout.PropertyField(minContainerHeightProp, new GUIContent("Min Container Height"));
+            EditorGUILayout.PropertyField(maxContainerHeightProp, new GUIContent("Max Container Height"));
+            EditorGUILayout.PropertyField(paddingProp, new GUIContent("Padding"));
 
             EditorGUILayout.Space();
 
-            // Content Scaling
-            EditorGUILayout.LabelField("Content Scaling", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(minContentSizeProp, new GUIContent("Min Content Size", "Minimum size for content elements"));
-            EditorGUILayout.PropertyField(maxContentSizeProp, new GUIContent("Max Content Size", "Maximum size for content elements"));
-            EditorGUILayout.PropertyField(autoDetectLayoutProp, new GUIContent("Auto-Detect Layout", "Automatically detect layout component"));
+            // Cell Size Constraints
+            EditorGUILayout.LabelField("Cell Size Constraints", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(minCellSizeProp, new GUIContent("Min Cell Size", "NEVER goes smaller than this"));
+            EditorGUILayout.PropertyField(maxCellSizeProp, new GUIContent("Max Cell Size", "NEVER goes larger than this"));
+            EditorGUILayout.PropertyField(cellSpacingProp, new GUIContent("Cell Spacing"));
 
             EditorGUILayout.Space();
 
-            // Shape-specific settings
-            if (shape == AutoFitLayoutContainer.ContainerShape.Circle)
+            // Grid Configuration
+            EditorGUILayout.LabelField("Grid Configuration", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(fixedColumnsProp, new GUIContent("Fixed Columns", "0 = unlimited/auto-calculate"));
+            EditorGUILayout.PropertyField(fixedRowsProp, new GUIContent("Fixed Rows", "0 = unlimited/auto-calculate"));
+            EditorGUILayout.PropertyField(layoutPreferenceProp, new GUIContent("Layout Preference"));
+            EditorGUILayout.PropertyField(flowDirectionProp, new GUIContent("Flow Direction"));
+
+            EditorGUILayout.Space();
+
+            // Overflow Handling
+            EditorGUILayout.LabelField("Overflow Handling", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(hideOverflowProp, new GUIContent("Hide Overflow", "Hide items that don't fit"));
+            EditorGUILayout.PropertyField(warnOnOverflowProp, new GUIContent("Warn On Overflow"));
+
+            // Show overflow info
+            if (Application.isPlaying)
             {
-                EditorGUILayout.LabelField("Circle Settings", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(circleInscribeFactorProp, new GUIContent("Inscribe Factor", "How much to reduce usable area (0.707 = inscribed square)"));
-            }
-            else if (shape == AutoFitLayoutContainer.ContainerShape.Triangle)
-            {
-                EditorGUILayout.LabelField("Triangle Settings", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(triangleAspectRatioProp, new GUIContent("Aspect Ratio", "Triangle height relative to width (0.866 = equilateral)"));
+                int visible = container.GetVisibleChildCount();
+                int hidden = container.GetHiddenChildCount();
+                if (hidden > 0)
+                {
+                    EditorGUILayout.HelpBox($"⚠️ {hidden} items hidden (showing {visible})", MessageType.Warning);
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox($"✓ All {visible} items visible", MessageType.Info);
+                }
             }
 
             EditorGUILayout.Space();
@@ -174,14 +192,20 @@ namespace RTS.UI.AutoFit.Editor
         private void ResetToDefaults()
         {
             shapeProp.enumValueIndex = 0; // Square
-            maxWidthProp.floatValue = 300f;
-            maxHeightProp.floatValue = 300f;
+            minContainerWidthProp.floatValue = 100f;
+            maxContainerWidthProp.floatValue = 500f;
+            minContainerHeightProp.floatValue = 100f;
+            maxContainerHeightProp.floatValue = 500f;
             paddingProp.floatValue = 10f;
-            minContentSizeProp.floatValue = 16f;
-            maxContentSizeProp.floatValue = 128f;
-            autoDetectLayoutProp.boolValue = true;
-            circleInscribeFactorProp.floatValue = 0.707f;
-            triangleAspectRatioProp.floatValue = 0.866f;
+            minCellSizeProp.floatValue = 32f;
+            maxCellSizeProp.floatValue = 128f;
+            cellSpacingProp.floatValue = 8f;
+            fixedColumnsProp.intValue = 0;
+            fixedRowsProp.intValue = 0;
+            layoutPreferenceProp.enumValueIndex = 0; // PreferHorizontal
+            flowDirectionProp.enumValueIndex = 0; // LeftToRight
+            hideOverflowProp.boolValue = true;
+            warnOnOverflowProp.boolValue = true;
             updateInEditModeProp.boolValue = true;
             debugModeProp.boolValue = false;
 
