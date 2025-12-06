@@ -130,6 +130,17 @@ namespace RTS.Buildings
         [Tooltip("Units that can be trained from this building")]
         public List<TrainableUnitData> trainableUnits = new List<TrainableUnitData>();
 
+        [Header("Worker Training (Optional)")]
+        [Tooltip("Can this building train worker units for resource gathering?")]
+        public bool canTrainWorkers = false;
+        [Tooltip("Auto-train workers when building is completed (requires worker gathering mode)")]
+        public bool autoTrainWorkers = false;
+        [Tooltip("Maximum number of workers this building can have active")]
+        [Range(1, 10)]
+        public int maxWorkers = 3;
+        [Tooltip("Worker unit config for this building (e.g., Lumber Worker for Lumber Mill)")]
+        public UnitConfigSO workerUnitConfig;
+
         private void OnValidate()
         {
             // Keep buildTime in sync with constructionTime

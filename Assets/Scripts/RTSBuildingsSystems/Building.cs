@@ -2,6 +2,7 @@
 using RTS.Core.Events;
 using RTS.Core.Services;
 using System.Collections.Generic;
+using KingdomsAtDusk.Core;
 
 namespace RTS.Buildings
 {
@@ -23,11 +24,13 @@ namespace RTS.Buildings
         private float constructionProgress = 0f;
         private IHappinessService happinessService;
         private IResourcesService resourceService;
+        private GameConfigSO gameConfig;
 
         // Resource generation
         private float resourceGenerationTimer = 0f;
 
         public BuildingDataSO Data => data;
+        public BuildingDataSO buildingData => data; // Alternative accessor for compatibility
         public bool IsConstructed => isConstructed;
         public float ConstructionProgress => constructionProgress / constructionTime;
 
@@ -35,6 +38,7 @@ namespace RTS.Buildings
         {
             happinessService = ServiceLocator.TryGet<IHappinessService>();
             resourceService = ServiceLocator.TryGet<IResourcesService>();
+            gameConfig = Resources.Load<GameConfigSO>("GameConfig");
 
             if (!requiresConstruction)
             {
@@ -116,6 +120,14 @@ namespace RTS.Buildings
         private void GenerateResources()
         {
             if (resourceService == null || data == null) return;
+
+            // Check if we're in worker gathering mode
+            // If so, workers handle resource generation, not buildings
+            if (gameConfig != null && gameConfig.gatheringMode == ResourceGatheringMode.WorkerGathering)
+            {
+                // Don't auto-generate resources, workers will do it
+                return;
+            }
 
             // Create resource dictionary with the generated amount
             var resources = new Dictionary<ResourceType, int>
