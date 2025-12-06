@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using KingdomsAtDusk.Units;
+
 namespace RTS.Units
 {
     /// <summary>
@@ -13,6 +15,12 @@ namespace RTS.Units
         public string unitName = "Unit";
         [TextArea(2, 4)]
         public string description = "A unit";
+
+        [Header("Worker Configuration")]
+        [Tooltip("If this is a worker unit, specify the worker type. None for combat units.")]
+        public WorkerUnitType workerType = WorkerUnitType.None;
+        [Tooltip("Is this unit a worker that gathers resources?")]
+        public bool isWorker = false;
 
         [Header("Health")]
         public float maxHealth = 100f;

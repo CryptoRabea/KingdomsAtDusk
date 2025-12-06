@@ -37,6 +37,16 @@ namespace RTS.Units.Animation
         [Tooltip("Death animation")]
         public AnimationClip deathAnimation;
 
+        [Header("Worker Animations")]
+        [Tooltip("Gathering animation for worker units (chopping, mining, farming, etc.)")]
+        public AnimationClip gatheringAnimation;
+
+        [Tooltip("Carrying animation when worker has resources (optional, uses walk if not set)")]
+        public AnimationClip carryingAnimation;
+
+        [Tooltip("Depositing animation when worker delivers resources (optional)")]
+        public AnimationClip depositingAnimation;
+
         [Header("Personality Animations")]
         [Tooltip("Idle variation animations (0-3 for IdleVariant parameter)")]
         public AnimationClip[] idleVariants = new AnimationClip[4];
