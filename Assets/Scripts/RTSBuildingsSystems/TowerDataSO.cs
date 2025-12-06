@@ -25,12 +25,6 @@ namespace RTS.Buildings
         public TowerType towerType = TowerType.Arrow;
 
         [Header("Combat Settings")]
-        [Tooltip("How far the tower can detect and attack enemies")]
-        new public float attackRange = 15f;
-
-        [Tooltip("Damage dealt per attack")]
-        new public float attackDamage = 20f;
-
         [Tooltip("Attacks per second")]
         public float attackRate = 1f;
 
