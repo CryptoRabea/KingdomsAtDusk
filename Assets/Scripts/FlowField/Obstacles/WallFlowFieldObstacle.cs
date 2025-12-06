@@ -28,7 +28,7 @@ namespace FlowField.Obstacles
             wallCollider = GetComponent<Collider>();
             if (wallCollider == null)
             {
-                Debug.LogError($"WallFlowFieldObstacle: No collider found on {gameObject.name}!");
+                UnityEngine. Debug.LogError($"WallFlowFieldObstacle: No collider found on {gameObject.name}!");
                 return;
             }
 
@@ -41,7 +41,7 @@ namespace FlowField.Obstacles
 
             if (flowFieldManager == null)
             {
-                Debug.LogWarning("FlowFieldManager not found! Wall obstacle will not affect pathfinding.");
+                UnityEngine.Debug.LogWarning("FlowFieldManager not found! Wall obstacle will not affect pathfinding.");
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace FlowField.Obstacles
             UpdateCostField();
             isRegistered = true;
 
-            Debug.Log($"WallFlowFieldObstacle registered for {gameObject.name} at {transform.position}");
+            UnityEngine.Debug.Log($"WallFlowFieldObstacle registered for {gameObject.name} at {transform.position}");
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace FlowField.Obstacles
 
             isRegistered = false;
 
-            Debug.Log($"WallFlowFieldObstacle unregistered for {gameObject.name}");
+            UnityEngine.Debug.Log($"WallFlowFieldObstacle unregistered for {gameObject.name}");
         }
 
         /// <summary>

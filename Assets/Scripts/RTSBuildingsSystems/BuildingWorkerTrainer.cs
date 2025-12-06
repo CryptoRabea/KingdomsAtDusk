@@ -4,6 +4,7 @@ using RTS.Buildings;
 using RTS.Units;
 using KingdomsAtDusk.Core;
 using KingdomsAtDusk.Units.AI;
+using RTS.Core.Events;
 
 namespace KingdomsAtDusk.Buildings
 {
@@ -47,7 +48,7 @@ namespace KingdomsAtDusk.Buildings
         private void Awake()
         {
             building = GetComponent<Building>();
-            gameConfig = Resources.Load<GameConfigSO>("GameConfig");
+            gameConfig =UnityEngine. Resources.Load<GameConfigSO>("GameConfig");
         }
 
         private void Start()
@@ -69,7 +70,7 @@ namespace KingdomsAtDusk.Buildings
 
         private void OnDestroy()
         {
-            EventBus.Unsubscribe<BuildingCompletedEvent>(OnBuildingCompleted);
+            RTS.Core.Events.EventBus.Unsubscribe<BuildingCompletedEvent>(OnBuildingCompleted);
 
             // Clean up all workers when building is destroyed
             DespawnAllWorkers();
@@ -78,7 +79,7 @@ namespace KingdomsAtDusk.Buildings
         private void OnBuildingCompleted(BuildingCompletedEvent evt)
         {
             // Check if this event is for our building
-            if (evt.building == gameObject)
+            if (evt.Building == gameObject)
             {
                 Initialize();
             }
@@ -193,8 +194,8 @@ namespace KingdomsAtDusk.Buildings
             // Publish event
             EventBus.Publish(new UnitSpawnedEvent
             {
-                unit = workerObj,
-                position = spawnPos
+                Unit = workerObj,
+                Position = spawnPos
             });
 
             return workerObj;

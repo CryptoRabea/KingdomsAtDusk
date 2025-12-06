@@ -1,5 +1,6 @@
 using UnityEngine;
 using KingdomsAtDusk.Core;
+using RTS.Core.Services;
 
 namespace KingdomsAtDusk.Resources
 {
@@ -148,7 +149,7 @@ namespace KingdomsAtDusk.Resources
         // Visualization in editor
         private void OnDrawGizmos()
         {
-            GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
+            GameConfigSO config = UnityEngine.Resources.Load<GameConfigSO>("GameConfig");
             if (config != null && !config.showDebugGizmos) return;
 
             // Draw gathering radius

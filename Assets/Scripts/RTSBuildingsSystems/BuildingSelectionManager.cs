@@ -286,8 +286,9 @@ namespace RTS.Buildings
                         Debug.Log($" BuildingSelectable found on {hit.collider.gameObject.name}");
 
                     // Check for shift/ctrl for additive selection
-                    bool additive = enableMultiSelect && (Keyboard.current?.shiftKey.isPressed ?? false || Keyboard.current?.ctrlKey.isPressed ?? false);
-
+                    bool shift = Keyboard.current != null && Keyboard.current.shiftKey.isPressed;
+                    bool ctrl = Keyboard.current != null && Keyboard.current.ctrlKey.isPressed;
+                    bool additive = enableMultiSelect && (shift || ctrl);
                     if (!additive)
                     {
                         ClearSelection();

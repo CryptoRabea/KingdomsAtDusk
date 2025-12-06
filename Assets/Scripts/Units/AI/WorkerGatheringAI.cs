@@ -1,8 +1,12 @@
 using UnityEngine;
 using RTS.Units;
 using KingdomsAtDusk.Units;
-using KingdomsAtDusk.Resources;
 using KingdomsAtDusk.Core;
+using RTS.Units.Animation;
+using RTS.Core.Services;
+using KingdomsAtDusk.Resources;
+using RTS.Buildings;
+using System.Collections.Generic;
 
 namespace KingdomsAtDusk.Units.AI
 {
@@ -39,7 +43,7 @@ namespace KingdomsAtDusk.Units.AI
 
         // State tracking
         private WorkerState currentState = WorkerState.Idle;
-        private ResourceNode targetNode;
+        private Resources.ResourceNode targetNode;
         private Vector3 gatheringPosition;
         private float gatherTimer = 0f;
         private int carriedResources = 0;
@@ -56,7 +60,7 @@ namespace KingdomsAtDusk.Units.AI
             carryingVisual = GetComponent<WorkerCarryingVisual>();
 
             // Load game config
-            gameConfig = Resources.Load<GameConfigSO>("GameConfig");
+            gameConfig = UnityEngine.Resources.Load<GameConfigSO>("GameConfig");
             if (gameConfig != null)
             {
                 gatherTime = gameConfig.gatheringTime;
@@ -169,7 +173,7 @@ namespace KingdomsAtDusk.Units.AI
             float distance = Vector3.Distance(transform.position, gatheringPosition);
             if (distance < 0.5f) // Close enough
             {
-                movement.StopMoving();
+                movement.Stop();
                 TransitionToState(WorkerState.Gathering);
             }
         }
@@ -226,7 +230,7 @@ namespace KingdomsAtDusk.Units.AI
             float distance = Vector3.Distance(transform.position, homeBuilding.transform.position);
             if (distance < 3f) // Close enough to building
             {
-                movement.StopMoving();
+                movement.Stop();
                 TransitionToState(WorkerState.Depositing);
             }
         }
@@ -236,10 +240,16 @@ namespace KingdomsAtDusk.Units.AI
             // Deposit resources to resource manager
             if (carriedResources > 0)
             {
-                var resourceManager = ServiceLocator.Instance?.GetService<IResourceService>() as ResourceManager;
+                var resourceManager = ServiceLocator.Get<ResourceManager>();
+
                 if (resourceManager != null)
                 {
-                    resourceManager.AddResource(resourceType, carriedResources);
+                    // Fix: Use a dictionary as required by AddResources signature
+                    var amounts = new Dictionary<ResourceType, int>
+                    {
+                        { resourceType, carriedResources }
+                    };
+                    resourceManager.AddResources(amounts);
                 }
 
                 carriedResources = 0;
@@ -274,7 +284,7 @@ namespace KingdomsAtDusk.Units.AI
             switch (state)
             {
                 case WorkerState.Idle:
-                    if (animController != null) animController.SetIdle();
+                    if (animController != null) animController.PlayCustomAnimation("Idle");
                     nextSearchTime = Time.time + 1f;
                     break;
 
@@ -285,7 +295,7 @@ namespace KingdomsAtDusk.Units.AI
                 case WorkerState.MovingToResource:
                     if (targetNode != null)
                     {
-                        movement.MoveTo(gatheringPosition);
+                        movement.SetDestination(gatheringPosition);
                     }
                     break;
 
@@ -296,14 +306,14 @@ namespace KingdomsAtDusk.Units.AI
                     {
                         // Use attack animation as gathering animation for now
                         // TODO: Add dedicated gathering animation to UnitAnimationProfile
-                        animController.TriggerAnimation("DoIdleAction");
+                        animController.PlayCustomAnimation("DoIdleAction");
                     }
                     break;
 
                 case WorkerState.ReturningToBuilding:
                     if (homeBuilding != null)
                     {
-                        movement.MoveTo(homeBuilding.transform.position);
+                        movement.SetDestination(homeBuilding.transform.position);
                     }
                     break;
 

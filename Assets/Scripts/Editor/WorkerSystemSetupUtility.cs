@@ -168,7 +168,7 @@ namespace KingdomsAtDusk.Editor
             List<string> info = new List<string>();
 
             // Check for GameConfig
-            var gameConfig = Resources.Load("GameConfig");
+            var gameConfig = UnityEngine.Resources.Load("GameConfig");
             if (gameConfig == null)
             {
                 errors.Add("❌ GameConfig asset not found in Resources folder!");
@@ -278,7 +278,7 @@ namespace KingdomsAtDusk.Editor
             }
 
             // Check if GameConfig already exists
-            var existing = Resources.Load("GameConfig");
+            var existing = UnityEngine.Resources.Load("GameConfig");
             if (existing != null)
             {
                 bool overwrite = EditorUtility.DisplayDialog(
