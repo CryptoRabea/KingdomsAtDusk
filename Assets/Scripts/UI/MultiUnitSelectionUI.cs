@@ -10,15 +10,26 @@ namespace RTS.UI
     /// Displays multiple selected units as icons with HP bars in a grid layout.
     /// Integrates with UnitDetailsUI - replaces stats section when 2+ units selected.
     /// Formation buttons remain visible.
+    /// Automatically scales icons to fit within a square container.
     /// </summary>
     public class MultiUnitSelectionUI : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField] private Transform unitIconContainer;
         [SerializeField] private GameObject unitIconPrefab;
+        [SerializeField] private RectTransform containerRect;
 
         [Header("Layout Settings")]
         [SerializeField] private int maxIconsToDisplay = 12;
+        [SerializeField] private float baseIconSize = 64f;
+        [SerializeField] private float minIconSize = 32f;
+        [SerializeField] private float iconSpacing = 8f;
+        [SerializeField] private float containerPadding = 10f;
+
+        [Header("Square Container")]
+        [SerializeField] private bool maintainSquare = true;
+        [Tooltip("Maximum size of the square container in pixels")]
+        [SerializeField] private float maxContainerSize = 300f;
 
         [Header("Grid Layout (Optional)")]
         [Tooltip("If assigned, will be used to configure grid layout dynamically")]
@@ -54,6 +65,12 @@ namespace RTS.UI
             if (unitIconPrefab == null)
             {
                 Debug.LogWarning("[MultiUnitSelectionUI] Unit icon prefab not assigned!");
+            }
+
+            // Auto-assign container rect if not set
+            if (containerRect == null && unitIconContainer != null)
+            {
+                containerRect = unitIconContainer.GetComponent<RectTransform>();
             }
 
             // Initialize grid layout if assigned
@@ -120,8 +137,11 @@ namespace RTS.UI
                 return;
             }
 
-            // Create icons for each selected unit (up to max)
+            // Calculate optimal grid and icon size
             int iconsToCreate = Mathf.Min(selectedUnits.Count, maxIconsToDisplay);
+            UpdateGridLayoutForCount(iconsToCreate);
+
+            // Create icons for each selected unit (up to max)
             for (int i = 0; i < iconsToCreate; i++)
             {
                 var unit = selectedUnits[i];
@@ -130,6 +150,47 @@ namespace RTS.UI
                     CreateIconForUnit(unit.gameObject);
                 }
             }
+        }
+
+        /// <summary>
+        /// Dynamically adjusts grid layout to fit icons within a square container.
+        /// </summary>
+        private void UpdateGridLayoutForCount(int iconCount)
+        {
+            if (gridLayoutGroup == null || !maintainSquare)
+                return;
+
+            // Calculate optimal grid dimensions (as square as possible)
+            int columns = Mathf.CeilToInt(Mathf.Sqrt(iconCount));
+            int rows = Mathf.CeilToInt((float)iconCount / columns);
+
+            // Calculate available space
+            float availableSize = maxContainerSize - (containerPadding * 2);
+
+            // Calculate icon size to fit within the square
+            float iconSizeWithSpacing = availableSize / Mathf.Max(columns, rows);
+            float calculatedIconSize = iconSizeWithSpacing - iconSpacing;
+
+            // Clamp icon size between min and base size
+            float finalIconSize = Mathf.Clamp(calculatedIconSize, minIconSize, baseIconSize);
+
+            // Update grid layout
+            gridLayoutGroup.constraintCount = columns;
+            gridLayoutGroup.cellSize = new Vector2(finalIconSize, finalIconSize);
+            gridLayoutGroup.spacing = new Vector2(iconSpacing, iconSpacing);
+
+            // Update container size to maintain square
+            if (containerRect != null)
+            {
+                float totalSize = (finalIconSize * Mathf.Max(columns, rows)) +
+                                 (iconSpacing * (Mathf.Max(columns, rows) - 1)) +
+                                 (containerPadding * 2);
+
+                totalSize = Mathf.Min(totalSize, maxContainerSize);
+                containerRect.sizeDelta = new Vector2(totalSize, totalSize);
+            }
+
+            Debug.Log($"[MultiUnitSelectionUI] Grid: {columns}x{rows}, Icon Size: {finalIconSize}px, Container: {maxContainerSize}px square");
         }
 
         /// <summary>

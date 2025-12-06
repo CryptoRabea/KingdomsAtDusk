@@ -65,13 +65,18 @@ namespace RTS.UI.Editor
                 "Multi-Unit Selection UI has been integrated with UnitDetailsUI!\n\n" +
                 "✅ Unit Icon Prefab created\n" +
                 "✅ Stats container created\n" +
-                "✅ Multi-unit container created\n" +
-                "✅ Grid Layout configured\n" +
+                "✅ Square container created (300×300px)\n" +
+                "✅ Auto-scaling grid configured\n" +
                 "✅ All references assigned\n\n" +
                 "How it works:\n" +
                 "• 1 unit selected: Shows normal stats\n" +
-                "• 2+ units selected: Shows unit icon grid\n" +
+                "• 2+ units selected: Shows unit icon grid in square\n" +
+                "• Icons automatically scale down to fit\n" +
                 "• Formation buttons stay visible\n\n" +
+                "Features:\n" +
+                "• Square container (never overflows)\n" +
+                "• Dynamic icon scaling (64px → 32px min)\n" +
+                "• Auto grid layout (2×2, 3×3, 4×3, etc.)\n\n" +
                 "Test it by selecting multiple units in Play Mode!",
                 "OK"
             );
@@ -222,6 +227,7 @@ namespace RTS.UI.Editor
 
         /// <summary>
         /// Creates the multi-unit selection container with grid layout.
+        /// Configured as a square that scales icons automatically.
         /// </summary>
         private static GameObject CreateMultiUnitSelectionContainer(Transform parent, GameObject unitIconPrefab)
         {
@@ -239,40 +245,38 @@ namespace RTS.UI.Editor
             container.transform.SetParent(parent, false);
             RectTransform containerRect = container.AddComponent<RectTransform>();
 
-            // Position in the stats area
-            containerRect.anchorMin = new Vector2(0, 0);
-            containerRect.anchorMax = new Vector2(1, 1);
-            containerRect.offsetMin = new Vector2(10, 10);
-            containerRect.offsetMax = new Vector2(-10, -10);
+            // Position in the stats area - centered
+            containerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            containerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            containerRect.pivot = new Vector2(0.5f, 0.5f);
+            containerRect.anchoredPosition = Vector2.zero;
+            containerRect.sizeDelta = new Vector2(300, 300); // Will be adjusted dynamically
 
             // Start hidden
             container.SetActive(false);
 
-            // Create icon grid container
+            // Create icon grid container (square)
             GameObject gridContainer = new GameObject("UnitIconGrid");
             gridContainer.transform.SetParent(container.transform, false);
             RectTransform gridRect = gridContainer.AddComponent<RectTransform>();
 
-            gridRect.anchorMin = Vector2.zero;
-            gridRect.anchorMax = Vector2.one;
-            gridRect.offsetMin = Vector2.zero;
-            gridRect.offsetMax = Vector2.zero;
+            // Center the grid within the container
+            gridRect.anchorMin = new Vector2(0.5f, 0.5f);
+            gridRect.anchorMax = new Vector2(0.5f, 0.5f);
+            gridRect.pivot = new Vector2(0.5f, 0.5f);
+            gridRect.anchoredPosition = Vector2.zero;
+            gridRect.sizeDelta = new Vector2(300, 300); // Square
 
             // Add GridLayoutGroup
             GridLayoutGroup grid = gridContainer.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(64, 64);
+            grid.cellSize = new Vector2(64, 64); // Will be adjusted dynamically
             grid.spacing = new Vector2(8, 8);
             grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
             grid.startAxis = GridLayoutGroup.Axis.Horizontal;
-            grid.childAlignment = TextAnchor.UpperLeft;
+            grid.childAlignment = TextAnchor.MiddleCenter;
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 4; // 4 columns
-            grid.padding = new RectOffset(5, 5, 5, 5);
-
-            // Add ContentSizeFitter for dynamic sizing
-            ContentSizeFitter fitter = gridContainer.AddComponent<ContentSizeFitter>();
-            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            grid.constraintCount = 4; // Will be adjusted dynamically
+            grid.padding = new RectOffset(10, 10, 10, 10);
 
             // Add MultiUnitSelectionUI component to main container
             MultiUnitSelectionUI multiUnitUI = container.AddComponent<MultiUnitSelectionUI>();
@@ -281,17 +285,31 @@ namespace RTS.UI.Editor
             var type = typeof(MultiUnitSelectionUI);
             var iconContainerField = type.GetField("unitIconContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var iconPrefabField = type.GetField("unitIconPrefab", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var containerRectField = type.GetField("containerRect", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var maxIconsField = type.GetField("maxIconsToDisplay", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var baseIconSizeField = type.GetField("baseIconSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var minIconSizeField = type.GetField("minIconSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var iconSpacingField = type.GetField("iconSpacing", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var containerPaddingField = type.GetField("containerPadding", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var maintainSquareField = type.GetField("maintainSquare", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var maxContainerSizeField = type.GetField("maxContainerSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var gridLayoutField = type.GetField("gridLayoutGroup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             if (iconContainerField != null) iconContainerField.SetValue(multiUnitUI, gridContainer.transform);
             if (iconPrefabField != null) iconPrefabField.SetValue(multiUnitUI, unitIconPrefab);
+            if (containerRectField != null) containerRectField.SetValue(multiUnitUI, gridRect);
             if (maxIconsField != null) maxIconsField.SetValue(multiUnitUI, 12);
+            if (baseIconSizeField != null) baseIconSizeField.SetValue(multiUnitUI, 64f);
+            if (minIconSizeField != null) minIconSizeField.SetValue(multiUnitUI, 32f);
+            if (iconSpacingField != null) iconSpacingField.SetValue(multiUnitUI, 8f);
+            if (containerPaddingField != null) containerPaddingField.SetValue(multiUnitUI, 10f);
+            if (maintainSquareField != null) maintainSquareField.SetValue(multiUnitUI, true);
+            if (maxContainerSizeField != null) maxContainerSizeField.SetValue(multiUnitUI, 300f);
             if (gridLayoutField != null) gridLayoutField.SetValue(multiUnitUI, grid);
 
             EditorUtility.SetDirty(container);
 
-            Debug.Log("[MultiUnitSelectionUISetup] Created MultiUnitSelectionContainer");
+            Debug.Log("[MultiUnitSelectionUISetup] Created MultiUnitSelectionContainer (Square, Auto-scaling)");
             return container;
         }
 
@@ -310,14 +328,21 @@ namespace RTS.UI.Editor
             if (gridContainer != null)
             {
                 GridLayoutGroup grid = gridContainer.GetComponent<GridLayoutGroup>();
+                RectTransform gridRect = gridContainer.GetComponent<RectTransform>();
 
                 var type = typeof(MultiUnitSelectionUI);
                 var iconContainerField = type.GetField("unitIconContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 var iconPrefabField = type.GetField("unitIconPrefab", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var containerRectField = type.GetField("containerRect", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var maintainSquareField = type.GetField("maintainSquare", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var maxContainerSizeField = type.GetField("maxContainerSize", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 var gridLayoutField = type.GetField("gridLayoutGroup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
                 if (iconContainerField != null) iconContainerField.SetValue(multiUnitUI, gridContainer);
                 if (iconPrefabField != null) iconPrefabField.SetValue(multiUnitUI, unitIconPrefab);
+                if (containerRectField != null) containerRectField.SetValue(multiUnitUI, gridRect);
+                if (maintainSquareField != null) maintainSquareField.SetValue(multiUnitUI, true);
+                if (maxContainerSizeField != null) maxContainerSizeField.SetValue(multiUnitUI, 300f);
                 if (gridLayoutField != null && grid != null) gridLayoutField.SetValue(multiUnitUI, grid);
 
                 EditorUtility.SetDirty(container);
