@@ -667,7 +667,7 @@ namespace RTSGame.UI.Settings
             {
                 settings.ResolutionWidth = availableResolutions[resolutionDropdown.value].width;
                 settings.ResolutionHeight = availableResolutions[resolutionDropdown.value].height;
-                settings.RefreshRate = availableResolutions[resolutionDropdown.value].refreshRate;
+                settings.RefreshRate = (int)(availableResolutions[resolutionDropdown.value].refreshRateRatio.value);
             }
             if (vsyncDropdown != null) settings.VSync = (VSyncMode)vsyncDropdown.value;
             if (qualityPresetDropdown != null) settings.QualityPreset = (QualityPreset)qualityPresetDropdown.value;

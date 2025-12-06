@@ -116,7 +116,7 @@ namespace FlowField.Performance
         public void RefreshUnitList()
         {
             allUnits.Clear();
-            allUnits.AddRange(FindObjectsOfType<FlowFieldFollower>());
+            allUnits.AddRange(FindObjectsByType<FlowFieldFollower>(FindObjectsSortMode.None));
 
             foreach (var unit in allUnits)
             {

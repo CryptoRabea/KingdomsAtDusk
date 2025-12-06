@@ -50,7 +50,7 @@ namespace FlowField.Integration
             else
             {
                 // Find all objects with NavMeshAgent
-                var agents = FindObjectsOfType<NavMeshAgent>();
+                var agents = FindObjectsByType<NavMeshAgent>(FindObjectsSortMode.None);
                 allUnits = new GameObject[agents.Length];
                 for (int i = 0; i < agents.Length; i++)
                 {

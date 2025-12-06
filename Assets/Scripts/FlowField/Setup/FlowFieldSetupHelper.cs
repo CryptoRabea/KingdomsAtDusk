@@ -79,7 +79,7 @@ namespace FlowField.Setup
         private void CreateFlowFieldManager()
         {
             // Check if already exists
-            FlowFieldManager existing = FindObjectOfType<FlowFieldManager>();
+            FlowFieldManager existing = FindFirstObjectByType<FlowFieldManager>();
             if (existing != null)
             {
                 Log("⚠️ FlowFieldManager already exists, skipping...");
@@ -105,7 +105,7 @@ namespace FlowField.Setup
 
         private void CreatePerformanceManager()
         {
-            FlowFieldPerformanceManager existing = FindObjectOfType<FlowFieldPerformanceManager>();
+            FlowFieldPerformanceManager existing = FindFirstObjectByType<FlowFieldPerformanceManager>();
             if (existing != null)
             {
                 Log("⚠️ FlowFieldPerformanceManager already exists, skipping...");
@@ -126,7 +126,7 @@ namespace FlowField.Setup
 
         private void CreateDebugVisualizer()
         {
-            FlowFieldDebugVisualizer existing = FindObjectOfType<FlowFieldDebugVisualizer>();
+            FlowFieldDebugVisualizer existing = FindFirstObjectByType<FlowFieldDebugVisualizer>();
             if (existing != null)
             {
                 Log("⚠️ FlowFieldDebugVisualizer already exists, skipping...");
@@ -145,7 +145,7 @@ namespace FlowField.Setup
 
         private void CreateCommandHandler()
         {
-            FlowFieldRTSCommandHandler existing = FindObjectOfType<FlowFieldRTSCommandHandler>();
+            FlowFieldRTSCommandHandler existing = FindFirstObjectByType<FlowFieldRTSCommandHandler>();
             if (existing != null)
             {
                 Log("⚠️ FlowFieldRTSCommandHandler already exists, skipping...");
@@ -165,24 +165,24 @@ namespace FlowField.Setup
         {
             Log("\n📋 Verification:");
 
-            bool hasManager = FindObjectOfType<FlowFieldManager>() != null;
+            bool hasManager = FindFirstObjectByType<FlowFieldManager>() != null;
             Log($"   FlowFieldManager: {(hasManager ? "✅" : "❌")}");
 
             if (includePerformanceManager)
             {
-                bool hasPerf = FindObjectOfType<FlowFieldPerformanceManager>() != null;
+                bool hasPerf = FindFirstObjectByType<FlowFieldPerformanceManager>() != null;
                 Log($"   PerformanceManager: {(hasPerf ? "✅" : "❌")}");
             }
 
             if (includeDebugVisualizer)
             {
-                bool hasDebug = FindObjectOfType<FlowFieldDebugVisualizer>() != null;
+                bool hasDebug = FindFirstObjectByType<FlowFieldDebugVisualizer>() != null;
                 Log($"   DebugVisualizer: {(hasDebug ? "✅" : "❌")}");
             }
 
             if (includeCommandHandler)
             {
-                bool hasCommand = FindObjectOfType<FlowFieldRTSCommandHandler>() != null;
+                bool hasCommand = FindFirstObjectByType<FlowFieldRTSCommandHandler>() != null;
                 Log($"   CommandHandler: {(hasCommand ? "✅" : "❌")}");
             }
         }
@@ -194,7 +194,7 @@ namespace FlowField.Setup
         public void ConvertAllUnits()
         {
             // Find or create converter
-            UnitConverter converter = FindObjectOfType<UnitConverter>();
+            UnitConverter converter = FindFirstObjectByType<UnitConverter>();
             if (converter == null)
             {
                 GameObject converterObj = new GameObject("UnitConverter");
@@ -217,7 +217,7 @@ namespace FlowField.Setup
             SetupFlowFieldSystem();
 
             // Enable all visualization
-            var visualizer = FindObjectOfType<FlowFieldDebugVisualizer>();
+            var visualizer = FindFirstObjectByType<FlowFieldDebugVisualizer>();
             if (visualizer != null)
             {
                 SetPrivateField(visualizer, "showCostField", true);
@@ -226,7 +226,7 @@ namespace FlowField.Setup
                 SetPrivateField(visualizer, "showGridBounds", true);
             }
 
-            var manager = FindObjectOfType<FlowFieldManager>();
+            var manager = FindFirstObjectByType<FlowFieldManager>();
             if (manager != null)
             {
                 SetPrivateField(manager, "showGridGizmos", true);

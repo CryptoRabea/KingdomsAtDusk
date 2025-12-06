@@ -18,7 +18,7 @@ namespace RTS.Units.Formation
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<CustomFormationManager>();
+                    _instance = FindFirstObjectByType<CustomFormationManager>();
                     if (_instance == null)
                     {
                         GameObject go = new GameObject("CustomFormationManager");
