@@ -617,6 +617,7 @@ namespace RTS.Units
 
         /// <summary>
         ///  OPTIMIZED: Uses cached units instead of FindObjectsByType
+        ///  NEW: Supports buildings/walls, favors type with more count
         /// </summary>
         private void PerformDragSelection(Vector2 start, Vector2 end)
         {
@@ -630,10 +631,12 @@ namespace RTS.Units
 
             Rect selectionRect = GetScreenRect(start, end);
             List<UnitSelectable> unitsInBox = new List<UnitSelectable>();
+            List<BuildingSelectable> buildingsInBox = new List<BuildingSelectable>();
 
             //  Use cached units if available, otherwise fallback to FindObjectsByType
             IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
+            // Check units
             foreach (var selectable in unitsToCheck)
             {
                 if (selectable == null || !PassesTypeFilter(selectable))
@@ -648,29 +651,69 @@ namespace RTS.Units
                 }
             }
 
-            // Apply max selection limit and distance sorting if enabled
-            if (enableMaxSelection && unitsInBox.Count > maxSelectionCount)
+            // Check buildings (including walls, towers, etc.)
+            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var buildingSelectable in allBuildings)
             {
-                if (sortByDistance)
-                {
-                    // Sort by distance from drag start position
-                    Vector3 dragStartWorld = mainCamera.ScreenToWorldPoint(new Vector3(start.x, start.y, mainCamera.nearClipPlane));
-                    unitsInBox.Sort((a, b) =>
-                    {
-                        float distA = Vector3.Distance(a.transform.position, dragStartWorld);
-                        float distB = Vector3.Distance(b.transform.position, dragStartWorld);
-                        return distA.CompareTo(distB);
-                    });
-                }
+                if (buildingSelectable == null)
+                    continue;
 
-                // Take only the maximum allowed
-                unitsInBox = unitsInBox.GetRange(0, maxSelectionCount);
+                Vector3 screenPos = mainCamera.WorldToScreenPoint(buildingSelectable.transform.position);
+
+                // Check if within selection rectangle and in front of camera
+                if (screenPos.z > 0 && selectionRect.Contains(screenPos))
+                {
+                    buildingsInBox.Add(buildingSelectable);
+                }
             }
 
-            // Select all units in the final list
-            foreach (var unit in unitsInBox)
+            // Favor the type with more count
+            if (unitsInBox.Count > buildingsInBox.Count)
             {
-                SelectUnit(unit);
+                // Select units only
+                // Apply max selection limit and distance sorting if enabled
+                if (enableMaxSelection && unitsInBox.Count > maxSelectionCount)
+                {
+                    if (sortByDistance)
+                    {
+                        // Sort by distance from drag start position
+                        Vector3 dragStartWorld = mainCamera.ScreenToWorldPoint(new Vector3(start.x, start.y, mainCamera.nearClipPlane));
+                        unitsInBox.Sort((a, b) =>
+                        {
+                            float distA = Vector3.Distance(a.transform.position, dragStartWorld);
+                            float distB = Vector3.Distance(b.transform.position, dragStartWorld);
+                            return distA.CompareTo(distB);
+                        });
+                    }
+
+                    // Take only the maximum allowed
+                    unitsInBox = unitsInBox.GetRange(0, maxSelectionCount);
+                }
+
+                // Select all units in the final list
+                foreach (var unit in unitsInBox)
+                {
+                    SelectUnit(unit);
+                }
+            }
+            else if (buildingsInBox.Count > 0)
+            {
+                // Select buildings only
+                // Use BuildingSelectionManager for multi-select
+                var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
+                if (buildingManager != null)
+                {
+                    // Deselect current building first
+                    buildingManager.DeselectBuilding();
+                }
+
+                // Select all buildings in box
+                foreach (var building in buildingsInBox)
+                {
+                    building.Select();
+                }
+
+                Debug.Log($"Selected {buildingsInBox.Count} buildings via drag selection");
             }
         }
 
@@ -737,6 +780,7 @@ namespace RTS.Units
 
         /// <summary>
         /// NEW: Select all visible units of a specific type (by UnitConfigSO)
+        /// NOTE: Ignores type filter to select based on ScriptableObject type only
         /// </summary>
         private void SelectAllVisibleUnitsOfType(UnitConfigSO targetConfig)
         {
@@ -754,10 +798,10 @@ namespace RTS.Units
 
             foreach (var selectable in unitsToCheck)
             {
-                if (selectable == null || !PassesTypeFilter(selectable))
+                if (selectable == null)
                     continue;
 
-                // Check if unit config matches
+                // Check if unit config matches by ScriptableObject reference (not AI type filter)
                 var aiController = selectable.GetComponent<UnitAIController>();
                 if (aiController == null || aiController.Config != targetConfig)
                     continue;
@@ -798,6 +842,7 @@ namespace RTS.Units
 
         /// <summary>
         /// NEW: Select all units of a specific type (by UnitConfigSO) in entire scene
+        /// NOTE: Ignores type filter to select based on ScriptableObject type only
         /// </summary>
         private void SelectAllUnitsOfTypeInScene(UnitConfigSO targetConfig)
         {
@@ -812,10 +857,10 @@ namespace RTS.Units
 
             foreach (var selectable in unitsToCheck)
             {
-                if (selectable == null || !PassesTypeFilter(selectable))
+                if (selectable == null)
                     continue;
 
-                // Check if unit config matches
+                // Check if unit config matches by ScriptableObject reference (not AI type filter)
                 var aiController = selectable.GetComponent<UnitAIController>();
                 if (aiController == null || aiController.Config != targetConfig)
                     continue;
