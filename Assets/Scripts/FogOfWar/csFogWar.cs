@@ -147,6 +147,11 @@ namespace FischlWorks_FogWar
 
             public Vector2Int GetCurrentLevelCoordinates(csFogWar fogWar)
             {
+                // Return last known position if transform was destroyed
+                if (revealerTransform == null)
+                {
+                    return currentLevelCoordinates;
+                }
 
                 currentLevelCoordinates = new Vector2Int(
                     fogWar.GetUnitX(revealerTransform.position.x),
@@ -184,6 +189,9 @@ namespace FischlWorks_FogWar
             [SerializeField]
             private Vector2Int lastSeenAt = new Vector2Int(Int32.MaxValue, Int32.MaxValue);
             public Vector2Int _LastSeenAt => lastSeenAt;
+
+            // Check if revealer is still valid (not destroyed)
+            public bool IsValid => revealerTransform != null;
         }
 
 
@@ -441,6 +449,12 @@ namespace FischlWorks_FogWar
 
             foreach (FogRevealer fogRevealer in fogRevealers)
             {
+                // Skip destroyed revealers
+                if (!fogRevealer.IsValid)
+                {
+                    continue;
+                }
+
                 if (fogRevealer._UpdateOnlyOnMove == false)
                 {
                     break;
@@ -472,6 +486,12 @@ namespace FischlWorks_FogWar
 
             foreach (FogRevealer fogRevealer in fogRevealers)
             {
+                // Skip destroyed revealers
+                if (!fogRevealer.IsValid)
+                {
+                    continue;
+                }
+
                 fogRevealer.GetCurrentLevelCoordinates(this);
 
                 shadowcaster.ProcessLevelData(
@@ -750,12 +770,10 @@ namespace FischlWorks_FogWar
         {
             if (levelData.levelDimensionX % 2 == 0)
             {
-                // Even dimensions: cells are offset by 0.5 because there's no exact center
-                return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
+                return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
             }
 
-            // Odd dimensions: center cell aligns exactly with midpoint
-            return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
+            return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
         }
 
 
@@ -773,12 +791,10 @@ namespace FischlWorks_FogWar
         {
             if (levelData.levelDimensionY % 2 == 0)
             {
-                // Even dimensions: cells are offset by 0.5 because there's no exact center
-                return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
+                return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
             }
 
-            // Odd dimensions: center cell aligns exactly with midpoint
-            return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
+            return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
         }
 
 
