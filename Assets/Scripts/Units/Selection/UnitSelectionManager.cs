@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using RTS.Core.Events;
 using RTS.Units.AI;
 using RTS.Buildings;
+using KAD.RTSBuildingsSystems;
 
 namespace RTS.Units
 {
@@ -86,6 +87,10 @@ namespace RTS.Units
         //  Performance Optimization - Cached Unit References
         private HashSet<UnitSelectable> allSelectableUnits = new HashSet<UnitSelectable>();
 
+        // Placement mode detection
+        private RTS.Managers.BuildingManager buildingManager;
+        private WallPlacementController wallPlacementController;
+
         public IReadOnlyList<UnitSelectable> SelectedUnits => selectedUnits;
         public int SelectionCount => selectedUnits.Count;
         public int TotalSelectableUnits => allSelectableUnits.Count;
@@ -125,6 +130,10 @@ namespace RTS.Units
             {
                 InitializeUnitCache();
             }
+
+            // Find BuildingManager and WallPlacementController to check placement mode
+            buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+            wallPlacementController = Object.FindAnyObjectByType<WallPlacementController>();
         }
 
         private void OnEnable()
@@ -312,6 +321,17 @@ namespace RTS.Units
         {
             // Don't process if clicking on UI
             if (IsMouseOverUI())
+            {
+                return;
+            }
+
+            // Don't process selection if currently placing a building or wall
+            if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                return;
+            }
+
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
             {
                 return;
             }
