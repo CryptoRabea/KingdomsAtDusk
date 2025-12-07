@@ -234,8 +234,8 @@ namespace RTS.Buildings
                 }
             }
 
-            // Double-click on empty space = select all visible buildings
-            SelectAllVisibleBuildings();
+            // Double-click on empty space = do nothing (don't select buildings unless clicking ON a building)
+            Debug.Log("Double-clicked on ground - buildings not selected (must click on building directly)");
         }
 
         private void HandleTripleClick(Vector2 screenPosition)
@@ -263,9 +263,8 @@ namespace RTS.Buildings
                 }
             }
 
-            // Triple-click on empty space = select ALL buildings in scene
-            SelectAllBuildingsSceneWide();
-            Debug.Log($"Triple-click on empty space: Selected all buildings in entire scene. Total: {selectedBuildings.Count}");
+            // Triple-click on empty space = do nothing (don't select buildings unless clicking ON a building)
+            Debug.Log("Triple-clicked on ground - buildings not selected (must click on building directly)");
         }
 
         private void TrySelectBuilding(Vector2 screenPosition)
@@ -444,47 +443,6 @@ namespace RTS.Buildings
         #region Multi-Select Helper Methods
 
         /// <summary>
-        /// Select all visible buildings
-        /// </summary>
-        private void SelectAllVisibleBuildings()
-        {
-            if (mainCamera == null)
-                mainCamera = Camera.main;
-
-            if (mainCamera == null)
-                return;
-
-            ClearSelection();
-
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            List<BuildingSelectable> visibleBuildings = new List<BuildingSelectable>();
-
-            foreach (var buildingSelectable in allBuildings)
-            {
-                if (buildingSelectable == null)
-                    continue;
-
-                // Check if building is visible to camera
-                Vector3 screenPos = mainCamera.WorldToScreenPoint(buildingSelectable.transform.position);
-
-                if (screenPos.z > 0 &&
-                    screenPos.x >= 0 && screenPos.x <= Screen.width &&
-                    screenPos.y >= 0 && screenPos.y <= Screen.height)
-                {
-                    visibleBuildings.Add(buildingSelectable);
-                }
-            }
-
-            // Select all visible buildings
-            foreach (var building in visibleBuildings)
-            {
-                SelectBuilding(building);
-            }
-
-            Debug.Log($"Selected all visible buildings: {selectedBuildings.Count}");
-        }
-
-        /// <summary>
         /// Select all visible buildings of a specific type (by BuildingDataSO reference)
         /// </summary>
         private void SelectAllVisibleBuildingsOfType(BuildingDataSO targetData)
@@ -563,26 +521,6 @@ namespace RTS.Buildings
             }
 
             Debug.Log($"Selected {selectedBuildings.Count} buildings of type: {targetData.buildingName} in entire scene");
-        }
-
-        /// <summary>
-        /// Select all buildings in entire scene
-        /// </summary>
-        private void SelectAllBuildingsSceneWide()
-        {
-            ClearSelection();
-
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
-            foreach (var building in allBuildings)
-            {
-                if (building == null)
-                    continue;
-
-                SelectBuilding(building);
-            }
-
-            Debug.Log($"Selected all buildings in scene: {selectedBuildings.Count}");
         }
 
         #endregion
