@@ -447,7 +447,6 @@ namespace RTS.Units
             if (clickedUnit != null && unitConfig != null)
             {
                 SelectAllVisibleUnitsOfType(unitConfig);
-                Debug.Log($"Double-clicked unit: {unitConfig.unitName}. Selected all visible units of this type.");
                 return;
             }
 
@@ -456,7 +455,6 @@ namespace RTS.Units
             {
                 // Clear unit selection when clicking on a building
                 ClearSelection();
-                Debug.Log($"Double-clicked building: {buildingData.buildingName}. Units deselected - use BuildingSelectionManager instead.");
                 return;
             }
 
@@ -483,7 +481,6 @@ namespace RTS.Units
             if (clickedUnit != null && unitConfig != null)
             {
                 SelectAllUnitsOfTypeInScene(unitConfig);
-                Debug.Log($"Triple-click on unit: {unitConfig.unitName}. Selected all units of this type in entire scene.");
                 return;
             }
 
@@ -492,13 +489,11 @@ namespace RTS.Units
             {
                 // Clear unit selection when clicking on a building
                 ClearSelection();
-                Debug.Log($"Triple-click on building: {buildingData.buildingName}. Units deselected - use BuildingSelectionManager instead.");
                 return;
             }
 
             // Triple-click on empty space = select ALL units in scene (NOT buildings)
             SelectAllUnitsSceneWide();
-            Debug.Log($"Triple-click on empty space: Selected all units in entire scene. Total: {selectedUnits.Count}");
         }
 
         /// <summary>
@@ -533,11 +528,10 @@ namespace RTS.Units
                 float dist = raycastHitsCache[i].distance;
                 if (dist > nearest) continue; // we only care about nearest
 
-                var hitUnit = raycastHitsCache[i].collider.GetComponent<UnitSelectable>();
-                if (hitUnit != null && PassesTypeFilter(hitUnit))
+                // Using TryGetComponent for better performance
+                if (raycastHitsCache[i].collider.TryGetComponent<UnitSelectable>(out var hitUnit) && PassesTypeFilter(hitUnit))
                 {
-                    var aiController = hitUnit.GetComponent<UnitAIController>();
-                    if (aiController != null && aiController.Config != null)
+                    if (hitUnit.TryGetComponent<UnitAIController>(out var aiController) && aiController.Config != null)
                     {
                         unit = hitUnit;
                         unitConfig = aiController.Config;
@@ -548,11 +542,9 @@ namespace RTS.Units
                     }
                 }
 
-                var hitBuilding = raycastHitsCache[i].collider.GetComponent<BuildingSelectable>();
-                if (hitBuilding != null)
+                if (raycastHitsCache[i].collider.TryGetComponent<BuildingSelectable>(out var hitBuilding))
                 {
-                    var b = hitBuilding.GetComponent<Building>();
-                    if (b != null && b.Data != null)
+                    if (hitBuilding.TryGetComponent<Building>(out var b) && b.Data != null)
                     {
                         building = hitBuilding;
                         buildingData = b.Data;
@@ -816,6 +808,7 @@ namespace RTS.Units
         /// <summary>
         /// NEW: Select all visible units of a specific type (by UnitConfigSO)
         /// NOTE: Ignores type filter to select based on ScriptableObject type only
+        /// OPTIMIZED: No debug logging for performance
         /// </summary>
         private void SelectAllVisibleUnitsOfType(UnitConfigSO targetConfig)
         {
@@ -837,8 +830,10 @@ namespace RTS.Units
                     continue;
 
                 // Check if unit config matches by ScriptableObject reference (not AI type filter)
-                var aiController = selectable.GetComponent<UnitAIController>();
-                if (aiController == null || aiController.Config != targetConfig)
+                // Using TryGetComponent for better performance
+                if (!selectable.TryGetComponent<UnitAIController>(out var aiController) ||
+                    aiController.Config == null ||
+                    aiController.Config != targetConfig)
                     continue;
 
                 // Check if unit is visible to camera
@@ -896,8 +891,10 @@ namespace RTS.Units
                     continue;
 
                 // Check if unit config matches by ScriptableObject reference (not AI type filter)
-                var aiController = selectable.GetComponent<UnitAIController>();
-                if (aiController == null || aiController.Config != targetConfig)
+                // Using TryGetComponent for better performance
+                if (!selectable.TryGetComponent<UnitAIController>(out var aiController) ||
+                    aiController.Config == null ||
+                    aiController.Config != targetConfig)
                     continue;
 
                 matchingUnits.Add(selectable);
