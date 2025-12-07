@@ -51,7 +51,7 @@ namespace RTS.UI
         [SerializeField] private Sprite stoneIcon;
 
         [Header("Positioning")]
-        [SerializeField] private Vector2 fixedPosition = new Vector2(0, 200); // Position above HUD
+        [SerializeField] private Vector2 fixedPosition = new Vector2(0, -300); // Position in bottom mid box
         [SerializeField] private bool useFixedPosition = true;
 
         private List<GameObject> activeCostItems = new List<GameObject>();
