@@ -23,7 +23,9 @@ namespace RTS.Units.Formation
                     {
                         GameObject go = new GameObject("CustomFormationManager");
                         _instance = go.AddComponent<CustomFormationManager>();
+#if !UNITY_EDITOR
                         DontDestroyOnLoad(go);
+#endif
                     }
                 }
                 return _instance;
@@ -48,9 +50,30 @@ namespace RTS.Units.Formation
             }
 
             _instance = this;
+
+#if UNITY_EDITOR
+            // In editor, don't use DontDestroyOnLoad to avoid cleanup warnings
+            // The instance will be recreated when needed
+#else
             DontDestroyOnLoad(gameObject);
+#endif
 
             Initialize();
+        }
+
+        private void OnDestroy()
+        {
+            // Clear the static instance when this object is destroyed
+            if (_instance == this)
+            {
+                _instance = null;
+            }
+
+            // Unsubscribe all events to prevent memory leaks
+            OnFormationsChanged = null;
+            OnFormationAdded = null;
+            OnFormationUpdated = null;
+            OnFormationDeleted = null;
         }
 
         private void Initialize()
