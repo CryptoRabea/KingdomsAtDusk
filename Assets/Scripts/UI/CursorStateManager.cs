@@ -54,6 +54,9 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private LayerMask unitLayer;
 
+        private RTS.Managers.BuildingManager buildingManager;
+        private RTS.Buildings.WallPlacementController wallPlacementController;
+
         [Header("Settings")]
         [SerializeField] private float raycastDistance = 1000f;
         [SerializeField] private float edgeScrollBorderThickness = 10f;
@@ -93,6 +96,10 @@ namespace KingdomsAtDusk.UI
 
             if (selectionManager == null)
                 selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
+
+            // Find placement managers to check if in placement mode
+            buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+            wallPlacementController = Object.FindAnyObjectByType<RTS.Buildings.WallPlacementController>();
 
             if (useRotatedArrow && baseScrollArrowCursor != null)
                 GenerateRotatedCursors();
@@ -163,6 +170,19 @@ namespace KingdomsAtDusk.UI
 
         private void UpdateCursorState()
         {
+            // Don't change cursor during placement mode - keep it as normal
+            if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                SetCursor(CursorState.Normal);
+                return;
+            }
+
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
+            {
+                SetCursor(CursorState.Normal);
+                return;
+            }
+
             Vector2 pos = mouse.position.ReadValue();
 
             // Edge scrolling first

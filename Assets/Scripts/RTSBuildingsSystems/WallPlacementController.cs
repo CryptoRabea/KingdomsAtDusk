@@ -42,6 +42,12 @@ namespace RTS.Buildings
         [SerializeField] private Color validLineColor = Color.green;
         [SerializeField] private Color invalidLineColor = Color.red;
 
+        [Header("UI Notification")]
+        [Tooltip("TextMeshProUGUI component to display wall placement warning (optional)")]
+        [SerializeField] private TMPro.TextMeshProUGUI wallPlacementNotificationText;
+        [SerializeField] private string wallPlacementWarningMessage = "WALL BUILDING MODE - Click to place wall segments";
+        [SerializeField] private Color warningTextColor = Color.red;
+
         [Header("Placement Settings")]
         [SerializeField] private bool useGridSnapping = false;
         [SerializeField] private float gridSize = 1f;
@@ -475,6 +481,8 @@ namespace RTS.Buildings
 
             CreatePolePreview();
 
+            // Show wall placement notification
+            ShowWallPlacementNotification(true);
         }
 
         public void CancelWallPlacement()
@@ -507,6 +515,9 @@ namespace RTS.Buildings
             requiredSegments = 0;
             totalCost.Clear();
             isSnappedToWall = false;
+
+            // Hide wall placement notification
+            ShowWallPlacementNotification(false);
         }
 
         public bool IsPlacingWalls => isPlacingWall;
@@ -1271,6 +1282,22 @@ namespace RTS.Buildings
                 {
                     renderer.sharedMaterial = material;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Show or hide the wall placement notification text.
+        /// </summary>
+        private void ShowWallPlacementNotification(bool show)
+        {
+            if (wallPlacementNotificationText == null) return;
+
+            wallPlacementNotificationText.gameObject.SetActive(show);
+
+            if (show)
+            {
+                wallPlacementNotificationText.text = wallPlacementWarningMessage;
+                wallPlacementNotificationText.color = warningTextColor;
             }
         }
 

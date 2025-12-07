@@ -36,6 +36,7 @@ namespace RTS.Buildings
         private List<BuildingSelectable> selectedBuildings = new List<BuildingSelectable>();
         private bool isSpawnPointMode = false;
         private RTS.Managers.BuildingManager buildingManager;
+        private WallPlacementController wallPlacementController;
 
         // Click tracking for double/triple click
         private int clickCount = 0;
@@ -62,6 +63,7 @@ namespace RTS.Buildings
 
             // Find BuildingManager to check if in placement mode
             buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+            wallPlacementController = Object.FindAnyObjectByType<WallPlacementController>();
         }
         private bool IsMouseOverUI()
         {
@@ -138,8 +140,14 @@ namespace RTS.Buildings
                 return;
             }
 
-            // Don't process selection clicks if currently placing a building
+            // Don't process selection clicks if currently placing a building or wall
             if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                if (enableDebugLogs)
+                return;
+            }
+
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
             {
                 if (enableDebugLogs)
                 return;

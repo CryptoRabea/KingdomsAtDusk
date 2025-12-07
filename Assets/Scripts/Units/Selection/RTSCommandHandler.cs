@@ -17,6 +17,9 @@ namespace RTS.Units
         [SerializeField] private Camera mainCamera;
         [SerializeField] private FormationGroupManager formationGroupManager;
 
+        private RTS.Managers.BuildingManager buildingManager;
+        private RTS.Buildings.WallPlacementController wallPlacementController;
+
         [Header("Settings")]
         [SerializeField] private LayerMask groundLayer; // What counts as ground
         [SerializeField] private LayerMask unitLayer;   // What counts as units
@@ -59,6 +62,10 @@ namespace RTS.Units
             {
                 cachedPointerEventData = new PointerEventData(EventSystem.current);
             }
+
+            // Find placement managers to check if in placement mode
+            buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+            wallPlacementController = Object.FindAnyObjectByType<RTS.Buildings.WallPlacementController>();
         }
 
         private bool IsMouseOverUI()
@@ -120,6 +127,17 @@ namespace RTS.Units
 
         private void HandleRightClick()
         {
+            // Don't process commands if in placement mode
+            if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                return;
+            }
+
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
+            {
+                return;
+            }
+
             // Don't process right-click if mouse is over UI or outside viewport
             if (IsMouseOverUI() || IsMouseOutsideViewport())
             {
