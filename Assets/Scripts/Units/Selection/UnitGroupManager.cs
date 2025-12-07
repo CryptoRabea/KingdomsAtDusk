@@ -217,7 +217,6 @@ namespace RTS.Units
                 mainCamera.transform.position = targetPos;
             }
 
-            if (showDebugMessages)
         }
 
         /// <summary>
@@ -261,7 +260,6 @@ namespace RTS.Units
             if (groupNumber >= 0 && groupNumber < numberOfGroups)
             {
                 groups[groupNumber].Clear();
-                if (showDebugMessages)
             }
         }
 
@@ -274,7 +272,6 @@ namespace RTS.Units
             {
                 group.Clear();
             }
-            if (showDebugMessages)
         }
 
         #region Debug Helpers

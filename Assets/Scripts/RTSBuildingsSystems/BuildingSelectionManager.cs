@@ -259,38 +259,41 @@ namespace RTS.Buildings
 
         private void TrySelectBuilding(Vector2 screenPosition)
         {
-            Ray ray = mainCamera.ScreenPointToRay(screenPosition);
+            if (mainCamera == null)
+                mainCamera = Camera.main;
 
-            if (enableDebugLogs)
+            Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, buildingLayer))
             {
-                if (enableDebugLogs)
-
-                if (hit.collider.TryGetComponent<BuildingSelectable>(out var selectable))
+                if (hit.collider != null)
                 {
-                    if (enableDebugLogs)
-
-                    // Check for shift/ctrl for additive selection
-                    bool shift = Keyboard.current != null && Keyboard.current.shiftKey.isPressed;
-                    bool ctrl = Keyboard.current != null && Keyboard.current.ctrlKey.isPressed;
-                    bool additive = enableMultiSelect && (shift || ctrl);
-                    if (!additive)
+                    if (hit.collider.TryGetComponent<BuildingSelectable>(out var selectable))
                     {
-                        ClearSelection();
-                    }
+                        // Multi-select support: shift/ctrl keys
+                        bool shift = Keyboard.current != null && Keyboard.current.shiftKey.isPressed;
+                        bool ctrl = Keyboard.current != null && Keyboard.current.ctrlKey.isPressed;
+                        bool additive = enableMultiSelect && (shift || ctrl);
 
-                    SelectBuilding(selectable);
-                    return;
-                }
-                else
-                {
-                    if (enableDebugLogs)
+                        if (!additive)
+                        {
+                            ClearSelection();
+                        }
+
+                        SelectBuilding(selectable);
+                        return;
+                    }
+                    else
+                    {
+                        if (enableDebugLogs)
+                            Debug.LogWarning($"Hit building {hit.collider.gameObject.name} but no BuildingSelectable component!");
+                    }
                 }
             }
             else
             {
                 if (enableDebugLogs)
+                    Debug.Log("BuildingSelectionManager: No building hit, deselecting all.");
             }
 
             // Clicked empty space - deselect all buildings
@@ -305,7 +308,6 @@ namespace RTS.Buildings
                 selectedBuildings.Add(building);
                 building.Select();
 
-                if (enableDebugLogs)
             }
         }
 
@@ -321,7 +323,6 @@ namespace RTS.Buildings
 
             selectedBuildings.Clear();
 
-            if (enableDebugLogs)
         }
 
         public void DeselectBuilding()
@@ -393,22 +394,12 @@ namespace RTS.Buildings
                         rallyFlag.SetRallyPointPosition(hit.point);
                         rallyFlag.ShowFlag(); // Show flag when rally point is set
                     }
-                    else
-                    {
-                        if (enableDebugLogs)
-                    }
+                    
 
-                    if (enableDebugLogs)
                 }
-                else
-                {
-                    if (enableDebugLogs)
-                }
+               
             }
-            else
-            {
-                if (enableDebugLogs)
-            }
+            
         }
 
         #region Multi-Select Helper Methods

@@ -59,7 +59,7 @@ namespace RTS.Units.Animation
             animationProfile = profile;
 
             // Validate profile
-            profile.ValidateProfile();
+            
 
             // Store original controller if not already stored
             if (originalController == null)

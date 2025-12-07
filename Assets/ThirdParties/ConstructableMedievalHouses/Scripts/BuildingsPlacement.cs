@@ -54,7 +54,7 @@ namespace CybeRockStudio
                 ReleaseTheBuildingIfClicked();
             }
 
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetButtonDown("Cancel"))
             {
                 enablePlacement = false;
             }

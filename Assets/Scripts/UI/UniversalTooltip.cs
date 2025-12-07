@@ -154,9 +154,7 @@ namespace RTS.UI
             foreach (var item in activeCostItems)
             {
                 if (item != null)
-                {
                     Destroy(item);
-                }
             }
             activeCostItems.Clear();
 
@@ -169,7 +167,6 @@ namespace RTS.UI
 
             costsContainer.SetActive(true);
 
-            // Create cost items
             foreach (var cost in costs)
             {
                 if (cost.Value <= 0) continue;
@@ -177,55 +174,42 @@ namespace RTS.UI
                 GameObject costItem = Instantiate(costItemPrefab, costsContainer.transform);
                 activeCostItems.Add(costItem);
 
-                // Find icon component - try "Icon" child first, then get from root
-                if (costItem.transform.Find("Icon")?.TryGetComponent<Image>(out var iconImage))
-                {
-                }
+                // --- ICON ---
+                Image iconImage = null;
+                Transform iconTransform = costItem.transform.Find("Icon");
+                if (iconTransform != null)
+                    iconTransform.TryGetComponent<Image>(out iconImage);
                 if (iconImage == null)
-                {
                     iconImage = costItem.GetComponentInChildren<Image>();
-                }
 
-                // Find text component - try multiple common names
-                if (costItem.transform.Find("Text")?.TryGetComponent<TextMeshProUGUI>(out var costText))
-                {
-                }
-                if (costText == null)
-                {
-                    costText = costItem.transform.Find("CostText")?.GetComponent<TextMeshProUGUI>();
-                }
-                if (costText == null)
-                {
-                    costText = costItem.transform.Find("Amount")?.GetComponent<TextMeshProUGUI>();
-                }
-                if (costText == null)
-                {
-                    costText = costItem.transform.Find("Value")?.GetComponent<TextMeshProUGUI>();
-                }
-                if (costText == null)
-                {
-                    // Last resort - get any TextMeshProUGUI component in children
-                    costText = costItem.GetComponentInChildren<TextMeshProUGUI>();
-                }
-
-                // Set icon
                 if (iconImage != null)
-                {
                     iconImage.sprite = GetResourceIcon(cost.Key);
+
+                // --- TEXT ---
+                TextMeshProUGUI costText = null;
+
+                string[] possibleNames = { "Text", "CostText", "Amount", "Value" };
+                foreach (var name in possibleNames)
+                {
+                    Transform textTransform = costItem.transform.Find(name);
+                    if (textTransform != null)
+                    {
+                        costText = textTransform.GetComponent<TextMeshProUGUI>();
+                        if (costText != null)
+                            break;
+                    }
                 }
 
-                // Set text
+                if (costText == null)
+                    costText = costItem.GetComponentInChildren<TextMeshProUGUI>();
+
                 if (costText != null)
-                {
                     costText.text = cost.Value.ToString();
-                }
-                else
-                {
-                }
 
                 costItem.SetActive(true);
             }
         }
+
 
         /// <summary>
         /// Update the stats display.

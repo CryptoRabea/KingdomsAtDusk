@@ -109,7 +109,6 @@ namespace RTS.Buildings
             // Check if replacing an existing building
             if (groups[groupNumber] != null)
             {
-                if (showDebugMessages)
             }
 
             // REPLACE (not add) - assign the new building
@@ -225,26 +224,22 @@ namespace RTS.Buildings
                 mainCamera.transform.LookAt(buildingPosition);
             }
 
-            if (showDebugMessages)
         }
 
         private System.Collections.IEnumerator SmoothCameraMove(Vector3 targetPosition, Vector3 lookAtPosition)
         {
             float elapsed = 0f;
-            Vector3 startPosition = mainCamera.transform.position;
-            Quaternion startRotation = mainCamera.transform.rotation;
+            mainCamera.transform.GetPositionAndRotation(out Vector3 startPosition, out Quaternion startRotation);
             Quaternion targetRotation = Quaternion.LookRotation(lookAtPosition - targetPosition);
 
             while (elapsed < 1f)
             {
                 elapsed += Time.deltaTime * cameraMoveSpeed;
-                mainCamera.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsed);
-                mainCamera.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsed);
+                mainCamera.transform.SetPositionAndRotation(Vector3.Lerp(startPosition, targetPosition, elapsed), Quaternion.Slerp(startRotation, targetRotation, elapsed));
                 yield return null;
             }
 
-            mainCamera.transform.position = targetPosition;
-            mainCamera.transform.rotation = targetRotation;
+            mainCamera.transform.SetPositionAndRotation(targetPosition, targetRotation);
         }
 
         /// <summary>
@@ -267,7 +262,6 @@ namespace RTS.Buildings
             if (groupNumber >= 0 && groupNumber < numberOfGroups)
             {
                 groups[groupNumber] = null;
-                if (showDebugMessages)
             }
         }
 
@@ -280,7 +274,6 @@ namespace RTS.Buildings
             {
                 groups[i] = null;
             }
-            if (showDebugMessages)
         }
 
         /// <summary>

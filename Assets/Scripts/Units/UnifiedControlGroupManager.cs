@@ -378,7 +378,6 @@ namespace RTS.Core
                 mainCamera.transform.LookAt(center);
             }
 
-            if (showDebugMessages)
         }
 
         /// <summary>
@@ -402,7 +401,6 @@ namespace RTS.Core
                 mainCamera.transform.LookAt(buildingPosition);
             }
 
-            if (showDebugMessages)
         }
 
         /// <summary>
@@ -450,7 +448,6 @@ namespace RTS.Core
             if (groupNumber >= 0 && groupNumber < numberOfGroups)
             {
                 groups[groupNumber].Clear();
-                if (showDebugMessages)
             }
         }
 
@@ -463,7 +460,6 @@ namespace RTS.Core
             {
                 group.Clear();
             }
-            if (showDebugMessages)
         }
 
         /// <summary>

@@ -188,42 +188,6 @@ namespace RTS.UI
         /// <summary>
         /// NEW: Display costs with resource icons from ResourceUI
         /// </summary>
-        private void UpdateCostDisplayWithIcons()
-        {
-            // Clear existing cost displays
-            foreach (Transform child in costContainer)
-            {
-                Destroy(child.gameObject);
-            }
-
-            var costs = buildingData.GetCosts();
-
-            foreach (var cost in costs)
-            {
-                // Create cost entry
-                GameObject costEntry = Instantiate(resourceCostPrefab, costContainer);
-
-                // Find components in prefab
-                if (costEntry.transform.Find("Icon")?.TryGetComponent<Image>(out var iconImg))
-                {
-                }
-                TextMeshProUGUI amountTxt = costEntry.transform.Find("Amount")?.GetComponent<TextMeshProUGUI>();
-
-                // Use centralized resource colors from utility
-                if (iconImg != null)
-                {
-                    // Use color-coded squares based on resource type
-                    iconImg.color = ResourceDisplayUtility.GetResourceColor(cost.Key);
-                }
-
-                // Set amount text
-                if (amountTxt != null)
-                {
-                    amountTxt.text = cost.Value.ToString();
-                }
-            }
-        }
-
         /// <summary>
         /// Update cost display with current resource availability
         /// </summary>
@@ -239,9 +203,12 @@ namespace RTS.UI
                 if (childIndex >= costContainer.childCount) break;
 
                 Transform costEntry = costContainer.GetChild(childIndex);
-                if (costEntry.Find("Amount")?.TryGetComponent<TextMeshProUGUI>(out var amountTxt))
-                {
-                }
+
+                // --- SAFELY GET AMOUNT TEXT ---
+                TextMeshProUGUI amountTxt = null;
+                Transform amountTransform = costEntry.Find("Amount");
+                if (amountTransform != null)
+                    amountTxt = amountTransform.GetComponent<TextMeshProUGUI>();
 
                 if (amountTxt != null && resourceService != null)
                 {
@@ -249,12 +216,8 @@ namespace RTS.UI
                     int required = cost.Value;
                     bool canAffordThis = current >= required;
 
-                    // Color code the amount: green if affordable, red if not
+                    // Color code the amount: white if affordable, red if not
                     amountTxt.color = canAffordThis ? Color.white : Color.red;
-
-                    // Optional: Show current/required
-                    // amountTxt.text = $"{required}"; // Just required
-                    // amountTxt.text = $"{current}/{required}"; // Current/Required
                 }
 
                 childIndex++;
@@ -266,6 +229,54 @@ namespace RTS.UI
                 UpdateSimpleCostText(resourceService);
             }
         }
+
+        /// <summary>
+        /// Display costs with resource icons from ResourceUI
+        /// </summary>
+        private void UpdateCostDisplayWithIcons()
+        {
+            if (costContainer == null || resourceCostPrefab == null || buildingData == null) return;
+
+            // Clear existing cost displays
+            foreach (Transform child in costContainer)
+            {
+                Destroy(child.gameObject);
+            }
+
+            var costs = buildingData.GetCosts();
+
+            foreach (var cost in costs)
+            {
+                // Create cost entry
+                GameObject costEntry = Instantiate(resourceCostPrefab, costContainer);
+
+                // --- SAFELY GET ICON IMAGE ---
+                Image iconImg = null;
+                Transform iconTransform = costEntry.transform.Find("Icon");
+                if (iconTransform != null)
+                    iconImg = iconTransform.GetComponent<Image>();
+
+                if (iconImg != null)
+                {
+                    // Use color-coded squares based on resource type
+                    iconImg.color = ResourceDisplayUtility.GetResourceColor(cost.Key);
+                }
+
+                // --- SAFELY GET AMOUNT TEXT ---
+                TextMeshProUGUI amountTxt = null;
+                Transform amountTransform = costEntry.transform.Find("Amount");
+                if (amountTransform != null)
+                    amountTxt = amountTransform.GetComponent<TextMeshProUGUI>();
+
+                if (amountTxt != null)
+                {
+                    amountTxt.text = cost.Value.ToString();
+                }
+
+                costEntry.SetActive(true);
+            }
+        }
+
 
         /// <summary>
         /// Simple text-based cost display (fallback)

@@ -123,11 +123,7 @@ namespace RTS.Buildings
                 flagVisual.SetActive(true);
                 UpdateFlagPosition();
             }
-            else
-            {
-                if (flagVisual == null)
-                if (rallyPoint == null)
-            }
+           
         }
 
         /// <summary>

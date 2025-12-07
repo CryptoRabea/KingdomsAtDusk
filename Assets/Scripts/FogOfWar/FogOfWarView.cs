@@ -70,7 +70,6 @@ namespace RTS.FogOfWar
                     return;
                 }
 
-                if (showDebugLogs)
             }
         }
 
@@ -85,7 +84,6 @@ namespace RTS.FogOfWar
             EventBus.Subscribe<BuildingCompletedEvent>(OnBuildingCompleted);
             EventBus.Subscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
-            if (showDebugLogs)
         }
 
         private void OnDisable()
@@ -97,7 +95,7 @@ namespace RTS.FogOfWar
             EventBus.Unsubscribe<BuildingCompletedEvent>(OnBuildingCompleted);
             EventBus.Unsubscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
 
-            if (showDebugLogs)
+            
         }
 
         private void Start()
@@ -105,7 +103,6 @@ namespace RTS.FogOfWar
             // Register any existing units/buildings in the scene
             RegisterExistingEntities();
 
-            if (showDebugLogs)
         }
 
         #endregion
@@ -119,14 +116,12 @@ namespace RTS.FogOfWar
             // Check if unit is on friendly layer
             if (!IsOnFriendlyLayer(evt.Unit))
             {
-                if (showDebugLogs)
                 return;
             }
 
             int sightRange = GetUnitSightRange(evt.Unit);
             RegisterRevealer(evt.Unit, sightRange);
 
-            if (showDebugLogs)
         }
 
         private void OnUnitDied(UnitDiedEvent evt)
@@ -135,7 +130,6 @@ namespace RTS.FogOfWar
 
             UnregisterRevealer(evt.Unit);
 
-            if (showDebugLogs)
         }
 
         private void OnBuildingPlaced(BuildingPlacedEvent evt)
@@ -150,10 +144,7 @@ namespace RTS.FogOfWar
             }
 
             // Get Building component and verify it's enabled
-            if (evt.Building.TryGetComponent<Building>(out var buildingComponent))
-            {
-            }
-            if (buildingComponent == null)
+            if (!evt.Building.TryGetComponent<Building>(out var buildingComponent))
             {
                 if (showDebugLogs)
                 return;
@@ -181,7 +172,6 @@ namespace RTS.FogOfWar
             }
             else
             {
-                if (showDebugLogs)
             }
         }
 
@@ -207,7 +197,6 @@ namespace RTS.FogOfWar
             int sightRange = GetBuildingSightRange(evt.Building);
             RegisterRevealer(evt.Building, sightRange);
 
-            if (showDebugLogs)
         }
 
         private void OnBuildingDestroyed(BuildingDestroyedEvent evt)
@@ -216,7 +205,7 @@ namespace RTS.FogOfWar
 
             UnregisterRevealer(evt.Building);
 
-            if (showDebugLogs)
+         
         }
 
         #endregion
@@ -228,7 +217,8 @@ namespace RTS.FogOfWar
             if (entity == null || fogWarSystem == null) return;
 
             // Safety check: Don't register buildings with disabled Building component (previews)
-            if (entity.TryGetComponent<Building>(out var buildingComponent) && !buildingComponent.enabled)
+            var buildingComponent = entity.GetComponent<Building>();
+            if (buildingComponent != null && !buildingComponent.enabled)
             {
                 if (showDebugLogs)
                 return;
@@ -243,7 +233,8 @@ namespace RTS.FogOfWar
 
             // Check if entity has custom update behavior
             bool entityUpdateOnMove = updateOnlyOnMove;
-            if (entity.TryGetComponent<FogRevealerConfig>(out var revealerConfig) && revealerConfig.OverrideUpdateBehavior)
+            var revealerConfig = entity.GetComponent<FogRevealerConfig>();
+            if (revealerConfig != null && revealerConfig.OverrideUpdateBehavior)
             {
                 entityUpdateOnMove = revealerConfig.UpdateOnlyOnMove;
             }
@@ -281,13 +272,15 @@ namespace RTS.FogOfWar
         private int GetUnitSightRange(GameObject unit)
         {
             // First, check if unit has FogRevealerConfig component for per-entity override
-            if (unit.TryGetComponent<FogRevealerConfig>(out var revealerConfig) && revealerConfig.OverrideSightRange)
+            var revealerConfig = unit.GetComponent<FogRevealerConfig>();
+            if (revealerConfig != null && revealerConfig.OverrideSightRange)
             {
                 return revealerConfig.CustomSightRange;
             }
 
             // Try to get UnitConfigSO from the UnitAIController
-            if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var unitAI) && unitAI.Config != null)
+            var unitAI = unit.GetComponent<RTS.Units.AI.UnitAIController>();
+            if (unitAI != null && unitAI.Config != null)
             {
                 // Check if we have a custom sight range for this unit type
                 var config = unitSightRanges.FirstOrDefault(c => c.unitName == unitAI.Config.unitName);
@@ -306,13 +299,15 @@ namespace RTS.FogOfWar
         private int GetBuildingSightRange(GameObject building)
         {
             // First, check if building has FogRevealerConfig component for per-entity override
-            if (building.TryGetComponent<FogRevealerConfig>(out var revealerConfig) && revealerConfig.OverrideSightRange)
+            var revealerConfig = building.GetComponent<FogRevealerConfig>();
+            if (revealerConfig != null && revealerConfig.OverrideSightRange)
             {
                 return revealerConfig.CustomSightRange;
             }
 
             // Try to get Building component
-            if (building.TryGetComponent<Building>(out var buildingComponent) && buildingComponent.Data != null)
+            var buildingComponent = building.GetComponent<Building>();
+            if (buildingComponent != null && buildingComponent.Data != null)
             {
                 // Check if we have a custom sight range for this building type
                 var config = buildingSightRanges.FirstOrDefault(c => c.buildingName == buildingComponent.Data.buildingName);
@@ -378,7 +373,6 @@ namespace RTS.FogOfWar
                 registeredBuildings++;
             }
 
-            if (showDebugLogs)
         }
 
         #endregion
@@ -461,7 +455,6 @@ namespace RTS.FogOfWar
             // Re-register all entities
             RegisterExistingEntities();
 
-            if (showDebugLogs)
         }
 
         #endregion
