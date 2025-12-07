@@ -154,8 +154,7 @@ namespace RTS.Units.AI
                 GameObject minion;
                 if (poolService != null)
                 {
-                    var minionComponent = minionPrefab.GetComponent<Transform>();
-                    if (minionComponent != null)
+                    if (minionPrefab.TryGetComponent<Transform>(out var minionComponent))
                     {
                         var pooledComponent = poolService.Get(minionComponent);
                         minion = pooledComponent.gameObject;
@@ -189,8 +188,7 @@ namespace RTS.Units.AI
                 var hit = areaAttackHits[i];
                 if (hit == null) continue;
 
-                var health = hit.GetComponent<UnitHealth>();
-                if (health != null && !health.IsDead)
+                if (hit.TryGetComponent<UnitHealth>(out var health) && !health.IsDead)
                 {
                     health.TakeDamage(areaAttackDamage, gameObject);
                     hitCount++;

@@ -110,7 +110,9 @@ namespace RTS.Buildings.WorkerModules
             {
                 if (building == null) continue;
 
-                Building buildingComponent = building.GetComponent<Building>();
+                if (building.TryGetComponent<Building>(out var buildingComponent))
+                {
+                }
                 if (buildingComponent == null || buildingComponent.IsConstructed) continue;
 
                 // Check if this building already has workers
@@ -125,7 +127,9 @@ namespace RTS.Buildings.WorkerModules
         {
             if (building == null || workforceService == null) return false;
 
-            Building buildingComponent = building.GetComponent<Building>();
+            if (building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null || buildingComponent.IsConstructed) return false;
 
             // Check if we can assign workers
@@ -166,7 +170,9 @@ namespace RTS.Buildings.WorkerModules
             // For now, we'll use a simple approach with Time.timeScale modifier
             // In a real implementation, you'd modify the Building component's construction logic
 
-            Building buildingComponent = building.GetComponent<Building>();
+            if (building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null) return;
 
             // You could add a public method to Building like:

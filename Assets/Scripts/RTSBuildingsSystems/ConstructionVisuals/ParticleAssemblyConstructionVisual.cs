@@ -115,8 +115,7 @@ namespace RTS.Buildings
                 particleObj.transform.localScale = Vector3.one * 0.1f;
 
                 // Set color
-                Renderer rend = particleObj.GetComponent<Renderer>();
-                if (rend != null)
+                if (particleObj.TryGetComponent<Renderer>(out var rend))
                 {
                     Material mat = new Material(Shader.Find("Standard"));
                     mat.color = particleColor;
@@ -126,8 +125,7 @@ namespace RTS.Buildings
                 }
 
                 // Remove collider
-                Collider col = particleObj.GetComponent<Collider>();
-                if (col != null)
+                if (particleObj.TryGetComponent<Collider>(out var col))
                 {
                     Destroy(col);
                 }
@@ -149,7 +147,9 @@ namespace RTS.Buildings
             // Add physics if enabled
             if (usePhysics)
             {
-                Rigidbody rb = particleObj.GetComponent<Rigidbody>();
+                if (particleObj.TryGetComponent<Rigidbody>(out var rb))
+                {
+                }
                 if (rb == null)
                 {
                     rb = particleObj.AddComponent<Rigidbody>();
@@ -194,8 +194,7 @@ namespace RTS.Buildings
                         // Smooth movement
                         if (usePhysics)
                         {
-                            Rigidbody rb = particle.gameObject.GetComponent<Rigidbody>();
-                            if (rb != null)
+                            if (particle.gameObject.TryGetComponent<Rigidbody>(out var rb))
                             {
                                 Vector3 direction = (particle.targetPosition - particle.gameObject.transform.position).normalized;
                                 rb.linearVelocity = direction * particleSpeed;

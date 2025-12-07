@@ -133,7 +133,9 @@ namespace RTS.Editor
             canvasObj.AddComponent<CanvasScaler>();
             canvasObj.AddComponent<GraphicRaycaster>();
 
-            CanvasScaler scaler = canvasObj.GetComponent<CanvasScaler>();
+            if (canvasObj.TryGetComponent<CanvasScaler>(out var scaler))
+            {
+            }
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
 
@@ -150,7 +152,9 @@ namespace RTS.Editor
             backgroundObj.transform.SetParent(canvasObj.transform, false);
             Image backgroundImg = backgroundObj.AddComponent<Image>();
             backgroundImg.color = menuBackgroundColor;
-            RectTransform bgRect = backgroundObj.GetComponent<RectTransform>();
+            if (backgroundObj.TryGetComponent<RectTransform>(out var bgRect))
+            {
+            }
             bgRect.anchorMin = Vector2.zero;
             bgRect.anchorMax = Vector2.one;
             bgRect.offsetMin = Vector2.zero;
@@ -167,7 +171,9 @@ namespace RTS.Editor
             titleText.fontSize = 72;
             titleText.alignment = TextAlignmentOptions.Center;
             titleText.color = Color.white;
-            RectTransform titleRect = titleObj.GetComponent<RectTransform>();
+            if (titleObj.TryGetComponent<RectTransform>(out var titleRect))
+            {
+            }
             titleRect.anchorMin = new Vector2(0.5f, 0.7f);
             titleRect.anchorMax = new Vector2(0.5f, 0.9f);
             titleRect.sizeDelta = new Vector2(800, 200);
@@ -180,7 +186,9 @@ namespace RTS.Editor
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlHeight = false;
             layout.childControlWidth = false;
-            RectTransform containerRect = buttonContainer.GetComponent<RectTransform>();
+            if (buttonContainer.TryGetComponent<RectTransform>(out var containerRect))
+            {
+            }
             containerRect.anchorMin = new Vector2(0.5f, 0.3f);
             containerRect.anchorMax = new Vector2(0.5f, 0.6f);
             containerRect.sizeDelta = new Vector2(400, 400);
@@ -210,7 +218,9 @@ namespace RTS.Editor
             versionText.fontSize = 24;
             versionText.alignment = TextAlignmentOptions.BottomRight;
             versionText.color = new Color(1, 1, 1, 0.5f);
-            RectTransform versionRect = versionObj.GetComponent<RectTransform>();
+            if (versionObj.TryGetComponent<RectTransform>(out var versionRect))
+            {
+            }
             versionRect.anchorMin = new Vector2(1, 0);
             versionRect.anchorMax = new Vector2(1, 0);
             versionRect.pivot = new Vector2(1, 0);
@@ -259,7 +269,9 @@ namespace RTS.Editor
             panel.transform.SetParent(parent, false);
             Image panelImg = panel.AddComponent<Image>();
             panelImg.color = new Color(0, 0, 0, 0); // Transparent
-            RectTransform rect = panel.GetComponent<RectTransform>();
+            if (panel.TryGetComponent<RectTransform>(out var rect))
+            {
+            }
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
@@ -292,14 +304,18 @@ namespace RTS.Editor
             buttonText.fontSize = 32;
             buttonText.alignment = TextAlignmentOptions.Center;
             buttonText.color = Color.white;
-            RectTransform textRect = textObj.GetComponent<RectTransform>();
+            if (textObj.TryGetComponent<RectTransform>(out var textRect))
+            {
+            }
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.offsetMin = Vector2.zero;
             textRect.offsetMax = Vector2.zero;
 
             // Set button size
-            RectTransform btnRect = btnObj.GetComponent<RectTransform>();
+            if (btnObj.TryGetComponent<RectTransform>(out var btnRect))
+            {
+            }
             btnRect.sizeDelta = new Vector2(300, 60);
 
             return button;
@@ -313,7 +329,9 @@ namespace RTS.Editor
             title.text = "Settings";
             title.fontSize = 48;
             title.alignment = TextAlignmentOptions.Center;
-            RectTransform titleRect = titleObj.GetComponent<RectTransform>();
+            if (titleObj.TryGetComponent<RectTransform>(out var titleRect))
+            {
+            }
             titleRect.anchorMin = new Vector2(0.5f, 0.8f);
             titleRect.anchorMax = new Vector2(0.5f, 0.9f);
             titleRect.sizeDelta = new Vector2(400, 100);
@@ -330,7 +348,9 @@ namespace RTS.Editor
             title.text = "Credits";
             title.fontSize = 48;
             title.alignment = TextAlignmentOptions.Center;
-            RectTransform titleRect = titleObj.GetComponent<RectTransform>();
+            if (titleObj.TryGetComponent<RectTransform>(out var titleRect))
+            {
+            }
             titleRect.anchorMin = new Vector2(0.5f, 0.8f);
             titleRect.anchorMax = new Vector2(0.5f, 0.9f);
             titleRect.sizeDelta = new Vector2(400, 100);
@@ -341,7 +361,9 @@ namespace RTS.Editor
             text.text = "Developed by: Your Studio\nPowered by Unity\n\nThanks for playing!";
             text.fontSize = 24;
             text.alignment = TextAlignmentOptions.Center;
-            RectTransform textRect = creditsText.GetComponent<RectTransform>();
+            if (creditsText.TryGetComponent<RectTransform>(out var textRect))
+            {
+            }
             textRect.anchorMin = new Vector2(0.5f, 0.4f);
             textRect.anchorMax = new Vector2(0.5f, 0.7f);
             textRect.sizeDelta = new Vector2(600, 300);
@@ -362,7 +384,9 @@ namespace RTS.Editor
             canvas.sortingOrder = 999; // Always on top
 
             loadingScreenObj.AddComponent<CanvasScaler>();
-            CanvasScaler scaler = loadingScreenObj.GetComponent<CanvasScaler>();
+            if (loadingScreenObj.TryGetComponent<CanvasScaler>(out var scaler))
+            {
+            }
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
 
@@ -376,7 +400,9 @@ namespace RTS.Editor
             rootPanel.transform.SetParent(loadingScreenObj.transform, false);
             Image panelImg = rootPanel.AddComponent<Image>();
             panelImg.color = new Color(0, 0, 0, 0.95f);
-            RectTransform rootRect = rootPanel.GetComponent<RectTransform>();
+            if (rootPanel.TryGetComponent<RectTransform>(out var rootRect))
+            {
+            }
             rootRect.anchorMin = Vector2.zero;
             rootRect.anchorMax = Vector2.one;
             rootRect.offsetMin = Vector2.zero;
@@ -387,7 +413,9 @@ namespace RTS.Editor
             progressBg.transform.SetParent(rootPanel.transform, false);
             Image progressBgImg = progressBg.AddComponent<Image>();
             progressBgImg.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-            RectTransform progressBgRect = progressBg.GetComponent<RectTransform>();
+            if (progressBg.TryGetComponent<RectTransform>(out var progressBgRect))
+            {
+            }
             progressBgRect.anchorMin = new Vector2(0.5f, 0.4f);
             progressBgRect.anchorMax = new Vector2(0.5f, 0.4f);
             progressBgRect.pivot = new Vector2(0.5f, 0.5f);
@@ -397,7 +425,9 @@ namespace RTS.Editor
             GameObject progressBarObj = new GameObject("ProgressBar");
             progressBarObj.transform.SetParent(rootPanel.transform, false);
             Slider progressBar = progressBarObj.AddComponent<Slider>();
-            RectTransform progressBarRect = progressBarObj.GetComponent<RectTransform>();
+            if (progressBarObj.TryGetComponent<RectTransform>(out var progressBarRect))
+            {
+            }
             progressBarRect.anchorMin = new Vector2(0.5f, 0.4f);
             progressBarRect.anchorMax = new Vector2(0.5f, 0.4f);
             progressBarRect.pivot = new Vector2(0.5f, 0.5f);
@@ -408,7 +438,9 @@ namespace RTS.Editor
             fillObj.transform.SetParent(progressBarObj.transform, false);
             Image fillImg = fillObj.AddComponent<Image>();
             fillImg.color = new Color(0.2f, 0.8f, 1f, 1f);
-            RectTransform fillRect = fillObj.GetComponent<RectTransform>();
+            if (fillObj.TryGetComponent<RectTransform>(out var fillRect))
+            {
+            }
             fillRect.anchorMin = Vector2.zero;
             fillRect.anchorMax = Vector2.one;
             fillRect.offsetMin = Vector2.zero;
@@ -425,7 +457,9 @@ namespace RTS.Editor
             progressText.fontSize = 32;
             progressText.alignment = TextAlignmentOptions.Center;
             progressText.color = Color.white;
-            RectTransform progressTextRect = progressTextObj.GetComponent<RectTransform>();
+            if (progressTextObj.TryGetComponent<RectTransform>(out var progressTextRect))
+            {
+            }
             progressTextRect.anchorMin = new Vector2(0.5f, 0.5f);
             progressTextRect.anchorMax = new Vector2(0.5f, 0.5f);
             progressTextRect.pivot = new Vector2(0.5f, 0.5f);
@@ -440,7 +474,9 @@ namespace RTS.Editor
             tipText.fontSize = 24;
             tipText.alignment = TextAlignmentOptions.Center;
             tipText.color = new Color(1, 1, 1, 0.7f);
-            RectTransform tipTextRect = tipTextObj.GetComponent<RectTransform>();
+            if (tipTextObj.TryGetComponent<RectTransform>(out var tipTextRect))
+            {
+            }
             tipTextRect.anchorMin = new Vector2(0.5f, 0.2f);
             tipTextRect.anchorMax = new Vector2(0.5f, 0.2f);
             tipTextRect.pivot = new Vector2(0.5f, 0.5f);

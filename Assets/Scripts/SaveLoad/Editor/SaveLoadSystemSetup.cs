@@ -376,7 +376,9 @@ namespace RTS.SaveLoad.Editor
             panel.AddComponent<RectTransform>();
             panel.transform.SetParent(parent.transform, false);
 
-            var panelRect = panel.GetComponent<RectTransform>();
+            if (panel.TryGetComponent<RectTransform>(out var panelRect))
+            {
+            }
             panelRect.anchorMin = Vector2.zero;
             panelRect.anchorMax = Vector2.one;
             panelRect.sizeDelta = Vector2.zero;
@@ -739,8 +741,7 @@ namespace RTS.SaveLoad.Editor
         private void WireReferences(GameObject systemObj, SaveLoadSettings settings, SaveLoadMenu menu, GameObject itemPrefab)
         {
             // Wire SaveLoadManager using SerializedObject
-            var manager = systemObj.GetComponent<SaveLoadManager>();
-            if (manager != null)
+            if (systemObj.TryGetComponent<SaveLoadManager>(out var manager))
             {
                 var serializedManager = new SerializedObject(manager);
                 serializedManager.FindProperty("settings").objectReferenceValue = settings;
@@ -750,8 +751,7 @@ namespace RTS.SaveLoad.Editor
             }
 
             // Wire AutoSaveSystem using SerializedObject
-            var autoSave = systemObj.GetComponent<AutoSaveSystem>();
-            if (autoSave != null)
+            if (systemObj.TryGetComponent<AutoSaveSystem>(out var autoSave))
             {
                 var serializedAutoSave = new SerializedObject(autoSave);
                 serializedAutoSave.FindProperty("settings").objectReferenceValue = settings;
@@ -760,8 +760,7 @@ namespace RTS.SaveLoad.Editor
             }
 
             // Wire SaveLoadInputHandler using SerializedObject
-            var inputHandler = systemObj.GetComponent<SaveLoadInputHandler>();
-            if (inputHandler != null)
+            if (systemObj.TryGetComponent<SaveLoadInputHandler>(out var inputHandler))
             {
                 var serializedInputHandler = new SerializedObject(inputHandler);
                 serializedInputHandler.FindProperty("inGameMenu").objectReferenceValue = menu;
@@ -829,8 +828,7 @@ namespace RTS.SaveLoad.Editor
                 return;
             }
 
-            var manager = systemObj.GetComponent<SaveLoadManager>();
-            if (manager != null)
+            if (systemObj.TryGetComponent<SaveLoadManager>(out var manager))
             {
                 var serializedGameManager = new SerializedObject(gameManager);
                 serializedGameManager.FindProperty("saveLoadManager").objectReferenceValue = manager;

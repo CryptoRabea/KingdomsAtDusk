@@ -1,4 +1,4 @@
-﻿using RTS.Buildings;
+using RTS.Buildings;
 using RTS.Core.Services;
 using RTS.Core.Utilities;
 using RTS.Core.Events;
@@ -204,7 +204,9 @@ namespace RTS.UI
                 GameObject costEntry = Instantiate(resourceCostPrefab, costContainer);
 
                 // Find components in prefab
-                Image iconImg = costEntry.transform.Find("Icon")?.GetComponent<Image>();
+                if (costEntry.transform.Find("Icon")?.TryGetComponent<Image>(out var iconImg))
+                {
+                }
                 TextMeshProUGUI amountTxt = costEntry.transform.Find("Amount")?.GetComponent<TextMeshProUGUI>();
 
                 // Use centralized resource colors from utility
@@ -237,7 +239,9 @@ namespace RTS.UI
                 if (childIndex >= costContainer.childCount) break;
 
                 Transform costEntry = costContainer.GetChild(childIndex);
-                TextMeshProUGUI amountTxt = costEntry.Find("Amount")?.GetComponent<TextMeshProUGUI>();
+                if (costEntry.Find("Amount")?.TryGetComponent<TextMeshProUGUI>(out var amountTxt))
+                {
+                }
 
                 if (amountTxt != null && resourceService != null)
                 {

@@ -1008,7 +1008,7 @@ namespace RTS.Buildings
                 for (int i = 0; i < hitCount; i++)
                 {
                     var hit = _overlapResults[i];
-                    if (hit.GetComponent<WallConnectionSystem>() != null)
+                    if (hit.TryGetComponent<WallConnectionSystem>(out var wallConnectionSystem))
                     {
                         EventBus.Publish(new BuildingPlacedEvent(hit.gameObject, data.position));
                         break;

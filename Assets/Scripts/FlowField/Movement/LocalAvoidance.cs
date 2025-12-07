@@ -167,8 +167,7 @@ namespace FlowField.Movement
 
             for (int i = 0; i < count; i++)
             {
-                var follower = colliderBuffer[i].GetComponent<FlowFieldFollower>();
-                if (follower != null && follower != unit)
+                if (colliderBuffer[i].TryGetComponent<FlowFieldFollower>(out var follower) && follower != unit)
                 {
                     neighborBuffer.Add(follower);
                 }

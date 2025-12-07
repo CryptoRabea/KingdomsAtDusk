@@ -132,15 +132,13 @@ namespace RTS.Buildings
 
             // Check if the collider belongs to a valid unit
             // You can add more validation here (e.g., check for UnitHealth, UnitMovement components)
-            var unitHealth = col.GetComponent<RTS.Units.UnitHealth>();
-            if (unitHealth != null && unitHealth.IsDead)
+            if (col.TryGetComponent<RTS.Units.UnitHealth>(out var unitHealth) && unitHealth.IsDead)
             {
                 return false; // Ignore dead units
             }
 
             // Check if it's a building (we want units, not buildings)
-            var building = col.GetComponent<Building>();
-            if (building != null)
+            if (col.TryGetComponent<Building>(out var building))
             {
                 return false; // Ignore buildings
             }

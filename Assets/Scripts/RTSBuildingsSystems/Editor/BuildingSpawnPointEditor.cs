@@ -99,7 +99,9 @@ namespace RTSBuildingsSystems.Editor
                 if (prefab == null) continue;
 
                 // Check if prefab has UnitTrainingQueue component (buildings that can train units)
-                UnitTrainingQueue trainingQueue = prefab.GetComponent<UnitTrainingQueue>();
+                if (prefab.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+                {
+                }
                 if (trainingQueue == null)
                 {
                     skippedCount++;

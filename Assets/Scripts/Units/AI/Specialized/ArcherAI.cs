@@ -37,7 +37,9 @@ public class ArcherAI : UnitAIController
         {
             if (hit.gameObject == gameObject) continue;
 
-            var health = hit.GetComponent<UnitHealth>();
+            if (hit.TryGetComponent<UnitHealth>(out var health))
+            {
+            }
             if (health == null || health.IsDead) continue;
 
             float distance = Vector3.Distance(transform.position, hit.transform.position);

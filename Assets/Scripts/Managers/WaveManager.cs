@@ -157,14 +157,12 @@ namespace RTS.Managers
 
         private void ApplyDifficultyScaling(GameObject enemy, WaveConfig config)
         {
-            var health = enemy.GetComponent<Units.UnitHealth>();
-            if (health != null && config.HealthMultiplier > 1f)
+            if (enemy.TryGetComponent<Units.UnitHealth>(out var health) && config.HealthMultiplier > 1f)
             {
                 health.SetMaxHealth(health.MaxHealth * config.HealthMultiplier);
             }
 
-            var combat = enemy.GetComponent<Units.UnitCombat>();
-            if (combat != null && config.DamageMultiplier > 1f)
+            if (enemy.TryGetComponent<Units.UnitCombat>(out var combat) && config.DamageMultiplier > 1f)
             {
                 combat.SetAttackDamage(combat.AttackDamage * config.DamageMultiplier);
             }

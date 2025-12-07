@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using RTS.Core.Services;
 using RTS.Core.Events;
@@ -584,8 +584,7 @@ namespace RTS.Managers
 
             if (isPlacingTower)
             {
-                var towerComponent = newBuilding.GetComponent<Tower>();
-                if (towerComponent != null && currentTowerData != null)
+                if (newBuilding.TryGetComponent<Tower>(out var towerComponent) && currentTowerData != null)
                 {
                     towerComponent.SetTowerData(currentTowerData);
                 }
@@ -600,8 +599,7 @@ namespace RTS.Managers
 
             if (isPlacingGate)
             {
-                var gateComponent = newBuilding.GetComponent<Gate>();
-                if (gateComponent != null && currentGateData != null)
+                if (newBuilding.TryGetComponent<Gate>(out var gateComponent) && currentGateData != null)
                 {
                     gateComponent.SetGateData(currentGateData);
                 }

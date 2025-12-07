@@ -125,7 +125,9 @@ namespace RTS.Buildings.Editor
                 wallPrefabRoot.AddComponent<Building>();
             }
 
-            WallConnectionSystem wallSystem = wallPrefabRoot.GetComponent<WallConnectionSystem>();
+            if (wallPrefabRoot.TryGetComponent<WallConnectionSystem>(out var wallSystem))
+            {
+            }
             if (wallSystem == null)
             {
                 wallSystem = wallPrefabRoot.AddComponent<WallConnectionSystem>();

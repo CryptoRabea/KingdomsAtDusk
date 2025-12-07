@@ -56,9 +56,9 @@ namespace RTS.Units.Animation
             }
 
             // Verify required components
-            bool hasMovement = selected.GetComponent<UnitMovement>() != null;
-            bool hasCombat = selected.GetComponent<UnitCombat>() != null;
-            bool hasHealth = selected.GetComponent<UnitHealth>() != null;
+            bool hasMovement = selected.TryGetComponent<UnitMovement>(out var _);
+            bool hasCombat = selected.TryGetComponent<UnitCombat>(out var _);
+            bool hasHealth = selected.TryGetComponent<UnitHealth>(out var _);
 
             string warnings = "";
             if (!hasMovement) warnings += "• UnitMovement component\n";
@@ -177,37 +177,39 @@ namespace RTS.Units.Animation
 
             // Check components
             totalChecks++;
-            bool hasAnimator = selected.GetComponent<Animator>() != null;
+            bool hasAnimator = selected.TryGetComponent<Animator>(out var _);
             report += (hasAnimator ? "✅" : "❌") + " Animator\n";
             if (hasAnimator) passCount++;
 
             totalChecks++;
-            bool hasArcherController = selected.GetComponent<ArcherAnimationController>() != null;
+            bool hasArcherController = selected.TryGetComponent<ArcherAnimationController>(out var _);
             report += (hasArcherController ? "✅" : "❌") + " ArcherAnimationController\n";
             if (hasArcherController) passCount++;
 
             totalChecks++;
-            bool hasIK = selected.GetComponent<ArcherAimIK>() != null;
+            bool hasIK = selected.TryGetComponent<ArcherAimIK>(out var _);
             report += (hasIK ? "✅" : "❌") + " ArcherAimIK\n";
             if (hasIK) passCount++;
 
             totalChecks++;
-            bool hasMovement = selected.GetComponent<UnitMovement>() != null;
+            bool hasMovement = selected.TryGetComponent<UnitMovement>(out var _);
             report += (hasMovement ? "✅" : "❌") + " UnitMovement\n";
             if (hasMovement) passCount++;
 
             totalChecks++;
-            bool hasCombat = selected.GetComponent<UnitCombat>() != null;
+            bool hasCombat = selected.TryGetComponent<UnitCombat>(out var _);
             report += (hasCombat ? "✅" : "❌") + " UnitCombat\n";
             if (hasCombat) passCount++;
 
             totalChecks++;
-            bool hasHealth = selected.GetComponent<UnitHealth>() != null;
+            bool hasHealth = selected.TryGetComponent<UnitHealth>(out var _);
             report += (hasHealth ? "✅" : "❌") + " UnitHealth\n";
             if (hasHealth) passCount++;
 
             // Check Animator Controller
-            Animator animator = selected.GetComponent<Animator>();
+            if (selected.TryGetComponent<Animator>(out var animator))
+            {
+            }
             totalChecks++;
             bool hasController = animator != null && animator.runtimeAnimatorController != null;
             report += (hasController ? "✅" : "❌") + " Animator Controller Assigned\n";

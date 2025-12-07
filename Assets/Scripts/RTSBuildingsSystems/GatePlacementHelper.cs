@@ -107,8 +107,12 @@ namespace RTS.Buildings
                     if (!walls.Contains(hit.gameObject))
                     {
                         // Check if it has WallConnectionSystem or is a wall building
-                        var wallComp = hit.GetComponent<WallConnectionSystem>();
-                        var buildingComp = hit.GetComponent<Building>();
+                        if (hit.TryGetComponent<WallConnectionSystem>(out var wallComp))
+                        {
+                        }
+                        if (hit.TryGetComponent<Building>(out var buildingComp))
+                        {
+                        }
 
                         if (wallComp != null || (buildingComp != null && buildingComp.Data?.buildingType == BuildingType.Defensive))
                         {
@@ -145,7 +149,9 @@ namespace RTS.Buildings
             Quaternion wallRotation = wall.transform.rotation;
 
             // Store wall connection data before destroying it
-            var wallConnection = wall.GetComponent<WallConnectionSystem>();
+            if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
+            {
+            }
             List<WallConnectionSystem> connectedWalls = null;
 
             if (wallConnection != null)
@@ -153,7 +159,9 @@ namespace RTS.Buildings
                 connectedWalls = wallConnection.GetConnectedWalls();
             }
 
-            var wallBuilding = wall.GetComponent<Building>();
+            if (wall.TryGetComponent<Building>(out var wallBuilding))
+            {
+            }
             string wallName = wallBuilding != null ? wallBuilding.Data?.buildingName : "Wall";
 
 
@@ -178,7 +186,9 @@ namespace RTS.Buildings
             if (gate == null || replacementData == null) return;
 
             // Add WallConnectionSystem to gate so it maintains wall continuity
-            var gateWallConnection = gate.GetComponent<WallConnectionSystem>();
+            if (gate.TryGetComponent<WallConnectionSystem>(out var gateWallConnection))
+            {
+            }
             if (gateWallConnection == null)
             {
                 gateWallConnection = gate.AddComponent<WallConnectionSystem>();

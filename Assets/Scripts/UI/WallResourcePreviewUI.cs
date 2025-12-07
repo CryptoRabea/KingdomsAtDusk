@@ -150,8 +150,7 @@ namespace RTS.UI
             Vector2 panelPos = mousePos + screenOffset;
 
             // Clamp to screen bounds
-            RectTransform panelRect = previewPanel.GetComponent<RectTransform>();
-            if (panelRect != null)
+            if (previewPanel.TryGetComponent<RectTransform>(out var panelRect))
             {
                 // Get screen dimensions
                 float screenWidth = Screen.width;

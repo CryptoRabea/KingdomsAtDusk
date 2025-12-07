@@ -146,8 +146,7 @@ namespace RTS.Units.Animation
             GameObject effect = Instantiate(effectPrefab, spawnPos, Quaternion.identity);
             
             // Auto-destroy particle effects
-            var particleSystem = effect.GetComponent<ParticleSystem>();
-            if (particleSystem != null)
+            if (effect.TryGetComponent<ParticleSystem>(out var particleSystem))
             {
                 Destroy(effect, particleSystem.main.duration + particleSystem.main.startLifetime.constantMax);
             }

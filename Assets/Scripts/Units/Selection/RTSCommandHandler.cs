@@ -153,8 +153,7 @@ namespace RTS.Units
             if (Physics.Raycast(ray, out RaycastHit hitUnit, 1000f, unitLayer))
             {
                 // Check if it's an enemy
-                var targetUnit = hitUnit.collider.GetComponent<UnitHealth>();
-                if (targetUnit != null && IsEnemy(hitUnit.collider.gameObject))
+                if (hitUnit.collider.TryGetComponent<UnitHealth>(out var targetUnit) && IsEnemy(hitUnit.collider.gameObject))
                 {
                     // Attack command
                     IssueAttackCommand(hitUnit.collider.transform);
@@ -226,14 +225,12 @@ namespace RTS.Units
                 Vector3 unitDestination = formationPositions[index];
 
                 // Set as forced move with destination so unit can resume aggro when it arrives
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, unitDestination);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.SetDestination(unitDestination);
                 }
@@ -318,14 +315,12 @@ namespace RTS.Units
                 Vector3 unitDestination = formationPositions[index];
 
                 // Clear AI target and set forced move flag with destination
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, unitDestination);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.SetDestination(unitDestination);
                 }
@@ -365,20 +360,17 @@ namespace RTS.Units
                 if (unit == null) continue;
 
                 // Clear forced move flag when issuing attack command
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(false);
                 }
 
-                var combat = unit.GetComponent<UnitCombat>();
-                if (combat != null)
+                if (unit.TryGetComponent<UnitCombat>(out var combat))
                 {
                     combat.SetTarget(target);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.FollowTarget(target);
                 }

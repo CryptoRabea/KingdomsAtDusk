@@ -200,7 +200,9 @@ namespace RTS.Animals
             if (poolService != null)
             {
                 // Use object pooling
-                var prefabComponent = config.animalPrefab.GetComponent<Transform>();
+                if (config.animalPrefab.TryGetComponent<Transform>(out var prefabComponent))
+                {
+                }
                 var instance = poolService.Get(prefabComponent);
                 animalObj = instance.gameObject;
                 animalObj.transform.position = position;
@@ -213,8 +215,7 @@ namespace RTS.Animals
             }
 
             // Initialize animal behavior
-            var animalBehavior = animalObj.GetComponent<AnimalBehavior>();
-            if (animalBehavior != null)
+            if (animalObj.TryGetComponent<AnimalBehavior>(out var animalBehavior))
             {
                 animalBehavior.Initialize(config, position);
             }

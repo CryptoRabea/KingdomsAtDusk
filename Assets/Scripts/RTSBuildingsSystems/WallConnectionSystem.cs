@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
 
@@ -193,7 +193,9 @@ namespace RTS.Buildings
             //  FIX: Only process if this is a wall and it's nearby
             if (evt.Building == null) return;
 
-            var wallSystem = evt.Building.GetComponent<WallConnectionSystem>();
+            if (evt.Building.TryGetComponent<WallConnectionSystem>(out var wallSystem))
+            {
+            }
             if (wallSystem == null) return;
 
             // Check if nearby

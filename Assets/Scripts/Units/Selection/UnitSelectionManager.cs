@@ -1,4 +1,4 @@
-﻿// File: UnitSelectionManager.cs
+// File: UnitSelectionManager.cs
 // Patched: Fix double/triple-click behavior and SO reference comparisons
 
 using UnityEngine;
@@ -589,8 +589,7 @@ namespace RTS.Units
                     //  OPTIMIZED: Find nearest/furthest in single pass instead of sorting
                     for (int i = 0; i < hitCount; i++)
                     {
-                        var selectable = raycastHitsCache[i].collider.GetComponent<UnitSelectable>();
-                        if (selectable != null && PassesTypeFilter(selectable))
+                        if (raycastHitsCache[i].collider.TryGetComponent<UnitSelectable>(out var selectable) && PassesTypeFilter(selectable))
                         {
                             float distance = raycastHitsCache[i].distance;
 
@@ -993,8 +992,7 @@ namespace RTS.Units
             // Check for new hover
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, selectableLayer))
             {
-                var selectable = hit.collider.GetComponent<UnitSelectable>();
-                if (selectable != null && !selectable.IsSelected && PassesTypeFilter(selectable))
+                if (hit.collider.TryGetComponent<UnitSelectable>(out var selectable) && !selectable.IsSelected && PassesTypeFilter(selectable))
                 {
                     hoveredUnit = selectable;
                     hoveredUnit.SetHoverHighlight(true, hoverColor);
@@ -1145,7 +1143,9 @@ namespace RTS.Units
             {
                 if (unit == null) continue;
 
-                var movement = unit.GetComponent<UnitMovement>();
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
+                {
+                }
                 movement?.SetDestination(destination);
             }
         }

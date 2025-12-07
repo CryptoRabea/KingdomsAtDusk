@@ -169,7 +169,9 @@ namespace KingdomsAtDusk.Buildings
             GameObject workerObj = Instantiate(config.unitPrefab, spawnPos, Quaternion.identity);
 
             // Set up worker AI
-            var gatheringAI = workerObj.GetComponent<WorkerGatheringAI>();
+            if (workerObj.TryGetComponent<WorkerGatheringAI>(out var gatheringAI))
+            {
+            }
             if (gatheringAI == null)
             {
                 gatheringAI = workerObj.AddComponent<WorkerGatheringAI>();

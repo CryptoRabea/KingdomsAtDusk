@@ -178,14 +178,18 @@ namespace RTS.UI
                 activeCostItems.Add(costItem);
 
                 // Find icon component - try "Icon" child first, then get from root
-                Image iconImage = costItem.transform.Find("Icon")?.GetComponent<Image>();
+                if (costItem.transform.Find("Icon")?.TryGetComponent<Image>(out var iconImage))
+                {
+                }
                 if (iconImage == null)
                 {
                     iconImage = costItem.GetComponentInChildren<Image>();
                 }
 
                 // Find text component - try multiple common names
-                TextMeshProUGUI costText = costItem.transform.Find("Text")?.GetComponent<TextMeshProUGUI>();
+                if (costItem.transform.Find("Text")?.TryGetComponent<TextMeshProUGUI>(out var costText))
+                {
+                }
                 if (costText == null)
                 {
                     costText = costItem.transform.Find("CostText")?.GetComponent<TextMeshProUGUI>();

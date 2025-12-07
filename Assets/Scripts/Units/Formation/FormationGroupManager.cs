@@ -226,14 +226,12 @@ namespace RTS.Units.Formation
                 Vector3 newPosition = formationPositions[index];
 
                 // Set forced move to new formation position
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, newPosition);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.SetDestination(newPosition);
                 }

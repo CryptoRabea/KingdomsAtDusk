@@ -238,8 +238,7 @@ namespace RTS.UI.HUD
         {
             if (hudFramework == null) return;
 
-            var inventoryUI = hudFramework.GetComponent<InventoryUI>();
-            if (inventoryUI != null)
+            if (hudFramework.TryGetComponent<InventoryUI>(out var inventoryUI))
             {
                 inventoryUI.SetInventory(inventory);
             }
@@ -252,8 +251,7 @@ namespace RTS.UI.HUD
         {
             if (hudFramework == null) return;
 
-            var inventoryUI = hudFramework.GetComponent<InventoryUI>();
-            if (inventoryUI != null)
+            if (hudFramework.TryGetComponent<InventoryUI>(out var inventoryUI))
             {
                 inventoryUI.ClearInventory();
             }
@@ -270,8 +268,7 @@ namespace RTS.UI.HUD
         {
             if (hudFramework == null) return;
 
-            var topBar = hudFramework.GetComponent<TopBarUI>();
-            if (topBar != null)
+            if (hudFramework.TryGetComponent<TopBarUI>(out var topBar))
             {
                 topBar.Configure(showResources, showMenu, showClock, showPopulation);
             }

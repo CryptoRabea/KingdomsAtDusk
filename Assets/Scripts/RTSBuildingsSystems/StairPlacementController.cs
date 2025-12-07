@@ -118,8 +118,7 @@ namespace RTS.Buildings
 
 
             // Disable components for preview
-            var stairComponent = stairPreview.GetComponent<WallStairs>();
-            if (stairComponent != null)
+            if (stairPreview.TryGetComponent<WallStairs>(out var stairComponent))
                 stairComponent.enabled = false;
 
             // Reactivate preview now that components are cleaned up
@@ -198,8 +197,7 @@ namespace RTS.Buildings
         private Vector3 CalculateStairPosition(Vector3 mousePos, GameObject wall)
         {
             // Get the closest point on the wall
-            Collider wallCollider = wall.GetComponent<Collider>();
-            if (wallCollider != null)
+            if (wall.TryGetComponent<Collider>(out var wallCollider))
             {
                 Vector3 closestPoint = wallCollider.ClosestPoint(mousePos);
 
@@ -308,8 +306,7 @@ namespace RTS.Buildings
             );
 
             // Ensure WallStairs component is enabled
-            var stairComponent = newStair.GetComponent<WallStairs>();
-            if (stairComponent != null)
+            if (newStair.TryGetComponent<WallStairs>(out var stairComponent))
             {
                 stairComponent.enabled = true;
             }

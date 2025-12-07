@@ -132,7 +132,9 @@ namespace RTS.Buildings
             foreach (var hit in hits)
             {
                 // Skip if no health component or dead
-                var health = hit.GetComponent<UnitHealth>();
+                if (hit.TryGetComponent<UnitHealth>(out var health))
+                {
+                }
                 if (health == null || health.IsDead) continue;
 
                 float distance = Vector3.Distance(transform.position, hit.transform.position);
@@ -151,7 +153,9 @@ namespace RTS.Buildings
             if (target == null) return false;
 
             // Check if target is still alive
-            var health = target.GetComponent<UnitHealth>();
+            if (target.TryGetComponent<UnitHealth>(out var health))
+            {
+            }
             if (health == null || health.IsDead) return false;
 
             // Check if target is still in range
@@ -216,8 +220,7 @@ namespace RTS.Buildings
             }
 
             // Initialize projectile based on tower type
-            var projectile = projectileObj.GetComponent<TowerProjectile>();
-            if (projectile != null)
+            if (projectileObj.TryGetComponent<TowerProjectile>(out var projectile))
             {
                 bool useArc = (towerData.towerType == TowerType.Catapult);
 
