@@ -64,16 +64,13 @@ namespace RTS.Core
             foreach (var condition in victoryConditions)
             {
                 condition.Initialize();
-                Debug.Log($"Initialized Victory Condition: {condition.ConditionName}");
             }
 
             foreach (var condition in defeatConditions)
             {
                 condition.Initialize();
-                Debug.Log($"Initialized Defeat Condition: {condition.ConditionName}");
             }
 
-            Debug.Log($"Game Conditions Manager initialized with {victoryConditions.Count} victory and {defeatConditions.Count} defeat conditions.");
         }
 
         private void CheckConditions()
@@ -107,12 +104,10 @@ namespace RTS.Core
             if (gameEnded) return;
 
             gameEnded = true;
-            Debug.Log("=== VICTORY ACHIEVED ===");
 
             // Log all completed conditions
             foreach (var condition in victoryConditions.Where(c => c.IsCompleted))
             {
-                Debug.Log($"OK {condition.ConditionName}: {condition.GetStatusText()}");
             }
 
             // Trigger game over with victory state
@@ -127,8 +122,6 @@ namespace RTS.Core
             if (gameEnded) return;
 
             gameEnded = true;
-            Debug.Log("=== DEFEAT ===");
-            Debug.Log($"X {failedCondition.ConditionName}: {failedCondition.GetStatusText()}");
 
             // Trigger game over with defeat state
             if (gameStateService != null)
@@ -181,7 +174,6 @@ namespace RTS.Core
                 condition.Initialize();
             }
 
-            Debug.Log("All game conditions reset.");
         }
 
         private void OnDestroy()

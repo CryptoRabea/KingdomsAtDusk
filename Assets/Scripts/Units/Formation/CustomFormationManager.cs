@@ -211,11 +211,9 @@ namespace RTS.Units.Formation
             {
                 string json = JsonUtility.ToJson(_customFormations, true);
                 File.WriteAllText(_saveFilePath, json);
-                Debug.Log($"Custom formations saved to {_saveFilePath}");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Failed to save custom formations: {ex.Message}");
             }
         }
 
@@ -230,17 +228,14 @@ namespace RTS.Units.Formation
                 {
                     string json = File.ReadAllText(_saveFilePath);
                     _customFormations = JsonUtility.FromJson<CustomFormationsContainer>(json);
-                    Debug.Log($"Loaded {_customFormations.formations.Count} custom formations");
                 }
                 else
                 {
                     _customFormations = new CustomFormationsContainer();
-                    Debug.Log("No custom formations file found, creating new container");
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Failed to load custom formations: {ex.Message}");
                 _customFormations = new CustomFormationsContainer();
             }
 
@@ -266,12 +261,10 @@ namespace RTS.Units.Formation
             {
                 string json = JsonUtility.ToJson(_customFormations, true);
                 File.WriteAllText(filePath, json);
-                Debug.Log($"Formations exported to {filePath}");
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Failed to export formations: {ex.Message}");
                 return false;
             }
         }
@@ -285,7 +278,6 @@ namespace RTS.Units.Formation
             {
                 if (!File.Exists(filePath))
                 {
-                    Debug.LogError($"Import file not found: {filePath}");
                     return false;
                 }
 
@@ -310,12 +302,10 @@ namespace RTS.Units.Formation
 
                 OnFormationsChanged?.Invoke(_customFormations.formations);
                 SaveFormations();
-                Debug.Log($"Formations imported from {filePath}");
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Failed to import formations: {ex.Message}");
                 return false;
             }
         }

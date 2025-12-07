@@ -336,7 +336,6 @@ namespace RTS.UI
             int filledCount = GetFilledCellCount();
             if (filledCount == 0)
             {
-                Debug.LogWarning("Cannot save empty formation!");
                 return;
             }
 
@@ -363,7 +362,6 @@ namespace RTS.UI
             if (isEditMode)
             {
                 CustomFormationManager.Instance.UpdateFormation(currentFormation);
-                Debug.Log($"Formation '{currentFormation.name}' updated!");
             }
             else
             {
@@ -377,7 +375,6 @@ namespace RTS.UI
 
                 CustomFormationManager.Instance.CreateFormation(currentFormation.name);
                 CustomFormationManager.Instance.UpdateFormation(currentFormation);
-                Debug.Log($"Formation '{currentFormation.name}' created!");
 
                 // Switch to edit mode
                 isEditMode = true;

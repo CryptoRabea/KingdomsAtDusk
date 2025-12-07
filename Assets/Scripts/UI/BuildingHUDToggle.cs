@@ -33,7 +33,6 @@ namespace RTS.UI
             // Validate BuildingHUD reference
             if (buildingHUD == null && panelToToggle == null)
             {
-                Debug.LogError("BuildingHUDToggle: BuildingHUD or panelToToggle must be assigned in inspector!");
             }
         }
 
@@ -94,7 +93,6 @@ namespace RTS.UI
             if (playSound)
             {
                 // Optional: Play UI sound here
-                Debug.Log($"Building HUD {(isPanelOpen ? "opened" : "closed")}");
             }
         }
 

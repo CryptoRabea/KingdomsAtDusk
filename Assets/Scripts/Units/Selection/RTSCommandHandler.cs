@@ -51,7 +51,6 @@ namespace RTS.Units
 
             if (mouse == null)
             {
-                Debug.LogError("No mouse detected! RTSCommandHandler won't work.");
                 enabled = false;
             }
 
@@ -261,7 +260,6 @@ namespace RTS.Units
                 Destroy(marker, markerLifetime);
             }
 
-            Debug.Log($"Moving {selectionManager.SelectionCount} units to {destination} in formation");
         }
 
         private void IssueForcedMoveCommand(Vector3 destination)
@@ -354,7 +352,6 @@ namespace RTS.Units
                 Destroy(marker, markerLifetime);
             }
 
-            Debug.Log($"FORCED Moving {selectionManager.SelectionCount} units to {destination} in formation");
         }
 
         private void IssueAttackCommand(Transform target)
@@ -387,7 +384,6 @@ namespace RTS.Units
                 }
             }
 
-            Debug.Log($"Attacking target with {selectionManager.SelectionCount} units");
         }
 
         private bool IsEnemy(GameObject obj)

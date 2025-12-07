@@ -116,7 +116,6 @@ namespace CybeRockStudio
 
         private void RotateBuildingByMouseWheel()
         {
-            Debug.Log(Input.mouseScrollDelta);
             mouseWheelRotation += Input.mouseScrollDelta.y;
             currentPlaceableObject.transform.Rotate(Vector3.up, mouseWheelRotation * 10f);
         }

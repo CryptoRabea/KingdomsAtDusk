@@ -66,8 +66,6 @@ namespace FlowField.Core
             generator = new FlowFieldGenerator(grid);
             flowFieldCache = new Dictionary<Vector3, CachedFlowField>();
 
-            UnityEngine.Debug.Log($"Flow Field Grid initialized: {grid.width}x{grid.height} cells " +
-                      $"({grid.width * grid.height} total), Cell Size: {cellSize}");
         }
 
         /// <summary>
@@ -80,7 +78,6 @@ namespace FlowField.Core
 
             if (triangulation.vertices.Length == 0)
             {
-                UnityEngine.Debug.LogWarning("No NavMesh found. Using default grid bounds.");
                 return;
             }
 
@@ -98,7 +95,6 @@ namespace FlowField.Core
             gridWidth = bounds.size.x;
             gridHeight = bounds.size.z;
 
-            UnityEngine.Debug.Log($"Auto-detected grid bounds: Origin={gridOrigin}, Size={bounds.size}");
         }
 
         /// <summary>
@@ -241,7 +237,6 @@ namespace FlowField.Core
 
             if (toRemove.Count > 0)
             {
-                UnityEngine.Debug.Log($"Invalidated {toRemove.Count} cached flow fields due to obstacle change");
             }
         }
 

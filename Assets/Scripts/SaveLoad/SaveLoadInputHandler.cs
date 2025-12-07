@@ -32,7 +32,6 @@ namespace RTS.SaveLoad
 
             if (saveLoadService == null)
             {
-                Debug.LogWarning("SaveLoadInputHandler: ISaveLoadService not found!");
             }
 
             if (inGameMenu == null)
@@ -40,7 +39,6 @@ namespace RTS.SaveLoad
                 inGameMenu = FindAnyObjectByType<SaveLoadMenu>(FindObjectsInactive.Include);
                 if (inGameMenu == null)
                 {
-                    Debug.LogWarning("SaveLoadInputHandler: SaveLoadMenu not found in scene!");
                 }
             }
         }
@@ -81,12 +79,10 @@ namespace RTS.SaveLoad
 
         private void OnF5Pressed(InputAction.CallbackContext context)
         {
-            Debug.Log("[SaveLoadInputHandler] F5 pressed (Quick Save)");
 
             // Don't process if menu is open
             if (inGameMenu != null && inGameMenu.IsOpen)
             {
-                Debug.Log("[SaveLoadInputHandler] Menu is open, ignoring F5");
                 return;
             }
 
@@ -95,12 +91,10 @@ namespace RTS.SaveLoad
 
         private void OnF9Pressed(InputAction.CallbackContext context)
         {
-            Debug.Log("[SaveLoadInputHandler] F9 pressed (Quick Load)");
 
             // Don't process if menu is open
             if (inGameMenu != null && inGameMenu.IsOpen)
             {
-                Debug.Log("[SaveLoadInputHandler] Menu is open, ignoring F9");
                 return;
             }
 
@@ -109,7 +103,6 @@ namespace RTS.SaveLoad
 
         private void OnF10Pressed(InputAction.CallbackContext context)
         {
-            Debug.Log("[SaveLoadInputHandler] F10 pressed (Toggle Menu)");
 
             // Toggle in-game menu
             ToggleMenu();
@@ -119,11 +112,9 @@ namespace RTS.SaveLoad
         {
             if (saveLoadService == null)
             {
-                Debug.LogWarning("Cannot quick save: Save service not available");
                 return;
             }
 
-            Debug.Log("Quick Save (F5) triggered...");
             bool success = saveLoadService.QuickSave();
 
             if (success)
@@ -140,7 +131,6 @@ namespace RTS.SaveLoad
         {
             if (saveLoadService == null)
             {
-                Debug.LogWarning("Cannot quick load: Save service not available");
                 return;
             }
 
@@ -150,7 +140,6 @@ namespace RTS.SaveLoad
                 return;
             }
 
-            Debug.Log("Quick Load (F9) triggered...");
             bool success = saveLoadService.QuickLoad();
 
             if (success)
@@ -167,11 +156,9 @@ namespace RTS.SaveLoad
         {
             if (inGameMenu == null)
             {
-                Debug.LogError("[SaveLoadInputHandler] InGameMenu is null!");
                 return;
             }
 
-            Debug.Log($"[SaveLoadInputHandler] Toggling menu. Current state: {(inGameMenu.IsOpen ? "Open" : "Closed")}");
 
             if (inGameMenu.IsOpen)
                 inGameMenu.CloseMenu();
@@ -185,11 +172,9 @@ namespace RTS.SaveLoad
             // In a real implementation, show a UI notification
             if (isError)
             {
-                Debug.LogWarning($"[Save/Load] {message}");
             }
             else
             {
-                Debug.Log($"[Save/Load] {message}");
             }
 
             // Could publish an event for UI notification system

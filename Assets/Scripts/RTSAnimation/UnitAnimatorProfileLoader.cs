@@ -30,7 +30,6 @@ namespace RTS.Units.Animation
 
             if (animator == null)
             {
-                Debug.LogError($"[UnitAnimatorProfileLoader] No Animator found on {gameObject.name}!");
                 enabled = false;
                 return;
             }
@@ -49,13 +48,11 @@ namespace RTS.Units.Animation
         {
             if (profile == null)
             {
-                Debug.LogError($"[UnitAnimatorProfileLoader] Cannot load null profile on {gameObject.name}!");
                 return;
             }
 
             if (animator == null)
             {
-                Debug.LogError($"[UnitAnimatorProfileLoader] Animator not initialized on {gameObject.name}!");
                 return;
             }
 
@@ -88,7 +85,6 @@ namespace RTS.Units.Animation
                     }
                     else
                     {
-                        Debug.LogError($"[UnitAnimatorProfileLoader] Original controller is not an AnimatorOverrideController! Creating runtime copy instead.");
                         overrideController = new AnimatorOverrideController(originalController);
                         animator.runtimeAnimatorController = overrideController;
                     }
@@ -101,7 +97,6 @@ namespace RTS.Units.Animation
             // Apply animation speed
             animator.speed = profile.animationSpeedMultiplier;
 
-            Debug.Log($"[UnitAnimatorProfileLoader] Loaded profile '{profile.name}' on {gameObject.name}");
         }
 
         /// <summary>
@@ -192,7 +187,6 @@ namespace RTS.Units.Animation
                 if (overrideDict.ContainsKey(clipName))
                 {
                     overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(pair.Key, overrideDict[clipName]);
-                    Debug.Log($"[UnitAnimatorProfileLoader] Override: {clipName} -> {overrideDict[clipName].name}");
                 }
             }
 
@@ -207,7 +201,6 @@ namespace RTS.Units.Animation
         {
             if (newProfile == null)
             {
-                Debug.LogWarning($"[UnitAnimatorProfileLoader] Cannot swap to null profile on {gameObject.name}");
                 return;
             }
 
@@ -223,7 +216,6 @@ namespace RTS.Units.Animation
             {
                 animator.runtimeAnimatorController = originalController;
                 overrideController = null;
-                Debug.Log($"[UnitAnimatorProfileLoader] Restored original controller on {gameObject.name}");
             }
         }
 
@@ -262,7 +254,6 @@ namespace RTS.Units.Animation
             }
             else
             {
-                Debug.LogWarning("[UnitAnimatorProfileLoader] No profile assigned to reload!");
             }
         }
 
@@ -274,19 +265,16 @@ namespace RTS.Units.Animation
         {
             if (overrideController == null)
             {
-                Debug.Log("[UnitAnimatorProfileLoader] No override controller active.");
                 return;
             }
 
             var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             overrideController.GetOverrides(overrides);
 
-            Debug.Log($"[UnitAnimatorProfileLoader] {overrides.Count} animation overrides:");
             foreach (var pair in overrides)
             {
                 string original = pair.Key != null ? pair.Key.name : "null";
                 string replacement = pair.Value != null ? pair.Value.name : "null";
-                Debug.Log($"  {original} -> {replacement}");
             }
         }
 #endif

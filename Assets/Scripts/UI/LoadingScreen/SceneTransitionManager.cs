@@ -54,7 +54,6 @@ namespace RTS.UI
         {
             if (isTransitioning)
             {
-                Debug.LogWarning("Scene transition already in progress!");
                 return;
             }
 
@@ -68,7 +67,6 @@ namespace RTS.UI
         {
             if (isTransitioning)
             {
-                Debug.LogWarning("Scene transition already in progress!");
                 return;
             }
 
@@ -82,7 +80,6 @@ namespace RTS.UI
         {
             if (isTransitioning)
             {
-                Debug.LogWarning("Scene transition already in progress!");
                 return;
             }
 
@@ -103,7 +100,6 @@ namespace RTS.UI
         /// </summary>
         public void QuitGame()
         {
-            Debug.Log("Quitting game...");
 
             #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
@@ -116,7 +112,6 @@ namespace RTS.UI
         {
             isTransitioning = true;
 
-            Debug.Log($"[SceneTransition] Loading scene: {sceneName}");
 
             // Show loading screen
             LoadingScreenManager loadingScreen = LoadingScreenManager.Instance;
@@ -183,7 +178,6 @@ namespace RTS.UI
 
             isTransitioning = false;
 
-            Debug.Log($"[SceneTransition] Scene loaded: {sceneName}");
         }
 
         /// <summary>

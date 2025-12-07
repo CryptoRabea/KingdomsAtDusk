@@ -27,7 +27,6 @@ namespace RTS.Buildings
 
             if (parentBuilding == null)
             {
-                Debug.LogError($"[{GetType().Name}] No Building component found in parent! This visual must be a child of a Building.");
                 enabled = false;
                 return;
             }

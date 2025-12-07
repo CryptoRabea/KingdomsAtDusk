@@ -49,7 +49,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in x axis is out of range");
 
                         return null;
                     }
@@ -62,7 +61,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in x axis is out of range");
 
                         return;
                     }
@@ -109,7 +107,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in y axis is out of range");
 
                         return ETileState.Empty;
                     }
@@ -122,7 +119,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in y axis is out of range");
 
                         return;
                     }
@@ -341,28 +337,23 @@ namespace FischlWorks_FogWar
             {
                 if (fogRevealer._RevealerTransform == null)
                 {
-                    Debug.LogErrorFormat("Please assign a Transform component to each Fog Revealer!");
                 }
             }
 
             if (unitScale <= 0)
             {
-                Debug.LogErrorFormat("Unit Scale must be bigger than 0!");
             }
 
             if (scanSpacingPerUnit <= 0)
             {
-                Debug.LogErrorFormat("Scan Spacing Per Unit must be bigger than 0!");
             }
 
             if (levelMidPoint == null)
             {
-                Debug.LogErrorFormat("Please assign the Level Mid Point property!");
             }
 
             if (fogPlaneMaterial == null)
             {
-                Debug.LogErrorFormat("Please assign the \"FogPlane\" material to the Fog Plane Material property!");
             }
         }
 
@@ -512,7 +503,6 @@ namespace FischlWorks_FogWar
 
             if (bufferPixels.Length != targetPixels.Length)
             {
-                Debug.LogErrorFormat("Fog plane texture buffer and target have different pixel counts");
                 return;
             }
 
@@ -541,7 +531,6 @@ namespace FischlWorks_FogWar
 
         private void ScanLevel()
         {
-            Debug.LogFormat("There is no level data file assigned, scanning level...");
 
             // These operations have no real computational meaning, but it will bring consistency to the data
             levelData.levelDimensionX = levelDimensionX;
@@ -578,7 +567,6 @@ namespace FischlWorks_FogWar
                 }
             }
 
-            Debug.LogFormat("Successfully scanned level with a scale of {0} x {1}", levelDimensionX, levelDimensionY);
         }
 
 
@@ -593,19 +581,16 @@ namespace FischlWorks_FogWar
             {
                 Directory.CreateDirectory(Application.dataPath + levelScanDataPath);
 
-                Debug.LogFormat("level scan data folder at \"{0}\" is missing, creating...", levelScanDataPath);
             }
 
             if (File.Exists(fullPath) == true)
             {
-                Debug.LogFormat("level scan data already exists, overwriting...");
             }
 
             string levelJson = JsonUtility.ToJson(levelData);
 
             File.WriteAllText(fullPath, levelJson);
 
-            Debug.LogFormat("Successfully saved level scan data at \"{0}\"", fullPath);
         }
 #endif
 
@@ -613,7 +598,6 @@ namespace FischlWorks_FogWar
 
         private void LoadLevelData()
         {
-            Debug.LogFormat("Level scan data with a name of \"{0}\" is assigned, loading...", LevelDataToLoad.name);
 
             // Exception check is indirectly performed through branching on the upper part of the code
             string levelJson = LevelDataToLoad.ToString();
@@ -625,7 +609,6 @@ namespace FischlWorks_FogWar
             unitScale = levelData.unitScale;
             scanSpacingPerUnit = levelData.scanSpacingPerUnit;
 
-            Debug.LogFormat("Successfully loaded level scan data with the name of \"{0}\"", LevelDataToLoad.name);
         }
 
 
@@ -649,7 +632,6 @@ namespace FischlWorks_FogWar
             }
             else
             {
-                Debug.LogFormat("Given index of {0} exceeds the revealers' container range", revealerIndex);
             }
         }
 
@@ -674,7 +656,6 @@ namespace FischlWorks_FogWar
 
             if (result == false && LogOutOfRange == true)
             {
-                Debug.LogFormat("Level coordinates \"{0}\" is out of grid range", levelCoordinates);
             }
 
             return result;

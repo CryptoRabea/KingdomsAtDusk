@@ -30,25 +30,21 @@ namespace RTS.Units.Animation
             // Step 1: Add Animator
             if (!AddComponent<Animator>(selected, "Animator", ref step))
             {
-                Debug.LogWarning("⚠️ Animator already exists");
             }
 
             // Step 2: Add ArcherAnimationController
             if (AddComponent<ArcherAnimationController>(selected, "ArcherAnimationController", ref step))
             {
-                Debug.Log("✅ Added ArcherAnimationController");
             }
 
             // Step 3: Add ArcherAimIK
             if (AddComponent<ArcherAimIK>(selected, "ArcherAimIK", ref step))
             {
-                Debug.Log("✅ Added ArcherAimIK");
             }
 
             // Step 4: Add ArcherCombatMode
             if (AddComponent<ArcherCombatMode>(selected, "ArcherCombatMode", ref step))
             {
-                Debug.Log("✅ Added ArcherCombatMode");
             }
 
             // Step 4: Configure Animator
@@ -57,7 +53,6 @@ namespace RTS.Units.Animation
                 animator.applyRootMotion = false;
                 animator.updateMode = AnimatorUpdateMode.Normal;
                 animator.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
-                Debug.Log("✅ Configured Animator settings");
             }
 
             // Verify required components
@@ -102,7 +97,6 @@ namespace RTS.Units.Animation
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = config;
 
-            Debug.Log($"✅ Created ArcherAnimationConfig at {path}");
 
             EditorUtility.DisplayDialog(
                 "Config Created",
@@ -155,7 +149,6 @@ namespace RTS.Units.Animation
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = mask;
 
-            Debug.Log($"✅ Created Upper Body Mask at {path}");
 
             EditorUtility.DisplayDialog(
                 "Avatar Mask Created",
@@ -335,7 +328,6 @@ namespace RTS.Units.Animation
                 }
             }
 
-            Debug.Log($"Toggled combat mode on {changed} archers");
         }
 
         private static void SetCombatModeForSelected(CombatMovementMode mode)
@@ -359,7 +351,6 @@ namespace RTS.Units.Animation
                 }
             }
 
-            Debug.Log($"Set {changed} archers to {mode} mode");
             EditorUtility.DisplayDialog(
                 "Combat Mode Changed",
                 $"Changed {changed} archer(s) to:\n{mode}",

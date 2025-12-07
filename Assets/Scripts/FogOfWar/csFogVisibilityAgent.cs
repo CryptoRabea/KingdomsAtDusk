@@ -56,9 +56,6 @@ namespace FischlWorks_FogWar
             }
             catch
             {
-                Debug.LogErrorFormat("Failed to fetch csFogWar component. " +
-                    "Please rename the gameobject that the module is attachted to as \"FogWar\", " +
-                    "or change the implementation located in the csFogVisibilityAgent.cs script.");
             }
 
             meshRenderers = GetComponentsInChildren<MeshRenderer>().ToList();

@@ -129,7 +129,6 @@ namespace KingdomsAtDusk.Editor
 
                         if (showDetailedLogs)
                         {
-                            Debug.Log($"✅ Added BuildingWorkerTrainer to: {building.Data.buildingName} ({path})");
                         }
                     }
                     else
@@ -137,7 +136,6 @@ namespace KingdomsAtDusk.Editor
                         skippedCount++;
                         if (showDetailedLogs)
                         {
-                            Debug.Log($"⏭️ Skipped (already configured): {building.Data.buildingName}");
                         }
                     }
                 }
@@ -152,10 +150,6 @@ namespace KingdomsAtDusk.Editor
                 "OK"
             );
 
-            Debug.Log($"========================================");
-            Debug.Log($"Worker System Auto-Configuration Complete!");
-            Debug.Log($"Configured: {configuredCount} | Skipped: {skippedCount}");
-            Debug.Log($"========================================");
         }
 
         /// <summary>
@@ -259,10 +253,6 @@ namespace KingdomsAtDusk.Editor
                 EditorUtility.DisplayDialog("Validation Results", message, "OK");
             }
 
-            Debug.Log("========================================");
-            Debug.Log("Worker System Validation Results:");
-            Debug.Log(message);
-            Debug.Log("========================================");
         }
 
         /// <summary>
@@ -274,7 +264,6 @@ namespace KingdomsAtDusk.Editor
             if (!AssetDatabase.IsValidFolder("Assets/Resources"))
             {
                 AssetDatabase.CreateFolder("Assets", "Resources");
-                Debug.Log("Created Resources folder");
             }
 
             // Check if GameConfig already exists
@@ -318,7 +307,6 @@ namespace KingdomsAtDusk.Editor
                 "OK"
             );
 
-            Debug.Log($"✅ Created GameConfig at: {path}");
         }
 
         /// <summary>
@@ -381,20 +369,15 @@ namespace KingdomsAtDusk.Editor
                     "All buildings and workers have required components!",
                     "OK"
                 );
-                Debug.Log("✅ No missing components found");
             }
             else
             {
                 string message = $"Found {issues.Count} missing components:\n\n" + string.Join("\n", issues);
                 EditorUtility.DisplayDialog("Missing Components", message, "OK");
 
-                Debug.Log("========================================");
-                Debug.Log("Missing Components Report:");
                 foreach (var issue in issues)
                 {
-                    Debug.LogWarning(issue);
                 }
-                Debug.Log("========================================");
             }
         }
     }

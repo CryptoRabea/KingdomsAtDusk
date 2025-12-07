@@ -817,14 +817,12 @@ namespace RTSGame.UI.Settings
             SaveSettingsFromUI();
             settingsService?.ApplySettings();
             settingsService?.SaveSettings();
-            Debug.Log("[SettingsPanel] Settings applied and saved.");
         }
 
         private void OnResetClicked()
         {
             settingsService?.ResetToDefaults();
             LoadSettingsIntoUI();
-            Debug.Log("[SettingsPanel] Settings reset to defaults.");
         }
 
         private void OnCloseClicked()
@@ -836,7 +834,6 @@ namespace RTSGame.UI.Settings
         private void OnClearCacheClicked()
         {
             Caching.ClearCache();
-            Debug.Log("[SettingsPanel] Cache cleared.");
         }
 
         private void OnOpenSaveFolderClicked()
@@ -847,7 +844,6 @@ namespace RTSGame.UI.Settings
         private void OnRebindKeysClicked()
         {
             // Placeholder for keybind UI
-            Debug.Log("[SettingsPanel] Keybind rebinding UI - TO BE IMPLEMENTED");
             if (keybindInfoText != null)
                 keybindInfoText.text = "Keybind rebinding system coming soon!";
         }

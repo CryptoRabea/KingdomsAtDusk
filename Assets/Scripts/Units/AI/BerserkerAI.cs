@@ -68,7 +68,6 @@ namespace RTS.Units.AI
                 enrageEffect = Instantiate(enrageEffectPrefab, transform.position, Quaternion.identity, transform);
             }
 
-            Debug.Log($"{gameObject.name} has entered ENRAGED state! Damage: {Combat.AttackDamage}, Attack Rate: {Combat.AttackRate}");
         }
 
         private void OnDestroy()

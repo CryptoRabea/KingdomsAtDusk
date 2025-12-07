@@ -70,7 +70,6 @@ namespace RTS.Buildings
                 obstacle.carvingTimeToStationary = carvingTimeToStationary;
             }
 
-            Debug.Log($"BuildingNavMeshObstacle configured for {gameObject.name} with size {obstacle.size}");
         }
 
         private void DetectAndSetSize()
@@ -116,7 +115,6 @@ namespace RTS.Buildings
             }
 
             // Fallback to default size
-            Debug.LogWarning($"BuildingNavMeshObstacle: Could not auto-detect size for {gameObject.name}, using default");
             obstacle.size = Vector3.one * 5f; // Default building size
             obstacle.center = Vector3.zero;
         }

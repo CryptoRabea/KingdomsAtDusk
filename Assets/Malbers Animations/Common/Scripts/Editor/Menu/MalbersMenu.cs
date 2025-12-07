@@ -77,7 +77,6 @@ namespace MalbersAnimations
                 {
                     var AllComponents = selected.GetComponentsInChildren<MonoBehaviour>(true);
 
-                    Debug.Log($"Removed {AllComponents.Length} from {selected}", selected);
 
                     foreach (var comp in AllComponents)
                     {

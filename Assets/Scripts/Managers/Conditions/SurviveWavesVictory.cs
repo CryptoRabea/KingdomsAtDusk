@@ -41,7 +41,6 @@ namespace RTS.Core.Conditions
         private void OnWaveCompleted(WaveCompletedEvent evt)
         {
             currentWave = evt.WaveNumber;
-            Debug.Log($"Victory Progress: {GetStatusText()}");
         }
     }
 }

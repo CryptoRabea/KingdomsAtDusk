@@ -68,7 +68,6 @@ namespace RTS.Units.AI
 
             if (tauntedUnits.Count > 0)
             {
-                Debug.Log($"{gameObject.name} taunted {tauntedUnits.Count} enemy units!");
             }
 
             // Release taunt after duration

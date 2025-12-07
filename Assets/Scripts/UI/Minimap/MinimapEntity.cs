@@ -110,7 +110,6 @@ namespace RTS.UI.Minimap
         private void DetectOwnershipEditor()
         {
             DetectOwnership();
-            Debug.Log($"{gameObject.name}: Detected ownership = {ownership}");
         }
 
         [ContextMenu("Set as Friendly")]

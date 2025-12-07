@@ -61,12 +61,10 @@ namespace RTS.Core.Conditions
                     building.Data.buildingName.Contains(strongholdBuildingName))
                 {
                     stronghold = building.gameObject;
-                    Debug.Log($"Found stronghold: {stronghold.name}");
                     return;
                 }
             }
 
-            Debug.LogWarning("No stronghold building found! Defeat condition may not work properly.");
         }
 
         private void OnBuildingDestroyed(BuildingDestroyedEvent evt)
@@ -74,7 +72,6 @@ namespace RTS.Core.Conditions
             if (evt.Building == stronghold || evt.BuildingName.Contains(strongholdBuildingName))
             {
                 strongholdDestroyed = true;
-                Debug.Log("DEFEAT: Stronghold has been destroyed!");
             }
         }
     }

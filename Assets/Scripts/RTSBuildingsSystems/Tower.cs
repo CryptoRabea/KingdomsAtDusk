@@ -26,7 +26,6 @@ namespace RTS.Buildings
             towerCombat = GetComponent<TowerCombat>();
             if (towerCombat == null)
             {
-                Debug.LogError($"Tower {name} is missing TowerCombat component!");
             }
 
             // Set tower data on combat component
@@ -100,20 +99,12 @@ namespace RTS.Buildings
         {
             if (towerData == null)
             {
-                Debug.Log("No tower data assigned!");
                 return;
             }
 
-            Debug.Log($"=== Tower Stats: {towerData.buildingName} ===");
-            Debug.Log($"Type: {towerData.towerType}");
-            Debug.Log($"Attack Range: {towerData.attackRange}");
-            Debug.Log($"Damage: {towerData.attackDamage}");
-            Debug.Log($"Attack Rate: {towerData.attackRate}/s");
-            Debug.Log($"Area Damage: {towerData.hasAreaDamage} (Radius: {towerData.aoeRadius})");
 
             if (towerData.towerType == TowerType.Fire)
             {
-                Debug.Log($"DOT: {towerData.dotDamage}/s for {towerData.dotDuration}s");
             }
         }
 

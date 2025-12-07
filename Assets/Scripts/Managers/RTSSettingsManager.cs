@@ -68,18 +68,15 @@ namespace RTSGame.Managers
                 {
                     string json = File.ReadAllText(SettingsFilePath);
                     currentSettings = JsonUtility.FromJson<GameSettings>(json);
-                    Debug.Log("[RTSSettingsManager] Settings loaded successfully.");
                 }
                 else
                 {
-                    Debug.Log("[RTSSettingsManager] No settings file found, using defaults.");
                     currentSettings = GameSettings.CreateDefault();
                     SaveSettings(); // Save default settings
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[RTSSettingsManager] Failed to load settings: {ex.Message}");
                 currentSettings = GameSettings.CreateDefault();
             }
         }
@@ -90,11 +87,9 @@ namespace RTSGame.Managers
             {
                 string json = JsonUtility.ToJson(currentSettings, true);
                 File.WriteAllText(SettingsFilePath, json);
-                Debug.Log("[RTSSettingsManager] Settings saved successfully.");
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[RTSSettingsManager] Failed to save settings: {ex.Message}");
             }
         }
 
@@ -104,7 +99,6 @@ namespace RTSGame.Managers
             ApplySettings();
             SaveSettings();
             OnSettingsChanged?.Invoke();
-            Debug.Log("[RTSSettingsManager] Settings reset to defaults.");
         }
 
         public void ApplySettings()
@@ -137,7 +131,6 @@ namespace RTSGame.Managers
             // RTS-Specific
             ApplyRTSGraphicsSettings();
 
-            Debug.Log("[RTSSettingsManager] Graphics settings applied.");
         }
 
         private void ApplyDisplaySettings()
@@ -205,7 +198,6 @@ namespace RTSGame.Managers
                 // Note: URP MSAA is set on the URP asset itself
                 // You may need to create multiple URP assets for different quality levels
                 // or modify the asset at runtime (which requires reflection or scriptable objects)
-                Debug.Log($"[RTSSettingsManager] Anti-Aliasing mode: {Graphics.AntiAliasing}");
             }
 
             // Render Scale
@@ -220,14 +212,12 @@ namespace RTSGame.Managers
             // Post-processing settings would be applied here
             // This requires references to post-processing volume components
             // Placeholder for now
-            Debug.Log($"[RTSSettingsManager] Post-Processing: Bloom={Graphics.Bloom}, AO={Graphics.AmbientOcclusion}, DOF={Graphics.DepthOfField}");
         }
 
         private void ApplyRTSGraphicsSettings()
         {
             // RTS-specific graphics settings
             // These would be applied to specific game systems
-            Debug.Log($"[RTSSettingsManager] RTS Graphics: Outlines={Graphics.UnitHighlightOutlines}, Health Bars={Graphics.HealthBars}");
 
             // Example: Update floating number service if it exists
             var floatingNumberService = ServiceLocator.TryGet<IFloatingNumberService>();
@@ -318,11 +308,9 @@ namespace RTSGame.Managers
             if (audioService != null)
             {
                 audioService.ApplySettings(Audio);
-                Debug.Log("[RTSSettingsManager] Audio settings applied.");
             }
             else
             {
-                Debug.LogWarning("[RTSSettingsManager] Audio service not found!");
             }
         }
 
@@ -347,7 +335,6 @@ namespace RTSGame.Managers
                 _ => 1.0f
             };
 
-            Debug.Log("[RTSSettingsManager] Gameplay settings applied.");
         }
 
         private void ApplyCameraSettings()
@@ -355,7 +342,6 @@ namespace RTSGame.Managers
             // Camera settings would be applied to the RTS camera controller
             // This requires a reference to RTSCameraController
             // Placeholder for now
-            Debug.Log($"[RTSSettingsManager] Camera: Pan Speed={Gameplay.CameraPanSpeed}, Zoom Speed={Gameplay.ZoomSpeed}");
 
             // Example: If you have a reference to the camera controller:
             // var cameraController = FindObjectOfType<RTSCameraController>();
@@ -377,7 +363,6 @@ namespace RTSGame.Managers
 
             // Control settings are mostly handled by Unity's Input System
             // Custom settings like mouse sensitivity would be applied here
-            Debug.Log($"[RTSSettingsManager] Controls: Mouse Sensitivity={Controls.MouseSensitivity}, Drag Button={Controls.CameraDragButton}");
 
             // Placeholder for custom control logic
         }
@@ -403,14 +388,12 @@ namespace RTSGame.Managers
             // Apply colorblind mode
             ApplyColorblindMode(UI.ColorblindMode);
 
-            Debug.Log("[RTSSettingsManager] UI settings applied.");
         }
 
         private void ApplyColorblindMode(ColorblindMode mode)
         {
             // Colorblind mode would require shader replacements or color adjustments
             // Placeholder for now
-            Debug.Log($"[RTSSettingsManager] Colorblind Mode: {mode}");
         }
 
         #endregion
@@ -439,7 +422,6 @@ namespace RTSGame.Managers
         public void ClearCache()
         {
             Caching.ClearCache();
-            Debug.Log("[RTSSettingsManager] Cache cleared.");
         }
 
         public void OpenSaveFolder()

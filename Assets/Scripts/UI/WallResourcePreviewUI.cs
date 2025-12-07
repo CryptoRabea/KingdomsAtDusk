@@ -47,7 +47,6 @@ namespace RTS.UI
 
             if (wallPlacementController == null)
             {
-                Debug.LogError("WallResourcePreviewUI: WallPlacementController not assigned!");
             }
 
             // Hide panel initially

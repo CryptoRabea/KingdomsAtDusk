@@ -90,7 +90,6 @@ namespace RTS.UI
             // Validate training progress bar configuration
             if (trainingProgressBar != null && trainingProgressBar.type != Image.Type.Filled)
             {
-                Debug.LogWarning("BuildingDetailsUI: trainingProgressBar Image Type should be set to 'Filled' for fillAmount to work properly. Current type: " + trainingProgressBar.type);
             }
 
             HidePanel();
@@ -239,7 +238,6 @@ namespace RTS.UI
 
             if (unitButtonContainer == null || trainUnitButtonPrefab == null)
             {
-                Debug.LogWarning("BuildingDetailsUI: Missing button container or prefab");
                 return;
             }
 

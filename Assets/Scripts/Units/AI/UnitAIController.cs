@@ -75,7 +75,6 @@ namespace RTS.Units.AI
 
             if (healthComponent == null || movementComponent == null || combatComponent == null)
             {
-                Debug.LogError($"UnitAIController on {gameObject.name} is missing required components!");
             }
         }
 
@@ -83,7 +82,6 @@ namespace RTS.Units.AI
         {
             if (config == null)
             {
-                Debug.LogWarning($"No UnitConfig assigned to {gameObject.name}");
                 return;
             }
 

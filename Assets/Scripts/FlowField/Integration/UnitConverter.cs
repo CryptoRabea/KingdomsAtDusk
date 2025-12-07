@@ -68,7 +68,6 @@ namespace FlowField.Integration
                 }
             }
 
-            UnityEngine.Debug.Log($"Converted {convertedCount} units to Flow Field movement");
         }
 
         /// <summary>
@@ -82,7 +81,6 @@ namespace FlowField.Integration
             // Check if already has FlowFieldFollower
             if (unit.GetComponent<FlowFieldFollower>() != null)
             {
-                UnityEngine.Debug.LogWarning($"Unit {unit.name} already has FlowFieldFollower");
                 return false;
             }
 
@@ -142,7 +140,6 @@ namespace FlowField.Integration
                             RigidbodyConstraints.FreezeRotationZ;
             rb.mass = 1f;
 
-            UnityEngine.Debug.Log($"Converted {unit.name} to Flow Field movement (Speed: {speed})");
 
             return true;
         }
@@ -189,7 +186,6 @@ namespace FlowField.Integration
                 unitMovement.enabled = true;
             }
 
-            UnityEngine.Debug.Log($"Reverted {unit.name} to NavMesh movement");
         }
     }
 }

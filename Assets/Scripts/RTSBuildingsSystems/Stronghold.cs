@@ -48,7 +48,6 @@ namespace RTS.Buildings
                 rallyPointMarker.SetActive(true);
             }
 
-            Debug.Log($"Stronghold initialized with {health.MaxHealth} HP");
         }
 
         private void OnBuildingDamaged(BuildingDamagedEvent evt)
@@ -60,12 +59,10 @@ namespace RTS.Buildings
             if (evt.Delta < 0)
             {
                 float healthPercent = evt.CurrentHealth / evt.MaxHealth * 100f;
-                Debug.LogWarning($"⚠ STRONGHOLD UNDER ATTACK! Health: {healthPercent:F0}%");
 
                 // Critical health warning
                 if (healthPercent <= 25f && healthPercent > 0f)
                 {
-                    Debug.LogError($"🚨 CRITICAL! Stronghold health at {healthPercent:F0}%!");
                 }
             }
         }

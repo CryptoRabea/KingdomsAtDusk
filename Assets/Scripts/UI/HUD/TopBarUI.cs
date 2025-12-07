@@ -124,7 +124,6 @@ namespace RTS.UI.HUD
         {
             if (resourceContainer == null || resourceItemPrefab == null)
             {
-                Debug.LogWarning("TopBarUI: Resource container or prefab not assigned!");
                 return;
             }
 
@@ -247,25 +246,21 @@ namespace RTS.UI.HUD
         // Menu button callbacks
         private void OnMenuClicked()
         {
-            Debug.Log("Menu button clicked (F10)");
             // Open game menu
         }
 
         private void OnAlliesClicked()
         {
-            Debug.Log("Allies button clicked (F11)");
             // Open allies panel
         }
 
         private void OnQuestsClicked()
         {
-            Debug.Log("Quests button clicked (F9)");
             // Open quests panel
         }
 
         private void OnChatClicked()
         {
-            Debug.Log("Chat button clicked (F12)");
             // Open chat panel
         }
 

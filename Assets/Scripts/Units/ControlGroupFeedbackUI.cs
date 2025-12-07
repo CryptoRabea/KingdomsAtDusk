@@ -83,7 +83,6 @@ namespace RTS.UI
         {
             string message = $"⚔️ {evt.UnitCount} units assigned to Group {evt.GroupNumber}";
             
-            Debug.Log($"[ControlGroups] {message}");
             
             ShowFeedback(message, unitGroupColor);
             PlaySound(groupSavedSound);
@@ -107,7 +106,6 @@ namespace RTS.UI
                 PlaySound(groupRecalledSound);
             }
             
-            Debug.Log($"[ControlGroups] {message}");
             
             ShowFeedback(message, recallColor);
         }
@@ -123,7 +121,6 @@ namespace RTS.UI
         {
             string message = $"🏰 {evt.BuildingName} assigned to Group {evt.GroupNumber}";
             
-            Debug.Log($"[ControlGroups] {message}");
             
             ShowFeedback(message, buildingGroupColor);
             PlaySound(groupSavedSound);
@@ -147,7 +144,6 @@ namespace RTS.UI
                 PlaySound(groupRecalledSound);
             }
             
-            Debug.Log($"[ControlGroups] {message}");
             
             ShowFeedback(message, recallColor);
         }
@@ -271,24 +267,18 @@ namespace RTS.UI
 
         private void OnUnitGroupSaved(UnitGroupSavedEvent evt)
         {
-            Debug.Log($"Unit group {evt.GroupNumber} saved with {evt.UnitCount} units");
         }
 
         private void OnUnitGroupRecalled(UnitGroupRecalledEvent evt)
         {
-            Debug.Log($"Unit group {evt.GroupNumber} recalled: {evt.UnitCount} units" +
-                     (evt.WasDoubleTap ? " [Camera centered]" : ""));
         }
 
         private void OnBuildingGroupSaved(BuildingGroupSavedEvent evt)
         {
-            Debug.Log($"Building '{evt.BuildingName}' saved to group {evt.GroupNumber}");
         }
 
         private void OnBuildingGroupRecalled(BuildingGroupRecalledEvent evt)
         {
-            Debug.Log($"Building '{evt.BuildingName}' recalled from group {evt.GroupNumber}" +
-                     (evt.WasDoubleTap ? " [Camera centered]" : ""));
         }
     }
 
@@ -357,7 +347,6 @@ namespace RTS.UI
             var units = unitGroupManager.GetGroup(groupNumber);
             
             // TODO: Create/update visual indicators for these units
-            Debug.Log($"Would update indicators for {units.Count} units in group {groupNumber}");
         }
 
         private void UpdateBuildingGroupIndicator(int groupNumber)
@@ -370,7 +359,6 @@ namespace RTS.UI
             if (building != null)
             {
                 // TODO: Create/update visual indicator for this building
-                Debug.Log($"Would update indicator for building '{building.name}' in group {groupNumber}");
             }
         }
     }

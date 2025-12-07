@@ -35,7 +35,6 @@ namespace FlowField.Obstacles
 
             if (flowFieldManager == null)
             {
-                UnityEngine.Debug.LogWarning("FlowFieldManager not found! Building obstacle will not affect pathfinding.");
                 return;
             }
 
@@ -131,7 +130,6 @@ namespace FlowField.Obstacles
             }
 
             // Fallback to default size
-            UnityEngine.Debug.LogWarning($"BuildingFlowFieldObstacle: Could not auto-detect size for {gameObject.name}, using default");
             obstacleBounds = new Bounds(transform.position, Vector3.one * 5f);
         }
 
@@ -147,7 +145,6 @@ namespace FlowField.Obstacles
             UpdateCostField();
             isRegistered = true;
 
-            UnityEngine.Debug.Log($"BuildingFlowFieldObstacle registered for {gameObject.name} at {transform.position}");
         }
 
         /// <summary>
@@ -166,7 +163,6 @@ namespace FlowField.Obstacles
 
             isRegistered = false;
 
-            UnityEngine.Debug.Log($"BuildingFlowFieldObstacle unregistered for {gameObject.name}");
         }
 
         /// <summary>

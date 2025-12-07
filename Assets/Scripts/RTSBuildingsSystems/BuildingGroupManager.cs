@@ -94,14 +94,12 @@ namespace RTS.Buildings
         {
             if (groupNumber < 0 || groupNumber >= numberOfGroups)
             {
-                Debug.LogWarning($"Invalid group number: {groupNumber}");
                 return;
             }
 
             if (selectionManager == null || selectionManager.CurrentlySelectedBuilding == null)
             {
                 if (showDebugMessages)
-                    Debug.Log($"No building selected to save to group {groupNumber}");
                 return;
             }
 
@@ -112,14 +110,12 @@ namespace RTS.Buildings
             if (groups[groupNumber] != null)
             {
                 if (showDebugMessages)
-                    Debug.Log($"Replacing building in group {groupNumber}: {groups[groupNumber].gameObject.name} → {selectedBuilding.gameObject.name}");
             }
 
             // REPLACE (not add) - assign the new building
             groups[groupNumber] = selectedBuilding;
 
             if (showDebugMessages)
-                Debug.Log($"🏰 Saved {selectedBuilding.gameObject.name} to group {groupNumber}");
 
             // Show on-screen feedback
             if (showOnScreenFeedback)
@@ -139,7 +135,6 @@ namespace RTS.Buildings
         {
             if (groupNumber < 0 || groupNumber >= numberOfGroups)
             {
-                Debug.LogWarning($"Invalid group number: {groupNumber}");
                 return;
             }
 
@@ -158,7 +153,6 @@ namespace RTS.Buildings
             if (groups[groupNumber] == null)
             {
                 if (showDebugMessages)
-                    Debug.Log($"Group {groupNumber} is empty");
                 return;
             }
 
@@ -189,7 +183,6 @@ namespace RTS.Buildings
             building.Select();
 
             if (showDebugMessages)
-                Debug.Log($"🏰 Recalled group {groupNumber}: {building.gameObject.name}");
 
             // Show on-screen feedback
             if (showOnScreenFeedback)
@@ -233,7 +226,6 @@ namespace RTS.Buildings
             }
 
             if (showDebugMessages)
-                Debug.Log($"📷 Centered camera on {building.gameObject.name}");
         }
 
         private System.Collections.IEnumerator SmoothCameraMove(Vector3 targetPosition, Vector3 lookAtPosition)
@@ -276,7 +268,6 @@ namespace RTS.Buildings
             {
                 groups[groupNumber] = null;
                 if (showDebugMessages)
-                    Debug.Log($"Cleared group {groupNumber}");
             }
         }
 
@@ -290,7 +281,6 @@ namespace RTS.Buildings
                 groups[i] = null;
             }
             if (showDebugMessages)
-                Debug.Log("Cleared all building groups");
         }
 
         /// <summary>
@@ -300,7 +290,6 @@ namespace RTS.Buildings
         {
             // TODO: Hook this up to your UI system
             // For now, just log it
-            Debug.Log($"[Feedback] {message}");
         }
 
         /// <summary>
@@ -333,11 +322,9 @@ namespace RTS.Buildings
             {
                 if (groups[i] != null)
                 {
-                    Debug.Log($"Group {i}: {groups[i].gameObject.name}");
                 }
                 else
                 {
-                    Debug.Log($"Group {i}: <empty>");
                 }
             }
         }

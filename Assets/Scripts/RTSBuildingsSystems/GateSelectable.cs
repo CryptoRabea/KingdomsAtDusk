@@ -26,12 +26,10 @@ namespace RTS.Buildings
 
             if (gate == null)
             {
-                Debug.LogError($"GateSelectable on {name} requires a Gate component!");
             }
 
             if (buildingSelectable == null)
             {
-                Debug.LogError($"GateSelectable on {name} requires a BuildingSelectable component!");
             }
         }
 
@@ -66,7 +64,6 @@ namespace RTS.Buildings
             if (evt.Building == gameObject)
             {
                 controlsActive = true;
-                Debug.Log($"Gate {name} selected. Press {openCloseKey} to toggle open/close.");
             }
         }
 
@@ -88,7 +85,6 @@ namespace RTS.Buildings
 
             if (!gate.GateData.allowManualControl)
             {
-                Debug.Log($"Manual control is disabled for gate {name}");
                 return;
             }
 
@@ -104,7 +100,6 @@ namespace RTS.Buildings
 
             if (!gate.GateData.allowManualControl)
             {
-                Debug.Log($"Manual control is disabled for gate {name}");
                 return;
             }
 
@@ -120,7 +115,6 @@ namespace RTS.Buildings
 
             if (!gate.GateData.allowManualControl)
             {
-                Debug.Log($"Manual control is disabled for gate {name}");
                 return;
             }
 

@@ -17,7 +17,6 @@ namespace RTS.Editor
             if (existing != null)
             {
                 EditorGUIUtility.PingObject(existing.gameObject);
-                Debug.LogWarning("ShaderPreloader already exists in the scene!");
                 Selection.activeGameObject = existing.gameObject;
                 return;
             }
@@ -39,7 +38,6 @@ namespace RTS.Editor
                     materialsArray.arraySize = 1;
                     materialsArray.GetArrayElementAtIndex(0).objectReferenceValue = fogMaterial;
                     so.ApplyModifiedProperties();
-                    Debug.Log($"Added fog of war material: {fogMaterial.name}");
                 }
             }
 
@@ -51,7 +49,6 @@ namespace RTS.Editor
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log("✓ ShaderPreloader added to scene! Configure critical materials in Inspector.");
         }
 
         [MenuItem("Tools/RTS/Build Setup/Add Build Diagnostics to Scene")]
@@ -62,7 +59,6 @@ namespace RTS.Editor
             if (existing != null)
             {
                 EditorGUIUtility.PingObject(existing.gameObject);
-                Debug.LogWarning("BuildDiagnostics already exists in the scene!");
                 Selection.activeGameObject = existing.gameObject;
                 return;
             }
@@ -79,13 +75,11 @@ namespace RTS.Editor
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log("✓ BuildDiagnostics added to scene! Press 'D' in build to show diagnostics.");
         }
 
         [MenuItem("Tools/RTS/Build Setup/Setup All Build Optimizations")]
         private static void SetupAllBuildOptimizations()
         {
-            Debug.Log("=== Setting up build optimizations ===");
 
             // Add ShaderPreloader
             if (Object.FindAnyObjectByType<ShaderPreloader>() == null)
@@ -94,7 +88,6 @@ namespace RTS.Editor
             }
             else
             {
-                Debug.Log("ShaderPreloader already in scene");
             }
 
             // Add BuildDiagnostics
@@ -104,11 +97,8 @@ namespace RTS.Editor
             }
             else
             {
-                Debug.Log("BuildDiagnostics already in scene");
             }
 
-            Debug.Log("=== Build optimization setup complete ===");
-            Debug.Log("Note: BuildInitializer runs automatically in builds - no setup needed!");
 
             EditorUtility.DisplayDialog(
                 "Build Optimization Setup",
@@ -144,7 +134,6 @@ namespace RTS.Editor
                 }
                 else
                 {
-                    Debug.LogError("BUILD_ISSUES_FIX_GUIDE.md not found in project!");
                 }
             }
         }
@@ -165,7 +154,6 @@ namespace RTS.Editor
 
             // Set color space to Linear
             PlayerSettings.colorSpace = ColorSpace.Linear;
-            Debug.Log("✓ Color Space set to Linear");
 
             // Set graphics APIs for Windows
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,
@@ -174,18 +162,14 @@ namespace RTS.Editor
                     UnityEngine.Rendering.GraphicsDeviceType.Direct3D11,
                     UnityEngine.Rendering.GraphicsDeviceType.Direct3D12
                 });
-            Debug.Log("✓ Graphics APIs set to DirectX11, DirectX12");
 
             // Set fullscreen mode
             PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
-            Debug.Log("✓ Fullscreen mode set to Fullscreen Window");
 
             // Set default resolution
             PlayerSettings.defaultScreenWidth = 1920;
             PlayerSettings.defaultScreenHeight = 1080;
-            Debug.Log("✓ Default resolution set to 1920x1080");
 
-            Debug.Log("=== Build settings configured successfully ===");
 
             EditorUtility.DisplayDialog(
                 "Build Settings Configured",

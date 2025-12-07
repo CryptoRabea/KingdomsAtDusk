@@ -93,7 +93,6 @@ namespace RTS.Editor
                 "This will create all menu and loading systems. Continue?",
                 "Yes", "Cancel"))
             {
-                Debug.Log("=== Starting Menu & Loading Screen Setup ===");
 
                 if (createLoadingScreen)
                 {
@@ -107,7 +106,6 @@ namespace RTS.Editor
 
                 SetupSceneTransitionManager();
 
-                Debug.Log("=== Setup Complete ===");
 
                 EditorUtility.DisplayDialog(
                     "Setup Complete",
@@ -123,7 +121,6 @@ namespace RTS.Editor
 
         private void SetupMainMenu()
         {
-            Debug.Log("[MenuSetup] Creating Main Menu scene...");
 
             // Create or load Main Menu scene
             var newScene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
@@ -248,7 +245,6 @@ namespace RTS.Editor
             System.IO.Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(newScene, scenePath);
 
-            Debug.Log($"[MenuSetup] Main Menu scene created at: {scenePath}");
             AssetDatabase.Refresh();
 
             EditorUtility.DisplayDialog("Main Menu Created",
@@ -356,7 +352,6 @@ namespace RTS.Editor
 
         private void SetupLoadingScreen()
         {
-            Debug.Log("[MenuSetup] Creating Loading Screen prefab...");
 
             // Create Loading Screen GameObject
             GameObject loadingScreenObj = new GameObject("LoadingScreen");
@@ -467,7 +462,6 @@ namespace RTS.Editor
             // Clean up temporary object
             DestroyImmediate(loadingScreenObj);
 
-            Debug.Log($"[MenuSetup] Loading Screen prefab created at: {prefabPath}");
             AssetDatabase.Refresh();
 
             // Select the prefab in the project window
@@ -486,7 +480,6 @@ namespace RTS.Editor
 
         private void SetupSceneTransitionManager()
         {
-            Debug.Log("[MenuSetup] Setting up Scene Transition Manager...");
 
             GameObject managerObj = new GameObject("SceneTransitionManager");
             SceneTransitionManager manager = managerObj.AddComponent<SceneTransitionManager>();
@@ -496,7 +489,6 @@ namespace RTS.Editor
             so.FindProperty("gameSceneName").stringValue = gameSceneName;
             so.ApplyModifiedProperties();
 
-            Debug.Log("[MenuSetup] Scene Transition Manager created");
 
             EditorUtility.DisplayDialog("Scene Transition Manager Created",
                 "SceneTransitionManager has been added to the scene!\n\n" +

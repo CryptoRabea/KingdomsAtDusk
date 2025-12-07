@@ -93,7 +93,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in x axis is out of range");
 
                         return null;
                     }
@@ -105,7 +104,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in x axis is out of range");
 
                         return;
                     }
@@ -167,7 +165,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in y axis is out of range");
 
                         return ETileVisibility.Hidden;
                     }
@@ -179,7 +176,6 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        Debug.LogErrorFormat("index given in y axis is out of range");
 
                         return;
                     }

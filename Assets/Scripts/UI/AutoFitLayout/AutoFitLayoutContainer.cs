@@ -169,12 +169,10 @@ namespace RTS.UI.AutoFit
 
             if (debugMode)
             {
-                Debug.Log($"[AutoFitLayout] Container: {containerSize}, Grid: {columns}x{rows}, Cell: {cellSize}px, Visible: {visibleChildCount}/{children.Count}");
             }
 
             if (warnOnOverflow && hiddenChildCount > 0)
             {
-                Debug.LogWarning($"[AutoFitLayout] {hiddenChildCount} items hidden due to space constraints. Increase container size or decrease min cell size.");
             }
         }
 

@@ -145,7 +145,6 @@ namespace RTS.Core.Services
                 .Select(c => $"{c.Key}:{c.Value} (have {GetResource(c.Key)})")
                 .ToArray();
 
-            Debug.LogWarning($"Not enough resources! Need: {string.Join(", ", missing)}");
         }
 
         #endregion

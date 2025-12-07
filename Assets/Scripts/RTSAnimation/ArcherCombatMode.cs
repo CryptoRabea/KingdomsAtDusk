@@ -267,7 +267,6 @@ namespace RTS.Units.Animation
         {
             if (!allowRuntimeModeChange)
             {
-                Debug.LogWarning($"[ArcherCombatMode] Runtime mode change disabled on {gameObject.name}");
                 return;
             }
 
@@ -277,7 +276,6 @@ namespace RTS.Units.Animation
             timeSinceStoppedMoving = 0f;
             isSettled = false;
 
-            Debug.Log($"[ArcherCombatMode] Changed to {mode} mode");
         }
 
         /// <summary>

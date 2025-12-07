@@ -109,7 +109,6 @@ namespace RTS.UI
         {
             if (buildingManager == null || upgradeButtonContainer == null || upgradeButtonPrefab == null)
             {
-                Debug.LogWarning("WallUpgradeUI: Missing required references");
                 return;
             }
 

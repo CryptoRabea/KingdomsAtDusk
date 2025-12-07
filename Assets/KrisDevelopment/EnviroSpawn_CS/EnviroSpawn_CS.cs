@@ -152,7 +152,6 @@ namespace KrisDevelopment.EnvSpawn
 			/*---------------------------------------*/
 
 
-			//Debug.Log("update data called");
 			if (population < 0)
 			{
 				population = 0;

@@ -38,7 +38,6 @@ namespace FlowField.Core
 
             if (!grid.IsValidGridPosition(destinationCell))
             {
-                UnityEngine.Debug.LogWarning($"Destination {destinationWorldPos} is outside grid bounds");
                 return;
             }
 
@@ -74,7 +73,6 @@ namespace FlowField.Core
 
             if (destinationCells.Count == 0)
             {
-                UnityEngine.Debug.LogWarning("No valid destinations for flow field");
                 return;
             }
 

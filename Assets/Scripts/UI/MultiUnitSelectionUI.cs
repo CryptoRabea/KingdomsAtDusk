@@ -59,12 +59,10 @@ namespace RTS.UI
             // Validate references
             if (unitIconContainer == null)
             {
-                Debug.LogWarning("[MultiUnitSelectionUI] Unit icon container not assigned!");
             }
 
             if (unitIconPrefab == null)
             {
-                Debug.LogWarning("[MultiUnitSelectionUI] Unit icon prefab not assigned!");
             }
 
             // Auto-assign container rect if not set
@@ -121,7 +119,6 @@ namespace RTS.UI
             var selectionManager = FindFirstObjectByType<UnitSelectionManager>();
             if (selectionManager == null)
             {
-                Debug.LogWarning("[MultiUnitSelectionUI] UnitSelectionManager not found!");
                 ClearAllIcons();
                 return;
             }
@@ -190,7 +187,6 @@ namespace RTS.UI
                 containerRect.sizeDelta = new Vector2(totalSize, totalSize);
             }
 
-            Debug.Log($"[MultiUnitSelectionUI] Grid: {columns}x{rows}, Icon Size: {finalIconSize}px, Container: {maxContainerSize}px square");
         }
 
         /// <summary>
@@ -217,7 +213,6 @@ namespace RTS.UI
             }
             else
             {
-                Debug.LogWarning("[MultiUnitSelectionUI] Unit icon prefab doesn't have UnitIconWithHP component!");
             }
         }
 
