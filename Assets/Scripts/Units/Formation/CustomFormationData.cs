@@ -34,6 +34,7 @@ namespace RTS.Units.Formation
         public List<FormationPosition> positions; // Unit positions
         public DateTime createdDate;
         public DateTime modifiedDate;
+        public bool isInQuickList; // Whether this formation appears in the quick access dropdown
 
         public CustomFormationData()
         {
@@ -42,6 +43,7 @@ namespace RTS.Units.Formation
             positions = new List<FormationPosition>();
             createdDate = DateTime.Now;
             modifiedDate = DateTime.Now;
+            isInQuickList = false; // Not in quick list by default
         }
 
         public CustomFormationData(string formationName)
@@ -51,6 +53,7 @@ namespace RTS.Units.Formation
             positions = new List<FormationPosition>();
             createdDate = DateTime.Now;
             modifiedDate = DateTime.Now;
+            isInQuickList = false; // Not in quick list by default
         }
 
         /// <summary>
@@ -138,8 +141,27 @@ namespace RTS.Units.Formation
 
             clone.createdDate = DateTime.Now;
             clone.modifiedDate = DateTime.Now;
+            clone.isInQuickList = false; // Clones are not in quick list by default
 
             return clone;
+        }
+
+        /// <summary>
+        /// Add this formation to the quick access list
+        /// </summary>
+        public void AddToQuickList()
+        {
+            isInQuickList = true;
+            modifiedDate = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Remove this formation from the quick access list
+        /// </summary>
+        public void RemoveFromQuickList()
+        {
+            isInQuickList = false;
+            modifiedDate = DateTime.Now;
         }
     }
 
