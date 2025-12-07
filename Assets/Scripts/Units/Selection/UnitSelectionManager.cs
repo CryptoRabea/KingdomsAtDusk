@@ -34,6 +34,7 @@ namespace RTS.Units
 
         [Header("Selection Settings")]
         [SerializeField] private LayerMask selectableLayer;
+        [SerializeField] private LayerMask buildingLayer;
         [SerializeField] private Camera mainCamera;
 
         [Header("Selection Behavior")]
@@ -502,6 +503,7 @@ namespace RTS.Units
 
         /// <summary>
         /// Resolve the clicked object (unit or building) and return the ScriptableObject references by direct reference
+        /// NOTE: Now checks BOTH unit layer and building layer to properly detect buildings
         /// </summary>
         private void ResolveClickedObject(
             Vector2 screenPos,
@@ -519,7 +521,10 @@ namespace RTS.Units
                 mainCamera = Camera.main;
 
             Ray ray = mainCamera.ScreenPointToRay(screenPos);
-            int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, selectableLayer);
+
+            // Combine both layers to check for units AND buildings
+            LayerMask combinedLayers = selectableLayer | buildingLayer;
+            int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, combinedLayers);
 
             float nearest = float.MaxValue;
 
