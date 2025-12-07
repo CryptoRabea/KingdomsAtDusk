@@ -1,4 +1,4 @@
-﻿using RTS.Buildings;
+using RTS.Buildings;
 using RTS.Core.Events;
 using RTS.Core.Services;
 using RTS.Managers;
@@ -209,7 +209,9 @@ namespace RTS.UI
             text.alignment = TextAlignmentOptions.Center;
             text.fontSize = 14;
 
-            RectTransform rectTransform = buttonObj.GetComponent<RectTransform>();
+            if (buttonObj.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+            }
             rectTransform.sizeDelta = new Vector2(100, 100);
 
             return buttonObj;

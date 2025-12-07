@@ -83,8 +83,7 @@ namespace RTS.Units
             if (Time.time < lastAttackTime + (1f / attackRate)) return false;
 
             // Check if target is still valid and alive
-            var targetHealth = currentTarget.GetComponent<UnitHealth>();
-            if (targetHealth != null && targetHealth.IsDead) return false;
+            if (currentTarget.TryGetComponent<UnitHealth>(out var targetHealth) && targetHealth.IsDead) return false;
 
             return true;
         }
@@ -94,8 +93,7 @@ namespace RTS.Units
             lastAttackTime = Time.time;
 
             // Apply damage to target
-            var targetHealth = currentTarget.GetComponent<UnitHealth>();
-            if (targetHealth != null)
+            if (currentTarget.TryGetComponent<UnitHealth>(out var targetHealth))
             {
                 targetHealth.TakeDamage(attackDamage, gameObject);
             }
@@ -116,8 +114,7 @@ namespace RTS.Units
             GameObject projectile = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
 
             // Configure projectile to move toward target
-            var projectileScript = projectile.GetComponent<Projectile>();
-            if (projectileScript != null)
+            if (projectile.TryGetComponent<Projectile>(out var projectileScript))
             {
                 projectileScript.Initialize(currentTarget, attackDamage, gameObject);
             }
@@ -143,8 +140,7 @@ namespace RTS.Units
                 if (hit.gameObject == gameObject) continue;
 
                 // Skip dead targets
-                var health = hit.GetComponent<UnitHealth>();
-                if (health != null && health.IsDead) continue;
+                if (hit.TryGetComponent<UnitHealth>(out var health) && health.IsDead) continue;
 
                 float distance = Vector3.Distance(transform.position, hit.transform.position);
                 if (distance < minDistance)
@@ -265,8 +261,7 @@ namespace RTS.Units
 
         private void HitTarget()
         {
-            var health = target.GetComponent<UnitHealth>();
-            if (health != null)
+            if (target.TryGetComponent<UnitHealth>(out var health))
             {
                 health.TakeDamage(damage, attacker);
             }

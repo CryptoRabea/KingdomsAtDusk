@@ -315,8 +315,7 @@ namespace RTS.Units.Animation
                 return;
 
             // Try to register the newly spawned unit
-            var personalityController = evt.Unit.GetComponent<UnitPersonalityController>();
-            if (personalityController != null)
+            if (evt.Unit.TryGetComponent<UnitPersonalityController>(out var personalityController))
             {
                 RegisterUnit(personalityController);
             }
@@ -328,8 +327,7 @@ namespace RTS.Units.Animation
                 return;
 
             // Unregister dead units
-            var personalityController = evt.Unit.GetComponent<UnitPersonalityController>();
-            if (personalityController != null)
+            if (evt.Unit.TryGetComponent<UnitPersonalityController>(out var personalityController))
             {
                 UnregisterUnit(personalityController);
             }

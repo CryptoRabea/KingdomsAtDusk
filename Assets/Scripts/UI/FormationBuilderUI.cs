@@ -69,7 +69,9 @@ namespace RTS.UI
             if (gridContainer != null)
             {
                 // Add GridLayoutGroup if not present
-                GridLayoutGroup gridLayout = gridContainer.GetComponent<GridLayoutGroup>();
+                if (gridContainer.TryGetComponent<GridLayoutGroup>(out var gridLayout))
+                {
+                }
                 if (gridLayout == null)
                 {
                     gridLayout = gridContainer.gameObject.AddComponent<GridLayoutGroup>();
@@ -94,7 +96,9 @@ namespace RTS.UI
                         GameObject cellObj = CreateGridCell(x, y);
                         if (cellObj != null)
                         {
-                            FormationGridCell cell = cellObj.GetComponent<FormationGridCell>();
+                            if (cellObj.TryGetComponent<FormationGridCell>(out var cell))
+                            {
+                            }
                             if (cell == null)
                             {
                                 cell = cellObj.AddComponent<FormationGridCell>();
@@ -131,7 +135,9 @@ namespace RTS.UI
                 img.color = new Color(0.2f, 0.2f, 0.2f, 0.5f);
 
                 // Set size
-                RectTransform rect = cellObj.GetComponent<RectTransform>();
+                if (cellObj.TryGetComponent<RectTransform>(out var rect))
+                {
+                }
                 rect.sizeDelta = new Vector2(cellSize, cellSize);
             }
 

@@ -22,8 +22,7 @@ namespace RTS.Buildings
             }
 
             // Check if wall can be upgraded
-            var wallConnection = wall.GetComponent<WallConnectionSystem>();
-            if (wallConnection != null)
+            if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
             {
                 int connectionCount = wallConnection.GetConnectionCount();
                 // Don't upgrade corner walls (3+ connections) to prevent breaking wall networks
@@ -59,8 +58,7 @@ namespace RTS.Buildings
             // Handle tower-specific setup
             if (newBuildingData is TowerDataSO towerData)
             {
-                var towerComponent = newBuilding.GetComponent<Tower>();
-                if (towerComponent != null)
+                if (newBuilding.TryGetComponent<Tower>(out var towerComponent))
                 {
                     towerComponent.SetTowerData(towerData);
                 }
@@ -69,8 +67,7 @@ namespace RTS.Buildings
             // Handle gate-specific setup
             if (newBuildingData is GateDataSO gateData)
             {
-                var gateComponent = newBuilding.GetComponent<Gate>();
-                if (gateComponent != null)
+                if (newBuilding.TryGetComponent<Gate>(out var gateComponent))
                 {
                     gateComponent.SetGateData(gateData);
                 }
@@ -86,7 +83,9 @@ namespace RTS.Buildings
             if (connectedWalls != null && connectedWalls.Count > 0)
             {
                 // Add WallConnectionSystem to the new building so it maintains wall continuity
-                var newWallConnection = newBuilding.GetComponent<WallConnectionSystem>();
+                if (newBuilding.TryGetComponent<WallConnectionSystem>(out var newWallConnection))
+                {
+                }
                 if (newWallConnection == null)
                 {
                     newWallConnection = newBuilding.AddComponent<WallConnectionSystem>();

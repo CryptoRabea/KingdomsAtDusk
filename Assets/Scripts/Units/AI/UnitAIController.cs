@@ -237,8 +237,7 @@ namespace RTS.Units.AI
                 var hit = hits[i];
                 if (hit == null || hit.gameObject == gameObject) continue;
 
-                var health = hit.GetComponent<UnitHealth>();
-                if (health != null && health.IsDead) continue;
+                if (hit.TryGetComponent<UnitHealth>(out var health) && health.IsDead) continue;
 
                 float distance = Vector3.Distance(transform.position, hit.transform.position);
                 if (distance < minDistance)
@@ -261,7 +260,9 @@ namespace RTS.Units.AI
                 var hit = hits[i];
                 if (hit == null || hit.gameObject == gameObject) continue;
 
-                var health = hit.GetComponent<UnitHealth>();
+                if (hit.TryGetComponent<UnitHealth>(out var health))
+                {
+                }
                 if (health == null || health.IsDead) continue;
 
                 if (health.CurrentHealth < lowestHealth)
@@ -292,7 +293,9 @@ namespace RTS.Units.AI
                 var ally = cachedHits[i];
                 if (ally == null || ally.gameObject == gameObject) continue;
 
-                var health = ally.GetComponent<UnitHealth>();
+                if (ally.TryGetComponent<UnitHealth>(out var health))
+                {
+                }
                 if (health == null || health.IsDead) continue;
 
                 float healthPercent = health.HealthPercent;

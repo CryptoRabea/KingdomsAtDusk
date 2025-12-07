@@ -682,8 +682,7 @@ namespace RTS.SaveLoad
                     buildingObj.tag = buildingData.tag;
 
                     // Configure building component
-                    Building building = buildingObj.GetComponent<Building>();
-                    if (building != null)
+                    if (buildingObj.TryGetComponent<Building>(out var building))
                     {
                         building.SetData(data);
                         if (buildingData.isConstructed)
@@ -735,23 +734,20 @@ namespace RTS.SaveLoad
                     EventBus.Publish(new UnitSpawnedEvent(unitObj, unitObj.transform.position));
 
                     // Restore health
-                    var health = unitObj.GetComponent<UnitHealth>();
-                    if (health != null)
+                    if (unitObj.TryGetComponent<UnitHealth>(out var health))
                     {
                         health.SetMaxHealth(unitData.maxHealth);
                         health.SetHealth(unitData.currentHealth);
                     }
 
                     // Restore movement
-                    var movement = unitObj.GetComponent<UnitMovement>();
-                    if (movement != null)
+                    if (unitObj.TryGetComponent<UnitMovement>(out var movement))
                     {
                         movement.SetSpeed(unitData.moveSpeed);
                     }
 
                     // Restore combat
-                    var combat = unitObj.GetComponent<UnitCombat>();
-                    if (combat != null)
+                    if (unitObj.TryGetComponent<UnitCombat>(out var combat))
                     {
                         combat.SetAttackDamage(unitData.attackDamage);
                         combat.SetAttackRange(unitData.attackRange);
@@ -782,7 +778,9 @@ namespace RTS.SaveLoad
                     continue;
 
                 GameObject unitObj = loadedEntitiesMap[unitData.instanceID];
-                var combat = unitObj.GetComponent<UnitCombat>();
+                if (unitObj.TryGetComponent<UnitCombat>(out var combat))
+                {
+                }
                 var aiController = unitObj.GetComponent<UnitAIController>();
 
                 // Restore combat target

@@ -144,7 +144,9 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
             prefab.AddComponent<CanvasGroup>();
 
-            RectTransform rectTransform = prefab.GetComponent<RectTransform>();
+            if (prefab.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+            }
             rectTransform.sizeDelta = new Vector2(settings.HPBarWidth * 100f, settings.HPBarHeight * 100f);
 
             // Background
@@ -185,7 +187,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
             if (bgField != null) bgField.SetValue(hpBar, bgImage);
             if (fillField != null) fillField.SetValue(hpBar, fillImage);
             if (canvasField != null) canvasField.SetValue(hpBar, canvas);
-            if (canvasGroupField != null) canvasGroupField.SetValue(hpBar, prefab.GetComponent<CanvasGroup>());
+            if (canvasGroupField != null) canvasGroupField.SetValue(hpBar, prefab.TryGetComponent<CanvasGroup>(out var canvasGroup));
 
             prefab.SetActive(false);
 
@@ -639,8 +641,7 @@ namespace Assets.Scripts.UI.FloatingNumbers
             }
 
             // Start blood dripping if unit is heavily wounded
-            var unitHealth = evt.Target.GetComponent<RTS.Units.UnitHealth>();
-            if (unitHealth != null)
+            if (evt.Target.TryGetComponent<RTS.Units.UnitHealth>(out var unitHealth))
             {
                 float healthPercent = unitHealth.CurrentHealth / unitHealth.MaxHealth;
                 if (healthPercent <= settings.BloodDrippingThreshold)

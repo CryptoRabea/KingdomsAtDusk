@@ -121,7 +121,9 @@ namespace RTS.UI
             text.fontSize = 16;
             text.color = new Color(0.7f, 0.7f, 0.7f);
 
-            RectTransform rect = itemObj.GetComponent<RectTransform>();
+            if (itemObj.TryGetComponent<RectTransform>(out var rect))
+            {
+            }
             rect.sizeDelta = new Vector2(0, 60);
 
             listItems.Add(itemObj);
@@ -188,7 +190,9 @@ namespace RTS.UI
             nameText.text = formation.name;
             nameText.fontSize = 16;
             nameText.alignment = TextAlignmentOptions.MidlineLeft;
-            RectTransform nameRect = nameObj.GetComponent<RectTransform>();
+            if (nameObj.TryGetComponent<RectTransform>(out var nameRect))
+            {
+            }
             nameRect.sizeDelta = new Vector2(200, 30);
 
             // Add piece count text
@@ -199,7 +203,9 @@ namespace RTS.UI
             countText.fontSize = 14;
             countText.color = new Color(0.7f, 0.7f, 0.7f);
             countText.alignment = TextAlignmentOptions.MidlineLeft;
-            RectTransform countRect = countObj.GetComponent<RectTransform>();
+            if (countObj.TryGetComponent<RectTransform>(out var countRect))
+            {
+            }
             countRect.sizeDelta = new Vector2(100, 30);
 
             return itemObj;

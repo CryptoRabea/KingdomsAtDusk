@@ -152,7 +152,9 @@ namespace RTS.Core.Pooling
 
         private int GetPrefabId(GameObject instance)
         {
-            var poolable = instance.GetComponent<PoolableObject>();
+            if (instance.TryGetComponent<PoolableObject>(out var poolable))
+            {
+            }
             return poolable != null ? poolable.PoolId : -1;
         }
 

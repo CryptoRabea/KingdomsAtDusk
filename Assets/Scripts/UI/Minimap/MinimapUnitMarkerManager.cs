@@ -56,8 +56,7 @@ namespace RTS.UI.Minimap
             RectTransform marker = pool.Get();
 
             // Ensure marker has correct visual appearance
-            Image img = marker.GetComponent<Image>();
-            if (img != null)
+            if (marker.TryGetComponent<Image>(out var img))
             {
                 img.color = isEnemy ? config.enemyUnitColor : config.friendlyUnitColor;
                 img.sprite = circleSprite;
@@ -83,7 +82,9 @@ namespace RTS.UI.Minimap
             if (marker != null)
             {
                 // Determine which pool to return to based on color
-                Image img = marker.GetComponent<Image>();
+                if (marker.TryGetComponent<Image>(out var img))
+                {
+                }
                 bool isEnemy = img != null && img.color == config.enemyUnitColor;
 
                 MinimapMarkerPool pool = isEnemy ? enemyPool : friendlyPool;
@@ -101,7 +102,9 @@ namespace RTS.UI.Minimap
             {
                 if (kvp.Value != null)
                 {
-                    Image img = kvp.Value.GetComponent<Image>();
+                    if (kvp.Value.TryGetComponent<Image>(out var img))
+                    {
+                    }
                     bool isEnemy = img != null && img.color == config.enemyUnitColor;
 
                     MinimapMarkerPool pool = isEnemy ? enemyPool : friendlyPool;

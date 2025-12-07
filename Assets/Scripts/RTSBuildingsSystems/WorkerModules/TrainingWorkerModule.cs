@@ -73,8 +73,7 @@ namespace RTS.Buildings.WorkerModules
             if (evt.Building == null) return;
 
             // Check if there are more units in queue
-            var trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
-            if (trainingQueue != null && trainingQueue.QueueCount == 0)
+            if (evt.Building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue) && trainingQueue.QueueCount == 0)
             {
                 // Release workers if queue is empty
                 ReleaseWorkersFromBuilding(evt.Building);
@@ -93,7 +92,9 @@ namespace RTS.Buildings.WorkerModules
             {
                 if (building == null) continue;
 
-                var trainingQueue = building.GetComponent<UnitTrainingQueue>();
+                if (building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+                {
+                }
                 if (trainingQueue == null) continue;
 
                 // Check if training and needs workers
@@ -116,7 +117,9 @@ namespace RTS.Buildings.WorkerModules
         {
             if (building == null || workforceService == null) return false;
 
-            var trainingQueue = building.GetComponent<UnitTrainingQueue>();
+            if (building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+            {
+            }
             if (trainingQueue == null || trainingQueue.QueueCount == 0) return false;
 
             // Check if we can assign workers
@@ -156,7 +159,9 @@ namespace RTS.Buildings.WorkerModules
             // This would integrate with UnitTrainingQueue to modify training speed
             // In a real implementation, you'd modify the training time
 
-            var trainingQueue = building.GetComponent<UnitTrainingQueue>();
+            if (building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+            {
+            }
             if (trainingQueue == null) return;
 
             // You could add a public method to UnitTrainingQueue like:

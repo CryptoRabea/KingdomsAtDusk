@@ -300,7 +300,7 @@ namespace FlowField.Editor
                 {
                     buildingsWithNavMeshObstacle.Add(obstacle.gameObject);
                 }
-                else if (obstacle.GetComponent<WallNavMeshObstacle>() != null)
+                else if (obstacle.TryGetComponent<WallNavMeshObstacle>(out var wallNavMeshObstacle))
                 {
                     wallsWithNavMeshObstacle.Add(obstacle.gameObject);
                 }
@@ -509,7 +509,7 @@ namespace FlowField.Editor
             if (unit == null) return;
 
             // Check if already converted
-            if (unit.GetComponent<FlowFieldFollower>() != null)
+            if (unit.TryGetComponent<FlowFieldFollower>(out var flowFieldFollower))
             {
                 return;
             }
@@ -535,7 +535,9 @@ namespace FlowField.Editor
             SetPrivateField(follower, "unitRadius", radius);
 
             // Ensure Rigidbody exists and is configured
-            Rigidbody rb = unit.GetComponent<Rigidbody>();
+            if (unit.TryGetComponent<Rigidbody>(out var rb))
+            {
+            }
             if (rb == null)
             {
                 rb = unit.AddComponent<Rigidbody>();
@@ -574,7 +576,7 @@ namespace FlowField.Editor
             if (building == null) return;
 
             // Check if already converted
-            if (building.GetComponent<BuildingFlowFieldObstacle>() != null)
+            if (building.TryGetComponent<BuildingFlowFieldObstacle>(out var buildingFlowFieldObstacle))
             {
                 return;
             }
@@ -585,8 +587,12 @@ namespace FlowField.Editor
             // Remove NavMesh obstacle components
             if (removeNavMeshComponents)
             {
-                BuildingNavMeshObstacle oldObstacle = building.GetComponent<BuildingNavMeshObstacle>();
-                NavMeshObstacle navObstacle = building.GetComponent<NavMeshObstacle>();
+                if (building.TryGetComponent<BuildingNavMeshObstacle>(out var oldObstacle))
+                {
+                }
+                if (building.TryGetComponent<NavMeshObstacle>(out var navObstacle))
+                {
+                }
 
                 if (oldObstacle != null) DestroyImmediate(oldObstacle);
                 if (navObstacle != null) DestroyImmediate(navObstacle);
@@ -601,7 +607,7 @@ namespace FlowField.Editor
             if (wall == null) return;
 
             // Check if already converted
-            if (wall.GetComponent<WallFlowFieldObstacle>() != null)
+            if (wall.TryGetComponent<WallFlowFieldObstacle>(out var wallFlowFieldObstacle))
             {
                 return;
             }
@@ -612,8 +618,12 @@ namespace FlowField.Editor
             // Remove NavMesh obstacle components
             if (removeNavMeshComponents)
             {
-                WallNavMeshObstacle oldObstacle = wall.GetComponent<WallNavMeshObstacle>();
-                NavMeshObstacle navObstacle = wall.GetComponent<NavMeshObstacle>();
+                if (wall.TryGetComponent<WallNavMeshObstacle>(out var oldObstacle))
+                {
+                }
+                if (wall.TryGetComponent<NavMeshObstacle>(out var navObstacle))
+                {
+                }
 
                 if (oldObstacle != null) DestroyImmediate(oldObstacle);
                 if (navObstacle != null) DestroyImmediate(navObstacle);

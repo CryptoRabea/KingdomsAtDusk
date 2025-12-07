@@ -150,7 +150,9 @@ namespace RTS.FogOfWar
             }
 
             // Get Building component and verify it's enabled
-            var buildingComponent = evt.Building.GetComponent<Building>();
+            if (evt.Building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null)
             {
                 if (showDebugLogs)
@@ -226,8 +228,7 @@ namespace RTS.FogOfWar
             if (entity == null || fogWarSystem == null) return;
 
             // Safety check: Don't register buildings with disabled Building component (previews)
-            var buildingComponent = entity.GetComponent<Building>();
-            if (buildingComponent != null && !buildingComponent.enabled)
+            if (entity.TryGetComponent<Building>(out var buildingComponent) && !buildingComponent.enabled)
             {
                 if (showDebugLogs)
                 return;
@@ -242,8 +243,7 @@ namespace RTS.FogOfWar
 
             // Check if entity has custom update behavior
             bool entityUpdateOnMove = updateOnlyOnMove;
-            var revealerConfig = entity.GetComponent<FogRevealerConfig>();
-            if (revealerConfig != null && revealerConfig.OverrideUpdateBehavior)
+            if (entity.TryGetComponent<FogRevealerConfig>(out var revealerConfig) && revealerConfig.OverrideUpdateBehavior)
             {
                 entityUpdateOnMove = revealerConfig.UpdateOnlyOnMove;
             }
@@ -281,15 +281,13 @@ namespace RTS.FogOfWar
         private int GetUnitSightRange(GameObject unit)
         {
             // First, check if unit has FogRevealerConfig component for per-entity override
-            var revealerConfig = unit.GetComponent<FogRevealerConfig>();
-            if (revealerConfig != null && revealerConfig.OverrideSightRange)
+            if (unit.TryGetComponent<FogRevealerConfig>(out var revealerConfig) && revealerConfig.OverrideSightRange)
             {
                 return revealerConfig.CustomSightRange;
             }
 
             // Try to get UnitConfigSO from the UnitAIController
-            var unitAI = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-            if (unitAI != null && unitAI.Config != null)
+            if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var unitAI) && unitAI.Config != null)
             {
                 // Check if we have a custom sight range for this unit type
                 var config = unitSightRanges.FirstOrDefault(c => c.unitName == unitAI.Config.unitName);
@@ -308,15 +306,13 @@ namespace RTS.FogOfWar
         private int GetBuildingSightRange(GameObject building)
         {
             // First, check if building has FogRevealerConfig component for per-entity override
-            var revealerConfig = building.GetComponent<FogRevealerConfig>();
-            if (revealerConfig != null && revealerConfig.OverrideSightRange)
+            if (building.TryGetComponent<FogRevealerConfig>(out var revealerConfig) && revealerConfig.OverrideSightRange)
             {
                 return revealerConfig.CustomSightRange;
             }
 
             // Try to get Building component
-            var buildingComponent = building.GetComponent<Building>();
-            if (buildingComponent != null && buildingComponent.Data != null)
+            if (building.TryGetComponent<Building>(out var buildingComponent) && buildingComponent.Data != null)
             {
                 // Check if we have a custom sight range for this building type
                 var config = buildingSightRanges.FirstOrDefault(c => c.buildingName == buildingComponent.Data.buildingName);

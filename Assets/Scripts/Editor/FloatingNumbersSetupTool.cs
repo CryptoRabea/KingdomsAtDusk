@@ -275,7 +275,9 @@ namespace RTS.Editor
             yPos = CreateToggle(content.transform, "Show Level Up Notifications", yPos, out Toggle levelUpToggle);
 
             // Update content size
-            RectTransform contentRect = content.GetComponent<RectTransform>();
+            if (content.TryGetComponent<RectTransform>(out var contentRect))
+            {
+            }
             contentRect.sizeDelta = new Vector2(0, Mathf.Abs(yPos) + 20f);
 
             // Create buttons

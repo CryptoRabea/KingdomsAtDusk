@@ -131,7 +131,9 @@ namespace RTS.UI.Editor
             GameObject multiUnitContainer = CreateMultiUnitSelectionContainer(unitDetailsPanel.transform, unitIconPrefab);
 
             // Add MultiUnitSelectionUI component to the multi-unit container
-            MultiUnitSelectionUI multiUnitUI = multiUnitContainer.GetComponent<MultiUnitSelectionUI>();
+            if (multiUnitContainer.TryGetComponent<MultiUnitSelectionUI>(out var multiUnitUI))
+            {
+            }
             if (multiUnitUI == null)
             {
                 multiUnitUI = multiUnitContainer.AddComponent<MultiUnitSelectionUI>();
@@ -304,7 +306,9 @@ namespace RTS.UI.Editor
         /// </summary>
         private static void UpdateMultiUnitContainer(GameObject container, GameObject unitIconPrefab)
         {
-            MultiUnitSelectionUI multiUnitUI = container.GetComponent<MultiUnitSelectionUI>();
+            if (container.TryGetComponent<MultiUnitSelectionUI>(out var multiUnitUI))
+            {
+            }
             if (multiUnitUI == null)
             {
                 multiUnitUI = container.AddComponent<MultiUnitSelectionUI>();
@@ -313,7 +317,9 @@ namespace RTS.UI.Editor
             Transform gridContainer = container.transform.Find("UnitIconGrid");
             if (gridContainer != null)
             {
-                GridLayoutGroup grid = gridContainer.GetComponent<GridLayoutGroup>();
+                if (gridContainer.TryGetComponent<GridLayoutGroup>(out var grid))
+                {
+                }
                 RectTransform gridRect = gridContainer.GetComponent<RectTransform>();
 
                 var type = typeof(MultiUnitSelectionUI);
@@ -363,7 +369,9 @@ namespace RTS.UI.Editor
             if (singleField != null) singleField.SetValue(unitDetailsUI, singleContainer);
             if (multiField != null) multiField.SetValue(unitDetailsUI, multiContainer);
 
-            MultiUnitSelectionUI multiUI = multiContainer.GetComponent<MultiUnitSelectionUI>();
+            if (multiContainer.TryGetComponent<MultiUnitSelectionUI>(out var multiUI))
+            {
+            }
             if (multiUIField != null && multiUI != null) multiUIField.SetValue(unitDetailsUI, multiUI);
 
             EditorUtility.SetDirty(unitDetailsUI);

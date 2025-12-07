@@ -220,8 +220,7 @@ namespace RTS.Buildings
                 if (hit.collider.TryGetComponent<BuildingSelectable>(out var clickedBuilding))
                 {
                     // Get the building data
-                    var building = clickedBuilding.GetComponent<Building>();
-                    if (building != null && building.Data != null)
+                    if (clickedBuilding.TryGetComponent<Building>(out var building) && building.Data != null)
                     {
                         SelectAllVisibleBuildingsOfType(building.Data);
                         return;
@@ -247,8 +246,7 @@ namespace RTS.Buildings
                 if (hit.collider.TryGetComponent<BuildingSelectable>(out var clickedBuilding))
                 {
                     // Get the building data
-                    var building = clickedBuilding.GetComponent<Building>();
-                    if (building != null && building.Data != null)
+                    if (clickedBuilding.TryGetComponent<Building>(out var building) && building.Data != null)
                     {
                         SelectAllBuildingsOfTypeInScene(building.Data);
                         return;
@@ -437,7 +435,9 @@ namespace RTS.Buildings
                     continue;
 
                 // Check if building data matches by ScriptableObject reference
-                var buildingComponent = buildingSelectable.GetComponent<Building>();
+                if (buildingSelectable.TryGetComponent<Building>(out var buildingComponent))
+                {
+                }
                 if (buildingComponent == null || buildingComponent.Data != targetData)
                     continue;
 
@@ -479,7 +479,9 @@ namespace RTS.Buildings
                     continue;
 
                 // Check if building data matches by ScriptableObject reference
-                var buildingComponent = buildingSelectable.GetComponent<Building>();
+                if (buildingSelectable.TryGetComponent<Building>(out var buildingComponent))
+                {
+                }
                 if (buildingComponent == null || buildingComponent.Data != targetData)
                     continue;
 

@@ -25,10 +25,10 @@ namespace RTS.Units.Animation
             }
 
             // Check for required components
-            bool hasAnimator = selected.GetComponent<Animator>() != null;
-            bool hasMovement = selected.GetComponent<UnitMovement>() != null;
-            bool hasCombat = selected.GetComponent<UnitCombat>() != null;
-            bool hasHealth = selected.GetComponent<UnitHealth>() != null;
+            bool hasAnimator = selected.TryGetComponent<Animator>(out var _);
+            bool hasMovement = selected.TryGetComponent<UnitMovement>(out var _);
+            bool hasCombat = selected.TryGetComponent<UnitCombat>(out var _);
+            bool hasHealth = selected.TryGetComponent<UnitHealth>(out var _);
 
             if (!hasAnimator)
             {
@@ -113,7 +113,9 @@ namespace RTS.Units.Animation
                 return;
             }
 
-            Animator animator = selected.GetComponent<Animator>();
+            if (selected.TryGetComponent<Animator>(out var animator))
+            {
+            }
             if (animator == null || animator.runtimeAnimatorController == null)
             {
                 EditorUtility.DisplayDialog(

@@ -41,8 +41,7 @@ namespace RTS.UI.Minimap
                 case DetectionMethod.Auto:
                 default:
                     // Try component first (most flexible)
-                    var minimapEntity = entity.GetComponent<IMinimapEntity>();
-                    if (minimapEntity != null)
+                    if (entity.TryGetComponent<IMinimapEntity>(out var minimapEntity))
                     {
                         return minimapEntity.GetOwnership() == MinimapEntityOwnership.Enemy;
                     }
@@ -68,8 +67,7 @@ namespace RTS.UI.Minimap
             switch (method)
             {
                 case DetectionMethod.Component:
-                    var minimapEntity = entity.GetComponent<IMinimapEntity>();
-                    if (minimapEntity != null)
+                    if (entity.TryGetComponent<IMinimapEntity>(out var minimapEntity))
                     {
                         return minimapEntity.GetOwnership();
                     }
@@ -89,8 +87,7 @@ namespace RTS.UI.Minimap
 
                 case DetectionMethod.Auto:
                     // Try component first
-                    var component = entity.GetComponent<IMinimapEntity>();
-                    if (component != null)
+                    if (entity.TryGetComponent<IMinimapEntity>(out var component))
                     {
                         return component.GetOwnership();
                     }
@@ -123,8 +120,7 @@ namespace RTS.UI.Minimap
 
         private static bool IsEnemyByComponent(GameObject entity)
         {
-            var minimapEntity = entity.GetComponent<IMinimapEntity>();
-            if (minimapEntity != null)
+            if (entity.TryGetComponent<IMinimapEntity>(out var minimapEntity))
             {
                 return minimapEntity.GetOwnership() == MinimapEntityOwnership.Enemy;
             }

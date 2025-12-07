@@ -151,8 +151,7 @@ namespace Assets.Scripts.FlowField.Integration
 
                 foreach (var obj in selectedObjects)
                 {
-                    var follower = obj.GetComponent<FlowFieldFollower>();
-                    if (follower != null)
+                    if (obj.TryGetComponent<FlowFieldFollower>(out var follower))
                     {
                         selectedUnits.Add(follower);
                     }

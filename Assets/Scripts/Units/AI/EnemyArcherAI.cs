@@ -78,8 +78,7 @@ namespace RTS.Units.AI
             {
                 if (hit.gameObject == gameObject) continue;
 
-                var health = hit.GetComponent<UnitHealth>();
-                if (health != null && health.IsDead) continue;
+                if (hit.TryGetComponent<UnitHealth>(out var health) && health.IsDead) continue;
 
                 float distance = Vector3.Distance(transform.position, hit.transform.position);
 

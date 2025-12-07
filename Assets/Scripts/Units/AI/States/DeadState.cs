@@ -15,8 +15,7 @@ namespace RTS.Units.AI
             controller.Movement?.Stop();
             controller.Combat?.SetCanAttack(false);
 
-            var collider = controller.GetComponent<Collider>();
-            if (collider != null) collider.enabled = false;
+            if (controller.TryGetComponent<Collider>(out var collider)) collider.enabled = false;
 
             Object.Destroy(controller.gameObject, 2f);
         }

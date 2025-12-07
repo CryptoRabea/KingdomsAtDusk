@@ -229,13 +229,11 @@ namespace RTS.Buildings
                 pole.transform.localScale = new Vector3(flagPoleRadius, flagHeight / 2f, flagPoleRadius);
 
                 // Remove collider from pole (we don't want it to interfere with clicks)
-                Collider poleCollider = pole.GetComponent<Collider>();
-                if (poleCollider != null)
+                if (pole.TryGetComponent<Collider>(out var poleCollider))
                     Destroy(poleCollider);
 
                 // Set pole color to dark gray
-                Renderer poleRenderer = pole.GetComponent<Renderer>();
-                if (poleRenderer != null)
+                if (pole.TryGetComponent<Renderer>(out var poleRenderer))
                 {
                     //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     poleRenderer.sharedMaterial.color = new Color(0.3f, 0.3f, 0.3f);
@@ -249,13 +247,11 @@ namespace RTS.Buildings
                 flag.transform.localScale = new Vector3(flagSize, flagSize * 0.6f, 0.05f);
 
                 // Remove collider from flag
-                Collider flagCollider = flag.GetComponent<Collider>();
-                if (flagCollider != null)
+                if (flag.TryGetComponent<Collider>(out var flagCollider))
                     Destroy(flagCollider);
 
                 // Set flag color
-                Renderer flagRenderer = flag.GetComponent<Renderer>();
-                if (flagRenderer != null)
+                if (flag.TryGetComponent<Renderer>(out var flagRenderer))
                 {
                     //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     flagRenderer.sharedMaterial.color = flagColor;

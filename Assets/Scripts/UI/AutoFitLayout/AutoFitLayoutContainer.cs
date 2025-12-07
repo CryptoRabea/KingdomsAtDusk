@@ -362,7 +362,9 @@ namespace RTS.UI.AutoFit
                     visibleChildCount++;
 
                     // Ensure child has proper size
-                    LayoutElement layoutElement = children[i].GetComponent<LayoutElement>();
+                    if (children[i].TryGetComponent<LayoutElement>(out var layoutElement))
+                    {
+                    }
                     if (layoutElement == null && gridLayout == null)
                     {
                         layoutElement = children[i].gameObject.AddComponent<LayoutElement>();

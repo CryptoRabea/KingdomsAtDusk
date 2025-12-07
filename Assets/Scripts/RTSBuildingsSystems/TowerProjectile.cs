@@ -157,8 +157,7 @@ namespace RTS.Buildings
 
         private void DealSingleTargetDamage(Transform targetTransform)
         {
-            var health = targetTransform.GetComponent<UnitHealth>();
-            if (health != null && !health.IsDead)
+            if (targetTransform.TryGetComponent<UnitHealth>(out var health) && !health.IsDead)
             {
                 health.TakeDamage(damage, attacker);
 
@@ -176,8 +175,7 @@ namespace RTS.Buildings
 
             foreach (var hit in hits)
             {
-                var health = hit.GetComponent<UnitHealth>();
-                if (health != null && !health.IsDead)
+                if (hit.TryGetComponent<UnitHealth>(out var health) && !health.IsDead)
                 {
                     // Calculate distance-based damage falloff (optional)
                     float distance = Vector3.Distance(explosionCenter, hit.transform.position);
@@ -207,7 +205,9 @@ namespace RTS.Buildings
         private void ApplyBurnEffect(GameObject targetObject)
         {
             // Add or refresh burn effect component
-            var burnEffect = targetObject.GetComponent<BurnEffect>();
+            if (targetObject.TryGetComponent<BurnEffect>(out var burnEffect))
+            {
+            }
             if (burnEffect == null)
             {
                 burnEffect = targetObject.AddComponent<BurnEffect>();

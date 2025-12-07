@@ -205,8 +205,7 @@ namespace RTS.UI
             iconObj.SetActive(true);
 
             // Initialize the icon
-            var iconComponent = iconObj.GetComponent<UnitIconWithHP>();
-            if (iconComponent != null)
+            if (iconObj.TryGetComponent<UnitIconWithHP>(out var iconComponent))
             {
                 iconComponent.Initialize(unit);
                 activeIcons.Add(iconComponent);

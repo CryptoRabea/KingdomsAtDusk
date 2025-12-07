@@ -206,8 +206,7 @@ namespace RTS.Units
             Vector3 targetPos = new Vector3(centerPos.x+xOffset, mainCamera.transform.position.y+yOffset, centerPos.z+zOffset);
 
             // Use the RTS camera controller if available
-            var cameraController = mainCamera.GetComponent<RTSCameraController>();
-            if (cameraController != null)
+            if (mainCamera.TryGetComponent<RTSCameraController>(out var cameraController))
             {
                 // Just set position directly - the camera controller handles the rest
                 mainCamera.transform.position = targetPos;

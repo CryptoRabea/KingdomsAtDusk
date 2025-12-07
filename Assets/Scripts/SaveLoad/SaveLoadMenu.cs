@@ -289,7 +289,9 @@ namespace RTS.SaveLoad
             }
 
             GameObject itemObj = Instantiate(saveListItemPrefab, content);
-            SaveListItem item = itemObj.GetComponent<SaveListItem>();
+            if (itemObj.TryGetComponent<SaveListItem>(out var item))
+            {
+            }
 
             if (item != null)
             {

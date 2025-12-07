@@ -89,8 +89,7 @@ namespace RTS.UI
             // We'll use RectTransform scaling for the slider effect
             if (healthBarFill != null)
             {
-                RectTransform fillRect = healthBarFill.GetComponent<RectTransform>();
-                if (fillRect != null)
+                if (healthBarFill.TryGetComponent<RectTransform>(out var fillRect))
                 {
                     // Set anchors to stretch from left
                     fillRect.anchorMin = new Vector2(0, 0);
@@ -99,8 +98,7 @@ namespace RTS.UI
                     fillRect.anchoredPosition = Vector2.zero;
 
                     // Get the parent width to set the fill width
-                    RectTransform parentRect = healthBarFill.transform.parent.GetComponent<RectTransform>();
-                    if (parentRect != null)
+                    if (healthBarFill.transform.parent.TryGetComponent<RectTransform>(out var parentRect))
                     {
                         fillRect.sizeDelta = new Vector2(parentRect.rect.width, 0);
                     }
@@ -298,7 +296,9 @@ namespace RTS.UI
             }
 
             // Get the UnitAIController component which has the config
-            var unitAI = unit.GetComponent<RTS.Units.AI.UnitAIController>();
+            if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var unitAI))
+            {
+            }
             if (unitAI == null || unitAI.Config == null)
             {
                 HideUnitDetails();
@@ -383,8 +383,7 @@ namespace RTS.UI
                 float healthPercent = currentHealth / maxHealth;
 
                 // Scale the fill image horizontally based on health percentage
-                RectTransform fillRect = healthBarFill.GetComponent<RectTransform>();
-                if (fillRect != null)
+                if (healthBarFill.TryGetComponent<RectTransform>(out var fillRect))
                 {
                     fillRect.localScale = new Vector3(healthPercent, 1, 1);
                 }
@@ -625,7 +624,9 @@ namespace RTS.UI
             btnText.alignment = TextAlignmentOptions.Center;
             btnText.color = Color.white;
 
-            RectTransform textRect = textObj.GetComponent<RectTransform>();
+            if (textObj.TryGetComponent<RectTransform>(out var textRect))
+            {
+            }
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.sizeDelta = Vector2.zero;
