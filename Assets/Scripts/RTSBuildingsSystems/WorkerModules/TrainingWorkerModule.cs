@@ -6,20 +6,20 @@ using System.Collections.Generic;
 namespace RTS.Buildings.WorkerModules
 {
     /// <summary>
-    /// Optional module: Allocates peasants from campfire to unit training.
-    /// Speeds up unit training when workers are assigned.
-    /// Add this component to a Campfire to enable training worker allocation.
+    /// DEPRECATED: This module caused performance issues and joint queue behavior.
+    /// Each barracks now manages training independently.
+    /// This component is disabled and will be removed in a future update.
     /// </summary>
     [RequireComponent(typeof(Campfire))]
     public class TrainingWorkerModule : MonoBehaviour
     {
         [Header("Worker Settings")]
-        [SerializeField] private bool enableModule = true;
+        [SerializeField] private bool enableModule = false; // Disabled by default
         [SerializeField] private int peasantsPerTraining = 1;
         [SerializeField] private float trainingSpeedBonus = 1.3f;
 
         [Header("Auto-Assignment")]
-        [SerializeField] private bool autoAssignWorkers = true;
+        [SerializeField] private bool autoAssignWorkers = false; // Disabled by default
         [SerializeField] private float assignmentUpdateInterval = 1.5f;
 
         private Campfire campfire;
