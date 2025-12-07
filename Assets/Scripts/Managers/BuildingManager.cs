@@ -285,6 +285,8 @@ namespace RTS.Managers
 
             if (previewBuilding != null)
             {
+                // Restore original materials before destroying to clean up material instances
+                RestoreOriginalMaterials();
                 Destroy(previewBuilding);
                 previewBuilding = null;
             }
@@ -777,7 +779,22 @@ namespace RTS.Managers
             {
                 if (renderer != null)
                 {
-                    renderer.sharedMaterial = material;
+                    // Use material (instance) instead of sharedMaterial to avoid modifying the prefab asset
+                    renderer.material = material;
+                }
+            }
+        }
+
+        private void RestoreOriginalMaterials()
+        {
+            if (previewBuilding == null || originalMaterials == null) return;
+
+            var renderers = previewBuilding.GetComponentsInChildren<Renderer>();
+            for (int i = 0; i < renderers.Length && i < originalMaterials.Length; i++)
+            {
+                if (renderers[i] != null && originalMaterials[i] != null)
+                {
+                    renderers[i].sharedMaterial = originalMaterials[i];
                 }
             }
         }
