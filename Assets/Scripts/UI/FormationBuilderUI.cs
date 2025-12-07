@@ -415,5 +415,41 @@ namespace RTS.UI
                 currentFormation.name = newName;
             }
         }
+
+        // ===== Legacy FormationPiece Support =====
+        // These methods are called by FormationPiece (legacy drag-and-drop system)
+        // but are not used in the current grid-based implementation
+
+        /// <summary>
+        /// Called when a formation piece is clicked (legacy)
+        /// </summary>
+        public void OnPieceClicked(FormationPiece piece)
+        {
+            // Not used in grid-based implementation
+        }
+
+        /// <summary>
+        /// Called when a formation piece drag starts (legacy)
+        /// </summary>
+        public void OnPieceDragStart(FormationPiece piece)
+        {
+            // Not used in grid-based implementation
+        }
+
+        /// <summary>
+        /// Called when a formation piece drag ends (legacy)
+        /// </summary>
+        public void OnPieceDragEnd(FormationPiece piece, UnityEngine.EventSystems.PointerEventData eventData)
+        {
+            // Not used in grid-based implementation
+        }
+
+        /// <summary>
+        /// Remove a formation piece (legacy)
+        /// </summary>
+        public void RemovePiece(FormationPiece piece)
+        {
+            // Not used in grid-based implementation
+        }
     }
 }
