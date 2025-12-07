@@ -446,6 +446,7 @@ namespace RTS.Units
 
             if (clickedUnit != null && unitConfig != null)
             {
+                Debug.Log($"[HandleDoubleClick] Clicked on unit: {clickedUnit.name}, Config: {unitConfig.name} (ID: {unitConfig.GetInstanceID()})");
                 SelectAllVisibleUnitsOfType(unitConfig);
                 Debug.Log($"Double-clicked unit: {unitConfig.unitName}. Selected all visible units of this type.");
                 return;
@@ -825,6 +826,8 @@ namespace RTS.Units
             if (mainCamera == null || targetConfig == null)
                 return;
 
+            Debug.Log($"[SelectAllVisibleUnitsOfType] Target Config: {targetConfig.name} (Instance ID: {targetConfig.GetInstanceID()})");
+
             ClearSelection();
 
             List<UnitSelectable> matchingUnits = new List<UnitSelectable>();
@@ -838,7 +841,23 @@ namespace RTS.Units
 
                 // Check if unit config matches by ScriptableObject reference (not AI type filter)
                 var aiController = selectable.GetComponent<UnitAIController>();
-                if (aiController == null || aiController.Config != targetConfig)
+                if (aiController == null)
+                {
+                    Debug.LogWarning($"[SelectAllVisibleUnitsOfType] Unit {selectable.name} has no UnitAIController!");
+                    continue;
+                }
+
+                if (aiController.Config == null)
+                {
+                    Debug.LogWarning($"[SelectAllVisibleUnitsOfType] Unit {selectable.name} has null Config!");
+                    continue;
+                }
+
+                // Log each unit's config for debugging
+                bool configMatches = aiController.Config == targetConfig;
+                Debug.Log($"[SelectAllVisibleUnitsOfType] Checking {selectable.name}: Config={aiController.Config.name} (ID:{aiController.Config.GetInstanceID()}), Matches={configMatches}");
+
+                if (!configMatches)
                     continue;
 
                 // Check if unit is visible to camera
@@ -849,8 +868,15 @@ namespace RTS.Units
                     screenPos.y >= 0 && screenPos.y <= Screen.height)
                 {
                     matchingUnits.Add(selectable);
+                    Debug.Log($"[SelectAllVisibleUnitsOfType] ✓ MATCHED and VISIBLE: {selectable.name}");
+                }
+                else
+                {
+                    Debug.Log($"[SelectAllVisibleUnitsOfType] ✓ MATCHED but NOT VISIBLE: {selectable.name}");
                 }
             }
+
+            Debug.Log($"[SelectAllVisibleUnitsOfType] Found {matchingUnits.Count} matching units before applying limits");
 
             // Apply max selection limit and distance sorting if enabled
             if (enableMaxSelection && matchingUnits.Count > maxSelectionCount)
@@ -873,6 +899,8 @@ namespace RTS.Units
             {
                 SelectUnit(unit);
             }
+
+            Debug.Log($"[SelectAllVisibleUnitsOfType] FINAL: Selected {selectedUnits.Count} units of type {targetConfig.name}");
         }
 
         /// <summary>
