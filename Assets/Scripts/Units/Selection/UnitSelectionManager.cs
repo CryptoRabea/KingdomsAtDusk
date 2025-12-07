@@ -450,10 +450,12 @@ namespace RTS.Units
                 return;
             }
 
-            // Don't select buildings from UnitSelectionManager - buildings have their own manager
+            // Don't select buildings or units from UnitSelectionManager when clicking on buildings
             if (clickedBuilding != null && buildingData != null)
             {
-                Debug.Log($"Double-clicked building: {buildingData.buildingName}. Ignoring - use BuildingSelectionManager instead.");
+                // Clear unit selection when clicking on a building
+                ClearSelection();
+                Debug.Log($"Double-clicked building: {buildingData.buildingName}. Units deselected - use BuildingSelectionManager instead.");
                 return;
             }
 
@@ -484,10 +486,12 @@ namespace RTS.Units
                 return;
             }
 
-            // Don't select buildings from UnitSelectionManager - buildings have their own manager
+            // Don't select buildings or units from UnitSelectionManager when clicking on buildings
             if (clickedBuilding != null && buildingData != null)
             {
-                Debug.Log($"Triple-click on building: {buildingData.buildingName}. Ignoring - use BuildingSelectionManager instead.");
+                // Clear unit selection when clicking on a building
+                ClearSelection();
+                Debug.Log($"Triple-click on building: {buildingData.buildingName}. Units deselected - use BuildingSelectionManager instead.");
                 return;
             }
 
@@ -630,6 +634,10 @@ namespace RTS.Units
                     SelectUnit(selectedUnit);
                     return true;
                 }
+
+                // Hit something but no valid unit found (e.g., building) - clear unit selection
+                ClearSelection();
+                return false;
             }
 
             // Clicked empty space - clear selection
