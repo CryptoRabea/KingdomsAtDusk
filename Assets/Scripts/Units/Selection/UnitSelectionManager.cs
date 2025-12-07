@@ -426,7 +426,8 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// Handles double-click: select visible units/buildings of same SO (by reference) or all visible units on empty
+        /// Handles double-click: select visible units of same SO (by reference) or all visible units on empty
+        /// NOTE: Buildings are NOT selected here - they have their own BuildingSelectionManager
         /// </summary>
         private void HandleDoubleClick(Vector2 screenPosition)
         {
@@ -449,21 +450,22 @@ namespace RTS.Units
                 return;
             }
 
+            // Don't select buildings from UnitSelectionManager - buildings have their own manager
             if (clickedBuilding != null && buildingData != null)
             {
-                SelectAllVisibleBuildingsOfType(buildingData);
-                Debug.Log($"Double-clicked building: {buildingData.buildingName}. Selected all visible buildings of this type.");
+                Debug.Log($"Double-clicked building: {buildingData.buildingName}. Ignoring - use BuildingSelectionManager instead.");
                 return;
             }
 
-            // Double-click on empty space selects all visible units
+            // Double-click on empty space selects all visible units (NOT buildings)
             SelectAllVisibleUnits();
             lastClickedUnitConfig = null;
             lastClickedBuildingData = null;
         }
 
         /// <summary>
-        /// Handles triple-click: select all units/buildings in scene (or all of same SO if clicked on one)
+        /// Handles triple-click: select all units in scene (or all of same SO if clicked on one)
+        /// NOTE: Buildings are NOT selected here - they have their own BuildingSelectionManager
         /// </summary>
         private void HandleTripleClick(Vector2 screenPosition)
         {
@@ -482,14 +484,14 @@ namespace RTS.Units
                 return;
             }
 
+            // Don't select buildings from UnitSelectionManager - buildings have their own manager
             if (clickedBuilding != null && buildingData != null)
             {
-                SelectAllBuildingsOfTypeInScene(buildingData);
-                Debug.Log($"Triple-click on building: {buildingData.buildingName}. Selected all buildings of this type in entire scene.");
+                Debug.Log($"Triple-click on building: {buildingData.buildingName}. Ignoring - use BuildingSelectionManager instead.");
                 return;
             }
 
-            // Triple-click on empty space = select ALL units in scene
+            // Triple-click on empty space = select ALL units in scene (NOT buildings)
             SelectAllUnitsSceneWide();
             Debug.Log($"Triple-click on empty space: Selected all units in entire scene. Total: {selectedUnits.Count}");
         }
@@ -929,92 +931,6 @@ namespace RTS.Units
             }
         }
 
-        /// <summary>
-        /// NEW: Select all visible buildings of a specific type (by BuildingDataSO)
-        /// </summary>
-        private void SelectAllVisibleBuildingsOfType(BuildingDataSO targetData)
-        {
-            if (mainCamera == null)
-                mainCamera = Camera.main;
-
-            if (mainCamera == null || targetData == null)
-                return;
-
-            ClearSelection();
-
-            // Find all building selectables in the scene
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
-            List<BuildingSelectable> matchingBuildings = new List<BuildingSelectable>();
-
-            foreach (var buildingSelectable in allBuildings)
-            {
-                if (buildingSelectable == null)
-                    continue;
-
-                // Check if building data matches
-                var buildingComponent = buildingSelectable.GetComponent<Building>();
-                if (buildingComponent == null || buildingComponent.Data != targetData)
-                    continue;
-
-                // Check if building is visible to camera
-                Vector3 screenPos = mainCamera.WorldToScreenPoint(buildingSelectable.transform.position);
-
-                if (screenPos.z > 0 &&
-                    screenPos.x >= 0 && screenPos.x <= Screen.width &&
-                    screenPos.y >= 0 && screenPos.y <= Screen.height)
-                {
-                    matchingBuildings.Add(buildingSelectable);
-                }
-            }
-
-            // Select all matching buildings (no selection limit for buildings)
-            foreach (var building in matchingBuildings)
-            {
-                // Buildings use their own selection system
-                building.Select();
-            }
-
-            Debug.Log($"Selected {matchingBuildings.Count} buildings of type: {targetData.buildingName}");
-        }
-
-        /// <summary>
-        /// NEW: Select all buildings of a specific type (by BuildingDataSO) in entire scene
-        /// </summary>
-        private void SelectAllBuildingsOfTypeInScene(BuildingDataSO targetData)
-        {
-            if (targetData == null)
-                return;
-
-            ClearSelection();
-
-            // Find all building selectables in the scene
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
-            List<BuildingSelectable> matchingBuildings = new List<BuildingSelectable>();
-
-            foreach (var buildingSelectable in allBuildings)
-            {
-                if (buildingSelectable == null)
-                    continue;
-
-                // Check if building data matches
-                var buildingComponent = buildingSelectable.GetComponent<Building>();
-                if (buildingComponent == null || buildingComponent.Data != targetData)
-                    continue;
-
-                matchingBuildings.Add(buildingSelectable);
-            }
-
-            // Select all matching buildings (no selection limit for buildings)
-            foreach (var building in matchingBuildings)
-            {
-                // Buildings use their own selection system
-                building.Select();
-            }
-
-            Debug.Log($"Selected {matchingBuildings.Count} buildings of type: {targetData.buildingName} in entire scene");
-        }
 
         #endregion
 
