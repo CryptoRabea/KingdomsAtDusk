@@ -38,10 +38,16 @@ namespace RTS.UI
         [Header("Formation")]
         [SerializeField] private TMP_Dropdown formationDropdown;
         [SerializeField] private FormationGroupManager formationGroupManager;
-        [SerializeField] private Button customFormationButton;
-        [SerializeField] private Button createFormationButton;
+        [SerializeField] private Button expandFormationsButton;
+        [SerializeField] private GameObject formationsPanel; // Expandable panel for all formations
+        [SerializeField] private Transform formationsPanelContent; // Content container for formation list items
+        [SerializeField] private GameObject formationListItemPrefab; // Prefab for formation list items
         [SerializeField] private FormationSelectorUI formationSelector;
         [SerializeField] private FormationBuilderUI formationBuilder;
+
+        // Dropdown index tracking
+        private const int CUSTOMIZE_FORMATION_INDEX = 7; // After standard formations (0-6)
+        private Dictionary<int, string> customFormationIndexMap = new Dictionary<int, string>();
 
         [Header("Health Bar")]
         [SerializeField] private Image healthBarFill;
@@ -104,15 +110,22 @@ namespace RTS.UI
             // Initialize formation dropdown
             InitializeFormationDropdown();
 
-            // Setup custom formation buttons
-            if (customFormationButton != null)
+            // Setup expand button
+            if (expandFormationsButton != null)
             {
-                customFormationButton.onClick.AddListener(OnCustomFormationButtonClicked);
+                expandFormationsButton.onClick.AddListener(OnExpandFormationsButtonClicked);
             }
 
-            if (createFormationButton != null)
+            // Hide formations panel initially
+            if (formationsPanel != null)
             {
-                createFormationButton.onClick.AddListener(OnCreateFormationButtonClicked);
+                formationsPanel.SetActive(false);
+            }
+
+            // Subscribe to custom formation changes
+            if (CustomFormationManager.Instance != null)
+            {
+                CustomFormationManager.Instance.OnFormationsChanged += OnCustomFormationsChanged;
             }
         }
 
@@ -120,14 +133,33 @@ namespace RTS.UI
         {
             if (formationDropdown == null) return;
 
-            // Clear existing options
+            // Clear existing options and mapping
             formationDropdown.ClearOptions();
+            customFormationIndexMap.Clear();
 
             // Add all formation types
             List<string> options = new List<string>();
             foreach (FormationType formationType in Enum.GetValues(typeof(FormationType)))
             {
                 options.Add(FormatFormationName(formationType));
+            }
+
+            // Add "Customize Formation" option
+            options.Add("⚙️ Customize Formation");
+
+            // Add custom formations from quick list
+            if (CustomFormationManager.Instance != null)
+            {
+                var customFormations = CustomFormationManager.Instance.GetAllFormations();
+                foreach (var formation in customFormations)
+                {
+                    if (formation.isInQuickList)
+                    {
+                        int index = options.Count;
+                        options.Add(formation.name);
+                        customFormationIndexMap[index] = formation.id;
+                    }
+                }
             }
 
             formationDropdown.AddOptions(options);
@@ -140,6 +172,7 @@ namespace RTS.UI
             }
 
             // Add listener
+            formationDropdown.onValueChanged.RemoveAllListeners();
             formationDropdown.onValueChanged.AddListener(OnFormationDropdownChanged);
         }
 
@@ -160,7 +193,37 @@ namespace RTS.UI
 
         private void OnFormationDropdownChanged(int index)
         {
-            if (formationGroupManager != null)
+            // Check if "Customize Formation" was selected
+            if (index == CUSTOMIZE_FORMATION_INDEX)
+            {
+                // Open formation builder to create new formation
+                if (formationBuilder != null)
+                {
+                    formationBuilder.OpenBuilder();
+                }
+
+                // Reset dropdown to current formation
+                if (formationGroupManager != null)
+                {
+                    formationDropdown.value = (int)formationGroupManager.CurrentFormation;
+                    formationDropdown.RefreshShownValue();
+                }
+                return;
+            }
+
+            // Check if a custom formation was selected
+            if (customFormationIndexMap.ContainsKey(index))
+            {
+                string formationId = customFormationIndexMap[index];
+                if (formationGroupManager != null)
+                {
+                    formationGroupManager.SetCustomFormation(formationId);
+                }
+                return;
+            }
+
+            // Otherwise, it's a standard formation type
+            if (index < CUSTOMIZE_FORMATION_INDEX && formationGroupManager != null)
             {
                 FormationType newFormation = (FormationType)index;
                 formationGroupManager.CurrentFormation = newFormation;
@@ -394,34 +457,290 @@ namespace RTS.UI
         }
 
         /// <summary>
-        /// Called when the custom formation button is clicked
-        /// Opens the formation selector to browse and select saved formations
+        /// Called when the expand formations button is clicked
+        /// Toggles the expandable formations panel
         /// </summary>
-        private void OnCustomFormationButtonClicked()
+        private void OnExpandFormationsButtonClicked()
         {
-            if (formationSelector != null)
+            if (formationsPanel != null)
             {
-                formationSelector.OpenSelector();
-            }
-            else
-            {
-                Debug.LogWarning("FormationSelectorUI is not assigned in UnitDetailsUI!");
+                bool isActive = formationsPanel.activeSelf;
+                formationsPanel.SetActive(!isActive);
+
+                if (!isActive)
+                {
+                    // Panel is being opened, refresh the list
+                    RefreshFormationsPanel();
+                }
             }
         }
 
         /// <summary>
-        /// Called when the create formation button is clicked
-        /// Opens the formation builder to create a new custom formation
+        /// Called when custom formations change
         /// </summary>
-        private void OnCreateFormationButtonClicked()
+        private void OnCustomFormationsChanged(List<CustomFormationData> formations)
         {
-            if (formationBuilder != null)
+            // Refresh dropdown to include updated quick list
+            InitializeFormationDropdown();
+
+            // Refresh panel if it's open
+            if (formationsPanel != null && formationsPanel.activeSelf)
             {
-                formationBuilder.OpenBuilder();
+                RefreshFormationsPanel();
+            }
+        }
+
+        /// <summary>
+        /// Refresh the formations panel with all formations
+        /// </summary>
+        private void RefreshFormationsPanel()
+        {
+            if (formationsPanelContent == null)
+                return;
+
+            // Clear existing items
+            foreach (Transform child in formationsPanelContent)
+            {
+                Destroy(child.gameObject);
+            }
+
+            // Get all formations
+            if (CustomFormationManager.Instance == null)
+                return;
+
+            var formations = CustomFormationManager.Instance.GetAllFormations();
+
+            if (formations.Count == 0)
+            {
+                // Show empty message
+                GameObject emptyObj = new GameObject("EmptyMessage");
+                emptyObj.transform.SetParent(formationsPanelContent, false);
+
+                TextMeshProUGUI emptyText = emptyObj.AddComponent<TextMeshProUGUI>();
+                emptyText.text = "No formations yet.\nClick 'Customize Formation' to create one!";
+                emptyText.alignment = TextAlignmentOptions.Center;
+                emptyText.fontSize = 14;
+                emptyText.color = new Color(0.7f, 0.7f, 0.7f);
+
+                return;
+            }
+
+            // Create list items for each formation
+            foreach (var formation in formations)
+            {
+                CreateFormationPanelItem(formation);
+            }
+        }
+
+        /// <summary>
+        /// Create a list item for a formation in the expandable panel
+        /// </summary>
+        private void CreateFormationPanelItem(CustomFormationData formation)
+        {
+            GameObject itemObj;
+
+            if (formationListItemPrefab != null)
+            {
+                itemObj = Instantiate(formationListItemPrefab, formationsPanelContent);
             }
             else
             {
-                Debug.LogWarning("FormationBuilderUI is not assigned in UnitDetailsUI!");
+                // Create basic item
+                itemObj = CreateBasicFormationItem(formation);
+            }
+
+            // Setup the item's buttons
+            SetupFormationItemButtons(itemObj, formation);
+        }
+
+        /// <summary>
+        /// Create a basic formation item (fallback if no prefab)
+        /// </summary>
+        private GameObject CreateBasicFormationItem(CustomFormationData formation)
+        {
+            GameObject itemObj = new GameObject($"Formation_{formation.name}");
+            itemObj.transform.SetParent(formationsPanelContent, false);
+
+            // Add background
+            Image bg = itemObj.AddComponent<Image>();
+            bg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+
+            // Add horizontal layout
+            HorizontalLayoutGroup layout = itemObj.AddComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(10, 10, 5, 5);
+            layout.spacing = 5;
+            layout.childAlignment = TextAnchor.MiddleLeft;
+            layout.childForceExpandWidth = false;
+
+            // Add layout element
+            LayoutElement layoutElement = itemObj.AddComponent<LayoutElement>();
+            layoutElement.preferredHeight = 35;
+
+            // Add name text
+            GameObject nameObj = new GameObject("NameText");
+            nameObj.transform.SetParent(itemObj.transform, false);
+            TextMeshProUGUI nameText = nameObj.AddComponent<TextMeshProUGUI>();
+            nameText.text = formation.name;
+            nameText.fontSize = 14;
+            LayoutElement nameLayout = nameObj.AddComponent<LayoutElement>();
+            nameLayout.preferredWidth = 150;
+            nameLayout.flexibleWidth = 1;
+
+            // Add Select button
+            CreateButton(itemObj.transform, "Select", () => OnFormationSelectClicked(formation));
+
+            // Add Edit button
+            CreateButton(itemObj.transform, "Edit", () => OnFormationEditClicked(formation));
+
+            // Add Remove button
+            CreateButton(itemObj.transform, "Remove", () => OnFormationRemoveClicked(formation));
+
+            // Add Quick List toggle button
+            string quickListText = formation.isInQuickList ? "Remove from Quick" : "Add to Quick";
+            CreateButton(itemObj.transform, quickListText, () => OnFormationQuickListToggleClicked(formation));
+
+            return itemObj;
+        }
+
+        /// <summary>
+        /// Create a button for the formation item
+        /// </summary>
+        private Button CreateButton(Transform parent, string label, UnityEngine.Events.UnityAction onClick)
+        {
+            GameObject btnObj = new GameObject($"{label}Button");
+            btnObj.transform.SetParent(parent, false);
+
+            Button btn = btnObj.AddComponent<Button>();
+            Image btnImage = btnObj.AddComponent<Image>();
+            btnImage.color = new Color(0.3f, 0.5f, 0.7f);
+
+            LayoutElement btnLayout = btnObj.AddComponent<LayoutElement>();
+            btnLayout.preferredWidth = 80;
+            btnLayout.preferredHeight = 25;
+
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(btnObj.transform, false);
+            TextMeshProUGUI btnText = textObj.AddComponent<TextMeshProUGUI>();
+            btnText.text = label;
+            btnText.fontSize = 10;
+            btnText.alignment = TextAlignmentOptions.Center;
+            btnText.color = Color.white;
+
+            RectTransform textRect = textObj.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.sizeDelta = Vector2.zero;
+
+            btn.onClick.AddListener(onClick);
+
+            return btn;
+        }
+
+        /// <summary>
+        /// Setup buttons for a formation item
+        /// </summary>
+        private void SetupFormationItemButtons(GameObject itemObj, CustomFormationData formation)
+        {
+            // Find buttons in the prefab and set up their callbacks
+            Button[] buttons = itemObj.GetComponentsInChildren<Button>();
+
+            foreach (var btn in buttons)
+            {
+                string btnName = btn.gameObject.name.ToLower();
+
+                if (btnName.Contains("select"))
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnFormationSelectClicked(formation));
+                }
+                else if (btnName.Contains("edit"))
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnFormationEditClicked(formation));
+                }
+                else if (btnName.Contains("remove") || btnName.Contains("delete"))
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnFormationRemoveClicked(formation));
+                }
+                else if (btnName.Contains("quick"))
+                {
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnFormationQuickListToggleClicked(formation));
+
+                    // Update button text
+                    TextMeshProUGUI btnText = btn.GetComponentInChildren<TextMeshProUGUI>();
+                    if (btnText != null)
+                    {
+                        btnText.text = formation.isInQuickList ? "Remove from Quick" : "Add to Quick";
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a formation's Select button is clicked
+        /// </summary>
+        private void OnFormationSelectClicked(CustomFormationData formation)
+        {
+            if (formationGroupManager != null)
+            {
+                formationGroupManager.SetCustomFormation(formation.id);
+                Debug.Log($"Applied formation: {formation.name}");
+            }
+        }
+
+        /// <summary>
+        /// Called when a formation's Edit button is clicked
+        /// </summary>
+        private void OnFormationEditClicked(CustomFormationData formation)
+        {
+            if (formationBuilder != null)
+            {
+                formationBuilder.OpenBuilder(formation);
+                formationsPanel.SetActive(false); // Close the panel
+            }
+        }
+
+        /// <summary>
+        /// Called when a formation's Remove button is clicked
+        /// </summary>
+        private void OnFormationRemoveClicked(CustomFormationData formation)
+        {
+            if (CustomFormationManager.Instance != null)
+            {
+                CustomFormationManager.Instance.DeleteFormation(formation.id);
+                Debug.Log($"Deleted formation: {formation.name}");
+            }
+        }
+
+        /// <summary>
+        /// Called when a formation's Quick List toggle button is clicked
+        /// </summary>
+        private void OnFormationQuickListToggleClicked(CustomFormationData formation)
+        {
+            if (CustomFormationManager.Instance != null)
+            {
+                if (formation.isInQuickList)
+                {
+                    formation.RemoveFromQuickList();
+                }
+                else
+                {
+                    formation.AddToQuickList();
+                }
+
+                CustomFormationManager.Instance.UpdateFormation(formation);
+                Debug.Log($"Toggled quick list for: {formation.name}");
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // Unsubscribe from custom formation changes
+            if (CustomFormationManager.Instance != null)
+            {
+                CustomFormationManager.Instance.OnFormationsChanged -= OnCustomFormationsChanged;
             }
         }
     }
