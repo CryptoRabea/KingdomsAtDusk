@@ -44,11 +44,16 @@ namespace RTS.Buildings
         [Header("Debug")]
         [SerializeField] private bool showDebugInfo = true;
 
+        [Header("Performance")]
+        [SerializeField] private float progressUpdateInterval = 0.1f; // Only update progress every 0.1s
+
         private Queue<TrainingQueueEntry> trainingQueue = new Queue<TrainingQueueEntry>();
         private TrainingQueueEntry currentTraining;
         private Building building;
         private IResourcesService resourceService;
         private BuildingDataSO buildingData;
+        private float progressUpdateTimer = 0f;
+        private float lastPublishedProgress = 0f;
 
         public int QueueCount => trainingQueue.Count + (currentTraining != null ? 1 : 0);
         public bool IsTraining => currentTraining != null;
@@ -99,25 +104,41 @@ namespace RTS.Buildings
             {
                 currentTraining.timeRemaining -= Time.deltaTime;
 
-                // Publish progress update
-                if (currentTraining.unitData?.unitConfig != null)
+                // Publish progress update at intervals, not every frame (massive performance boost)
+                progressUpdateTimer += Time.deltaTime;
+                if (progressUpdateTimer >= progressUpdateInterval)
                 {
-                    EventBus.Publish(new TrainingProgressEvent(
-                        gameObject,
-                        currentTraining.unitData.unitConfig.unitName,
-                        currentTraining.Progress
-                    ));
+                    progressUpdateTimer = 0f;
+
+                    // Only publish if progress actually changed significantly
+                    float currentProgress = currentTraining.Progress;
+                    if (Mathf.Abs(currentProgress - lastPublishedProgress) > 0.01f)
+                    {
+                        if (currentTraining.unitData?.unitConfig != null)
+                        {
+                            EventBus.Publish(new TrainingProgressEvent(
+                                gameObject,
+                                currentTraining.unitData.unitConfig.unitName,
+                                currentProgress
+                            ));
+                            lastPublishedProgress = currentProgress;
+                        }
+                    }
                 }
 
                 if (currentTraining.timeRemaining <= 0)
                 {
                     CompleteTraining();
+                    progressUpdateTimer = 0f;
+                    lastPublishedProgress = 0f;
                 }
             }
             else if (trainingQueue.Count > 0)
             {
                 // Start next unit in queue
                 currentTraining = trainingQueue.Dequeue();
+                progressUpdateTimer = 0f;
+                lastPublishedProgress = 0f;
             }
         }
 

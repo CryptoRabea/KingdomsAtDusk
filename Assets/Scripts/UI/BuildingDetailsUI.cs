@@ -97,13 +97,7 @@ namespace RTS.UI
 
         private void Update()
         {
-            // Update training queue display if a building is selected
-            if (currentSelectedBuilding != null && trainingQueue != null)
-            {
-                UpdateTrainingQueueDisplay();
-            }
-
-            // Sync rally point mode with selection manager
+            // Sync rally point mode with selection manager (lightweight check)
             if (selectionManager != null && isSettingRallyPoint != selectionManager.IsSpawnPointMode())
             {
                 isSettingRallyPoint = selectionManager.IsSpawnPointMode();
@@ -329,33 +323,63 @@ namespace RTS.UI
 
         private void UpdateQueuedUnitIcons()
         {
-            // Clear existing queue icons
-            ClearQueueIcons();
-
             if (trainingQueue == null || queueIconsContainer == null || queueIconPrefab == null)
             {
+                ClearQueueIcons();
                 return;
             }
 
-            // Display icons for units in the queue (excluding the current training unit)
-            foreach (var queueEntry in trainingQueue.Queue)
+            // Get current queue (excluding current training unit)
+            var queueList = new List<TrainingQueueEntry>(trainingQueue.Queue);
+
+            // Reuse existing icons instead of destroying and recreating (major performance boost)
+            int iconIndex = 0;
+            foreach (var queueEntry in queueList)
             {
                 if (queueEntry?.unitData?.unitConfig?.unitIcon == null)
                 {
                     continue;
                 }
 
-                // Instantiate queue icon
-                GameObject iconObj = Instantiate(queueIconPrefab, queueIconsContainer);
+                GameObject iconObj;
+                Image iconImage;
 
-                // Try to get the Image component and set the sprite
-                if (iconObj.TryGetComponent<Image>(out var iconImage))
+                // Reuse existing icon if available
+                if (iconIndex < spawnedQueueIcons.Count)
                 {
-                    iconImage.sprite = queueEntry.unitData.unitConfig.unitIcon;
-                    iconImage.enabled = true;
+                    iconObj = spawnedQueueIcons[iconIndex];
+                    if (iconObj != null)
+                    {
+                        iconObj.SetActive(true); // Re-enable if it was disabled
+                        if (iconObj.TryGetComponent<Image>(out iconImage))
+                        {
+                            iconImage.sprite = queueEntry.unitData.unitConfig.unitIcon;
+                            iconImage.enabled = true;
+                        }
+                    }
+                }
+                else
+                {
+                    // Create new icon only if needed
+                    iconObj = Instantiate(queueIconPrefab, queueIconsContainer);
+                    if (iconObj.TryGetComponent<Image>(out iconImage))
+                    {
+                        iconImage.sprite = queueEntry.unitData.unitConfig.unitIcon;
+                        iconImage.enabled = true;
+                    }
+                    spawnedQueueIcons.Add(iconObj);
                 }
 
-                spawnedQueueIcons.Add(iconObj);
+                iconIndex++;
+            }
+
+            // Disable excess icons instead of destroying them
+            for (int i = iconIndex; i < spawnedQueueIcons.Count; i++)
+            {
+                if (spawnedQueueIcons[i] != null)
+                {
+                    spawnedQueueIcons[i].SetActive(false);
+                }
             }
         }
 
