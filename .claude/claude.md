@@ -45,6 +45,21 @@ if (TryGetComponent<SomeComponent>(out var component)) { ... }
   - Don't leave debug logs in production code
   - Use conditional compilation for debug-only code if needed
 
+### 6. Transform Optimization
+- **ALWAYS** use `SetPositionAndRotation()` instead of setting position and rotation sequentially
+- Setting position and rotation separately triggers two transform updates
+- `SetPositionAndRotation()` performs both operations in a single update, reducing overhead
+
+**Example:**
+```csharp
+// BAD - triggers two transform updates
+transform.position = newPosition;
+transform.rotation = newRotation;
+
+// GOOD - single transform update
+transform.SetPositionAndRotation(newPosition, newRotation);
+```
+
 ## Best Practices
 
 ### Object Pooling
