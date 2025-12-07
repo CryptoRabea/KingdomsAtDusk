@@ -116,13 +116,11 @@ namespace RTS.Buildings
             if (unitsInOpenRange.Count > 0 && !gate.IsOpen)
             {
                 // Units are near, open the gate
-                Debug.Log($"Auto-opening gate for {unitsInOpenRange.Count} nearby friendly units");
                 gate.Open();
             }
             else if (unitsInCloseRange.Count == 0 && gate.IsOpen)
             {
                 // No units nearby, close the gate
-                Debug.Log("Auto-closing gate - no friendly units in range");
                 gate.Close();
             }
         }
@@ -181,17 +179,11 @@ namespace RTS.Buildings
         [ContextMenu("Print Units in Range")]
         private void DebugPrintUnitsInRange()
         {
-            Debug.Log($"=== Gate Auto-Open Status ===");
-            Debug.Log($"Enabled: {isEnabled}");
-            Debug.Log($"Gate Open: {gate?.IsOpen}");
-            Debug.Log($"Units in Open Range: {unitsInOpenRange.Count}");
-            Debug.Log($"Units in Close Range: {unitsInCloseRange.Count}");
 
             foreach (var unit in unitsInOpenRange)
             {
                 if (unit != null)
                 {
-                    Debug.Log($"  - {unit.gameObject.name} at distance {Vector3.Distance(transform.position, unit.transform.position):F2}");
                 }
             }
         }
@@ -200,7 +192,6 @@ namespace RTS.Buildings
         private void DebugToggleAutoOpen()
         {
             IsEnabled = !IsEnabled;
-            Debug.Log($"Auto-open {(IsEnabled ? "enabled" : "disabled")}");
         }
 
         #endregion

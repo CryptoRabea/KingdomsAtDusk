@@ -64,7 +64,6 @@ namespace RTS.UI.HUD
 
             if (hudFramework == null)
             {
-                Debug.LogError("HUDController: No MainHUDFramework found in scene!");
             }
         }
 
@@ -107,7 +106,6 @@ namespace RTS.UI.HUD
             config.enableInventory = !config.enableInventory;
             hudFramework.ToggleComponent("inventory", config.enableInventory);
 
-            Debug.Log($"Inventory: {(config.enableInventory ? "ON" : "OFF")}");
         }
 
         /// <summary>
@@ -121,7 +119,6 @@ namespace RTS.UI.HUD
             config.enableMinimap = !config.enableMinimap;
             hudFramework.ToggleComponent("minimap", config.enableMinimap);
 
-            Debug.Log($"Minimap: {(config.enableMinimap ? "ON" : "OFF")}");
         }
 
         /// <summary>
@@ -135,7 +132,6 @@ namespace RTS.UI.HUD
             config.enableTopBar = !config.enableTopBar;
             hudFramework.ToggleComponent("topbar", config.enableTopBar);
 
-            Debug.Log($"Top Bar: {(config.enableTopBar ? "ON" : "OFF")}");
         }
 
         /// <summary>
@@ -150,7 +146,6 @@ namespace RTS.UI.HUD
                 hudFramework.gameObject.SetActive(uiVisible);
             }
 
-            Debug.Log($"UI Visibility: {(uiVisible ? "ON" : "OFF")}");
         }
 
         /// <summary>
@@ -176,11 +171,9 @@ namespace RTS.UI.HUD
             if (presetIndex >= 0 && presetIndex < presetConfigurations.Length)
             {
                 hudFramework.SetConfiguration(presetConfigurations[presetIndex]);
-                Debug.Log($"Applied configuration: {presetConfigurations[presetIndex].name}");
             }
             else
             {
-                Debug.LogWarning($"Invalid preset index: {presetIndex}");
             }
         }
 
@@ -195,11 +188,9 @@ namespace RTS.UI.HUD
             if (config != null)
             {
                 hudFramework.SetConfiguration(config);
-                Debug.Log($"Applied configuration: {configName}");
             }
             else
             {
-                Debug.LogWarning($"Configuration not found: {configName}");
             }
         }
 
@@ -213,11 +204,9 @@ namespace RTS.UI.HUD
             if (presetIndex >= 0 && presetIndex < presetLayouts.Length)
             {
                 hudFramework.ApplyLayoutPreset(presetLayouts[presetIndex]);
-                Debug.Log($"Applied layout: {presetLayouts[presetIndex].presetName}");
             }
             else
             {
-                Debug.LogWarning($"Invalid layout preset index: {presetIndex}");
             }
         }
 
@@ -232,11 +221,9 @@ namespace RTS.UI.HUD
             if (layout != null)
             {
                 hudFramework.ApplyLayoutPreset(layout);
-                Debug.Log($"Applied layout: {layoutName}");
             }
             else
             {
-                Debug.LogWarning($"Layout not found: {layoutName}");
             }
         }
 
@@ -369,19 +356,10 @@ namespace RTS.UI.HUD
         {
             if (hudFramework == null)
             {
-                Debug.Log("No HUD Framework found!");
                 return;
             }
 
             var config = hudFramework.GetConfiguration();
-            Debug.Log("=== HUD Status ===");
-            Debug.Log($"Minimap: {config.enableMinimap}");
-            Debug.Log($"Unit Details: {config.enableUnitDetails}");
-            Debug.Log($"Building Details: {config.enableBuildingDetails}");
-            Debug.Log($"Top Bar: {config.enableTopBar}");
-            Debug.Log($"Inventory: {config.enableInventory}");
-            Debug.Log($"Notifications: {config.enableNotifications}");
-            Debug.Log("==================");
         }
 
         #endregion

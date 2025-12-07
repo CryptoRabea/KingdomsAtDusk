@@ -41,7 +41,6 @@ namespace RTS.UI.HUD
         {
             if (slotsContainer == null || slotPrefab == null)
             {
-                Debug.LogWarning("InventoryUI: Slots container or prefab not assigned!");
                 return;
             }
 

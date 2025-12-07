@@ -64,7 +64,6 @@ namespace RTS.Core.Conditions
                 if (!CanTrainMoreUnits())
                 {
                     allUnitsDead = true;
-                    Debug.Log("DEFEAT: All units dead and cannot train more!");
                 }
             }
         }

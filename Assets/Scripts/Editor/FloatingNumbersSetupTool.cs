@@ -129,12 +129,10 @@ namespace RTS.Editor
                 AssetDatabase.CreateAsset(settings, SETTINGS_PATH);
                 AssetDatabase.SaveAssets();
                 statusMessage = $"Settings asset created at: {SETTINGS_PATH}";
-                Debug.Log(statusMessage);
             }
             else
             {
                 statusMessage = "Settings asset already exists!";
-                Debug.Log(statusMessage);
             }
 
             EditorUtility.SetDirty(settings);
@@ -148,7 +146,6 @@ namespace RTS.Editor
             if (gameManagerObj == null)
             {
                 statusMessage = "ERROR: GameManager not found in scene! Please add GameManager first.";
-                Debug.LogError(statusMessage);
                 return;
             }
 
@@ -157,7 +154,6 @@ namespace RTS.Editor
             if (existingManager != null)
             {
                 statusMessage = "FloatingNumbersManager already exists in scene!";
-                Debug.Log(statusMessage);
 
                 // Make sure it has settings assigned
                 SerializedObject so = new SerializedObject(existingManager);
@@ -194,7 +190,6 @@ namespace RTS.Editor
 
             statusMessage = "FloatingNumbersManager created in scene!\n" +
                            "IMPORTANT: You need to register it as a service in GameManager.InitializeServices()";
-            Debug.Log(statusMessage);
 
             Selection.activeGameObject = managerObj;
         }
@@ -214,7 +209,6 @@ namespace RTS.Editor
             if (existingPrefab != null)
             {
                 statusMessage = "Settings panel prefab already exists!";
-                Debug.Log(statusMessage);
                 return;
             }
 
@@ -229,7 +223,6 @@ namespace RTS.Editor
 
             statusMessage = $"Settings panel prefab created at: {prefabPath}\n" +
                            "Add this to your pause menu or game menu!";
-            Debug.Log(statusMessage);
 
             AssetDatabase.Refresh();
         }
@@ -549,17 +542,6 @@ namespace RTS.Editor
             setupComplete = true;
             statusMessage = "Setup complete! Check the console for next steps.";
 
-            Debug.Log("=== FLOATING NUMBERS SETUP COMPLETE ===");
-            Debug.Log("Next steps:");
-            Debug.Log("1. Add this code to GameManager.InitializeServices():");
-            Debug.Log("   // Floating Numbers System");
-            Debug.Log("   var floatingNumbersManager = FindObjectOfType<KAD.UI.FloatingNumbers.FloatingNumbersManager>();");
-            Debug.Log("   if (floatingNumbersManager != null)");
-            Debug.Log("       ServiceLocator.Register<IFloatingNumberService>(floatingNumbersManager);");
-            Debug.Log("");
-            Debug.Log("2. Add the FloatingNumbersSettingsPanel prefab to your pause/game menu");
-            Debug.Log("3. Test the system by damaging units or generating resources");
-            Debug.Log("========================================");
         }
     }
 }

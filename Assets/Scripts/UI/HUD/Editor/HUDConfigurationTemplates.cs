@@ -23,7 +23,6 @@ namespace RTS.UI.HUD.Editor
             CreateModernRTSLayout();
             CreateAgeOfEmpiresLayout();
             AssetDatabase.Refresh();
-            Debug.Log("HUD Templates created successfully!");
         }
 
         #region Configuration Templates
@@ -385,12 +384,10 @@ namespace RTS.UI.HUD.Editor
             {
                 EditorUtility.CopySerialized(asset, existingAsset);
                 AssetDatabase.SaveAssets();
-                Debug.Log($"Updated existing asset: {fullPath}");
             }
             else
             {
                 AssetDatabase.CreateAsset(asset, fullPath);
-                Debug.Log($"Created new asset: {fullPath}");
             }
         }
 

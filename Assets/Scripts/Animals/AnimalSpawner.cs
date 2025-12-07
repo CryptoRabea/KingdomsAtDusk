@@ -46,7 +46,6 @@ namespace RTS.Animals
                 biomeManager = FindFirstObjectByType<BiomeManager>();
             }
 
-            Debug.Log("AnimalSpawner initialized");
         }
 
         private void Start()
@@ -88,14 +87,12 @@ namespace RTS.Animals
         /// </summary>
         private void SpawnInitialAnimals()
         {
-            Debug.Log($"Spawning {initialAnimalCount} initial animals...");
 
             for (int i = 0; i < initialAnimalCount; i++)
             {
                 TrySpawnRandomAnimal();
             }
 
-            Debug.Log($"Initial spawn complete. Total animals: {spawnedAnimals.Count}");
         }
 
         /// <summary>
@@ -112,7 +109,6 @@ namespace RTS.Animals
             // Pick a random animal config
             if (animalConfigs == null || animalConfigs.Length == 0)
             {
-                Debug.LogWarning("No animal configs assigned to AnimalSpawner!");
                 return;
             }
 
@@ -195,7 +191,6 @@ namespace RTS.Animals
         {
             if (config == null || config.animalPrefab == null)
             {
-                Debug.LogWarning("Cannot spawn animal: invalid config or missing prefab");
                 return;
             }
 
@@ -225,7 +220,6 @@ namespace RTS.Animals
             }
             else
             {
-                Debug.LogWarning($"Animal prefab {config.animalName} is missing AnimalBehavior component!");
             }
 
             // Track spawned animal
@@ -241,7 +235,6 @@ namespace RTS.Animals
             // Publish spawn event
             EventBus.Publish(new AnimalSpawnedEvent(animalObj, config.animalType, position));
 
-            Debug.Log($"Spawned {config.animalName} at {position}. Total: {spawnedAnimals.Count}");
         }
 
         #endregion
@@ -264,7 +257,6 @@ namespace RTS.Animals
                     animalCounts[evt.AnimalType] = 0;
             }
 
-            Debug.Log($"Animal died. Remaining: {spawnedAnimals.Count}");
         }
 
         #endregion
@@ -275,13 +267,11 @@ namespace RTS.Animals
         {
             isSpawning = true;
             spawnTimer = 0f;
-            Debug.Log("Animal spawning started");
         }
 
         public void StopSpawning()
         {
             isSpawning = false;
-            Debug.Log("Animal spawning stopped");
         }
 
         public int GetAnimalCount()

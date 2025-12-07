@@ -75,7 +75,6 @@ namespace RTS.Core.Pooling
 
             if (prefabId == -1)
             {
-                Debug.LogWarning($"Trying to return object {gameObj.name} that wasn't spawned from pool.");
                 Destroy(gameObj);
                 return;
             }

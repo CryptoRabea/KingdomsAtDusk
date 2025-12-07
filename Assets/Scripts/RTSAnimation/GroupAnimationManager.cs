@@ -103,7 +103,6 @@ namespace RTS.Units.Animation
 
             if (showDebugInfo)
             {
-                Debug.Log($"[GroupAnimationManager] Auto-registered {registeredUnits.Count} units");
             }
         }
 
@@ -124,7 +123,6 @@ namespace RTS.Units.Animation
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"[GroupAnimationManager] Registered unit: {unit.gameObject.name}");
                 }
             }
         }
@@ -142,7 +140,6 @@ namespace RTS.Units.Animation
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"[GroupAnimationManager] Unregistered unit: {unit.gameObject.name}");
                 }
             }
         }
@@ -188,7 +185,6 @@ namespace RTS.Units.Animation
 
             if (showDebugInfo)
             {
-                Debug.Log($"[GroupAnimationManager] Group victory triggered for {celebratingUnits} units at {center}");
             }
         }
 
@@ -212,7 +208,6 @@ namespace RTS.Units.Animation
 
             if (showDebugInfo)
             {
-                Debug.Log($"[GroupAnimationManager] Global victory triggered for {unitCache.Count} units");
             }
         }
 
@@ -265,7 +260,6 @@ namespace RTS.Units.Animation
 
             if (showDebugInfo && scanningUnits > 0)
             {
-                Debug.Log($"[GroupAnimationManager] Group scan triggered for {scanningUnits} units near {scanCenter}");
             }
         }
 
@@ -299,7 +293,6 @@ namespace RTS.Units.Animation
 
             if (showDebugInfo)
             {
-                Debug.Log($"[GroupAnimationManager] Manual group scan triggered for {scanningUnits} units at {center}");
             }
         }
 
@@ -374,7 +367,6 @@ namespace RTS.Units.Animation
 
             if (showDebugInfo)
             {
-                Debug.Log("[GroupAnimationManager] Cleared all registered units");
             }
         }
 
@@ -399,12 +391,10 @@ namespace RTS.Units.Animation
         private void DebugListRegisteredUnits()
         {
             CleanupNullUnits();
-            Debug.Log($"[GroupAnimationManager] {registeredUnits.Count} registered units:");
             foreach (var unit in unitCache)
             {
                 if (unit != null)
                 {
-                    Debug.Log($"  - {unit.gameObject.name}");
                 }
             }
         }

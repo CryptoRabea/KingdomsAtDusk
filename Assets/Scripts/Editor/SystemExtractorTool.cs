@@ -184,7 +184,6 @@ namespace RTS.Editor
         {
             detectedSystems.Clear();
 
-            Debug.Log("[SystemExtractor] Scanning project for game systems...");
 
             // Core Systems
             AddSystemIfExists("Core Services",
@@ -294,7 +293,6 @@ namespace RTS.Editor
                 new[] { "Assets/Scripts/Editor" },
                 new string[] { });
 
-            Debug.Log($"[SystemExtractor] Found {detectedSystems.Count} systems");
         }
 
         private void AddSystemIfExists(string name, string description, string[] paths, string[] dependencies)
@@ -339,7 +337,6 @@ namespace RTS.Editor
             // Create export folder
             Directory.CreateDirectory(exportFolder);
 
-            Debug.Log($"[SystemExtractor] Exporting {selectedSystems.Count} systems to: {exportFolder}");
 
             int successCount = 0;
             int failCount = 0;
@@ -353,7 +350,6 @@ namespace RTS.Editor
                 }
                 catch (System.Exception e)
                 {
-                    Debug.LogError($"[SystemExtractor] Failed to export {system.name}: {e.Message}");
                     failCount++;
                 }
             }
@@ -378,7 +374,6 @@ namespace RTS.Editor
 
         private void ExportSystem(GameSystem system)
         {
-            Debug.Log($"[SystemExtractor] Exporting: {system.name}");
 
             // Collect all asset paths
             List<string> allAssetPaths = new List<string>();
@@ -412,7 +407,6 @@ namespace RTS.Editor
             // Create README for this system
             CreateSystemReadme(system, packagePath);
 
-            Debug.Log($"[SystemExtractor] Exported: {system.name} ({allAssetPaths.Count} files)");
         }
 
         private void CreateSystemReadme(GameSystem system, string packagePath)
@@ -504,7 +498,6 @@ For questions or issues, refer to individual system documentation.
 ";
 
             File.WriteAllText(readmePath, content);
-            Debug.Log($"[SystemExtractor] Master README created: {readmePath}");
         }
     }
 }

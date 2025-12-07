@@ -128,7 +128,6 @@ namespace KingdomsAtDusk.Buildings
 
             if (config == null)
             {
-                Debug.LogWarning($"Building {buildingData.buildingName} has no worker config assigned!");
                 return;
             }
 
@@ -138,7 +137,6 @@ namespace KingdomsAtDusk.Buildings
                 SpawnWorker(config);
             }
 
-            Debug.Log($"Auto-spawned {targetWorkers} workers for {buildingData.buildingName}");
         }
 
         /// <summary>
@@ -153,7 +151,6 @@ namespace KingdomsAtDusk.Buildings
 
             if (config == null)
             {
-                Debug.LogError("No worker config specified!");
                 return null;
             }
 
@@ -162,7 +159,6 @@ namespace KingdomsAtDusk.Buildings
             int currentMax = overrideSettings ? maxWorkers : buildingData.maxWorkers;
             if (activeWorkers.Count >= currentMax)
             {
-                Debug.LogWarning($"Building already has maximum workers ({currentMax})");
                 return null;
             }
 

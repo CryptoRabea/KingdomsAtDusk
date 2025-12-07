@@ -276,7 +276,6 @@ namespace FlowField.Editor
 
         private void ScanProject()
         {
-            UnityEngine.Debug.Log("=== Starting NavMesh to FlowField Scan ===");
 
             unitsWithNavMesh.Clear();
             buildingsWithNavMeshObstacle.Clear();
@@ -320,12 +319,6 @@ namespace FlowField.Editor
 
             scanComplete = true;
 
-            UnityEngine.Debug.Log($"Scan complete! Found:\n" +
-                     $"- {unitsWithNavMesh.Count} units with NavMeshAgent\n" +
-                     $"- {buildingsWithNavMeshObstacle.Count} buildings with NavMeshObstacle\n" +
-                     $"- {wallsWithNavMeshObstacle.Count} walls with NavMeshObstacle\n" +
-                     $"- {navMeshSurfaces.Count} NavMeshSurfaces\n" +
-                     $"- {prefabsToUpdate.Count} prefabs to update");
 
             Repaint();
         }
@@ -358,7 +351,6 @@ namespace FlowField.Editor
 
         private void MigrateProject()
         {
-            UnityEngine.Debug.Log("=== Starting NavMesh to FlowField Migration ===");
 
             int totalSteps = 0;
             int currentStep = 0;
@@ -469,7 +461,6 @@ namespace FlowField.Editor
                     "OK"
                 );
 
-                UnityEngine.Debug.Log("=== Migration Complete ===");
 
                 // Rescan to show results
                 ScanProject();
@@ -482,7 +473,6 @@ namespace FlowField.Editor
                     $"An error occurred during migration:\n{e.Message}\n\nCheck the console for details.",
                     "OK"
                 );
-                UnityEngine.Debug.LogError($"Migration error: {e}");
             }
         }
 
@@ -491,7 +481,6 @@ namespace FlowField.Editor
             FlowFieldManager existing = FindFirstObjectByType<FlowFieldManager>();
             if (existing != null)
             {
-                UnityEngine.Debug.Log("FlowFieldManager already exists in scene");
                 return;
             }
 
@@ -513,7 +502,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(manager);
 
-            UnityEngine.Debug.Log("Created FlowFieldManager in scene");
         }
 
         private void ConvertUnitToFlowField(GameObject unit)
@@ -523,7 +511,6 @@ namespace FlowField.Editor
             // Check if already converted
             if (unit.GetComponent<FlowFieldFollower>() != null)
             {
-                UnityEngine.Debug.LogWarning($"Unit {unit.name} already has FlowFieldFollower");
                 return;
             }
 
@@ -580,7 +567,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(unit);
 
-            UnityEngine.Debug.Log($"Converted unit {unit.name} to FlowField (speed: {speed})");
         }
 
         private void ConvertBuildingToFlowField(GameObject building)
@@ -590,7 +576,6 @@ namespace FlowField.Editor
             // Check if already converted
             if (building.GetComponent<BuildingFlowFieldObstacle>() != null)
             {
-                UnityEngine.Debug.LogWarning($"Building {building.name} already has BuildingFlowFieldObstacle");
                 return;
             }
 
@@ -609,7 +594,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(building);
 
-            UnityEngine.Debug.Log($"Converted building {building.name} to FlowField obstacle");
         }
 
         private void ConvertWallToFlowField(GameObject wall)
@@ -619,7 +603,6 @@ namespace FlowField.Editor
             // Check if already converted
             if (wall.GetComponent<WallFlowFieldObstacle>() != null)
             {
-                UnityEngine.Debug.LogWarning($"Wall {wall.name} already has WallFlowFieldObstacle");
                 return;
             }
 
@@ -638,7 +621,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(wall);
 
-            UnityEngine.Debug.Log($"Converted wall {wall.name} to FlowField obstacle");
         }
 
         private void UpdatePrefab(string prefabPath)
@@ -686,7 +668,6 @@ namespace FlowField.Editor
             if (modified)
             {
                 PrefabUtility.SaveAsPrefabAsset(prefabContents, path);
-                UnityEngine.Debug.Log($"Updated prefab: {prefabPath}");
             }
 
             PrefabUtility.UnloadPrefabContents(prefabContents);

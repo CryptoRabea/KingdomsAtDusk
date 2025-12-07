@@ -128,13 +128,11 @@ namespace RTS.UI
         {
             if (targetWall == null || buildingData == null)
             {
-                Debug.LogWarning("WallUpgradeButton: Cannot upgrade - wall or building data is null");
                 return;
             }
 
             if (resourceService == null)
             {
-                Debug.LogWarning("WallUpgradeButton: Resource service not available");
                 return;
             }
 
@@ -148,7 +146,6 @@ namespace RTS.UI
             // Spend resources
             if (!resourceService.SpendResources(costs))
             {
-                Debug.LogError("Failed to spend resources!");
                 return;
             }
 

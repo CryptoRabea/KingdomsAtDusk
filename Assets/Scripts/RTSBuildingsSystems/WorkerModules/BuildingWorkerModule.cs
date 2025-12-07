@@ -139,7 +139,6 @@ namespace RTS.Buildings.WorkerModules
                 // Apply construction speed bonus
                 ApplyConstructionBonus(building, true);
 
-                Debug.Log($"🔨 Assigned {peasantsPerBuilding} peasants to {buildingComponent.Data?.buildingName ?? "building"}");
                 return true;
             }
 
@@ -158,7 +157,6 @@ namespace RTS.Buildings.WorkerModules
                 // Remove construction bonus
                 ApplyConstructionBonus(building, false);
 
-                Debug.Log($"🔨 Released {workerCount} peasants from building");
             }
         }
 
@@ -177,7 +175,6 @@ namespace RTS.Buildings.WorkerModules
             // For now, we'll just log it
             if (apply)
             {
-                Debug.Log($"Construction speed bonus ({constructionSpeedBonus}x) applied to {buildingComponent.Data?.buildingName}");
             }
         }
 
@@ -222,13 +219,11 @@ namespace RTS.Buildings.WorkerModules
         [ContextMenu("Show Assigned Workers")]
         private void DebugShowAssignedWorkers()
         {
-            Debug.Log($"=== Building Workers ({assignedWorkers.Count} assignments) ===");
             foreach (var kvp in assignedWorkers)
             {
                 if (kvp.Key != null)
                 {
                     Building b = kvp.Key.GetComponent<Building>();
-                    Debug.Log($"  {b?.Data?.buildingName ?? "Unknown"}: {kvp.Value} workers");
                 }
             }
         }

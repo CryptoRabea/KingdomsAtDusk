@@ -42,7 +42,6 @@ namespace RTS.Buildings
 
             if (campfireData == null)
             {
-                Debug.LogWarning($"Campfire on {gameObject.name} has no CampfireDataSO assigned!");
             }
 
             // Create peasant container if not assigned
@@ -100,7 +99,6 @@ namespace RTS.Buildings
                 fireEffect.Play();
             }
 
-            Debug.Log($"🔥 Campfire activated at {transform.position}");
         }
 
         private void UpdatePeasantGathering()
@@ -170,7 +168,6 @@ namespace RTS.Buildings
             float happinessMultiplier = CalculateHappinessMultiplier();
             EventBus.Publish(new CampfireGatheringChangedEvent(gameObject, currentPeasantCount, happinessMultiplier));
 
-            Debug.Log($"🔥 Campfire peasants: {previousCount} → {currentPeasantCount}");
         }
 
         private void UpdateBonuses()

@@ -206,7 +206,6 @@ namespace RTS.Units.Animation
                 animator.SetInteger(IdleVariantHash, variantIndex);
                 animator.SetTrigger(DoIdleActionHash);
 
-                Debug.Log($"[{gameObject.name}] Triggered idle action: variant {variantIndex}");
             }
         }
 
@@ -243,7 +242,6 @@ namespace RTS.Units.Animation
                 isVictorious = true;
                 animator?.SetTrigger(VictoryHash);
 
-                Debug.Log($"[{gameObject.name}] Victory animation triggered!");
 
                 // Reset after animation duration
                 StartCoroutine(ResetVictoryState());
@@ -264,7 +262,6 @@ namespace RTS.Units.Animation
                 isRetreating = retreating;
                 animator?.SetBool(RetreatHash, retreating);
 
-                Debug.Log($"[{gameObject.name}] Retreat state: {retreating}");
             }
         }
 

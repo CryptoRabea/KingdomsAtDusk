@@ -36,7 +36,6 @@ namespace RTS.Managers
             
             if (poolService == null)
             {
-                Debug.LogWarning("PoolService not available. WaveManager will use Instantiate.");
             }
 
             // Subscribe to enemy death events
@@ -70,7 +69,6 @@ namespace RTS.Managers
             WaveConfig config = GetWaveConfig(currentWaveNumber);
             
             EventBus.Publish(new WaveStartedEvent(currentWaveNumber, config.TotalEnemyCount));
-            Debug.Log($"Starting Wave {currentWaveNumber} with {config.TotalEnemyCount} enemies");
 
             StartCoroutine(SpawnWaveCoroutine(config));
         }
@@ -124,7 +122,6 @@ namespace RTS.Managers
         {
             if (spawnPoints == null || spawnPoints.Length == 0)
             {
-                Debug.LogError("No spawn points assigned!");
                 return;
             }
 
@@ -135,7 +132,6 @@ namespace RTS.Managers
             GameObject enemyPrefab = config.GetRandomEnemyPrefab();
             if (enemyPrefab == null)
             {
-                Debug.LogWarning("No enemy prefab available!");
                 return;
             }
 
@@ -183,7 +179,6 @@ namespace RTS.Managers
                 if (activeEnemies <= 0 && !isSpawningWave)
                 {
                     EventBus.Publish(new WaveCompletedEvent(currentWaveNumber));
-                    Debug.Log($"Wave {currentWaveNumber} completed!");
                 }
             }
         }

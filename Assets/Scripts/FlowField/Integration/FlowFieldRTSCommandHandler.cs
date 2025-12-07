@@ -110,8 +110,6 @@ namespace Assets.Scripts.FlowField.Integration
                 currentFormation
             );
 
-            UnityEngine.Debug.Log($"Moving {selectedUnits.Count} units to {destination} " +
-                      $"in {currentFormation} formation (Forced: {forcedMove})");
         }
 
         /// <summary>
@@ -133,7 +131,6 @@ namespace Assets.Scripts.FlowField.Integration
                 currentFormation
             );
 
-            UnityEngine.Debug.Log($"Attack command: {selectedUnits.Count} units attacking {target.name}");
         }
 
         /// <summary>
@@ -193,7 +190,6 @@ namespace Assets.Scripts.FlowField.Integration
         public void SetFormation(FlowFieldFormationController.FormationType formation)
         {
             currentFormation = formation;
-            UnityEngine.Debug.Log($"Formation changed to: {formation}");
         }
 
         /// <summary>

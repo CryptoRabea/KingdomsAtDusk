@@ -196,7 +196,6 @@ namespace RTS.Core
             diagnosticsText = sb.ToString();
 
             // Also log to console
-            Debug.Log(diagnosticsText);
         }
 
         private void OnGUI()

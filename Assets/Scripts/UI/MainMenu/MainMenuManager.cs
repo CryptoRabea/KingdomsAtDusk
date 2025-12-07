@@ -137,7 +137,6 @@ namespace RTS.UI
             // Check if save game exists for Continue button
             UpdateContinueButtonState();
 
-            UnityEngine.Debug.Log("[MainMenu] Main menu initialized with Input System and SaveLoad integration");
         }
 
         private void OnCancelPerformed(InputAction.CallbackContext context)
@@ -167,7 +166,6 @@ namespace RTS.UI
 
         private void OnNewGameClicked()
         {
-            UnityEngine.Debug.Log("[MainMenu] New Game clicked");
 
             // Clear any load-on-start flag
             PlayerPrefs.DeleteKey("LoadSaveOnStart");
@@ -179,11 +177,9 @@ namespace RTS.UI
 
         private void OnContinueClicked()
         {
-            UnityEngine.Debug.Log("[MainMenu] Continue clicked");
 
             if (!HasAnySaves())
             {
-                UnityEngine.Debug.LogWarning("No save games found!");
                 return;
             }
 
@@ -195,13 +191,11 @@ namespace RTS.UI
             }
             else
             {
-                UnityEngine.Debug.LogError("Load panel not found!");
             }
         }
 
         private void OnSettingsClicked()
         {
-            UnityEngine.Debug.Log("[MainMenu] Settings clicked");
             SetPanelActive(mainMenuPanel, false);
 
             // Use the advanced settings panel controller if available
@@ -218,20 +212,17 @@ namespace RTS.UI
 
         private void OnCreditsClicked()
         {
-            UnityEngine.Debug.Log("[MainMenu] Credits clicked");
             SetPanelActive(mainMenuPanel, false);
             SetPanelActive(creditsPanel, true);
         }
 
         private void OnQuitClicked()
         {
-            UnityEngine.Debug.Log("[MainMenu] Quit clicked");
             SceneTransitionManager.Instance.QuitGame();
         }
 
         private void OnBackFromSettings()
         {
-            UnityEngine.Debug.Log("[MainMenu] Back from Settings");
 
             // Close the advanced settings panel if it's being used
             if (settingsPanelController != null)
@@ -244,7 +235,6 @@ namespace RTS.UI
 
         private void OnBackFromCredits()
         {
-            UnityEngine.Debug.Log("[MainMenu] Back from Credits");
             ShowMainMenu();
         }
 

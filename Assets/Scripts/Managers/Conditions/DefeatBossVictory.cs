@@ -48,7 +48,6 @@ namespace RTS.Core.Conditions
             if (bossAI != null || evt.Unit.CompareTag(bossTag))
             {
                 bossDefeated = true;
-                Debug.Log("Victory Condition: Boss Defeated!");
             }
         }
     }

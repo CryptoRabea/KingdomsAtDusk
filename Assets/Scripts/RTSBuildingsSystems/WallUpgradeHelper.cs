@@ -18,7 +18,6 @@ namespace RTS.Buildings
         {
             if (wall == null || newBuildingData == null || newBuildingData.buildingPrefab == null)
             {
-                Debug.LogError("WallUpgradeHelper: Invalid parameters");
                 return null;
             }
 
@@ -30,7 +29,6 @@ namespace RTS.Buildings
                 // Don't upgrade corner walls (3+ connections) to prevent breaking wall networks
                 if (connectionCount > 2)
                 {
-                    Debug.LogWarning($"Cannot upgrade wall: too many connections ({connectionCount}). Corner walls cannot be upgraded.");
                     EventBus.Publish(new BuildingPlacementFailedEvent("Cannot upgrade corner walls!"));
                     return null;
                 }
@@ -44,11 +42,9 @@ namespace RTS.Buildings
             if (wallConnection != null)
             {
                 connectedWalls = wallConnection.GetConnectedWalls();
-                Debug.Log($"Wall has {connectedWalls.Count} connections that will be transferred to new building");
             }
 
             // Destroy the wall
-            Debug.Log($"Upgrading wall at {position} to {newBuildingData.buildingName}");
             Object.Destroy(wall);
 
             // Create the new building
@@ -67,7 +63,6 @@ namespace RTS.Buildings
                 if (towerComponent != null)
                 {
                     towerComponent.SetTowerData(towerData);
-                    Debug.Log($"Assigned tower data to {towerData.buildingName}");
                 }
             }
 
@@ -78,7 +73,6 @@ namespace RTS.Buildings
                 if (gateComponent != null)
                 {
                     gateComponent.SetGateData(gateData);
-                    Debug.Log($"Assigned gate data to {gateData.buildingName}");
                 }
             }
 
@@ -98,7 +92,6 @@ namespace RTS.Buildings
                     newWallConnection = newBuilding.AddComponent<WallConnectionSystem>();
                 }
 
-                Debug.Log($"New building will connect to {connectedWalls.Count} neighboring walls");
 
                 // Force update connections after a short delay
                 var helper = newBuilding.AddComponent<DelayedConnectionUpdater>();
@@ -108,7 +101,6 @@ namespace RTS.Buildings
             // Publish event
             EventBus.Publish(new BuildingPlacedEvent(newBuilding, position));
 
-            Debug.Log($"Successfully upgraded wall to {newBuildingData.buildingName}");
 
             return newBuilding;
         }

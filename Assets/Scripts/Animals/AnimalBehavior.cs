@@ -215,7 +215,6 @@ namespace RTS.Animals
             movement.SetDestination(fleeTarget);
             ChangeState(AnimalState.Fleeing);
 
-            Debug.Log($"{config?.animalName ?? "Animal"} is fleeing!");
         }
 
         private void StartFleeingFrom(Vector3 threatPosition)
@@ -227,7 +226,6 @@ namespace RTS.Animals
             movement.SetDestination(fleeTarget);
             ChangeState(AnimalState.Fleeing);
 
-            Debug.Log($"{config?.animalName ?? "Animal"} is fleeing from threat!");
         }
 
         #endregion

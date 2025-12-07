@@ -87,14 +87,12 @@ namespace RTS.Units
         {
             if (groupNumber < 0 || groupNumber >= numberOfGroups)
             {
-                Debug.LogWarning($"Invalid group number: {groupNumber}");
                 return;
             }
 
             if (selectionManager == null || selectionManager.SelectionCount == 0)
             {
                 if (showDebugMessages)
-                    Debug.Log($"No units selected to save to group {groupNumber}");
                 return;
             }
 
@@ -111,7 +109,6 @@ namespace RTS.Units
             }
 
             if (showDebugMessages)
-                Debug.Log($"Saved {groups[groupNumber].Count} units to group {groupNumber}");
 
             // Publish event
             EventBus.Publish(new UnitGroupSavedEvent(groupNumber, groups[groupNumber].Count));
@@ -124,7 +121,6 @@ namespace RTS.Units
         {
             if (groupNumber < 0 || groupNumber >= numberOfGroups)
             {
-                Debug.LogWarning($"Invalid group number: {groupNumber}");
                 return;
             }
 
@@ -140,7 +136,6 @@ namespace RTS.Units
             if (groups[groupNumber].Count == 0)
             {
                 if (showDebugMessages)
-                    Debug.Log($"Group {groupNumber} is empty");
                 return;
             }
 
@@ -177,7 +172,6 @@ namespace RTS.Units
             }
 
             if (showDebugMessages)
-                Debug.Log($"Recalled group {groupNumber} with {validUnits.Count} units");
 
             // Center camera on group if double-tapped
             if (isDoubleTap && validUnits.Count > 0)
@@ -225,7 +219,6 @@ namespace RTS.Units
             }
 
             if (showDebugMessages)
-                Debug.Log($"Centered camera on group at {centerPos}");
         }
 
         /// <summary>
@@ -270,7 +263,6 @@ namespace RTS.Units
             {
                 groups[groupNumber].Clear();
                 if (showDebugMessages)
-                    Debug.Log($"Cleared group {groupNumber}");
             }
         }
 
@@ -284,7 +276,6 @@ namespace RTS.Units
                 group.Clear();
             }
             if (showDebugMessages)
-                Debug.Log("Cleared all groups");
         }
 
         #region Debug Helpers
@@ -296,7 +287,6 @@ namespace RTS.Units
             {
                 if (groups[i].Count > 0)
                 {
-                    Debug.Log($"Group {i}: {groups[i].Count} units");
                 }
             }
         }

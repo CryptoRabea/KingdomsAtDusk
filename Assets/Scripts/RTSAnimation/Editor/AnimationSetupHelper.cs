@@ -38,7 +38,6 @@ namespace RTS.Units.Animation
                     "Yes", "Cancel"))
                 {
                     selected.AddComponent<Animator>();
-                    Debug.Log("✅ Added Animator component");
                 }
                 else
                 {
@@ -50,7 +49,6 @@ namespace RTS.Units.Animation
             if (selected.GetComponent<UnitAnimationController>() == null)
             {
                 selected.AddComponent<UnitAnimationController>();
-                Debug.Log("✅ Added UnitAnimationController");
             }
 
             // Optionally add UnitAnimationEvents
@@ -62,7 +60,6 @@ namespace RTS.Units.Animation
                 if (selected.GetComponent<UnitAnimationEvents>() == null)
                 {
                     selected.AddComponent<UnitAnimationEvents>();
-                    Debug.Log("✅ Added UnitAnimationEvents");
                 }
             }
 
@@ -75,24 +72,20 @@ namespace RTS.Units.Animation
                 if (selected.GetComponent<UnitAnimationAdvanced>() == null)
                 {
                     selected.AddComponent<UnitAnimationAdvanced>();
-                    Debug.Log("✅ Added UnitAnimationAdvanced");
                 }
             }
 
             // Warnings for missing components
             if (!hasMovement)
             {
-                Debug.LogWarning("⚠️ UnitMovement component not found. Add it for movement animations.");
             }
 
             if (!hasCombat)
             {
-                Debug.LogWarning("⚠️ UnitCombat component not found. Add it for attack animations.");
             }
 
             if (!hasHealth)
             {
-                Debug.LogWarning("⚠️ UnitHealth component not found. Add it for death animations.");
             }
 
             EditorUtility.DisplayDialog(
@@ -195,7 +188,6 @@ namespace RTS.Units.Animation
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = config;
 
-            Debug.Log($"✅ Created AnimationConfig at {path}");
         }
     }
 

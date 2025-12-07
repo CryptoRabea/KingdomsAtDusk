@@ -103,7 +103,6 @@ namespace RTS.Buildings
         private void ActivateTower()
         {
             isActive = true;
-            Debug.Log($"Tower activated: {towerData?.buildingName ?? "Unknown"}");
         }
 
         public void DeactivateTower()
@@ -198,7 +197,6 @@ namespace RTS.Buildings
         {
             if (towerData.projectilePrefab == null)
             {
-                Debug.LogWarning($"Tower {towerData.buildingName} has no projectile prefab assigned!");
                 return;
             }
 
@@ -237,7 +235,6 @@ namespace RTS.Buildings
             }
             else
             {
-                Debug.LogWarning($"Projectile prefab is missing TowerProjectile component!");
             }
         }
 
@@ -313,7 +310,6 @@ namespace RTS.Buildings
         private void DebugFindTarget()
         {
             FindNewTarget();
-            Debug.Log($"Found target: {currentTarget?.name ?? "None"}");
         }
 
         [ContextMenu("Fire Once")]
@@ -325,7 +321,6 @@ namespace RTS.Buildings
             }
             else
             {
-                Debug.Log("No target to fire at!");
             }
         }
 

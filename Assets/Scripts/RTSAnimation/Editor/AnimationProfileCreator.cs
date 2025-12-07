@@ -99,7 +99,6 @@ namespace RTS.Units.Animation.Editor
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"Created Archer profile at: {AssetDatabase.GetAssetPath(profile)}");
             Selection.activeObject = profile;
         }
 
@@ -121,7 +120,6 @@ namespace RTS.Units.Animation.Editor
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"Created Knight profile at: {AssetDatabase.GetAssetPath(profile)}");
             Selection.activeObject = profile;
         }
 
@@ -143,7 +141,6 @@ namespace RTS.Units.Animation.Editor
             EditorUtility.SetDirty(profile);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"Created Mage profile at: {AssetDatabase.GetAssetPath(profile)}");
             Selection.activeObject = profile;
         }
 
@@ -249,7 +246,6 @@ namespace RTS.Units.Animation.Editor
             Selection.activeObject = profile;
             EditorGUIUtility.PingObject(profile);
 
-            Debug.Log($"Created {unitType} animation profile at: {assetPath}");
         }
     }
 }

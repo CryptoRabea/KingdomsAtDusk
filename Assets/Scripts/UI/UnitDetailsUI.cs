@@ -301,7 +301,6 @@ namespace RTS.UI
             var unitAI = unit.GetComponent<RTS.Units.AI.UnitAIController>();
             if (unitAI == null || unitAI.Config == null)
             {
-                Debug.LogWarning("Selected unit doesn't have a UnitAIController component or UnitConfigSO!");
                 HideUnitDetails();
                 return;
             }
@@ -686,7 +685,6 @@ namespace RTS.UI
             if (formationGroupManager != null)
             {
                 formationGroupManager.SetCustomFormation(formation.id);
-                Debug.Log($"Applied formation: {formation.name}");
             }
         }
 
@@ -710,7 +708,6 @@ namespace RTS.UI
             if (CustomFormationManager.Instance != null)
             {
                 CustomFormationManager.Instance.DeleteFormation(formation.id);
-                Debug.Log($"Deleted formation: {formation.name}");
             }
         }
 
@@ -731,7 +728,6 @@ namespace RTS.UI
                 }
 
                 CustomFormationManager.Instance.UpdateFormation(formation);
-                Debug.Log($"Toggled quick list for: {formation.name}");
             }
         }
 

@@ -42,8 +42,6 @@ namespace RTS.Core
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[BuildInitializer] Error during initialization: {e.Message}");
-                Debug.LogException(e);
             }
         }
 
@@ -129,7 +127,6 @@ namespace RTS.Core
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"[BuildInitializer] Shader warmup failed: {e.Message}");
             }
 
             if (success)
@@ -150,7 +147,6 @@ namespace RTS.Core
         {
             if (enableDebugLogs)
             {
-                Debug.Log($"[BuildInitializer] {message}");
             }
         }
 

@@ -61,7 +61,6 @@ namespace RTS.SaveLoad
 
                 if (!string.IsNullOrEmpty(saveToLoad))
                 {
-                    Debug.Log($"Auto-loading save: {saveToLoad}");
                     // Use a small delay to ensure all systems are initialized
                     StartCoroutine(DelayedLoad(saveToLoad));
                 }
@@ -76,7 +75,6 @@ namespace RTS.SaveLoad
             bool success = LoadGame(saveName);
             if (!success)
             {
-                Debug.LogError($"Failed to auto-load save: {saveName}");
             }
         }
 
@@ -131,7 +129,6 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($" Failed to save game: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -145,7 +142,6 @@ namespace RTS.SaveLoad
                 string filePath = settings.GetSaveFilePath(saveName);
                 if (!File.Exists(filePath))
                 {
-                    Debug.LogError($" Save file not found: {filePath}");
                     return false;
                 }
 
@@ -180,7 +176,6 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($" Failed to load game: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -194,7 +189,6 @@ namespace RTS.SaveLoad
         {
             if (!SaveExists(settings.quickSaveSlotName))
             {
-                Debug.LogWarning("No quick save found!");
                 return false;
             }
             return LoadGame(settings.quickSaveSlotName);
@@ -215,7 +209,6 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"Failed to delete save: {ex.Message}");
                 return false;
             }
         }
@@ -268,7 +261,6 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"Failed to get save info: {ex.Message}");
                 return null;
             }
         }
@@ -418,7 +410,6 @@ namespace RTS.SaveLoad
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"Failed to save building {building.name}: {ex.Message}");
                 }
             }
 
@@ -493,7 +484,6 @@ namespace RTS.SaveLoad
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"Failed to save unit {unit.name}: {ex.Message}");
                 }
             }
 
@@ -682,7 +672,6 @@ namespace RTS.SaveLoad
                     BuildingDataSO data = FindBuildingDataSO(buildingData.buildingDataName);
                     if (data == null || data.buildingPrefab == null)
                     {
-                        Debug.LogError($"Could not find BuildingDataSO or prefab for: {buildingData.buildingDataName}");
                         continue;
                     }
 
@@ -710,7 +699,6 @@ namespace RTS.SaveLoad
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"Failed to restore building {buildingData.buildingDataName}: {ex.Message}\n{ex.StackTrace}");
                 }
             }
 
@@ -734,7 +722,6 @@ namespace RTS.SaveLoad
                     UnitConfigSO config = FindUnitConfigSO(unitData.unitConfigName);
                     if (config == null || config.unitPrefab == null)
                     {
-                        Debug.LogError($"Could not find UnitConfigSO or prefab for: {unitData.unitConfigName}");
                         continue;
                     }
 
@@ -778,7 +765,6 @@ namespace RTS.SaveLoad
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"Failed to restore unit {unitData.unitConfigName}: {ex.Message}\n{ex.StackTrace}");
                 }
             }
 
@@ -852,7 +838,6 @@ namespace RTS.SaveLoad
         {
             if (string.IsNullOrEmpty(buildingDataName))
             {
-                Debug.LogError("BuildingDataName is null or empty!");
                 return null;
             }
 
@@ -920,8 +905,6 @@ namespace RTS.SaveLoad
                 return result;
             }
 
-            Debug.LogError($"  ✗ Could not find BuildingDataSO '{buildingDataName}' using any strategy!");
-            Debug.LogError($"  SOLUTION: Move your BuildingDataSO assets to Assets/Resources/Buildings/ folder or create a BuildingDataRegistry ScriptableObject");
             return null;
         }
 
@@ -932,7 +915,6 @@ namespace RTS.SaveLoad
         {
             if (string.IsNullOrEmpty(unitConfigName))
             {
-                Debug.LogError("UnitConfigName is null or empty!");
                 return null;
             }
 
@@ -1000,8 +982,6 @@ namespace RTS.SaveLoad
                 return result;
             }
 
-            Debug.LogError($"  ✗ Could not find UnitConfigSO '{unitConfigName}' using any strategy!");
-            Debug.LogError($"  SOLUTION: Move your UnitConfigSO assets to Assets/Resources/Units/ folder or create a UnitConfigRegistry ScriptableObject");
             return null;
         }
 
@@ -1039,7 +1019,6 @@ namespace RTS.SaveLoad
         {
             if (settings.enableDebugLogging)
             {
-                Debug.Log($"[SaveLoad] {message}");
             }
         }
 

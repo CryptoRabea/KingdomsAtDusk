@@ -217,7 +217,6 @@ namespace RTS.UI
                 }
                 else
                 {
-                    Debug.LogWarning($"UniversalTooltip: Could not find TextMeshProUGUI component in cost item prefab for {cost.Key}. Make sure the prefab has a TextMeshProUGUI component.");
                 }
 
                 costItem.SetActive(true);

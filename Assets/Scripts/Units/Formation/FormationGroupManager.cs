@@ -34,7 +34,6 @@ namespace RTS.Units.Formation
                     currentFormation = value;
                     // Clear custom formation when switching to preset
                     currentCustomFormationId = null;
-                    Debug.Log($"Formation changed to: {currentFormation}");
 
                     // Publish event for UI updates
                     EventBus.Publish(new FormationChangedEvent(currentFormation));
@@ -62,14 +61,12 @@ namespace RTS.Units.Formation
                 currentCustomFormationId = formationId;
                 // Set to None to indicate custom formation is active
                 currentFormation = FormationType.None;
-                Debug.Log($"Custom formation '{formation.name}' set");
 
                 // Immediately reshape units if any are selected
                 ReshapeSelectedUnits();
             }
             else
             {
-                Debug.LogWarning($"Custom formation with ID {formationId} not found!");
             }
         }
 
@@ -100,7 +97,6 @@ namespace RTS.Units.Formation
         {
             if (instance != null && instance != this)
             {
-                Debug.LogWarning("Multiple FormationGroupManager instances detected. Destroying duplicate.");
                 Destroy(gameObject);
                 return;
             }
@@ -184,11 +180,9 @@ namespace RTS.Units.Formation
                         spacing,
                         facingDirection
                     );
-                    Debug.Log($"Using custom formation: {customFormation.name}");
                 }
                 else
                 {
-                    Debug.LogWarning("Custom formation not found, falling back to Box");
                     formationPositions = FormationManager.CalculateFormationPositions(
                         centerPosition,
                         unitCount,
@@ -248,7 +242,6 @@ namespace RTS.Units.Formation
             }
 
             string formationName = IsUsingCustomFormation ? GetCurrentCustomFormation()?.name : currentFormation.ToString();
-            Debug.Log($"Reshaped {selectionManager.SelectionCount} units into {formationName} formation");
         }
 
         /// <summary>

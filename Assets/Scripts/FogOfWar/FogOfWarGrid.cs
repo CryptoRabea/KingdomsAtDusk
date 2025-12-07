@@ -46,7 +46,6 @@ public class FogOfWarGrid
                 }
             }
 
-            Debug.Log($"[FogOfWarGrid] Initialized grid: {gridWidth}x{gridHeight} cells (world bounds: {worldBounds.size})");
         }
 
         /// <summary>

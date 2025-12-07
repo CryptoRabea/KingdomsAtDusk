@@ -87,7 +87,6 @@ namespace RTS.Buildings
             // Publish placement event
             EventBus.Publish(new BuildingPlacedEvent(gameObject, transform.position));
 
-            Debug.Log($"Started constructing {data?.buildingName ?? "building"}");
         }
 
         private void CompleteConstruction()
@@ -105,7 +104,6 @@ namespace RTS.Buildings
             if (data != null && happinessService != null && data.happinessBonus != 0)
             {
                 happinessService.AddBuildingBonus(data.happinessBonus, data.buildingName);
-                Debug.Log($"Applied happiness bonus: +{data.happinessBonus} from {data.buildingName}");
             }
 
             // Publish completion event
@@ -114,7 +112,6 @@ namespace RTS.Buildings
                 EventBus.Publish(new BuildingCompletedEvent(gameObject, data.buildingName));
             }
 
-            Debug.Log($" {data?.buildingName ?? "Building"} construction complete!");
         }
 
         private void GenerateResources()
@@ -138,7 +135,6 @@ namespace RTS.Buildings
             // Add resources to the player
             resourceService.AddResources(resources);
 
-            Debug.Log($" {data.buildingName} generated {data.resourceAmount} {data.resourceType}");
 
             // Publish event (optional - for UI updates, sound effects, etc.)
             EventBus.Publish(new ResourcesGeneratedEvent(
@@ -154,7 +150,6 @@ namespace RTS.Buildings
             if (isConstructed && data != null && happinessService != null && data.happinessBonus != 0)
             {
                 happinessService.RemoveBuildingBonus(data.happinessBonus, data.buildingName);
-                Debug.Log($"Removed happiness bonus: -{data.happinessBonus} from {data.buildingName}");
             }
 
             // Publish destruction event

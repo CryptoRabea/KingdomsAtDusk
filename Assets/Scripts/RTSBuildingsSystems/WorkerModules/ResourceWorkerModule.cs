@@ -174,7 +174,6 @@ namespace RTS.Buildings.WorkerModules
                 // Apply production bonus
                 ApplyProductionBonus(building, true);
 
-                Debug.Log($"⛏️ Assigned {peasantsPerResourceBuilding} peasants to {buildingComponent.Data?.buildingName ?? "resource building"}");
                 return true;
             }
 
@@ -193,7 +192,6 @@ namespace RTS.Buildings.WorkerModules
                 // Remove production bonus
                 ApplyProductionBonus(building, false);
 
-                Debug.Log($"⛏️ Released {workerCount} peasants from resource building");
             }
         }
 
@@ -210,7 +208,6 @@ namespace RTS.Buildings.WorkerModules
 
             if (apply)
             {
-                Debug.Log($"Resource production bonus ({resourceProductionBonus}x) applied to {buildingComponent.Data?.buildingName}");
             }
         }
 
@@ -253,13 +250,11 @@ namespace RTS.Buildings.WorkerModules
         [ContextMenu("Show Assigned Workers")]
         private void DebugShowAssignedWorkers()
         {
-            Debug.Log($"=== Resource Workers ({assignedWorkers.Count} assignments) ===");
             foreach (var kvp in assignedWorkers)
             {
                 if (kvp.Key != null)
                 {
                     Building b = kvp.Key.GetComponent<Building>();
-                    Debug.Log($"  {b?.Data?.buildingName ?? "Unknown"}: {kvp.Value} workers");
                 }
             }
         }
@@ -269,7 +264,6 @@ namespace RTS.Buildings.WorkerModules
         {
             trackedResourceBuildings.Clear();
             FindExistingResourceBuildings();
-            Debug.Log($"Found {trackedResourceBuildings.Count} resource buildings");
         }
 
         #endregion

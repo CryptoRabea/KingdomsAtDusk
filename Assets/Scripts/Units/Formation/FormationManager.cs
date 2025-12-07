@@ -87,7 +87,6 @@ namespace RTS.Units.Formation
         {
             if (customFormation == null || customFormation.positions.Count == 0)
             {
-                Debug.LogWarning("Custom formation is null or empty, using Box formation as fallback");
                 return CalculateBoxFormation(centerPosition, unitCount, spacing);
             }
 

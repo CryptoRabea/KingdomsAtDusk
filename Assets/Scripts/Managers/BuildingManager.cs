@@ -140,7 +140,6 @@ namespace RTS.Managers
 
             if (resourceService == null)
             {
-                Debug.LogError("BuildingManager: ResourceService not available!");
             }
 
             // Find fog of war system if not assigned
@@ -149,7 +148,6 @@ namespace RTS.Managers
                 fogWarSystem = FindFirstObjectByType<csFogWar>();
                 if (fogWarSystem == null)
                 {
-                    Debug.LogWarning("[BuildingManager] No csFogWar found in scene. Fog of war checks will be skipped.");
                 }
             }
 
@@ -163,7 +161,6 @@ namespace RTS.Managers
                 if (towerPlacementHelper == null)
                 {
                     towerPlacementHelper = gameObject.AddComponent<TowerPlacementHelper>();
-                    Debug.Log("BuildingManager: Auto-created TowerPlacementHelper component");
                 }
             }
 
@@ -173,7 +170,6 @@ namespace RTS.Managers
                 if (gatePlacementHelper == null)
                 {
                     gatePlacementHelper = gameObject.AddComponent<GatePlacementHelper>();
-                    Debug.Log("BuildingManager: Auto-created GatePlacementHelper component");
                 }
             }
 
@@ -182,7 +178,6 @@ namespace RTS.Managers
                 wallPlacementController = GetComponent<WallPlacementController>();
                 if (wallPlacementController == null)
                 {
-                    Debug.LogWarning("BuildingManager: No WallPlacementController found. Wall placement will not work.");
                 }
             }
 
@@ -209,7 +204,6 @@ namespace RTS.Managers
         {
             if (buildingIndex < 0 || buildingIndex >= buildingDataArray.Length)
             {
-                Debug.LogError($"Invalid building index: {buildingIndex}");
                 return;
             }
 
@@ -223,13 +217,11 @@ namespace RTS.Managers
         {
             if (buildingData == null)
             {
-                Debug.LogError("Building data is null!");
                 return;
             }
 
             if (buildingData.buildingPrefab == null)
             {
-                Debug.LogError($"Building data '{buildingData.buildingName}' has no prefab assigned!");
                 return;
             }
 
@@ -246,7 +238,6 @@ namespace RTS.Managers
             if (isWall && useWallPlacementForWalls && wallPlacementController != null)
             {
                 wallPlacementController.StartPlacingWalls(buildingData);
-                Debug.Log($"Started placing walls (pole-to-pole mode): {buildingData.buildingName}");
             }
             else
             {
@@ -261,7 +252,6 @@ namespace RTS.Managers
                     currentTowerData = towerData;
                     isPlacingGate = false;
                     currentGateData = null;
-                    Debug.Log($"Started placing tower: {buildingData.buildingName} (Type: {towerData.towerType})");
                 }
                 else if (buildingData is GateDataSO gateData)
                 {
@@ -269,7 +259,6 @@ namespace RTS.Managers
                     currentGateData = gateData;
                     isPlacingTower = false;
                     currentTowerData = null;
-                    Debug.Log($"Started placing gate: {buildingData.buildingName} (Type: {gateData.animationType})");
                 }
                 else
                 {
@@ -281,7 +270,6 @@ namespace RTS.Managers
 
                 CreateBuildingPreview();
 
-                Debug.Log($"Started placing: {buildingData.buildingName}");
             }
         }
 
@@ -520,7 +508,6 @@ namespace RTS.Managers
 
                 if (!resourceService.CanAfford(costs))
                 {
-                    Debug.Log($"Not enough resources for {currentBuildingData.buildingName}!");
 
                     EventBus.Publish(new ResourcesSpentEvent(
                         costs.GetValueOrDefault(ResourceType.Wood, 0),
@@ -536,23 +523,19 @@ namespace RTS.Managers
                 bool success = resourceService.SpendResources(costs);
                 if (success)
                 {
-                    Debug.Log($"✅ Spent resources for {currentBuildingData.buildingName}: {string.Join(", ", costs.Select(c => $"{c.Key}:{c.Value}"))}");
                 }
                 else
                 {
-                    Debug.LogError("Failed to spend resources even though CanAfford returned true!");
                     return;
                 }
             }
             else
             {
-                Debug.LogWarning("ResourceService not available, placing building anyway!");
             }
 
             // Handle wall replacement for towers
             if (isPlacingTower && wallToReplace != null && autoReplaceWalls && isSnappedToWall && towerPlacementHelper != null)
             {
-                Debug.Log($"Replacing wall at {wallToReplace.transform.position} with tower {currentTowerData.buildingName}");
 
                 // Store wall connection data before destroying
                 wallReplacementData = towerPlacementHelper.ReplaceWallWithTower(wallToReplace, currentTowerData);
@@ -565,7 +548,6 @@ namespace RTS.Managers
             // Handle wall replacement for gates
             if (isPlacingGate && wallToReplaceForGate != null && autoReplaceWallsForGates && isGateSnappedToWall && gatePlacementHelper != null)
             {
-                Debug.Log($"Replacing wall at {wallToReplaceForGate.transform.position} with gate {currentGateData.buildingName}");
 
                 // Store wall connection data before destroying
                 gateWallReplacementData = gatePlacementHelper.ReplaceWallWithGate(wallToReplaceForGate, currentGateData);
@@ -583,11 +565,9 @@ namespace RTS.Managers
             if (newBuilding.TryGetComponent<Building>(out var buildingComponent))
             {
                 buildingComponent.SetData(currentBuildingData);
-                Debug.Log($"✅ Assigned {currentBuildingData.buildingName} data to building component");
             }
             else
             {
-                Debug.LogWarning($"Building prefab for {currentBuildingData.buildingName} doesn't have Building component!");
             }
 
             // Add NavMesh obstacle (legacy support)
@@ -608,7 +588,6 @@ namespace RTS.Managers
                 if (towerComponent != null && currentTowerData != null)
                 {
                     towerComponent.SetTowerData(currentTowerData);
-                    Debug.Log($"✅ Assigned {currentTowerData.buildingName} tower data (Type: {currentTowerData.towerType})");
                 }
 
                 // Apply wall connections to tower if it replaced a wall
@@ -625,7 +604,6 @@ namespace RTS.Managers
                 if (gateComponent != null && currentGateData != null)
                 {
                     gateComponent.SetGateData(currentGateData);
-                    Debug.Log($"✅ Assigned {currentGateData.buildingName} gate data (Type: {currentGateData.animationType})");
                 }
 
                 // Apply wall connections to gate if it replaced a wall
@@ -638,7 +616,6 @@ namespace RTS.Managers
 
             EventBus.Publish(new BuildingPlacedEvent(newBuilding, position));
 
-            Debug.Log($"✅ Placed building: {currentBuildingData.buildingName} at {position}");
 
             CancelPlacement();
         }
@@ -702,7 +679,6 @@ namespace RTS.Managers
                     continue;
                 }
 
-                Debug.Log($"Cannot place: colliding with {col.gameObject.name} (Layer: {LayerMask.LayerToName(col.gameObject.layer)})");
                 return false;
             }
 
@@ -816,30 +792,25 @@ namespace RTS.Managers
         {
             if (buildingDataArray == null || buildingDataArray.Length == 0)
             {
-                Debug.LogWarning("BuildingManager: No building data assigned!");
                 return;
             }
 
-            Debug.Log($"BuildingManager: Loaded {buildingDataArray.Length} building types");
 
             for (int i = 0; i < buildingDataArray.Length; i++)
             {
                 var data = buildingDataArray[i];
                 if (data == null)
                 {
-                    Debug.LogError($"BuildingManager: Building data at index {i} is null!");
                     continue;
                 }
 
                 if (data.buildingPrefab == null)
                 {
-                    Debug.LogError($"BuildingManager: '{data.buildingName}' has no prefab assigned!");
                     continue;
                 }
 
                 if (!data.buildingPrefab.TryGetComponent<Building>(out var building))
                 {
-                    Debug.LogWarning($"BuildingManager: '{data.buildingName}' prefab doesn't have Building component!");
                 }
             }
         }
@@ -898,7 +869,6 @@ namespace RTS.Managers
         [ContextMenu("Print Building Costs")]
         private void PrintBuildingCosts()
         {
-            Debug.Log("=== Building Costs ===");
             foreach (var data in buildingDataArray)
             {
                 if (data == null) continue;
@@ -909,21 +879,18 @@ namespace RTS.Managers
                 {
                     costString += $"{cost.Key}={cost.Value} ";
                 }
-                Debug.Log(costString);
             }
         }
 
         [ContextMenu("List Buildings By Type")]
         private void ListBuildingsByType()
         {
-            Debug.Log("=== Buildings By Type ===");
             var types = System.Enum.GetValues(typeof(BuildingType));
             foreach (BuildingType type in types)
             {
                 var buildings = GetBuildingsByType(type);
                 if (buildings.Length > 0)
                 {
-                    Debug.Log($"{type}: {string.Join(", ", buildings.Select(b => b.buildingName))}");
                 }
             }
         }

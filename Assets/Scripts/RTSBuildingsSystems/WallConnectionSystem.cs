@@ -242,12 +242,10 @@ namespace RTS.Buildings
         [ContextMenu("Print Connections")]
         private void DebugPrintConnections()
         {
-            Debug.Log($"Wall at {transform.position}: {connectedWalls.Count} connections");
             foreach (var wall in connectedWalls)
             {
                 if (wall != null)
                 {
-                    Debug.Log($"  - Connected to wall at {wall.transform.position}");
                 }
             }
         }
@@ -255,12 +253,10 @@ namespace RTS.Buildings
         [ContextMenu("Print All Walls")]
         private void DebugPrintAllWalls()
         {
-            Debug.Log($"Total walls in scene: {allWalls.Count}");
             foreach (var wall in allWalls)
             {
                 if (wall != null)
                 {
-                    Debug.Log($"  - Wall at {wall.transform.position}");
                 }
             }
         }

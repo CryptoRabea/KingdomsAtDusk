@@ -75,7 +75,6 @@ namespace RTS.UI
         {
             if (loadingScreenRoot == null)
             {
-                Debug.LogError("LoadingScreenManager: loadingScreenRoot is not assigned!");
                 return;
             }
 
@@ -97,7 +96,6 @@ namespace RTS.UI
                 loadingTipText.gameObject.SetActive(false);
             }
 
-            Debug.Log("[LoadingScreen] Shown");
         }
 
         /// <summary>
@@ -127,7 +125,6 @@ namespace RTS.UI
             }
 
             isLoading = false;
-            Debug.Log("[LoadingScreen] Hidden");
         }
 
         /// <summary>

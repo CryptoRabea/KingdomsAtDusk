@@ -95,7 +95,6 @@ namespace RTSGame.Editor
             {
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
                 tmpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
-                Debug.Log($"[SettingsPanelGenerator] Found TMP font: {tmpFont.name}");
                 return;
             }
 
@@ -105,11 +104,9 @@ namespace RTSGame.Editor
             {
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
                 tmpFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
-                Debug.Log($"[SettingsPanelGenerator] Found TMP font: {tmpFont.name}");
                 return;
             }
 
-            Debug.LogError("[SettingsPanelGenerator] No TMP font found! Please import TMP Essential Resources.");
         }
 
         private void ConfigureTextMeshPro(TextMeshProUGUI text, string content, int fontSize, Color color, TextAlignmentOptions alignment = TextAlignmentOptions.Left)
@@ -142,7 +139,6 @@ namespace RTSGame.Editor
                     "Cancel"))
                 {
                     DestroyImmediate(existing.gameObject);
-                    Debug.Log("[SettingsPanelGenerator] Existing Settings Panel deleted.");
                 }
             }
             else
@@ -234,13 +230,11 @@ namespace RTSGame.Editor
                     "OK"
                 );
 
-                Debug.Log("[SettingsPanelGenerator] Settings Panel UI generated successfully!");
             }
             catch (System.Exception e)
             {
                 EditorUtility.ClearProgressBar();
                 EditorUtility.DisplayDialog("Error", "Failed to generate Settings Panel:\n" + e.Message, "OK");
-                Debug.LogError($"[SettingsPanelGenerator] Error: {e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -1094,7 +1088,6 @@ namespace RTSGame.Editor
 
             so.ApplyModifiedProperties();
 
-            Debug.Log("[SettingsPanelGenerator] References assigned. Note: You may need to manually assign specific control references in the Inspector.");
         }
 
         private void AssignField(SerializedObject so, string fieldName, UnityEngine.Object value)

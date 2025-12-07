@@ -128,7 +128,6 @@ namespace RTS.Buildings
             if (positionAction == null)
             {
                 if (enableDebugLogs)
-                    Debug.LogWarning("BuildingSelectionManager: positionAction is null!");
                 return;
             }
 
@@ -136,7 +135,6 @@ namespace RTS.Buildings
             if (IsMouseOverUI())
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Click was over UI, ignoring");
                 return;
             }
 
@@ -144,14 +142,12 @@ namespace RTS.Buildings
             if (buildingManager != null && buildingManager.IsPlacingBuilding)
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Ignoring click - currently placing building");
                 return;
             }
 
             Vector2 mousePosition = positionAction.action.ReadValue<Vector2>();
 
             if (enableDebugLogs)
-                Debug.Log($"BuildingSelectionManager: Click detected at {mousePosition}");
 
             if (isSpawnPointMode)
             {
@@ -228,14 +224,12 @@ namespace RTS.Buildings
                     if (building != null && building.Data != null)
                     {
                         SelectAllVisibleBuildingsOfType(building.Data);
-                        Debug.Log($"Double-clicked building: {building.Data.buildingName}. Selected all visible buildings of this type.");
                         return;
                     }
                 }
             }
 
             // Double-click on empty space = do nothing (don't select buildings unless clicking ON a building)
-            Debug.Log("Double-clicked on ground - buildings not selected (must click on building directly)");
         }
 
         private void HandleTripleClick(Vector2 screenPosition)
@@ -257,14 +251,12 @@ namespace RTS.Buildings
                     if (building != null && building.Data != null)
                     {
                         SelectAllBuildingsOfTypeInScene(building.Data);
-                        Debug.Log($"Triple-click on building: {building.Data.buildingName}. Selected all buildings of this type in entire scene.");
                         return;
                     }
                 }
             }
 
             // Triple-click on empty space = do nothing (don't select buildings unless clicking ON a building)
-            Debug.Log("Triple-clicked on ground - buildings not selected (must click on building directly)");
         }
 
         private void TrySelectBuilding(Vector2 screenPosition)
@@ -272,17 +264,14 @@ namespace RTS.Buildings
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
             if (enableDebugLogs)
-                Debug.Log($"BuildingSelectionManager: Raycasting with layer mask {buildingLayer.value}");
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, buildingLayer))
             {
                 if (enableDebugLogs)
-                    Debug.Log($"BuildingSelectionManager: Hit {hit.collider.gameObject.name}");
 
                 if (hit.collider.TryGetComponent<BuildingSelectable>(out var selectable))
                 {
                     if (enableDebugLogs)
-                        Debug.Log($" BuildingSelectable found on {hit.collider.gameObject.name}");
 
                     // Check for shift/ctrl for additive selection
                     bool shift = Keyboard.current != null && Keyboard.current.shiftKey.isPressed;
@@ -299,13 +288,11 @@ namespace RTS.Buildings
                 else
                 {
                     if (enableDebugLogs)
-                        Debug.LogWarning($"Hit building {hit.collider.gameObject.name} but no BuildingSelectable component!");
                 }
             }
             else
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: No building hit, deselecting");
             }
 
             // Clicked empty space - deselect all buildings
@@ -321,7 +308,6 @@ namespace RTS.Buildings
                 building.Select();
 
                 if (enableDebugLogs)
-                    Debug.Log($"🏰 Selecting building: {building.gameObject.name}. Total selected: {selectedBuildings.Count}");
             }
         }
 
@@ -338,7 +324,6 @@ namespace RTS.Buildings
             selectedBuildings.Clear();
 
             if (enableDebugLogs)
-                Debug.Log("Deselected all buildings");
         }
 
         public void DeselectBuilding()
@@ -352,7 +337,6 @@ namespace RTS.Buildings
             if (CurrentlySelectedBuilding == null)
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Right-click but no building selected");
                 return;
             }
 
@@ -360,14 +344,12 @@ namespace RTS.Buildings
             if (IsMouseOverUI())
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Right-click was over UI, ignoring");
                 return;
             }
 
             if (positionAction == null)
             {
                 if (enableDebugLogs)
-                    Debug.LogWarning("BuildingSelectionManager: positionAction is null!");
                 return;
             }
 
@@ -381,7 +363,6 @@ namespace RTS.Buildings
             if (building == null)
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: No building selected, cannot set rally point");
                 return;
             }
 
@@ -389,20 +370,17 @@ namespace RTS.Buildings
             if (IsMouseOverUI())
             {
                 if (enableDebugLogs)
-                    Debug.Log("BuildingSelectionManager: Click was over UI, ignoring");
                 return;
             }
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
             if (enableDebugLogs)
-                Debug.Log($"🎯 Attempting to set rally point from screen position {screenPosition} for building {building.gameObject.name}");
 
             // Try to hit ground layer
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, groundLayer))
             {
                 if (enableDebugLogs)
-                    Debug.Log($" Ground hit at world position {hit.point} on object {hit.collider.gameObject.name}");
 
                 // Get UnitTrainingQueue component
                 if (building.TryGetComponent<UnitTrainingQueue>(out UnitTrainingQueue trainingQueue))
@@ -413,7 +391,6 @@ namespace RTS.Buildings
                     if (building.TryGetComponent<RallyPointFlag>(out var rallyFlag))
                     {
                         if (enableDebugLogs)
-                            Debug.Log($"🚩 BuildingSelectionManager: Found RallyPointFlag component on {building.gameObject.name}, updating position and showing flag...");
 
                         rallyFlag.SetRallyPointPosition(hit.point);
                         rallyFlag.ShowFlag(); // Show flag when rally point is set
@@ -421,22 +398,18 @@ namespace RTS.Buildings
                     else
                     {
                         if (enableDebugLogs)
-                            Debug.LogWarning($"⚠️ BuildingSelectionManager: Building {building.gameObject.name} has no RallyPointFlag component - flag will not be shown. This is optional.");
                     }
 
                     if (enableDebugLogs)
-                        Debug.Log($" Rally point successfully set for {building.gameObject.name} at {hit.point}");
                 }
                 else
                 {
                     if (enableDebugLogs)
-                        Debug.LogWarning($" Building {building.gameObject.name} has no UnitTrainingQueue component - cannot set rally point");
                 }
             }
             else
             {
                 if (enableDebugLogs)
-                    Debug.LogWarning($" Click did not hit ground layer (mask: {groundLayer.value}). Make sure ground has correct layer assigned.");
             }
         }
 
@@ -485,7 +458,6 @@ namespace RTS.Buildings
                 SelectBuilding(building);
             }
 
-            Debug.Log($"Selected {selectedBuildings.Count} visible buildings of type: {targetData.buildingName}");
         }
 
         /// <summary>
@@ -520,7 +492,6 @@ namespace RTS.Buildings
                 SelectBuilding(building);
             }
 
-            Debug.Log($"Selected {selectedBuildings.Count} buildings of type: {targetData.buildingName} in entire scene");
         }
 
         #endregion
@@ -535,7 +506,6 @@ namespace RTS.Buildings
 
             if (enableDebugLogs)
             {
-                Debug.Log($"Spawn point mode: {(enabled ? "ENABLED" : "DISABLED")}");
             }
         }
 

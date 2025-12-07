@@ -45,25 +45,20 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void Awake()
         {
-            Debug.Log("[FloatingNumbersManager] Awake called");
             mainCamera = Camera.main;
 
             // Ensure settings exist
             if (settings == null)
             {
-                Debug.LogError("[FloatingNumbersManager] FloatingNumbersSettings is not assigned! Creating temporary settings with defaults.");
                 // Create default settings
                 settings = ScriptableObject.CreateInstance<FloatingNumbersSettings>();
                 // Initialize with default values by calling ResetToDefaults
                 settings.ResetToDefaults();
-                Debug.LogWarning("[FloatingNumbersManager] Created temporary FloatingNumbersSettings. Please assign a proper settings asset in the inspector!");
             }
             else
             {
-                Debug.Log("[FloatingNumbersManager] Settings are assigned properly");
             }
 
-            Debug.Log($"[FloatingNumbersManager] Settings null? {settings == null}, ShowDamageNumbers: {(settings != null ? settings.ShowDamageNumbers.ToString() : "N/A")}");
 
             InitializeCanvases();
             WarmupPools();
@@ -71,7 +66,6 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void OnEnable()
         {
-            Debug.Log($"[FloatingNumbersManager] OnEnable called. Settings null? {settings == null}");
             SubscribeToEvents();
         }
 
@@ -348,19 +342,15 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         public void ShowDamageNumber(Vector3 worldPosition, float damageAmount, bool isCritical = false)
         {
-            Debug.Log($"[FloatingNumbersManager] ShowDamageNumber called. Settings null? {settings == null}");
 
             if (settings == null)
             {
-                Debug.LogWarning("FloatingNumbersSettings is null - cannot show damage number");
                 return;
             }
 
-            Debug.Log($"[FloatingNumbersManager] ShowDamageNumbers setting: {settings.ShowDamageNumbers}");
 
             if (!settings.ShowDamageNumbers)
             {
-                Debug.LogWarning("[FloatingNumbersManager] ShowDamageNumbers is disabled in settings!");
                 return;
             }
 
@@ -368,7 +358,6 @@ namespace Assets.Scripts.UI.FloatingNumbers
             Color color = isCritical ? settings.CriticalColor : settings.DamageColor;
             string text = $"-{Mathf.RoundToInt(damageAmount)}";
 
-            Debug.Log($"[FloatingNumbersManager] Calling ShowNumber with text: {text}, screenPos: {screenPos}, color: {color}");
             ShowNumber(text, screenPos, color);
         }
 
@@ -517,18 +506,15 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void ShowNumber(string text, Vector2 screenPosition, Color color)
         {
-            Debug.Log($"[FloatingNumbersManager] ShowNumber called. Text: {text}, Position: {screenPosition}");
 
             if (settings == null)
             {
-                Debug.LogWarning("Cannot show number - settings is null");
                 return;
             }
 
             // Check if we've hit the max active numbers limit
             if (activeNumbers.Count >= settings.MaxActiveNumbers)
             {
-                Debug.LogWarning($"[FloatingNumbersManager] Hit max active numbers limit ({settings.MaxActiveNumbers}). Current: {activeNumbers.Count}");
                 // Force oldest number to complete
                 if (activeNumbers.Count > 0)
                 {
@@ -536,15 +522,12 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 }
             }
 
-            Debug.Log($"[FloatingNumbersManager] Getting floating number from pool...");
             FloatingNumber number = GetFloatingNumber();
             if (number == null)
             {
-                Debug.LogWarning("Failed to get FloatingNumber from pool");
                 return;
             }
 
-            Debug.Log($"[FloatingNumbersManager] Got floating number: {number.gameObject.name}. Initializing...");
             activeNumbers.Add(number);
 
             number.Initialize(
@@ -559,7 +542,6 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 ReturnFloatingNumber
             );
 
-            Debug.Log($"[FloatingNumbersManager] FloatingNumber initialized and should be active. GameObject active: {number.gameObject.activeSelf}");
         }
 
         private Vector2 WorldToCanvasPosition(Vector3 worldPosition)
@@ -614,22 +596,18 @@ namespace Assets.Scripts.UI.FloatingNumbers
 
         private void OnDamageDealt(DamageDealtEvent evt)
         {
-            Debug.Log($"[FloatingNumbersManager] OnDamageDealt called. Settings null? {settings == null}");
 
             if (evt.Target == null || evt.Target.transform == null)
             {
-                Debug.LogWarning("[FloatingNumbersManager] OnDamageDealt: Target is null");
                 return;
             }
 
             if (settings == null)
             {
-                Debug.LogError("[FloatingNumbersManager] FloatingNumbersSettings is null in OnDamageDealt - cannot show effects. This should not happen!");
                 return;
             }
 
             Vector3 position = evt.Target.transform.position + Vector3.up;
-            Debug.Log($"[FloatingNumbersManager] Showing damage number at position {position}, damage: {evt.Damage}");
 
             // Show damage number
             ShowDamageNumber(position, evt.Damage);
@@ -649,7 +627,6 @@ namespace Assets.Scripts.UI.FloatingNumbers
                     direction = new Vector3(Random.Range(-1f, 1f), Random.Range(0f, 1f), Random.Range(-1f, 1f)).normalized;
                 }
 
-                Debug.Log($"[FloatingNumbersManager] Showing blood gush effect");
                 ShowBloodGush(position, direction);
             }
 
@@ -658,7 +635,6 @@ namespace Assets.Scripts.UI.FloatingNumbers
             {
                 Vector3 groundPosition = evt.Target.transform.position;
                 groundPosition.y = 0.01f; // Just above ground
-                Debug.Log($"[FloatingNumbersManager] Showing blood decal");
                 ShowBloodDecal(groundPosition);
             }
 
@@ -669,7 +645,6 @@ namespace Assets.Scripts.UI.FloatingNumbers
                 float healthPercent = unitHealth.CurrentHealth / unitHealth.MaxHealth;
                 if (healthPercent <= settings.BloodDrippingThreshold)
                 {
-                    Debug.Log($"[FloatingNumbersManager] Starting blood dripping for {evt.Target.name}");
                     StartBloodDripping(
                         evt.Target,
                         () => unitHealth.CurrentHealth,

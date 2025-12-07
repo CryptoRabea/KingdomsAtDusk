@@ -213,11 +213,9 @@ namespace RTS.UI
             if (formationGroupManager != null)
             {
                 formationGroupManager.SetCustomFormation(formation.id);
-                Debug.Log($"Selected custom formation: {formation.name}");
             }
             else
             {
-                Debug.LogWarning("FormationGroupManager not assigned!");
             }
         }
 
@@ -233,7 +231,6 @@ namespace RTS.UI
             }
             else
             {
-                Debug.LogWarning("FormationBuilder not assigned!");
             }
         }
 
@@ -268,7 +265,6 @@ namespace RTS.UI
             }
             else
             {
-                Debug.LogWarning("FormationBuilder not assigned!");
             }
         }
 

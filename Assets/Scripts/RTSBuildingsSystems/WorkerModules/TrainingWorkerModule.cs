@@ -130,7 +130,6 @@ namespace RTS.Buildings.WorkerModules
                 // Apply training speed bonus
                 ApplyTrainingBonus(building, true);
 
-                Debug.Log($"⚔️ Assigned {peasantsPerTraining} peasants to training at {building.name}");
                 return true;
             }
 
@@ -149,7 +148,6 @@ namespace RTS.Buildings.WorkerModules
                 // Remove training bonus
                 ApplyTrainingBonus(building, false);
 
-                Debug.Log($"⚔️ Released {workerCount} peasants from training");
             }
         }
 
@@ -166,7 +164,6 @@ namespace RTS.Buildings.WorkerModules
 
             if (apply)
             {
-                Debug.Log($"Training speed bonus ({trainingSpeedBonus}x) applied");
             }
         }
 
@@ -209,12 +206,10 @@ namespace RTS.Buildings.WorkerModules
         [ContextMenu("Show Assigned Workers")]
         private void DebugShowAssignedWorkers()
         {
-            Debug.Log($"=== Training Workers ({assignedWorkers.Count} assignments) ===");
             foreach (var kvp in assignedWorkers)
             {
                 if (kvp.Key != null)
                 {
-                    Debug.Log($"  {kvp.Key.name}: {kvp.Value} workers");
                 }
             }
         }

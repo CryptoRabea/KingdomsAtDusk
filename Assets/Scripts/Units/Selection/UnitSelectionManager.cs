@@ -213,7 +213,6 @@ namespace RTS.Units
             // Show performance stats if enabled
             if (showPerformanceStats && Time.frameCount % 60 == 0)
             {
-                Debug.Log($"[UnitSelectionManager] Cached Units: {allSelectableUnits.Count} | Selected: {selectedUnits.Count}");
             }
         }
 
@@ -237,7 +236,6 @@ namespace RTS.Units
 
             if (showPerformanceStats)
             {
-                Debug.Log($"[UnitSelectionManager] Initialized cache with {allSelectableUnits.Count} units");
             }
         }
 
@@ -252,7 +250,6 @@ namespace RTS.Units
 
                 if (showPerformanceStats)
                 {
-                    Debug.Log($"[UnitSelectionManager] Unit added to cache: {evt.Unit.name}. Total: {allSelectableUnits.Count}");
                 }
             }
         }
@@ -275,7 +272,6 @@ namespace RTS.Units
 
                 if (showPerformanceStats)
                 {
-                    Debug.Log($"[UnitSelectionManager] Unit removed from cache: {evt.Unit.name}. Total: {allSelectableUnits.Count}");
                 }
             }
         }
@@ -739,8 +735,6 @@ namespace RTS.Units
                 {
                     building.Select();
                 }
-
-                Debug.Log($"Selected {buildingsInBox.Count} buildings via drag selection");
             }
         }
 
@@ -801,8 +795,6 @@ namespace RTS.Units
             {
                 SelectUnit(unit);
             }
-
-            Debug.Log($"Selected all visible units: {selectedUnits.Count} units");
         }
 
         /// <summary>

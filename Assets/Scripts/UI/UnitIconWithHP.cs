@@ -31,7 +31,6 @@ namespace RTS.UI
         {
             if (unit == null)
             {
-                Debug.LogWarning("[UnitIconWithHP] Cannot initialize with null unit!");
                 return;
             }
 
@@ -41,7 +40,6 @@ namespace RTS.UI
             var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
             if (aiController == null || aiController.Config == null)
             {
-                Debug.LogWarning($"[UnitIconWithHP] Unit {unit.name} doesn't have UnitAIController or Config!");
                 return;
             }
 

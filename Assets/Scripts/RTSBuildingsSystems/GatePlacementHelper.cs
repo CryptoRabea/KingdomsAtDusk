@@ -138,7 +138,6 @@ namespace RTS.Buildings
         {
             if (wall == null)
             {
-                Debug.LogWarning("Cannot replace wall: wall is null!");
                 return null;
             }
 
@@ -152,13 +151,11 @@ namespace RTS.Buildings
             if (wallConnection != null)
             {
                 connectedWalls = wallConnection.GetConnectedWalls();
-                Debug.Log($"Wall has {connectedWalls.Count} connections that will be transferred to gate");
             }
 
             var wallBuilding = wall.GetComponent<Building>();
             string wallName = wallBuilding != null ? wallBuilding.Data?.buildingName : "Wall";
 
-            Debug.Log($"Replacing {wallName} at {wallPosition} with {gateData.buildingName}");
 
             // Create replacement data
             var replacementData = new WallReplacementData
@@ -187,7 +184,6 @@ namespace RTS.Buildings
                 gateWallConnection = gate.AddComponent<WallConnectionSystem>();
             }
 
-            Debug.Log($"Gate placed at wall position, will connect to {replacementData.connectedWalls?.Count ?? 0} neighboring walls");
 
             // Force update connections after a short delay to ensure all systems are initialized
             if (gateWallConnection != null)
@@ -223,7 +219,6 @@ namespace RTS.Buildings
                 // Block replacement of walls with 3+ connections (corner pieces)
                 if (connectionCount > 2)
                 {
-                    Debug.Log($"Cannot replace wall: too many connections ({connectionCount})");
                     return false;
                 }
             }

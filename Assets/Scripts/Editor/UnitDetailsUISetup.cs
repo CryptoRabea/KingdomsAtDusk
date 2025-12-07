@@ -179,9 +179,6 @@ namespace RTS.Editor
             EditorUtility.SetDirty(componentWrapper);
             Selection.activeGameObject = componentWrapper;
 
-            Debug.Log("✅ UnitDetailsUI created successfully!");
-            Debug.Log("   - UnitDetailsUI component: ACTIVE (receives events)");
-            Debug.Log("   - UnitDetailsPanel visual: INACTIVE (will show when unit selected)");
         }
 
         // Helper methods
