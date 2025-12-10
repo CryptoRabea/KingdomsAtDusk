@@ -69,9 +69,21 @@ namespace RTS.Buildings
             if (nearest != null)
             {
                 outPosition = nearest.transform.position;
-                outRotation = nearest.transform.rotation; // Gate inherits wall rotation
-                outWall = nearest;
-                return true;
+                if (nearest != null)
+                {
+                    outPosition = nearest.transform.position;
+
+                    // Remove X-rotation (and Z for stability)
+                    Quaternion wallRot = nearest.transform.rotation;
+                    Vector3 euler = wallRot.eulerAngles;
+                    euler.x = 0f;
+                    euler.z = 0f;
+                    outRotation = Quaternion.Euler(euler);
+
+                    outWall = nearest;
+                    return true;
+                }
+                
             }
 
             return false;

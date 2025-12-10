@@ -478,6 +478,8 @@ namespace RTS.Managers
 
         private void HandleRotationInput()
         {
+            if (isPlacingGate||isPlacingTower)
+                return; // Gates use wall-aligned rotation when snapped, skip manual rotation
             float scrollDelta = inputActions.Player.Zoom.ReadValue<float>();
 
             if (scrollDelta > 0f)
