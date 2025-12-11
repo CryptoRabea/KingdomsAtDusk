@@ -37,6 +37,7 @@ namespace RTS.UI
 
         [Header("Formation")]
         [SerializeField] private TMP_Dropdown formationDropdown;
+        [SerializeField] private FormationSettingsSO formationSettings;
         // FormationGroupManager is accessed via singleton to avoid cross-scene reference issues
         private FormationGroupManager FormationGroupManager => FormationGroupManager.Instance;
         [SerializeField] private Button expandFormationsButton;
@@ -47,7 +48,8 @@ namespace RTS.UI
         [SerializeField] private FormationBuilderUI formationBuilder;
 
         // Dropdown index tracking
-        private const int CUSTOMIZE_FORMATION_INDEX = 7; // After standard formations (0-6)
+        private int customizeFormationIndex = -1; // Dynamically set based on available formations
+        private Dictionary<int, FormationType> formationTypeIndexMap = new Dictionary<int, FormationType>();
         private Dictionary<int, string> customFormationIndexMap = new Dictionary<int, string>();
 
         [Header("Health Bar")]
@@ -130,21 +132,46 @@ namespace RTS.UI
 
         private void InitializeFormationDropdown()
         {
-            if (formationDropdown == null) return;
+            if (formationDropdown == null)
+            {
+                Debug.LogError("Formation Dropdown is not assigned!");
+                return;
+            }
 
-            // Clear existing options and mapping
+            // Clear existing options and mappings
             formationDropdown.ClearOptions();
+            formationTypeIndexMap.Clear();
             customFormationIndexMap.Clear();
 
-            // Add all formation types
             List<string> options = new List<string>();
-            foreach (FormationType formationType in Enum.GetValues(typeof(FormationType)))
+            int currentIndex = 0;
+
+            // Add preset formations from FormationSettings SO
+            if (formationSettings != null && formationSettings.availableFormations != null)
             {
-                options.Add(FormatFormationName(formationType));
+                foreach (FormationType formationType in formationSettings.availableFormations)
+                {
+                    options.Add(FormatFormationName(formationType));
+                    formationTypeIndexMap[currentIndex] = formationType;
+                    currentIndex++;
+                }
+            }
+            else
+            {
+                // Fallback: Add all formation types if SO is not assigned
+                Debug.LogWarning("FormationSettings SO not assigned! Using all formation types.");
+                foreach (FormationType formationType in System.Enum.GetValues(typeof(FormationType)))
+                {
+                    options.Add(FormatFormationName(formationType));
+                    formationTypeIndexMap[currentIndex] = formationType;
+                    currentIndex++;
+                }
             }
 
             // Add "Customize Formation" option
+            customizeFormationIndex = currentIndex;
             options.Add("⚙️ Customize Formation");
+            currentIndex++;
 
             // Add custom formations from quick list
             if (CustomFormationManager.Instance != null)
@@ -154,9 +181,9 @@ namespace RTS.UI
                 {
                     if (formation.isInQuickList)
                     {
-                        int index = options.Count;
                         options.Add(formation.name);
-                        customFormationIndexMap[index] = formation.id;
+                        customFormationIndexMap[currentIndex] = formation.id;
+                        currentIndex++;
                     }
                 }
             }
@@ -164,15 +191,44 @@ namespace RTS.UI
             formationDropdown.AddOptions(options);
 
             // Set current formation
-            if (FormationGroupManager != null)
-            {
-                formationDropdown.value = (int)FormationGroupManager.CurrentFormation;
-                formationDropdown.RefreshShownValue();
-            }
+            UpdateDropdownToCurrentFormation();
 
             // Add listener
             formationDropdown.onValueChanged.RemoveAllListeners();
             formationDropdown.onValueChanged.AddListener(OnFormationDropdownChanged);
+        }
+
+        private void UpdateDropdownToCurrentFormation()
+        {
+            if (FormationGroupManager == null || formationDropdown == null) return;
+
+            // Find the index of the current formation type
+            FormationType currentFormation = FormationGroupManager.CurrentFormation;
+
+            foreach (var kvp in formationTypeIndexMap)
+            {
+                if (kvp.Value == currentFormation)
+                {
+                    formationDropdown.value = kvp.Key;
+                    formationDropdown.RefreshShownValue();
+                    return;
+                }
+            }
+
+            // If using custom formation, try to find it
+            if (FormationGroupManager.IsUsingCustomFormation)
+            {
+                string customId = FormationGroupManager.CurrentCustomFormationId;
+                foreach (var kvp in customFormationIndexMap)
+                {
+                    if (kvp.Value == customId)
+                    {
+                        formationDropdown.value = kvp.Key;
+                        formationDropdown.RefreshShownValue();
+                        return;
+                    }
+                }
+            }
         }
 
         private string FormatFormationName(FormationType type)
@@ -193,7 +249,7 @@ namespace RTS.UI
         private void OnFormationDropdownChanged(int index)
         {
             // Check if "Customize Formation" was selected
-            if (index == CUSTOMIZE_FORMATION_INDEX)
+            if (index == customizeFormationIndex)
             {
                 // Open formation builder to create new formation
                 if (formationBuilder != null)
@@ -202,11 +258,7 @@ namespace RTS.UI
                 }
 
                 // Reset dropdown to current formation
-                if (FormationGroupManager != null)
-                {
-                    formationDropdown.value = (int)FormationGroupManager.CurrentFormation;
-                    formationDropdown.RefreshShownValue();
-                }
+                UpdateDropdownToCurrentFormation();
                 return;
             }
 
@@ -221,10 +273,10 @@ namespace RTS.UI
                 return;
             }
 
-            // Otherwise, it's a standard formation type
-            if (index < CUSTOMIZE_FORMATION_INDEX && FormationGroupManager != null)
+            // Check if it's a preset formation type
+            if (formationTypeIndexMap.ContainsKey(index) && FormationGroupManager != null)
             {
-                FormationType newFormation = (FormationType)index;
+                FormationType newFormation = formationTypeIndexMap[index];
                 FormationGroupManager.CurrentFormation = newFormation;
             }
         }
@@ -232,11 +284,7 @@ namespace RTS.UI
         private void OnFormationChanged(FormationChangedEvent evt)
         {
             // Update dropdown to match current formation (in case it was changed elsewhere)
-            if (formationDropdown != null)
-            {
-                formationDropdown.value = (int)evt.FormationType;
-                formationDropdown.RefreshShownValue();
-            }
+            UpdateDropdownToCurrentFormation();
         }
 
         private void OnUnitSelected(UnitSelectedEvent evt)

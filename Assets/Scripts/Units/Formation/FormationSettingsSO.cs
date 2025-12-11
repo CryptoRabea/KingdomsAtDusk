@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace RTS.Units.Formation
 {
@@ -9,6 +10,19 @@ namespace RTS.Units.Formation
     [CreateAssetMenu(fileName = "FormationSettings", menuName = "RTS/Formation Settings")]
     public class FormationSettingsSO : ScriptableObject
     {
+        [Header("Available Formations")]
+        [Tooltip("List of formations available in the dropdown (in order)")]
+        public List<FormationType> availableFormations = new List<FormationType>
+        {
+            FormationType.None,
+            FormationType.Line,
+            FormationType.Column,
+            FormationType.Box,
+            FormationType.Wedge,
+            FormationType.Circle,
+            FormationType.Scatter
+        };
+
         [Header("Default Formation")]
         [Tooltip("Default formation type when moving multiple units")]
         public FormationType defaultFormationType = FormationType.Box;
