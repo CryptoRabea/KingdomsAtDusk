@@ -7,8 +7,9 @@ namespace RTS.UI
     /// <summary>
     /// Represents a single cell in the formation grid.
     /// Each cell has a square background with a circle in the middle that can be toggled.
+    /// Supports custom cursors on hover and click.
     /// </summary>
-    public class FormationGridCell : MonoBehaviour, IPointerClickHandler
+    public class FormationGridCell : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [Header("Visual Settings")]
         [SerializeField] private Image squareBackground;
@@ -107,7 +108,48 @@ namespace RTS.UI
         /// </summary>
         public void OnPointerClick(PointerEventData eventData)
         {
+            // Show select or deselect cursor based on current state
+            if (CustomCursorController.Instance != null)
+            {
+                var cursorState = isFilled ? CustomCursorController.CursorState.Deselect : CustomCursorController.CursorState.Select;
+                CustomCursorController.Instance.SetCursorState(cursorState);
+            }
+
             Toggle();
+        }
+
+        /// <summary>
+        /// Handle mouse enter
+        /// </summary>
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (CustomCursorController.Instance != null)
+            {
+                CustomCursorController.Instance.SetCursorState(CustomCursorController.CursorState.Hover);
+            }
+
+            // Optional: Highlight the cell on hover
+            if (squareBackground != null)
+            {
+                squareBackground.color = new Color(0.3f, 0.3f, 0.3f, 0.7f);
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse exit
+        /// </summary>
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (CustomCursorController.Instance != null)
+            {
+                CustomCursorController.Instance.ResetCursor();
+            }
+
+            // Reset highlight
+            if (squareBackground != null)
+            {
+                squareBackground.color = squareColor;
+            }
         }
 
         /// <summary>
