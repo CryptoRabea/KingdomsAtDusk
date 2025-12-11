@@ -10,6 +10,20 @@ namespace RTS.Units.Formation
     /// </summary>
     public class FormationGroupManager : MonoBehaviour
     {
+        // Singleton instance
+        private static FormationGroupManager _instance;
+        public static FormationGroupManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindFirstObjectByType<FormationGroupManager>();
+                }
+                return _instance;
+            }
+        }
+
         [Header("Current Formation")]
         [SerializeField] private FormationType currentFormation = FormationType.Box;
         private string currentCustomFormationId = null;
@@ -91,6 +105,18 @@ namespace RTS.Units.Formation
                 currentCustomFormationId = null;
                 CurrentFormation = FormationType.Box; // Revert to default
             }
+        }
+
+        private void Awake()
+        {
+            // Singleton setup
+            if (_instance != null && _instance != this)
+            {
+                Debug.LogWarning("Multiple FormationGroupManager instances detected! Destroying duplicate.");
+                Destroy(gameObject);
+                return;
+            }
+            _instance = this;
         }
 
         private void OnEnable()
