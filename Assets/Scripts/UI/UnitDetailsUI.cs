@@ -37,7 +37,8 @@ namespace RTS.UI
 
         [Header("Formation")]
         [SerializeField] private TMP_Dropdown formationDropdown;
-        [SerializeField] private FormationGroupManager formationGroupManager;
+        // FormationGroupManager is accessed via singleton to avoid cross-scene reference issues
+        private FormationGroupManager FormationGroupManager => FormationGroupManager.Instance;
         [SerializeField] private Button expandFormationsButton;
         [SerializeField] private GameObject formationsPanel; // Expandable panel for all formations
         [SerializeField] private Transform formationsPanelContent; // Content container for formation list items
@@ -163,9 +164,9 @@ namespace RTS.UI
             formationDropdown.AddOptions(options);
 
             // Set current formation
-            if (formationGroupManager != null)
+            if (FormationGroupManager != null)
             {
-                formationDropdown.value = (int)formationGroupManager.CurrentFormation;
+                formationDropdown.value = (int)FormationGroupManager.CurrentFormation;
                 formationDropdown.RefreshShownValue();
             }
 
@@ -201,9 +202,9 @@ namespace RTS.UI
                 }
 
                 // Reset dropdown to current formation
-                if (formationGroupManager != null)
+                if (FormationGroupManager != null)
                 {
-                    formationDropdown.value = (int)formationGroupManager.CurrentFormation;
+                    formationDropdown.value = (int)FormationGroupManager.CurrentFormation;
                     formationDropdown.RefreshShownValue();
                 }
                 return;
@@ -213,18 +214,18 @@ namespace RTS.UI
             if (customFormationIndexMap.ContainsKey(index))
             {
                 string formationId = customFormationIndexMap[index];
-                if (formationGroupManager != null)
+                if (FormationGroupManager != null)
                 {
-                    formationGroupManager.SetCustomFormation(formationId);
+                    FormationGroupManager.SetCustomFormation(formationId);
                 }
                 return;
             }
 
             // Otherwise, it's a standard formation type
-            if (index < CUSTOMIZE_FORMATION_INDEX && formationGroupManager != null)
+            if (index < CUSTOMIZE_FORMATION_INDEX && FormationGroupManager != null)
             {
                 FormationType newFormation = (FormationType)index;
-                formationGroupManager.CurrentFormation = newFormation;
+                FormationGroupManager.CurrentFormation = newFormation;
             }
         }
 
@@ -683,9 +684,10 @@ namespace RTS.UI
         /// </summary>
         private void OnFormationSelectClicked(CustomFormationData formation)
         {
-            if (formationGroupManager != null)
+            if (FormationGroupManager != null)
             {
-                formationGroupManager.SetCustomFormation(formation.id);
+                FormationGroupManager.SetCustomFormation(formation.id);
+                Debug.Log($"Applied formation: {formation.name}");
             }
         }
 
