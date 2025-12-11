@@ -147,20 +147,7 @@ namespace RTS.Units.Animation
         /// <summary>
         /// Validate the profile and log warnings for missing animations
         /// </summary>
-        public void ValidateProfile()
-        {
-            if (idleAnimation == null)
-                Debug.LogWarning($"[{profileName}] Missing idle animation!");
-
-            if (walkAnimation == null)
-                Debug.LogWarning($"[{profileName}] Missing walk animation!");
-
-            if (attackAnimation == null)
-                Debug.LogWarning($"[{profileName}] Missing attack animation!");
-
-            if (deathAnimation == null)
-                Debug.LogWarning($"[{profileName}] Missing death animation!");
-        }
+      
 
 #if UNITY_EDITOR
         private void OnValidate()

@@ -97,7 +97,6 @@ namespace RTS.Buildings
                 -amount
             ));
 
-            Debug.Log($"{gameObject.name} took {amount} damage. Health: {currentHealth}/{maxHealth}");
 
             // Check for death
             if (currentHealth <= 0f && !isDead)
@@ -131,7 +130,6 @@ namespace RTS.Buildings
                     actualHealing
                 ));
 
-                Debug.Log($"{gameObject.name} repaired for {actualHealing}. Health: {currentHealth}/{maxHealth}");
             }
         }
 
@@ -164,7 +162,6 @@ namespace RTS.Buildings
             // Unregister HP bar
             UnregisterHPBar();
 
-            Debug.Log($"{gameObject.name} has been destroyed!");
 
             // Spawn destruction effect
             if (destructionEffectPrefab != null)

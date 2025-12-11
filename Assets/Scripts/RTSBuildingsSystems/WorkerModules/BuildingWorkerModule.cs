@@ -110,7 +110,9 @@ namespace RTS.Buildings.WorkerModules
             {
                 if (building == null) continue;
 
-                Building buildingComponent = building.GetComponent<Building>();
+                if (building.TryGetComponent<Building>(out var buildingComponent))
+                {
+                }
                 if (buildingComponent == null || buildingComponent.IsConstructed) continue;
 
                 // Check if this building already has workers
@@ -125,7 +127,9 @@ namespace RTS.Buildings.WorkerModules
         {
             if (building == null || workforceService == null) return false;
 
-            Building buildingComponent = building.GetComponent<Building>();
+            if (building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null || buildingComponent.IsConstructed) return false;
 
             // Check if we can assign workers
@@ -139,7 +143,6 @@ namespace RTS.Buildings.WorkerModules
                 // Apply construction speed bonus
                 ApplyConstructionBonus(building, true);
 
-                Debug.Log($"🔨 Assigned {peasantsPerBuilding} peasants to {buildingComponent.Data?.buildingName ?? "building"}");
                 return true;
             }
 
@@ -158,7 +161,6 @@ namespace RTS.Buildings.WorkerModules
                 // Remove construction bonus
                 ApplyConstructionBonus(building, false);
 
-                Debug.Log($"🔨 Released {workerCount} peasants from building");
             }
         }
 
@@ -168,7 +170,9 @@ namespace RTS.Buildings.WorkerModules
             // For now, we'll use a simple approach with Time.timeScale modifier
             // In a real implementation, you'd modify the Building component's construction logic
 
-            Building buildingComponent = building.GetComponent<Building>();
+            if (building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null) return;
 
             // You could add a public method to Building like:
@@ -177,7 +181,6 @@ namespace RTS.Buildings.WorkerModules
             // For now, we'll just log it
             if (apply)
             {
-                Debug.Log($"Construction speed bonus ({constructionSpeedBonus}x) applied to {buildingComponent.Data?.buildingName}");
             }
         }
 
@@ -222,13 +225,11 @@ namespace RTS.Buildings.WorkerModules
         [ContextMenu("Show Assigned Workers")]
         private void DebugShowAssignedWorkers()
         {
-            Debug.Log($"=== Building Workers ({assignedWorkers.Count} assignments) ===");
             foreach (var kvp in assignedWorkers)
             {
                 if (kvp.Key != null)
                 {
                     Building b = kvp.Key.GetComponent<Building>();
-                    Debug.Log($"  {b?.Data?.buildingName ?? "Unknown"}: {kvp.Value} workers");
                 }
             }
         }

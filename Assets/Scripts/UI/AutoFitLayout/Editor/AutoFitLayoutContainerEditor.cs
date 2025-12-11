@@ -161,7 +161,9 @@ namespace RTS.UI.AutoFit.Editor
         {
             EditorGUILayout.LabelField("Detected Layout", EditorStyles.boldLabel);
 
-            GridLayoutGroup grid = container.GetComponent<GridLayoutGroup>();
+            if (container.TryGetComponent<GridLayoutGroup>(out var grid))
+            {
+            }
             HorizontalLayoutGroup horizontal = container.GetComponent<HorizontalLayoutGroup>();
             VerticalLayoutGroup vertical = container.GetComponent<VerticalLayoutGroup>();
 

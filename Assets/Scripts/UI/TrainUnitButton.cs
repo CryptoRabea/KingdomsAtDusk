@@ -79,7 +79,6 @@ namespace RTS.UI
 
             if (unitData?.unitConfig == null)
             {
-                Debug.LogError("TrainUnitButton: Invalid unit data");
                 gameObject.SetActive(false);
                 return;
             }
@@ -158,7 +157,6 @@ namespace RTS.UI
 
                 if (!success)
                 {
-                    Debug.LogWarning($"Failed to train {unitData.unitConfig.unitName}");
                     // Could show a notification here
                 }
             }

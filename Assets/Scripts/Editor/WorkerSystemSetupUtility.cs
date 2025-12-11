@@ -99,14 +99,18 @@ namespace KingdomsAtDusk.Editor
 
                 if (prefab == null) continue;
 
-                Building building = prefab.GetComponent<Building>();
+                if (prefab.TryGetComponent<Building>(out var building))
+                {
+                }
                 if (building == null || building.Data == null) continue;
 
                 // Check if it's a resource building
                 if (building.Data.generatesResources)
                 {
                     // Check if it already has a worker trainer
-                    BuildingWorkerTrainer trainer = prefab.GetComponent<BuildingWorkerTrainer>();
+                    if (prefab.TryGetComponent<BuildingWorkerTrainer>(out var trainer))
+                    {
+                    }
 
                     if (trainer == null)
                     {
@@ -129,7 +133,6 @@ namespace KingdomsAtDusk.Editor
 
                         if (showDetailedLogs)
                         {
-                            Debug.Log($"✅ Added BuildingWorkerTrainer to: {building.Data.buildingName} ({path})");
                         }
                     }
                     else
@@ -137,7 +140,6 @@ namespace KingdomsAtDusk.Editor
                         skippedCount++;
                         if (showDetailedLogs)
                         {
-                            Debug.Log($"⏭️ Skipped (already configured): {building.Data.buildingName}");
                         }
                     }
                 }
@@ -152,10 +154,6 @@ namespace KingdomsAtDusk.Editor
                 "OK"
             );
 
-            Debug.Log($"========================================");
-            Debug.Log($"Worker System Auto-Configuration Complete!");
-            Debug.Log($"Configured: {configuredCount} | Skipped: {skippedCount}");
-            Debug.Log($"========================================");
         }
 
         /// <summary>
@@ -259,10 +257,6 @@ namespace KingdomsAtDusk.Editor
                 EditorUtility.DisplayDialog("Validation Results", message, "OK");
             }
 
-            Debug.Log("========================================");
-            Debug.Log("Worker System Validation Results:");
-            Debug.Log(message);
-            Debug.Log("========================================");
         }
 
         /// <summary>
@@ -274,7 +268,6 @@ namespace KingdomsAtDusk.Editor
             if (!AssetDatabase.IsValidFolder("Assets/Resources"))
             {
                 AssetDatabase.CreateFolder("Assets", "Resources");
-                Debug.Log("Created Resources folder");
             }
 
             // Check if GameConfig already exists
@@ -318,7 +311,6 @@ namespace KingdomsAtDusk.Editor
                 "OK"
             );
 
-            Debug.Log($"✅ Created GameConfig at: {path}");
         }
 
         /// <summary>
@@ -338,13 +330,14 @@ namespace KingdomsAtDusk.Editor
 
                 if (prefab == null) continue;
 
-                Building building = prefab.GetComponent<Building>();
-                if (building != null && building.Data != null)
+                if (prefab.TryGetComponent<Building>(out var building) && building.Data != null)
                 {
                     // Check resource buildings
                     if (building.Data.generatesResources)
                     {
-                        BuildingWorkerTrainer trainer = prefab.GetComponent<BuildingWorkerTrainer>();
+                        if (prefab.TryGetComponent<BuildingWorkerTrainer>(out var trainer))
+                        {
+                        }
                         if (trainer == null)
                         {
                             issues.Add($"🏗️ Building missing WorkerTrainer: {building.Data.buildingName} ({path})");
@@ -354,8 +347,12 @@ namespace KingdomsAtDusk.Editor
 
                 // Check worker prefabs
                 var unitConfig = prefab.GetComponent<RTS.Units.UnitConfigSO>();
-                var gatheringAI = prefab.GetComponent<KingdomsAtDusk.Units.AI.WorkerGatheringAI>();
-                var carryingVisual = prefab.GetComponent<KingdomsAtDusk.Units.WorkerCarryingVisual>();
+                if (prefab.TryGetComponent<KingdomsAtDusk.Units.AI.WorkerGatheringAI>(out var gatheringAI))
+                {
+                }
+                if (prefab.TryGetComponent<KingdomsAtDusk.Units.WorkerCarryingVisual>(out var carryingVisual))
+                {
+                }
 
                 if (gatheringAI != null)
                 {
@@ -365,7 +362,9 @@ namespace KingdomsAtDusk.Editor
                         issues.Add($"👷 Worker missing CarryingVisual: {prefab.name} ({path})");
                     }
 
-                    var movement = prefab.GetComponent<RTS.Units.UnitMovement>();
+                    if (prefab.TryGetComponent<RTS.Units.UnitMovement>(out var movement))
+                    {
+                    }
                     if (movement == null)
                     {
                         issues.Add($"👷 Worker missing UnitMovement: {prefab.name} ({path})");
@@ -381,20 +380,15 @@ namespace KingdomsAtDusk.Editor
                     "All buildings and workers have required components!",
                     "OK"
                 );
-                Debug.Log("✅ No missing components found");
             }
             else
             {
                 string message = $"Found {issues.Count} missing components:\n\n" + string.Join("\n", issues);
                 EditorUtility.DisplayDialog("Missing Components", message, "OK");
 
-                Debug.Log("========================================");
-                Debug.Log("Missing Components Report:");
                 foreach (var issue in issues)
                 {
-                    Debug.LogWarning(issue);
                 }
-                Debug.Log("========================================");
             }
         }
     }

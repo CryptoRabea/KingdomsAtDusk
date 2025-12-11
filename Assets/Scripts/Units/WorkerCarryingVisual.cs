@@ -158,8 +158,7 @@ namespace KingdomsAtDusk.Units
             currentParticle = Instantiate(carryingParticlePrefab, particleAnchor.position, Quaternion.identity, particleAnchor);
 
             // Set particle color based on resource
-            var particleSystem = currentParticle.GetComponent<ParticleSystem>();
-            if (particleSystem != null)
+            if (currentParticle.TryGetComponent<ParticleSystem>(out var particleSystem))
             {
                 var main = particleSystem.main;
                 main.startColor = GetResourceColor(resourceType);

@@ -169,12 +169,10 @@ namespace RTS.UI.AutoFit
 
             if (debugMode)
             {
-                Debug.Log($"[AutoFitLayout] Container: {containerSize}, Grid: {columns}x{rows}, Cell: {cellSize}px, Visible: {visibleChildCount}/{children.Count}");
             }
 
             if (warnOnOverflow && hiddenChildCount > 0)
             {
-                Debug.LogWarning($"[AutoFitLayout] {hiddenChildCount} items hidden due to space constraints. Increase container size or decrease min cell size.");
             }
         }
 
@@ -364,7 +362,9 @@ namespace RTS.UI.AutoFit
                     visibleChildCount++;
 
                     // Ensure child has proper size
-                    LayoutElement layoutElement = children[i].GetComponent<LayoutElement>();
+                    if (children[i].TryGetComponent<LayoutElement>(out var layoutElement))
+                    {
+                    }
                     if (layoutElement == null && gridLayout == null)
                     {
                         layoutElement = children[i].gameObject.AddComponent<LayoutElement>();

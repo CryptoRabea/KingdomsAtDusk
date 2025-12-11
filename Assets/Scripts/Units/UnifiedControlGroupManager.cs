@@ -147,7 +147,6 @@ namespace RTS.Core
         {
             if (groupNumber < 0 || groupNumber >= numberOfGroups)
             {
-                Debug.LogWarning($"Invalid group number: {groupNumber}");
                 return;
             }
 
@@ -158,7 +157,6 @@ namespace RTS.Core
             if (!hasUnitsSelected && !hasBuildingSelected)
             {
                 if (showDebugMessages)
-                    Debug.Log($"Nothing selected to save to group {groupNumber}");
                 return;
             }
 
@@ -180,7 +178,6 @@ namespace RTS.Core
                 }
 
                 if (showDebugMessages)
-                    Debug.Log($"⚔️ Saved {groups[groupNumber].Units.Count} units to group {groupNumber} (overwrote previous assignment)");
 
                 EventBus.Publish(new UnitGroupSavedEvent(groupNumber, groups[groupNumber].Units.Count));
             }
@@ -191,7 +188,6 @@ namespace RTS.Core
                 groups[groupNumber].Building = buildingSelectionManager.CurrentlySelectedBuilding;
 
                 if (showDebugMessages)
-                    Debug.Log($"🏰 Saved building '{groups[groupNumber].Building.gameObject.name}' to group {groupNumber} (overwrote previous assignment)");
 
                 EventBus.Publish(new BuildingGroupSavedEvent(groupNumber, groups[groupNumber].Building.gameObject.name));
             }
@@ -205,7 +201,6 @@ namespace RTS.Core
         {
             if (groupNumber < 0 || groupNumber >= numberOfGroups)
             {
-                Debug.LogWarning($"Invalid group number: {groupNumber}");
                 return;
             }
 
@@ -218,7 +213,6 @@ namespace RTS.Core
             if (groups[groupNumber].IsEmpty())
             {
                 if (showDebugMessages)
-                    Debug.Log($"Group {groupNumber} is empty");
                 return;
             }
 
@@ -257,7 +251,6 @@ namespace RTS.Core
             if (group.Units.Count == 0)
             {
                 if (showDebugMessages)
-                    Debug.Log($"Unit group {groupNumber} is empty");
                 return;
             }
 
@@ -282,7 +275,6 @@ namespace RTS.Core
             }
 
             if (showDebugMessages)
-                Debug.Log($"⚔️ Recalled unit group {groupNumber}: {validUnits.Count} units");
 
             // Center camera on group if double-tapped
             if (isDoubleTap && validUnits.Count > 0)
@@ -304,7 +296,6 @@ namespace RTS.Core
             if (group.Building == null)
             {
                 if (showDebugMessages)
-                    Debug.Log($"Building group {groupNumber} is empty");
                 return;
             }
 
@@ -318,7 +309,6 @@ namespace RTS.Core
             group.Building.Select();
 
             if (showDebugMessages)
-                Debug.Log($"🏰 Recalled building group {groupNumber}: {group.Building.gameObject.name}");
 
             // Center camera on building if double-tapped
             if (isDoubleTap)
@@ -388,8 +378,6 @@ namespace RTS.Core
                 mainCamera.transform.LookAt(center);
             }
 
-            if (showDebugMessages)
-                Debug.Log($"📷 Centered camera on {units.Count} units");
         }
 
         /// <summary>
@@ -413,8 +401,6 @@ namespace RTS.Core
                 mainCamera.transform.LookAt(buildingPosition);
             }
 
-            if (showDebugMessages)
-                Debug.Log($"📷 Centered camera on building '{building.gameObject.name}'");
         }
 
         /// <summary>
@@ -462,8 +448,6 @@ namespace RTS.Core
             if (groupNumber >= 0 && groupNumber < numberOfGroups)
             {
                 groups[groupNumber].Clear();
-                if (showDebugMessages)
-                    Debug.Log($"Cleared group {groupNumber}");
             }
         }
 
@@ -476,8 +460,6 @@ namespace RTS.Core
             {
                 group.Clear();
             }
-            if (showDebugMessages)
-                Debug.Log("Cleared all groups");
         }
 
         /// <summary>
@@ -506,11 +488,9 @@ namespace RTS.Core
         [ContextMenu("Debug - Print All Groups")]
         private void DebugPrintAllGroups()
         {
-            Debug.Log("=== Control Group Status ===");
             for (int i = 0; i < numberOfGroups; i++)
             {
                 string info = GetGroupInfo(i);
-                Debug.Log($"Group {i}: {info}");
             }
         }
 

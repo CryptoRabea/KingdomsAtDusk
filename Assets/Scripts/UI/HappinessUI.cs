@@ -57,8 +57,7 @@ namespace RTS.UI
             {
                 happinessSlider.value = happiness / 100f;
 
-                var fillImage = happinessSlider.fillRect.GetComponent<Image>();
-                if (fillImage != null)
+                if (happinessSlider.fillRect.TryGetComponent<Image>(out var fillImage))
                 {
                     fillImage.color = GetHappinessColor(happiness);
                 }

@@ -37,7 +37,6 @@ namespace RTS.Buildings
             wallCollider = GetComponent<Collider>();
             if (wallCollider == null)
             {
-                Debug.LogError($"WallNavMeshObstacle: No collider found on {gameObject.name}!");
                 return;
             }
 
@@ -72,7 +71,6 @@ namespace RTS.Buildings
                 obstacle.carvingTimeToStationary = carvingTimeToStationary;
             }
 
-            Debug.Log($"WallNavMeshObstacle configured for {gameObject.name} with size {size}");
         }
 
         private void OnValidate()

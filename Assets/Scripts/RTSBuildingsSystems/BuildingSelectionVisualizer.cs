@@ -51,7 +51,6 @@ namespace KAD.RTSBuildingsSystems
                 squareSpriteRenderer = squareIndicator.GetComponent<SpriteRenderer>();
                 if (squareSpriteRenderer == null)
                 {
-                    Debug.LogWarning("BuildingSelectionVisualizer: Square indicator doesn't have a SpriteRenderer component!");
                 }
             }
 
@@ -60,7 +59,6 @@ namespace KAD.RTSBuildingsSystems
                 circleSpriteRenderer = circleIndicator.GetComponent<SpriteRenderer>();
                 if (circleSpriteRenderer == null)
                 {
-                    Debug.LogWarning("BuildingSelectionVisualizer: Circle indicator doesn't have a SpriteRenderer component!");
                 }
             }
 

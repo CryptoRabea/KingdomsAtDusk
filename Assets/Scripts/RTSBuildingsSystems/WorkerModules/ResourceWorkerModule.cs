@@ -72,7 +72,9 @@ namespace RTS.Buildings.WorkerModules
         {
             if (evt.Building == null) return;
 
-            Building building = evt.Building.GetComponent<Building>();
+            if (evt.Building.TryGetComponent<Building>(out var building))
+            {
+            }
             if (building == null || building.Data == null) return;
 
             // Check if it's a resource-generating building
@@ -107,7 +109,9 @@ namespace RTS.Buildings.WorkerModules
             {
                 if (buildingObj == null) continue;
 
-                Building building = buildingObj.GetComponent<Building>();
+                if (buildingObj.TryGetComponent<Building>(out var building))
+                {
+                }
                 if (building == null || !building.IsConstructed || building.Data == null) continue;
 
                 if (building.Data.generatesResources && IsTargetBuildingType(building.Data.buildingName))
@@ -146,7 +150,9 @@ namespace RTS.Buildings.WorkerModules
             {
                 if (building == null) continue;
 
-                Building buildingComponent = building.GetComponent<Building>();
+                if (building.TryGetComponent<Building>(out var buildingComponent))
+                {
+                }
                 if (buildingComponent == null || !buildingComponent.IsConstructed) continue;
 
                 if (!assignedWorkers.ContainsKey(building) || assignedWorkers[building] == 0)
@@ -160,7 +166,9 @@ namespace RTS.Buildings.WorkerModules
         {
             if (building == null || workforceService == null) return false;
 
-            Building buildingComponent = building.GetComponent<Building>();
+            if (building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null || !buildingComponent.IsConstructed) return false;
 
             // Check if we can assign workers
@@ -174,7 +182,6 @@ namespace RTS.Buildings.WorkerModules
                 // Apply production bonus
                 ApplyProductionBonus(building, true);
 
-                Debug.Log($"⛏️ Assigned {peasantsPerResourceBuilding} peasants to {buildingComponent.Data?.buildingName ?? "resource building"}");
                 return true;
             }
 
@@ -193,7 +200,6 @@ namespace RTS.Buildings.WorkerModules
                 // Remove production bonus
                 ApplyProductionBonus(building, false);
 
-                Debug.Log($"⛏️ Released {workerCount} peasants from resource building");
             }
         }
 
@@ -202,7 +208,9 @@ namespace RTS.Buildings.WorkerModules
             // This would integrate with the Building component to modify resource generation
             // In a real implementation, you'd modify the resource generation rate/amount
 
-            Building buildingComponent = building.GetComponent<Building>();
+            if (building.TryGetComponent<Building>(out var buildingComponent))
+            {
+            }
             if (buildingComponent == null) return;
 
             // You could add a public method to Building like:
@@ -210,7 +218,6 @@ namespace RTS.Buildings.WorkerModules
 
             if (apply)
             {
-                Debug.Log($"Resource production bonus ({resourceProductionBonus}x) applied to {buildingComponent.Data?.buildingName}");
             }
         }
 
@@ -253,13 +260,11 @@ namespace RTS.Buildings.WorkerModules
         [ContextMenu("Show Assigned Workers")]
         private void DebugShowAssignedWorkers()
         {
-            Debug.Log($"=== Resource Workers ({assignedWorkers.Count} assignments) ===");
             foreach (var kvp in assignedWorkers)
             {
                 if (kvp.Key != null)
                 {
                     Building b = kvp.Key.GetComponent<Building>();
-                    Debug.Log($"  {b?.Data?.buildingName ?? "Unknown"}: {kvp.Value} workers");
                 }
             }
         }
@@ -269,7 +274,6 @@ namespace RTS.Buildings.WorkerModules
         {
             trackedResourceBuildings.Clear();
             FindExistingResourceBuildings();
-            Debug.Log($"Found {trackedResourceBuildings.Count} resource buildings");
         }
 
         #endregion

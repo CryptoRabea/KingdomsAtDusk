@@ -92,7 +92,6 @@ namespace RTS.Units.Animation
 
             if (animator == null)
             {
-                Debug.LogError($"Animator not found on {gameObject.name}!");
                 enabled = false;
                 return;
             }
@@ -328,7 +327,6 @@ namespace RTS.Units.Animation
             // The animation determines the timing
             combat?.TryAttack();
 
-            Debug.Log($"{gameObject.name}: Attack Hit!");
         }
 
         /// <summary>
@@ -338,7 +336,6 @@ namespace RTS.Units.Animation
         {
             if (!enableAttackEvents) return;
 
-            Debug.Log($"{gameObject.name}: Attack Complete");
         }
 
         /// <summary>
@@ -351,7 +348,6 @@ namespace RTS.Units.Animation
             // Play footstep sound here
             // AudioManager.Instance?.PlayFootstep(transform.position);
             
-            Debug.Log($"{gameObject.name}: Footstep");
         }
 
         /// <summary>
@@ -359,7 +355,6 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnDeathComplete()
         {
-            Debug.Log($"{gameObject.name}: Death animation complete");
             
             // Could trigger corpse spawn, item drops, etc.
             // For now, the unit is destroyed by DeadState

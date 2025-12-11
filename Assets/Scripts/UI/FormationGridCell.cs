@@ -51,7 +51,9 @@ namespace RTS.UI
                 circle = circleObj.AddComponent<Image>();
 
                 // Make circle smaller than the square
-                RectTransform circleRect = circleObj.GetComponent<RectTransform>();
+                if (circleObj.TryGetComponent<RectTransform>(out var circleRect))
+                {
+                }
                 circleRect.anchorMin = new Vector2(0.5f, 0.5f);
                 circleRect.anchorMax = new Vector2(0.5f, 0.5f);
                 circleRect.pivot = new Vector2(0.5f, 0.5f);

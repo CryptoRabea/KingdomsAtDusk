@@ -17,6 +17,9 @@ namespace RTS.Units
         [SerializeField] private Camera mainCamera;
         [SerializeField] private FormationGroupManager formationGroupManager;
 
+        private RTS.Managers.BuildingManager buildingManager;
+        private RTS.Buildings.WallPlacementController wallPlacementController;
+
         [Header("Settings")]
         [SerializeField] private LayerMask groundLayer; // What counts as ground
         [SerializeField] private LayerMask unitLayer;   // What counts as units
@@ -51,7 +54,6 @@ namespace RTS.Units
 
             if (mouse == null)
             {
-                Debug.LogError("No mouse detected! RTSCommandHandler won't work.");
                 enabled = false;
             }
 
@@ -60,6 +62,10 @@ namespace RTS.Units
             {
                 cachedPointerEventData = new PointerEventData(EventSystem.current);
             }
+
+            // Find placement managers to check if in placement mode
+            buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+            wallPlacementController = Object.FindAnyObjectByType<RTS.Buildings.WallPlacementController>();
         }
 
         private bool IsMouseOverUI()
@@ -121,6 +127,17 @@ namespace RTS.Units
 
         private void HandleRightClick()
         {
+            // Don't process commands if in placement mode
+            if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                return;
+            }
+
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
+            {
+                return;
+            }
+
             // Don't process right-click if mouse is over UI or outside viewport
             if (IsMouseOverUI() || IsMouseOutsideViewport())
             {
@@ -154,8 +171,7 @@ namespace RTS.Units
             if (Physics.Raycast(ray, out RaycastHit hitUnit, 1000f, unitLayer))
             {
                 // Check if it's an enemy
-                var targetUnit = hitUnit.collider.GetComponent<UnitHealth>();
-                if (targetUnit != null && IsEnemy(hitUnit.collider.gameObject))
+                if (hitUnit.collider.TryGetComponent<UnitHealth>(out var targetUnit) && IsEnemy(hitUnit.collider.gameObject))
                 {
                     // Attack command
                     IssueAttackCommand(hitUnit.collider.transform);
@@ -227,14 +243,12 @@ namespace RTS.Units
                 Vector3 unitDestination = formationPositions[index];
 
                 // Set as forced move with destination so unit can resume aggro when it arrives
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, unitDestination);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.SetDestination(unitDestination);
                 }
@@ -261,7 +275,6 @@ namespace RTS.Units
                 Destroy(marker, markerLifetime);
             }
 
-            Debug.Log($"Moving {selectionManager.SelectionCount} units to {destination} in formation");
         }
 
         private void IssueForcedMoveCommand(Vector3 destination)
@@ -320,14 +333,12 @@ namespace RTS.Units
                 Vector3 unitDestination = formationPositions[index];
 
                 // Clear AI target and set forced move flag with destination
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, unitDestination);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.SetDestination(unitDestination);
                 }
@@ -354,7 +365,6 @@ namespace RTS.Units
                 Destroy(marker, markerLifetime);
             }
 
-            Debug.Log($"FORCED Moving {selectionManager.SelectionCount} units to {destination} in formation");
         }
 
         private void IssueAttackCommand(Transform target)
@@ -368,26 +378,22 @@ namespace RTS.Units
                 if (unit == null) continue;
 
                 // Clear forced move flag when issuing attack command
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(false);
                 }
 
-                var combat = unit.GetComponent<UnitCombat>();
-                if (combat != null)
+                if (unit.TryGetComponent<UnitCombat>(out var combat))
                 {
                     combat.SetTarget(target);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.FollowTarget(target);
                 }
             }
 
-            Debug.Log($"Attacking target with {selectionManager.SelectionCount} units");
         }
 
         private bool IsEnemy(GameObject obj)

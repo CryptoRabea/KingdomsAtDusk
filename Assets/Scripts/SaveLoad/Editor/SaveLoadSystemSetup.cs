@@ -137,14 +137,12 @@ namespace RTS.SaveLoad.Editor
                     "OK"
                 );
 
-                Debug.Log(" Save/Load system setup complete!");
                 Selection.activeGameObject = systemObj;
             }
             catch (System.Exception e)
             {
                 EditorUtility.ClearProgressBar();
                 EditorUtility.DisplayDialog("Setup Failed", $"Error during setup:\n{e.Message}", "OK");
-                Debug.LogError($"Setup failed: {e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -178,7 +176,6 @@ namespace RTS.SaveLoad.Editor
             var existing = AssetDatabase.LoadAssetAtPath<SaveLoadSettings>(SETTINGS_PATH);
             if (existing != null)
             {
-                Debug.Log("SaveLoadSettings already exists, using existing asset.");
                 return existing;
             }
 
@@ -205,7 +202,6 @@ namespace RTS.SaveLoad.Editor
             AssetDatabase.CreateAsset(settings, SETTINGS_PATH);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($" Created SaveLoadSettings at {SETTINGS_PATH}");
             return settings;
         }
 
@@ -284,7 +280,6 @@ namespace RTS.SaveLoad.Editor
             savePanel.SetActive(false);
             loadPanel.SetActive(false);
 
-            Debug.Log(" Created Save/Load UI with separate Save/Load/Main panels");
             return saveLoadMenu;
         }
 
@@ -296,7 +291,6 @@ namespace RTS.SaveLoad.Editor
             canvasObj.AddComponent<CanvasScaler>();
             canvasObj.AddComponent<GraphicRaycaster>();
 
-            Debug.Log(" Created Canvas");
             return canvas;
         }
 
@@ -382,7 +376,9 @@ namespace RTS.SaveLoad.Editor
             panel.AddComponent<RectTransform>();
             panel.transform.SetParent(parent.transform, false);
 
-            var panelRect = panel.GetComponent<RectTransform>();
+            if (panel.TryGetComponent<RectTransform>(out var panelRect))
+            {
+            }
             panelRect.anchorMin = Vector2.zero;
             panelRect.anchorMax = Vector2.one;
             panelRect.sizeDelta = Vector2.zero;
@@ -624,7 +620,6 @@ namespace RTS.SaveLoad.Editor
             var existing = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             if (existing != null)
             {
-                Debug.Log("SaveListItem prefab already exists.");
                 return existing;
             }
 
@@ -700,7 +695,6 @@ namespace RTS.SaveLoad.Editor
             PrefabUtility.SaveAsPrefabAsset(itemObj, prefabPath);
             DestroyImmediate(itemObj);
 
-            Debug.Log($" Created SaveListItem prefab at {prefabPath}");
             return AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
         }
 
@@ -727,7 +721,6 @@ namespace RTS.SaveLoad.Editor
             var existing = GameObject.Find("SaveLoadSystem");
             if (existing != null)
             {
-                Debug.Log("SaveLoadSystem GameObject already exists.");
                 return existing;
             }
 
@@ -738,7 +731,6 @@ namespace RTS.SaveLoad.Editor
             systemObj.AddComponent<AutoSaveSystem>();
             systemObj.AddComponent<SaveLoadInputHandler>();
 
-            Debug.Log(" Created SaveLoadSystem GameObject with all components");
             return systemObj;
         }
 
@@ -749,37 +741,31 @@ namespace RTS.SaveLoad.Editor
         private void WireReferences(GameObject systemObj, SaveLoadSettings settings, SaveLoadMenu menu, GameObject itemPrefab)
         {
             // Wire SaveLoadManager using SerializedObject
-            var manager = systemObj.GetComponent<SaveLoadManager>();
-            if (manager != null)
+            if (systemObj.TryGetComponent<SaveLoadManager>(out var manager))
             {
                 var serializedManager = new SerializedObject(manager);
                 serializedManager.FindProperty("settings").objectReferenceValue = settings;
                 serializedManager.FindProperty("mainCamera").objectReferenceValue = Camera.main;
                 serializedManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(manager);
-                Debug.Log("- Wired SaveLoadManager");
             }
 
             // Wire AutoSaveSystem using SerializedObject
-            var autoSave = systemObj.GetComponent<AutoSaveSystem>();
-            if (autoSave != null)
+            if (systemObj.TryGetComponent<AutoSaveSystem>(out var autoSave))
             {
                 var serializedAutoSave = new SerializedObject(autoSave);
                 serializedAutoSave.FindProperty("settings").objectReferenceValue = settings;
                 serializedAutoSave.ApplyModifiedProperties();
                 EditorUtility.SetDirty(autoSave);
-                Debug.Log("- Wired AutoSaveSystem");
             }
 
             // Wire SaveLoadInputHandler using SerializedObject
-            var inputHandler = systemObj.GetComponent<SaveLoadInputHandler>();
-            if (inputHandler != null)
+            if (systemObj.TryGetComponent<SaveLoadInputHandler>(out var inputHandler))
             {
                 var serializedInputHandler = new SerializedObject(inputHandler);
                 serializedInputHandler.FindProperty("inGameMenu").objectReferenceValue = menu;
                 serializedInputHandler.ApplyModifiedProperties();
                 EditorUtility.SetDirty(inputHandler);
-                Debug.Log("- Wired SaveLoadInputHandler");
             }
 
             // Double-check SaveLoadMenu has prefab (should already be set in CreateSaveLoadUI)
@@ -790,17 +776,14 @@ namespace RTS.SaveLoad.Editor
 
                 if (prefabProperty.objectReferenceValue == null)
                 {
-                    Debug.LogWarning("SaveListItemPrefab was null, assigning now...");
                     prefabProperty.objectReferenceValue = itemPrefab;
                     serializedMenu.ApplyModifiedProperties();
                 }
 
                 EditorUtility.SetDirty(menu);
-                Debug.Log("- Verified SaveLoadMenu prefab reference");
             }
 
             EditorUtility.SetDirty(systemObj);
-            Debug.Log(" All references wired successfully");
         }
 
         private void AutoWireReferences()
@@ -842,18 +825,15 @@ namespace RTS.SaveLoad.Editor
             var gameManager = FindAnyObjectByType<RTS.Managers.GameManager>();
             if (gameManager == null)
             {
-                Debug.LogWarning("GameManager not found in scene. SaveLoadManager will be auto-found at runtime.");
                 return;
             }
 
-            var manager = systemObj.GetComponent<SaveLoadManager>();
-            if (manager != null)
+            if (systemObj.TryGetComponent<SaveLoadManager>(out var manager))
             {
                 var serializedGameManager = new SerializedObject(gameManager);
                 serializedGameManager.FindProperty("saveLoadManager").objectReferenceValue = manager;
                 serializedGameManager.ApplyModifiedProperties();
                 EditorUtility.SetDirty(gameManager.gameObject);
-                Debug.Log(" Integrated with GameManager");
             }
         }
 

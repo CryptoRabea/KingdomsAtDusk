@@ -28,7 +28,6 @@ namespace RTS.Managers
             var populationService = ServiceLocator.TryGet<IPopulationService>();
             if (populationService == null)
             {
-                Debug.LogWarning("PopulationService not found. Cannot request workers.");
                 return false;
             }
 

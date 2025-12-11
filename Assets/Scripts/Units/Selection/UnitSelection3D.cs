@@ -277,8 +277,7 @@ namespace RTS.Units
 
             foreach (var collider in colliders)
             {
-                var selectable = collider.GetComponent<UnitSelectable>();
-                if (selectable != null)
+                if (collider.TryGetComponent<UnitSelectable>(out var selectable))
                 {
                     units.Add(selectable);
                 }
@@ -302,8 +301,7 @@ namespace RTS.Units
                 if (selectable == null)
                     continue;
 
-                var renderer = selectable.GetComponent<Renderer>();
-                if (renderer != null && selectionBounds.Intersects(renderer.bounds))
+                if (selectable.TryGetComponent<Renderer>(out var renderer) && selectionBounds.Intersects(renderer.bounds))
                 {
                     units.Add(selectable);
                 }
@@ -342,8 +340,7 @@ namespace RTS.Units
 
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, selectableLayer))
             {
-                var selectable = hit.collider.GetComponent<UnitSelectable>();
-                if (selectable != null)
+                if (hit.collider.TryGetComponent<UnitSelectable>(out var selectable))
                 {
                     bool additive = Keyboard.current?.shiftKey.isPressed ?? false;
 

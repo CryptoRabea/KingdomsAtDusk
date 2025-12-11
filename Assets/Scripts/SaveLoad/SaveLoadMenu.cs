@@ -123,7 +123,6 @@ namespace RTS.SaveLoad
 
             if (saveLoadService == null)
             {
-                Debug.LogError("SaveLoadMenu: ISaveLoadService not found!");
             }
 
             // Try to find settings panel controller if not assigned
@@ -141,15 +140,12 @@ namespace RTS.SaveLoad
 
         public void OpenMenu()
         {
-            Debug.Log("[SaveLoadMenu] OpenMenu called");
 
             if (menuPanel == null)
             {
-                Debug.LogError("[SaveLoadMenu] Menu panel not assigned!");
                 return;
             }
 
-            Debug.Log($"[SaveLoadMenu] Menu panel exists: {menuPanel.name}");
 
             isOpen = true;
 
@@ -158,19 +154,16 @@ namespace RTS.SaveLoad
             {
                 previousTimeScale = Time.timeScale;
                 Time.timeScale = 0f;
-                Debug.Log($"[SaveLoadMenu] Game paused. Previous timeScale: {previousTimeScale}");
 
                 // Also pause through game state service if available
                 if (gameStateService != null)
                 {
                     gameStateService.PauseGame();
-                    Debug.Log("[SaveLoadMenu] Game paused via GameStateService");
                 }
             }
 
             // Show main menu mode
             ShowMode(MenuMode.Main);
-            Debug.Log("[SaveLoadMenu] Menu opened successfully");
         }
 
         public void CloseMenu()
@@ -200,38 +193,31 @@ namespace RTS.SaveLoad
 
         private void ShowMode(MenuMode mode)
         {
-            Debug.Log($"[SaveLoadMenu] ShowMode called: {mode}");
             currentMode = mode;
 
             // Show/hide appropriate panels
             if (menuPanel != null)
             {
                 menuPanel.SetActive(mode == MenuMode.Main);
-                Debug.Log($"[SaveLoadMenu] Menu panel active: {menuPanel.activeSelf}");
             }
             else
             {
-                Debug.LogError("[SaveLoadMenu] Menu panel is null!");
             }
 
             if (savePanel != null)
             {
                 savePanel.SetActive(mode == MenuMode.Save);
-                Debug.Log($"[SaveLoadMenu] Save panel active: {savePanel.activeSelf}");
             }
             else if (mode == MenuMode.Save)
             {
-                Debug.LogError("[SaveLoadMenu] Save panel is null but trying to show save mode!");
             }
 
             if (loadPanel != null)
             {
                 loadPanel.SetActive(mode == MenuMode.Load);
-                Debug.Log($"[SaveLoadMenu] Load panel active: {loadPanel.activeSelf}");
             }
             else if (mode == MenuMode.Load)
             {
-                Debug.LogError("[SaveLoadMenu] Load panel is null but trying to show load mode!");
             }
 
             // Refresh save list when showing save or load mode
@@ -247,16 +233,13 @@ namespace RTS.SaveLoad
             }
 
             UpdateButtonStates();
-            Debug.Log($"[SaveLoadMenu] ShowMode completed for {mode}");
         }
 
         private void RefreshSaveList()
         {
-            Debug.Log($"[SaveLoadMenu] RefreshSaveList called for mode: {currentMode}");
 
             if (saveLoadService == null)
             {
-                Debug.LogError("[SaveLoadMenu] SaveLoadService is null!");
                 return;
             }
 
@@ -265,11 +248,9 @@ namespace RTS.SaveLoad
 
             if (targetContent == null)
             {
-                Debug.LogError($"[SaveLoadMenu] Target content is null for mode {currentMode}! saveListContentSave={saveListContentSave}, saveListContentLoad={saveListContentLoad}");
                 return;
             }
 
-            Debug.Log($"[SaveLoadMenu] Using content: {targetContent.name}");
 
             // Clear existing items
             foreach (var item in saveListItems)
@@ -279,14 +260,11 @@ namespace RTS.SaveLoad
             }
             saveListItems.Clear();
             selectedSaveItem = null;
-            Debug.Log("[SaveLoadMenu] Cleared existing save list items");
 
             // Get all saves
             string[] saves = saveLoadService.GetAllSaves();
-            Debug.Log($"[SaveLoadMenu] Found {saves.Length} save files");
             foreach (var save in saves)
             {
-                Debug.Log($"[SaveLoadMenu]   - {save}");
             }
 
             // Create list items in the appropriate content area
@@ -295,7 +273,6 @@ namespace RTS.SaveLoad
                 CreateSaveListItem(saveName, targetContent);
             }
 
-            Debug.Log($"[SaveLoadMenu] Created {saveListItems.Count} save list items");
             UpdateButtonStates();
         }
 
@@ -303,29 +280,27 @@ namespace RTS.SaveLoad
         {
             if (saveListItemPrefab == null)
             {
-                Debug.LogError("[SaveLoadMenu] SaveListItemPrefab is null!");
                 return;
             }
 
             if (content == null)
             {
-                Debug.LogError("[SaveLoadMenu] Content transform is null!");
                 return;
             }
 
             GameObject itemObj = Instantiate(saveListItemPrefab, content);
-            SaveListItem item = itemObj.GetComponent<SaveListItem>();
+            if (itemObj.TryGetComponent<SaveListItem>(out var item))
+            {
+            }
 
             if (item != null)
             {
                 SaveFileInfo info = saveLoadService.GetSaveInfo(saveName);
                 if (info != null)
                 {
-                    Debug.Log($"[SaveLoadMenu] Creating list item for: {saveName} (Date: {info.saveDate})");
                 }
                 else
                 {
-                    Debug.LogWarning($"[SaveLoadMenu] Could not get save info for: {saveName}, using fallback");
                 }
 
                 item.Initialize(info ?? new SaveFileInfo { saveName = saveName, fileName = saveName });
@@ -334,7 +309,6 @@ namespace RTS.SaveLoad
             }
             else
             {
-                Debug.LogError($"[SaveLoadMenu] SaveListItem component not found on prefab!");
             }
         }
 
@@ -367,7 +341,6 @@ namespace RTS.SaveLoad
             string saveName = saveNameInput.text.Trim();
             if (string.IsNullOrEmpty(saveName))
             {
-                Debug.LogWarning("Save name cannot be empty!");
                 return;
             }
 
@@ -375,7 +348,6 @@ namespace RTS.SaveLoad
             if (saveLoadService.SaveExists(saveName))
             {
                 // In a real implementation, show confirmation dialog
-                Debug.Log($"Overwriting existing save: {saveName}");
             }
 
             // Perform save
@@ -383,13 +355,11 @@ namespace RTS.SaveLoad
 
             if (success)
             {
-                Debug.Log($"Game saved: {saveName}");
                 RefreshSaveList();
                 saveNameInput.text = "";
             }
             else
             {
-                Debug.LogError($"Failed to save game: {saveName}");
             }
         }
 
@@ -405,12 +375,10 @@ namespace RTS.SaveLoad
 
             if (success)
             {
-                Debug.Log($"Game loaded: {saveName}");
                 CloseMenu();
             }
             else
             {
-                Debug.LogError($"Failed to load game: {saveName}");
             }
         }
 
@@ -422,18 +390,15 @@ namespace RTS.SaveLoad
             string saveName = selectedSaveItem.SaveInfo.saveName;
 
             // In a real implementation, show confirmation dialog
-            Debug.Log($"Deleting save: {saveName}");
 
             bool success = saveLoadService.DeleteSave(saveName);
 
             if (success)
             {
-                Debug.Log($"Save deleted: {saveName}");
                 RefreshSaveList();
             }
             else
             {
-                Debug.LogError($"Failed to delete save: {saveName}");
             }
         }
 
@@ -444,7 +409,6 @@ namespace RTS.SaveLoad
 
             if (saveNameInput == null || string.IsNullOrWhiteSpace(saveNameInput.text))
             {
-                Debug.LogWarning("New save name cannot be empty!");
                 return;
             }
 
@@ -453,14 +417,12 @@ namespace RTS.SaveLoad
 
             if (oldName == newName)
             {
-                Debug.LogWarning("New name is the same as old name!");
                 return;
             }
 
             // Check if new name already exists
             if (saveLoadService.SaveExists(newName))
             {
-                Debug.LogWarning($"A save with name '{newName}' already exists!");
                 return;
             }
 
@@ -489,13 +451,11 @@ namespace RTS.SaveLoad
                                 // Delete the old file
                                 System.IO.File.Delete(oldFilePath);
 
-                                Debug.Log($"Renamed save from '{oldName}' to '{newName}'");
                                 RefreshSaveList();
                                 saveNameInput.text = "";
                             }
                             else
                             {
-                                Debug.LogError($"Save file not found: {oldFilePath}");
                             }
                         }
                     }
@@ -503,7 +463,6 @@ namespace RTS.SaveLoad
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"Failed to rename save: {ex.Message}");
             }
         }
 
@@ -534,7 +493,6 @@ namespace RTS.SaveLoad
 
         private void OnSettingsButtonClicked()
         {
-            Debug.Log("[SaveLoadMenu] Settings button clicked");
 
             // Hide the save/load menu temporarily
             if (menuPanel != null)
@@ -556,7 +514,6 @@ namespace RTS.SaveLoad
             }
             else
             {
-                Debug.LogWarning("[SaveLoadMenu] Settings panel not found!");
                 // Show the menu again since we can't open settings
                 ShowMode(MenuMode.Main);
             }
@@ -568,7 +525,6 @@ namespace RTS.SaveLoad
                 return;
 
             // Show confirmation dialog (for now, just log)
-            Debug.Log("Returning to main menu...");
 
             // Find SceneTransitionManager
             var sceneManager = FindAnyObjectByType<RTS.UI.SceneTransitionManager>();
@@ -596,18 +552,15 @@ namespace RTS.SaveLoad
 
             if (success)
             {
-                Debug.Log($"Game saved: {saveName}. Quitting...");
                 QuitGame();
             }
             else
             {
-                Debug.LogError($"Failed to save game before quitting!");
             }
         }
 
         private void OnQuitWithoutSavingClicked()
         {
-            Debug.Log("Quitting without saving...");
             QuitGame();
         }
 

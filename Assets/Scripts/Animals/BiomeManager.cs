@@ -39,7 +39,6 @@ namespace RTS.Animals
                 terrain = FindFirstObjectByType<Terrain>();
             }
 
-            Debug.Log($"BiomeManager initialized with {biomeLookup.Count} biomes");
         }
 
         /// <summary>
@@ -49,7 +48,6 @@ namespace RTS.Animals
         {
             if (terrain == null)
             {
-                Debug.LogWarning("No terrain found, defaulting to Grassland biome");
                 return BiomeType.Grassland;
             }
 

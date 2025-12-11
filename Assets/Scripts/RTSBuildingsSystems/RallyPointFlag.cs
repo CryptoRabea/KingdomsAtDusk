@@ -36,35 +36,29 @@ namespace RTS.Buildings
             buildingSelectable = GetComponent<BuildingSelectable>();
             trainingQueue = GetComponent<UnitTrainingQueue>();
 
-            Debug.Log($"[FLAG] RallyPointFlag Awake for {gameObject.name}: autoCreateFlag={autoCreateFlag}, flagPrefab={flagPrefab != null}");
 
             // Get rally point from training queue if not set
             if (rallyPoint == null && trainingQueue != null)
             {
                 rallyPoint = trainingQueue.GetRallyPoint();
-                Debug.Log($"[FLAG] RallyPointFlag: Got rally point from training queue: {rallyPoint != null}");
             }
 
             // Auto-create flag visual if needed
             if (flagVisual == null && autoCreateFlag)
             {
-                Debug.Log($"[FLAG] RallyPointFlag: Creating flag visual for {gameObject.name}...");
                 CreateFlagVisual();
             }
             else if (!autoCreateFlag)
             {
-                Debug.LogWarning($"⚠️ RallyPointFlag: autoCreateFlag is FALSE for {gameObject.name} - flag will not be created!");
             }
 
             // Hide flag initially
             if (flagVisual != null)
             {
                 flagVisual.SetActive(false);
-                Debug.Log($" RallyPointFlag: Flag visual created and hidden for {gameObject.name}");
             }
             else
             {
-                Debug.LogError($" RallyPointFlag: Flag visual is NULL after Awake for {gameObject.name}!");
             }
         }
 
@@ -128,15 +122,8 @@ namespace RTS.Buildings
                 isVisible = true;
                 flagVisual.SetActive(true);
                 UpdateFlagPosition();
-                Debug.Log($" RallyPointFlag: Showing flag for {gameObject.name} at {rallyPoint.position}");
             }
-            else
-            {
-                if (flagVisual == null)
-                    Debug.LogWarning($"⚠️ RallyPointFlag: Cannot show flag for {gameObject.name}: flagVisual is null");
-                if (rallyPoint == null)
-                    Debug.LogWarning($"⚠️ RallyPointFlag: Cannot show flag for {gameObject.name}: rallyPoint is null (training queue has no rally point set)");
-            }
+           
         }
 
         /// <summary>
@@ -190,11 +177,9 @@ namespace RTS.Buildings
             {
                 rallyPoint.position = position;
                 UpdateFlagPosition();
-                Debug.Log($" RallyPointFlag: Updated rally point position to {position} for {gameObject.name}");
             }
             else
             {
-                Debug.LogWarning($"⚠️ RallyPointFlag: Cannot set rally point position for {gameObject.name}: rallyPoint is still null even after getting from training queue");
             }
         }
 
@@ -226,7 +211,6 @@ namespace RTS.Buildings
                     Destroy(col);
                 }
 
-                Debug.Log($" RallyPointFlag: Created flag visual from PREFAB for {gameObject.name}");
             }
             else
             {
@@ -241,13 +225,11 @@ namespace RTS.Buildings
                 pole.transform.localScale = new Vector3(flagPoleRadius, flagHeight / 2f, flagPoleRadius);
 
                 // Remove collider from pole (we don't want it to interfere with clicks)
-                Collider poleCollider = pole.GetComponent<Collider>();
-                if (poleCollider != null)
+                if (pole.TryGetComponent<Collider>(out var poleCollider))
                     Destroy(poleCollider);
 
                 // Set pole color to dark gray
-                Renderer poleRenderer = pole.GetComponent<Renderer>();
-                if (poleRenderer != null)
+                if (pole.TryGetComponent<Renderer>(out var poleRenderer))
                 {
                     //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     poleRenderer.sharedMaterial.color = new Color(0.3f, 0.3f, 0.3f);
@@ -261,20 +243,17 @@ namespace RTS.Buildings
                 flag.transform.localScale = new Vector3(flagSize, flagSize * 0.6f, 0.05f);
 
                 // Remove collider from flag
-                Collider flagCollider = flag.GetComponent<Collider>();
-                if (flagCollider != null)
+                if (flag.TryGetComponent<Collider>(out var flagCollider))
                     Destroy(flagCollider);
 
                 // Set flag color
-                Renderer flagRenderer = flag.GetComponent<Renderer>();
-                if (flagRenderer != null)
+                if (flag.TryGetComponent<Renderer>(out var flagRenderer))
                 {
                     //  FIX: Use sharedMaterial to avoid creating instances during render pass
                     flagRenderer.sharedMaterial.color = flagColor;
                 }
 
                 flagVisual = flagParent;
-                Debug.Log($" RallyPointFlag: Created flag visual from PRIMITIVES for {gameObject.name}");
             }
         }
 

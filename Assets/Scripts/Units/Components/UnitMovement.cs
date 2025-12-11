@@ -105,7 +105,6 @@ namespace RTS.Units
             }
             else
             {
-                Debug.LogError($"NavMeshAgent not found on {gameObject.name}!");
             }
         }
 
@@ -156,13 +155,11 @@ namespace RTS.Units
         {
             if (!isEnabled)
             {
-                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - movement is disabled!");
                 return;
             }
 
             if (agent == null)
             {
-                Debug.LogError($" UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is null!");
                 return;
             }
 
@@ -190,7 +187,6 @@ namespace RTS.Units
             }
             else
             {
-                Debug.LogWarning($"⚠️ UnitMovement: Cannot set destination for {gameObject.name} - NavMeshAgent is disabled!");
             }
         }
 
@@ -419,7 +415,6 @@ namespace RTS.Units
                         if (!isStuck)
                         {
                             isStuck = true;
-                            Debug.LogWarning($"Unit {gameObject.name} detected as stuck at {transform.position}");
 
                             // Stop the agent so velocity goes to 0 and animations naturally transition to idle
                             if (agent != null && agent.enabled && agent.isOnNavMesh)
@@ -438,7 +433,6 @@ namespace RTS.Units
                     if (isStuck && distanceMoved >= stuckThreshold)
                     {
                         isStuck = false;
-                        Debug.Log($"Unit {gameObject.name} is no longer stuck");
 
                         // Resume agent movement
                         if (agent != null && agent.enabled && agent.isOnNavMesh)
@@ -463,7 +457,6 @@ namespace RTS.Units
 
                 if (pathPendingTimer >= pathFailureTimeout)
                 {
-                    Debug.LogWarning($"Unit {gameObject.name} - path calculation timeout. Path may be invalid.");
                     isStuck = true;
                     pathPendingTimer = 0f;
 
@@ -483,7 +476,6 @@ namespace RTS.Units
                 // Check if path is invalid
                 if (agent.pathStatus == UnityEngine.AI.NavMeshPathStatus.PathInvalid)
                 {
-                    Debug.LogWarning($"Unit {gameObject.name} - invalid path to {currentDestination}");
                     isStuck = true;
 
                     // Physically stop the agent
@@ -517,7 +509,6 @@ namespace RTS.Units
                 agent.isStopped = false;
             }
 
-            Debug.Log($"Unit {gameObject.name} stuck state reset");
         }
 
         /// <summary>

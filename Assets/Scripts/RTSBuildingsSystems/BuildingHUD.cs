@@ -1,4 +1,4 @@
-﻿using RTS.Buildings;
+using RTS.Buildings;
 using RTS.Core.Events;
 using RTS.Core.Services;
 using RTS.Managers;
@@ -58,13 +58,11 @@ namespace RTS.UI
 
             if (buildingManager == null)
             {
-                Debug.LogError("BuildingHUD: BuildingManager not registered in ServiceLocator!");
                 return;
             }
 
             if (resourceService == null)
             {
-                Debug.LogError("BuildingHUD: ResourceService not registered in ServiceLocator!");
                 return;
             }
 
@@ -125,7 +123,6 @@ namespace RTS.UI
         {
             if (buildingButtonContainer == null || buildingManager == null)
             {
-                Debug.LogError("BuildingHUD: Missing references!");
                 return;
             }
 
@@ -134,7 +131,6 @@ namespace RTS.UI
 
             if (availableBuildings == null || availableBuildings.Length == 0)
             {
-                Debug.LogWarning("BuildingHUD: No buildings available in BuildingManager!");
                 return;
             }
 
@@ -153,7 +149,6 @@ namespace RTS.UI
             // Initial update
             UpdateAllButtons();
 
-            Debug.Log($"BuildingHUD: Created {buildingButtons.Count} building buttons from BuildingManager");
         }
 
         private void ClearButtons()
@@ -214,7 +209,9 @@ namespace RTS.UI
             text.alignment = TextAlignmentOptions.Center;
             text.fontSize = 14;
 
-            RectTransform rectTransform = buttonObj.GetComponent<RectTransform>();
+            if (buttonObj.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+            }
             rectTransform.sizeDelta = new Vector2(100, 100);
 
             return buttonObj;
@@ -228,7 +225,6 @@ namespace RTS.UI
         {
             if (buildingManager == null)
             {
-                Debug.LogError("BuildingManager not available!");
                 return;
             }
 
@@ -237,7 +233,6 @@ namespace RTS.UI
 
             if (buildingIndex >= availableBuildings.Length)
             {
-                Debug.LogError("Invalid building selection!");
                 return;
             }
 
@@ -246,14 +241,12 @@ namespace RTS.UI
             // Check if can afford
             if (!buildingManager.CanAffordBuilding(buildingData))
             {
-                Debug.Log($"Cannot afford {buildingData.buildingName}!");
                 ShowInsufficientResourcesFeedback(buildingData);
                 return;
             }
 
             // Start placing building through BuildingManager
             buildingManager.StartPlacingBuilding(buildingIndex);
-            Debug.Log($"Started placing: {buildingData.buildingName}");
 
             //to Close the building panel when a building is chosen
            // SetPanelVisible(false);
@@ -415,7 +408,6 @@ namespace RTS.UI
         {
             // Flash the button or show error message
             // You could also trigger a sound effect here
-            Debug.LogWarning($"Not enough resources for {buildingData.buildingName}!");
 
             // Optional: Show a UI notification
             // notificationSystem.Show($"Need: {buildingData.GetCostString()}");
@@ -467,15 +459,12 @@ namespace RTS.UI
         {
             if (buildingManager == null)
             {
-                Debug.Log("BuildingManager not assigned!");
                 return;
             }
 
             var buildings = buildingManager.GetAllBuildingData();
-            Debug.Log($"=== Available Buildings ({buildings.Length}) ===");
             for (int i = 0; i < buildings.Length; i++)
             {
-                Debug.Log($"{i}: {buildings[i].buildingName} ({buildings[i].buildingType})");
             }
         }
 

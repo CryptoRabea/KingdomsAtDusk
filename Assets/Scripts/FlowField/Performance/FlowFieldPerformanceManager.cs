@@ -123,7 +123,6 @@ namespace FlowField.Performance
                 updateQueue.Enqueue(unit);
             }
 
-            UnityEngine.Debug.Log($"Performance Manager: Tracking {allUnits.Count} units");
         }
 
         /// <summary>
@@ -211,11 +210,6 @@ namespace FlowField.Performance
 
                 if (showPerformanceStats)
                 {
-                    UnityEngine.Debug.Log($"Flow Field Performance:\n" +
-                              $"Total Units: {totalUnits}\n" +
-                              $"Active Units: {activeUnits}\n" +
-                              $"Avg Frame Time: {averageFrameTime * 1000f:F2}ms ({1f / averageFrameTime:F1} FPS)\n" +
-                              $"LOD High/Med/Low: {highDetailUnits.Count}/{mediumDetailUnits.Count}/{lowDetailUnits.Count}");
                 }
 
                 lastStatsUpdate = Time.time;
@@ -253,7 +247,6 @@ namespace FlowField.Performance
                 highDetailRadius *= 0.9f;
                 mediumDetailRadius *= 0.9f;
 
-                UnityEngine.Debug.LogWarning($"Performance degradation detected. Reducing LOD radii. FPS: {currentFPS:F1}");
             }
             else if (currentFPS > targetFPS * 1.1f) // 110% of target
             {

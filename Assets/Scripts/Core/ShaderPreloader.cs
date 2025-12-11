@@ -87,7 +87,6 @@ namespace RTS.Core
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"[ShaderPreloader] Shader warmup failed: {e.Message}");
             }
 
             if (success)
@@ -221,7 +220,6 @@ namespace RTS.Core
         {
             if (enableDebugLogs)
             {
-                Debug.Log($"[ShaderPreloader] {message}");
             }
         }
 
@@ -248,7 +246,6 @@ namespace RTS.Core
             }
             else
             {
-                Debug.LogWarning($"[ShaderPreloader] Shader not found: {shaderName}");
             }
         }
 

@@ -71,7 +71,6 @@ namespace RTS.Buildings
         {
             if (stairPrefab == null)
             {
-                Debug.LogError("StairPlacementController: No stair prefab assigned!");
                 return;
             }
 
@@ -80,7 +79,6 @@ namespace RTS.Buildings
             isPlacingStair = true;
             CreateStairPreview();
 
-            Debug.Log("Started placing stairs");
         }
 
         public void CancelStairPlacement()
@@ -120,8 +118,7 @@ namespace RTS.Buildings
 
 
             // Disable components for preview
-            var stairComponent = stairPreview.GetComponent<WallStairs>();
-            if (stairComponent != null)
+            if (stairPreview.TryGetComponent<WallStairs>(out var stairComponent))
                 stairComponent.enabled = false;
 
             // Reactivate preview now that components are cleaned up
@@ -200,8 +197,7 @@ namespace RTS.Buildings
         private Vector3 CalculateStairPosition(Vector3 mousePos, GameObject wall)
         {
             // Get the closest point on the wall
-            Collider wallCollider = wall.GetComponent<Collider>();
-            if (wallCollider != null)
+            if (wall.TryGetComponent<Collider>(out var wallCollider))
             {
                 Vector3 closestPoint = wallCollider.ClosestPoint(mousePos);
 
@@ -243,7 +239,6 @@ namespace RTS.Buildings
             {
                 if (col.GetComponent<WallStairs>() != null && col.gameObject != stairPreview)
                 {
-                    Debug.Log("Stair too close to existing stair");
                     return false;
                 }
             }
@@ -273,7 +268,6 @@ namespace RTS.Buildings
                 }
                 else
                 {
-                    Debug.Log("Cannot place stair here!");
                 }
             }
 
@@ -281,7 +275,6 @@ namespace RTS.Buildings
                 (keyboard != null && keyboard.escapeKey.wasPressedThisFrame))
             {
                 CancelStairPlacement();
-                Debug.Log("Stair placement canceled");
             }
         }
 
@@ -301,7 +294,6 @@ namespace RTS.Buildings
 
                 if (!resourceService.SpendResources(cost))
                 {
-                    Debug.LogError("Failed to spend resources for stair!");
                     return;
                 }
             }
@@ -314,13 +306,11 @@ namespace RTS.Buildings
             );
 
             // Ensure WallStairs component is enabled
-            var stairComponent = newStair.GetComponent<WallStairs>();
-            if (stairComponent != null)
+            if (newStair.TryGetComponent<WallStairs>(out var stairComponent))
             {
                 stairComponent.enabled = true;
             }
 
-            Debug.Log($" Placed stair at {newStair.transform.position}");
 
             // Continue placing or cancel
             CancelStairPlacement();

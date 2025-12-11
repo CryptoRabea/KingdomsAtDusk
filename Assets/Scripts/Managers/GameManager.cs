@@ -63,7 +63,6 @@ namespace RTS.Managers
         /// </summary>
         public void InitializeServices()
         {
-            Debug.Log("Initializing game services...");
 
             // 1. Core services first
             InitializeObjectPool();
@@ -96,7 +95,6 @@ namespace RTS.Managers
             // 9. UI systems (floating numbers, etc.)
             InitializeFloatingNumbersManager();
 
-            Debug.Log("All services initialized successfully!");
         }
 
         private void InitializeObjectPool()
@@ -115,7 +113,6 @@ namespace RTS.Managers
         {
             if (resourceManager == null)
             {
-                Debug.LogError("ResourceManager not assigned in GameManager!");
                 return;
             }
 
@@ -126,7 +123,6 @@ namespace RTS.Managers
         {
             if (happinessManager == null)
             {
-                Debug.LogError("HappinessManager not assigned in GameManager!");
                 return;
             }
 
@@ -138,12 +134,10 @@ namespace RTS.Managers
             if (populationManager == null)
             {
                 // Population manager is optional
-                Debug.Log("PopulationManager not assigned - campfire peasant system disabled");
                 return;
             }
 
             ServiceLocator.Register<IPopulationService>(populationManager);
-            Debug.Log("PopulationManager registered as IPopulationService");
         }
 
         private void InitializeReputationManager()
@@ -151,12 +145,10 @@ namespace RTS.Managers
             if (reputationManager == null)
             {
                 // Reputation manager is optional
-                Debug.Log("ReputationManager not assigned - reputation system disabled");
                 return;
             }
 
             ServiceLocator.Register<IReputationService>(reputationManager);
-            Debug.Log("ReputationManager registered as IReputationService");
         }
 
         private void InitializePeasantWorkforceManager()
@@ -164,12 +156,10 @@ namespace RTS.Managers
             if (peasantWorkforceManager == null)
             {
                 // Workforce manager is optional
-                Debug.Log("PeasantWorkforceManager not assigned - worker allocation disabled");
                 return;
             }
 
             ServiceLocator.Register<IPeasantWorkforceService>(peasantWorkforceManager);
-            Debug.Log("PeasantWorkforceManager registered as IPeasantWorkforceService");
         }
 
         private void InitializeBuildingManager()
@@ -181,13 +171,11 @@ namespace RTS.Managers
 
                 if (buildingManager == null)
                 {
-                    Debug.LogWarning("BuildingManager not assigned and not found in scene!");
                     return;
                 }
             }
 
             ServiceLocator.Register<IBuildingService>(buildingManager);
-            Debug.Log("BuildingManager registered as IBuildingService");
         }
 
         private void InitializeSaveLoadManager()
@@ -199,13 +187,11 @@ namespace RTS.Managers
 
                 if (saveLoadManager == null)
                 {
-                    Debug.LogWarning("SaveLoadManager not assigned and not found in scene!");
                     return;
                 }
             }
 
             ServiceLocator.Register<ISaveLoadService>(saveLoadManager);
-            Debug.Log("SaveLoadManager registered as ISaveLoadService");
         }
 
         private void InitializeFloatingNumbersManager()
@@ -217,13 +203,11 @@ namespace RTS.Managers
 
                 if (floatingNumbersManager == null)
                 {
-                    Debug.Log("FloatingNumbersManager not assigned and not found in scene - floating numbers disabled");
                     return;
                 }
             }
 
             ServiceLocator.Register<IFloatingNumberService>(floatingNumbersManager);
-            Debug.Log("FloatingNumbersManager registered as IFloatingNumberService");
         }
 
         private void InitializeAudioManager()
@@ -239,12 +223,10 @@ namespace RTS.Managers
                     var audioObj = new GameObject("AudioManager");
                     audioObj.transform.SetParent(transform);
                     audioManager = audioObj.AddComponent<RTSGame.Managers.AudioManager>();
-                    Debug.Log("AudioManager created automatically");
                 }
             }
 
             ServiceLocator.Register<IAudioService>(audioManager);
-            Debug.Log("AudioManager registered as IAudioService");
         }
 
         private void InitializeSettingsManager()
@@ -260,12 +242,10 @@ namespace RTS.Managers
                     var settingsObj = new GameObject("RTSSettingsManager");
                     settingsObj.transform.SetParent(transform);
                     settingsManager = settingsObj.AddComponent<RTSGame.Managers.RTSSettingsManager>();
-                    Debug.Log("RTSSettingsManager created automatically");
                 }
             }
 
             ServiceLocator.Register<ISettingsService>(settingsManager);
-            Debug.Log("RTSSettingsManager registered as ISettingsService");
         }
 
         private void OnDestroy()
@@ -322,7 +302,6 @@ namespace RTS.Managers
             var oldState = CurrentState;
             CurrentState = newState;
 
-            Debug.Log($"Game state changed: {oldState} -> {newState}");
 
             // Handle state-specific logic
             switch (newState)

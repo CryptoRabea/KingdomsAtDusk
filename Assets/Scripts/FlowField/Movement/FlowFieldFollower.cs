@@ -76,7 +76,6 @@ namespace FlowField.Movement
 
             if (flowFieldManager == null)
             {
-                UnityEngine.Debug.LogError("FlowFieldManager not found! Add FlowFieldManager to scene.");
                 enabled = false;
                 return;
             }

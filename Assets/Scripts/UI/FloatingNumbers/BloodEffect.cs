@@ -65,8 +65,7 @@ namespace KAD.UI.FloatingNumbers
             );
             colorOverLifetime.color = new ParticleSystem.MinMaxGradient(gradient);
 
-            var renderer = particleSystem.GetComponent<ParticleSystemRenderer>();
-            if (renderer != null)
+            if (particleSystem.TryGetComponent<ParticleSystemRenderer>(out var renderer))
             {
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.material = new Material(Shader.Find("Particles/Standard Unlit"));

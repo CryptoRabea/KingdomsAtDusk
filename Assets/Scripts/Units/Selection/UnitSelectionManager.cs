@@ -1,4 +1,4 @@
-﻿// File: UnitSelectionManager.cs
+// File: UnitSelectionManager.cs
 // Patched: Fix double/triple-click behavior and SO reference comparisons
 
 using UnityEngine;
@@ -34,6 +34,7 @@ namespace RTS.Units
 
         [Header("Selection Settings")]
         [SerializeField] private LayerMask selectableLayer;
+        [SerializeField] private LayerMask buildingLayer;
         [SerializeField] private Camera mainCamera;
 
         [Header("Selection Behavior")]
@@ -212,7 +213,6 @@ namespace RTS.Units
             // Show performance stats if enabled
             if (showPerformanceStats && Time.frameCount % 60 == 0)
             {
-                Debug.Log($"[UnitSelectionManager] Cached Units: {allSelectableUnits.Count} | Selected: {selectedUnits.Count}");
             }
         }
 
@@ -236,7 +236,6 @@ namespace RTS.Units
 
             if (showPerformanceStats)
             {
-                Debug.Log($"[UnitSelectionManager] Initialized cache with {allSelectableUnits.Count} units");
             }
         }
 
@@ -251,7 +250,6 @@ namespace RTS.Units
 
                 if (showPerformanceStats)
                 {
-                    Debug.Log($"[UnitSelectionManager] Unit added to cache: {evt.Unit.name}. Total: {allSelectableUnits.Count}");
                 }
             }
         }
@@ -274,7 +272,6 @@ namespace RTS.Units
 
                 if (showPerformanceStats)
                 {
-                    Debug.Log($"[UnitSelectionManager] Unit removed from cache: {evt.Unit.name}. Total: {allSelectableUnits.Count}");
                 }
             }
         }
@@ -426,7 +423,8 @@ namespace RTS.Units
         }
 
         /// <summary>
-        /// Handles double-click: select visible units/buildings of same SO (by reference) or all visible units on empty
+        /// Handles double-click: select visible units of same SO (by reference) or all visible units on empty
+        /// NOTE: Buildings are NOT selected here - they have their own BuildingSelectionManager
         /// </summary>
         private void HandleDoubleClick(Vector2 screenPosition)
         {
@@ -445,25 +443,26 @@ namespace RTS.Units
             if (clickedUnit != null && unitConfig != null)
             {
                 SelectAllVisibleUnitsOfType(unitConfig);
-                Debug.Log($"Double-clicked unit: {unitConfig.unitName}. Selected all visible units of this type.");
                 return;
             }
 
+            // Don't select buildings or units from UnitSelectionManager when clicking on buildings
             if (clickedBuilding != null && buildingData != null)
             {
-                SelectAllVisibleBuildingsOfType(buildingData);
-                Debug.Log($"Double-clicked building: {buildingData.buildingName}. Selected all visible buildings of this type.");
+                // Clear unit selection when clicking on a building
+                ClearSelection();
                 return;
             }
 
-            // Double-click on empty space selects all visible units
+            // Double-click on empty space selects all visible units (NOT buildings)
             SelectAllVisibleUnits();
             lastClickedUnitConfig = null;
             lastClickedBuildingData = null;
         }
 
         /// <summary>
-        /// Handles triple-click: select all units/buildings in scene (or all of same SO if clicked on one)
+        /// Handles triple-click: select all units in scene (or all of same SO if clicked on one)
+        /// NOTE: Buildings are NOT selected here - they have their own BuildingSelectionManager
         /// </summary>
         private void HandleTripleClick(Vector2 screenPosition)
         {
@@ -478,24 +477,24 @@ namespace RTS.Units
             if (clickedUnit != null && unitConfig != null)
             {
                 SelectAllUnitsOfTypeInScene(unitConfig);
-                Debug.Log($"Triple-click on unit: {unitConfig.unitName}. Selected all units of this type in entire scene.");
                 return;
             }
 
+            // Don't select buildings or units from UnitSelectionManager when clicking on buildings
             if (clickedBuilding != null && buildingData != null)
             {
-                SelectAllBuildingsOfTypeInScene(buildingData);
-                Debug.Log($"Triple-click on building: {buildingData.buildingName}. Selected all buildings of this type in entire scene.");
+                // Clear unit selection when clicking on a building
+                ClearSelection();
                 return;
             }
 
-            // Triple-click on empty space = select ALL units in scene
+            // Triple-click on empty space = select ALL units in scene (NOT buildings)
             SelectAllUnitsSceneWide();
-            Debug.Log($"Triple-click on empty space: Selected all units in entire scene. Total: {selectedUnits.Count}");
         }
 
         /// <summary>
         /// Resolve the clicked object (unit or building) and return the ScriptableObject references by direct reference
+        /// NOTE: Now checks BOTH unit layer and building layer to properly detect buildings
         /// </summary>
         private void ResolveClickedObject(
             Vector2 screenPos,
@@ -513,7 +512,10 @@ namespace RTS.Units
                 mainCamera = Camera.main;
 
             Ray ray = mainCamera.ScreenPointToRay(screenPos);
-            int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, selectableLayer);
+
+            // Combine both layers to check for units AND buildings
+            LayerMask combinedLayers = selectableLayer | buildingLayer;
+            int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, combinedLayers);
 
             float nearest = float.MaxValue;
 
@@ -522,11 +524,10 @@ namespace RTS.Units
                 float dist = raycastHitsCache[i].distance;
                 if (dist > nearest) continue; // we only care about nearest
 
-                var hitUnit = raycastHitsCache[i].collider.GetComponent<UnitSelectable>();
-                if (hitUnit != null && PassesTypeFilter(hitUnit))
+                // Using TryGetComponent for better performance
+                if (raycastHitsCache[i].collider.TryGetComponent<UnitSelectable>(out var hitUnit) && PassesTypeFilter(hitUnit))
                 {
-                    var aiController = hitUnit.GetComponent<UnitAIController>();
-                    if (aiController != null && aiController.Config != null)
+                    if (hitUnit.TryGetComponent<UnitAIController>(out var aiController) && aiController.Config != null)
                     {
                         unit = hitUnit;
                         unitConfig = aiController.Config;
@@ -537,11 +538,9 @@ namespace RTS.Units
                     }
                 }
 
-                var hitBuilding = raycastHitsCache[i].collider.GetComponent<BuildingSelectable>();
-                if (hitBuilding != null)
+                if (raycastHitsCache[i].collider.TryGetComponent<BuildingSelectable>(out var hitBuilding))
                 {
-                    var b = hitBuilding.GetComponent<Building>();
-                    if (b != null && b.Data != null)
+                    if (hitBuilding.TryGetComponent<Building>(out var b) && b.Data != null)
                     {
                         building = hitBuilding;
                         buildingData = b.Data;
@@ -590,8 +589,7 @@ namespace RTS.Units
                     //  OPTIMIZED: Find nearest/furthest in single pass instead of sorting
                     for (int i = 0; i < hitCount; i++)
                     {
-                        var selectable = raycastHitsCache[i].collider.GetComponent<UnitSelectable>();
-                        if (selectable != null && PassesTypeFilter(selectable))
+                        if (raycastHitsCache[i].collider.TryGetComponent<UnitSelectable>(out var selectable) && PassesTypeFilter(selectable))
                         {
                             float distance = raycastHitsCache[i].distance;
 
@@ -628,6 +626,10 @@ namespace RTS.Units
                     SelectUnit(selectedUnit);
                     return true;
                 }
+
+                // Hit something but no valid unit found (e.g., building) - clear unit selection
+                ClearSelection();
+                return false;
             }
 
             // Clicked empty space - clear selection
@@ -732,8 +734,6 @@ namespace RTS.Units
                 {
                     building.Select();
                 }
-
-                Debug.Log($"Selected {buildingsInBox.Count} buildings via drag selection");
             }
         }
 
@@ -794,13 +794,12 @@ namespace RTS.Units
             {
                 SelectUnit(unit);
             }
-
-            Debug.Log($"Selected all visible units: {selectedUnits.Count} units");
         }
 
         /// <summary>
         /// NEW: Select all visible units of a specific type (by UnitConfigSO)
         /// NOTE: Ignores type filter to select based on ScriptableObject type only
+        /// OPTIMIZED: No debug logging for performance
         /// </summary>
         private void SelectAllVisibleUnitsOfType(UnitConfigSO targetConfig)
         {
@@ -822,8 +821,10 @@ namespace RTS.Units
                     continue;
 
                 // Check if unit config matches by ScriptableObject reference (not AI type filter)
-                var aiController = selectable.GetComponent<UnitAIController>();
-                if (aiController == null || aiController.Config != targetConfig)
+                // Using TryGetComponent for better performance
+                if (!selectable.TryGetComponent<UnitAIController>(out var aiController) ||
+                    aiController.Config == null ||
+                    aiController.Config != targetConfig)
                     continue;
 
                 // Check if unit is visible to camera
@@ -881,8 +882,10 @@ namespace RTS.Units
                     continue;
 
                 // Check if unit config matches by ScriptableObject reference (not AI type filter)
-                var aiController = selectable.GetComponent<UnitAIController>();
-                if (aiController == null || aiController.Config != targetConfig)
+                // Using TryGetComponent for better performance
+                if (!selectable.TryGetComponent<UnitAIController>(out var aiController) ||
+                    aiController.Config == null ||
+                    aiController.Config != targetConfig)
                     continue;
 
                 matchingUnits.Add(selectable);
@@ -929,92 +932,6 @@ namespace RTS.Units
             }
         }
 
-        /// <summary>
-        /// NEW: Select all visible buildings of a specific type (by BuildingDataSO)
-        /// </summary>
-        private void SelectAllVisibleBuildingsOfType(BuildingDataSO targetData)
-        {
-            if (mainCamera == null)
-                mainCamera = Camera.main;
-
-            if (mainCamera == null || targetData == null)
-                return;
-
-            ClearSelection();
-
-            // Find all building selectables in the scene
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
-            List<BuildingSelectable> matchingBuildings = new List<BuildingSelectable>();
-
-            foreach (var buildingSelectable in allBuildings)
-            {
-                if (buildingSelectable == null)
-                    continue;
-
-                // Check if building data matches
-                var buildingComponent = buildingSelectable.GetComponent<Building>();
-                if (buildingComponent == null || buildingComponent.Data != targetData)
-                    continue;
-
-                // Check if building is visible to camera
-                Vector3 screenPos = mainCamera.WorldToScreenPoint(buildingSelectable.transform.position);
-
-                if (screenPos.z > 0 &&
-                    screenPos.x >= 0 && screenPos.x <= Screen.width &&
-                    screenPos.y >= 0 && screenPos.y <= Screen.height)
-                {
-                    matchingBuildings.Add(buildingSelectable);
-                }
-            }
-
-            // Select all matching buildings (no selection limit for buildings)
-            foreach (var building in matchingBuildings)
-            {
-                // Buildings use their own selection system
-                building.Select();
-            }
-
-            Debug.Log($"Selected {matchingBuildings.Count} buildings of type: {targetData.buildingName}");
-        }
-
-        /// <summary>
-        /// NEW: Select all buildings of a specific type (by BuildingDataSO) in entire scene
-        /// </summary>
-        private void SelectAllBuildingsOfTypeInScene(BuildingDataSO targetData)
-        {
-            if (targetData == null)
-                return;
-
-            ClearSelection();
-
-            // Find all building selectables in the scene
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
-            List<BuildingSelectable> matchingBuildings = new List<BuildingSelectable>();
-
-            foreach (var buildingSelectable in allBuildings)
-            {
-                if (buildingSelectable == null)
-                    continue;
-
-                // Check if building data matches
-                var buildingComponent = buildingSelectable.GetComponent<Building>();
-                if (buildingComponent == null || buildingComponent.Data != targetData)
-                    continue;
-
-                matchingBuildings.Add(buildingSelectable);
-            }
-
-            // Select all matching buildings (no selection limit for buildings)
-            foreach (var building in matchingBuildings)
-            {
-                // Buildings use their own selection system
-                building.Select();
-            }
-
-            Debug.Log($"Selected {matchingBuildings.Count} buildings of type: {targetData.buildingName} in entire scene");
-        }
 
         #endregion
 
@@ -1075,8 +992,7 @@ namespace RTS.Units
             // Check for new hover
             if (Physics.Raycast(ray, out RaycastHit hit, 1000f, selectableLayer))
             {
-                var selectable = hit.collider.GetComponent<UnitSelectable>();
-                if (selectable != null && !selectable.IsSelected && PassesTypeFilter(selectable))
+                if (hit.collider.TryGetComponent<UnitSelectable>(out var selectable) && !selectable.IsSelected && PassesTypeFilter(selectable))
                 {
                     hoveredUnit = selectable;
                     hoveredUnit.SetHoverHighlight(true, hoverColor);
@@ -1227,7 +1143,9 @@ namespace RTS.Units
             {
                 if (unit == null) continue;
 
-                var movement = unit.GetComponent<UnitMovement>();
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
+                {
+                }
                 movement?.SetDestination(destination);
             }
         }

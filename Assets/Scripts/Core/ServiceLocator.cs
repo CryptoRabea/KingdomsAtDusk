@@ -22,13 +22,11 @@ namespace RTS.Core.Services
             
             if (services.ContainsKey(type))
             {
-                Debug.LogWarning($"Service of type {type.Name} is already registered. Overwriting.");
                 services[type] = service;
             }
             else
             {
                 services.Add(type, service);
-                Debug.Log($"Service registered: {type.Name}");
             }
         }
 
@@ -42,7 +40,6 @@ namespace RTS.Core.Services
             if (services.ContainsKey(type))
             {
                 services.Remove(type);
-                Debug.Log($"Service unregistered: {type.Name}");
             }
         }
 
@@ -53,7 +50,6 @@ namespace RTS.Core.Services
         {
             if (isQuitting)
             {
-                Debug.LogWarning($"Attempting to get service {typeof(T).Name} during application quit.");
                 return null;
             }
 
@@ -90,7 +86,6 @@ namespace RTS.Core.Services
         public static void Clear()
         {
             services.Clear();
-            Debug.Log("All services cleared from ServiceLocator.");
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

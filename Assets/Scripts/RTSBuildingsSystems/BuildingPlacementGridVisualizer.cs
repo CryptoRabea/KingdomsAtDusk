@@ -47,7 +47,6 @@ namespace KAD.RTSBuildingsSystems
                 squareSpriteRenderer = squareIndicator.GetComponent<SpriteRenderer>();
                 if (squareSpriteRenderer == null)
                 {
-                    Debug.LogWarning("BuildingPlacementGridVisualizer: Square indicator doesn't have a SpriteRenderer component!");
                 }
             }
 

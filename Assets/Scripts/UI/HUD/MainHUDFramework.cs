@@ -48,7 +48,6 @@ namespace RTS.UI.HUD
             // Validate configuration
             if (configuration == null)
             {
-                Debug.LogError("MainHUDFramework: No HUD configuration assigned!");
                 return;
             }
 
@@ -86,7 +85,6 @@ namespace RTS.UI.HUD
         /// </summary>
         private void InitializeHUD()
         {
-            Debug.Log("MainHUDFramework: Initializing HUD...");
 
             // Core components
             SetComponentActive(minimapPanel, configuration.enableMinimap, "Minimap");
@@ -141,7 +139,6 @@ namespace RTS.UI.HUD
             // Register all HUD elements for layout management
             RegisterHUDElements();
 
-            Debug.Log("MainHUDFramework: HUD initialized successfully!");
         }
 
         /// <summary>
@@ -156,66 +153,56 @@ namespace RTS.UI.HUD
             if (minimapPanel != null)
             {
                 hudElements["Minimap"] = minimapPanel.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered Minimap for layout");
                 registeredCount++;
             }
 
             if (unitDetailsUI != null)
             {
                 hudElements["UnitDetails"] = unitDetailsUI.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered UnitDetails for layout");
                 registeredCount++;
             }
 
             if (buildingDetailsUI != null)
             {
                 hudElements["BuildingDetails"] = buildingDetailsUI.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered BuildingDetails for layout");
                 registeredCount++;
             }
 
             if (buildingHUD != null)
             {
                 hudElements["BuildingHUD"] = buildingHUD.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered BuildingHUD for layout");
                 registeredCount++;
             }
 
             if (inventoryUI != null)
             {
                 hudElements["Inventory"] = inventoryUI.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered Inventory for layout");
                 registeredCount++;
             }
 
             if (topBarUI != null)
             {
                 hudElements["TopBar"] = topBarUI.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered TopBar for layout");
                 registeredCount++;
             }
 
             if (resourceUI != null)
             {
                 hudElements["ResourcePanel"] = resourceUI.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered ResourcePanel for layout");
                 registeredCount++;
             }
 
             if (notificationUI != null)
             {
                 hudElements["Notifications"] = notificationUI.GetComponent<RectTransform>();
-                Debug.Log("MainHUDFramework: Registered Notifications for layout");
                 registeredCount++;
             }
 
             if (registeredCount == 0)
             {
-                Debug.LogWarning("MainHUDFramework: NO UI COMPONENTS ASSIGNED! Layout will not be applied. Please assign your UI components in the Inspector.");
             }
             else
             {
-                Debug.Log($"MainHUDFramework: Registered {registeredCount} UI components for layout management");
             }
         }
 
@@ -226,11 +213,9 @@ namespace RTS.UI.HUD
         {
             if (preset == null)
             {
-                Debug.LogWarning("MainHUDFramework: Cannot apply null layout preset!");
                 return;
             }
 
-            Debug.Log($"MainHUDFramework: Applying layout preset '{preset.presetName}'");
 
             // Apply minimap layout
             if (hudElements.ContainsKey("Minimap"))
@@ -308,7 +293,6 @@ namespace RTS.UI.HUD
             // Apply offset
             element.anchoredPosition = offset;
 
-            Debug.Log($"MainHUDFramework: Applied layout to {element.gameObject.name} - Anchor: {anchor}, Size: {size}, Offset: {offset}");
         }
 
         /// <summary>
@@ -346,7 +330,6 @@ namespace RTS.UI.HUD
             if (component != null)
             {
                 component.SetActive(active);
-                Debug.Log($"MainHUDFramework: {componentName} = {(active ? "Enabled" : "Disabled")}");
             }
         }
 
@@ -397,7 +380,6 @@ namespace RTS.UI.HUD
                     SetComponentActive(notificationUI?.gameObject, enabled, "Notifications");
                     break;
                 default:
-                    Debug.LogWarning($"MainHUDFramework: Unknown component '{componentName}'");
                     break;
             }
         }

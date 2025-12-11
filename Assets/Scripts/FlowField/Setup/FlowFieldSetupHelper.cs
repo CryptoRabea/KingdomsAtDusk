@@ -253,7 +253,6 @@ namespace FlowField.Setup
             }
             else
             {
-                UnityEngine.Debug.LogWarning($"Field '{fieldName}' not found on {obj.GetType().Name}");
             }
         }
 
@@ -261,7 +260,6 @@ namespace FlowField.Setup
         {
             if (showSetupLog)
             {
-                UnityEngine.Debug.Log($"[FlowField Setup] {message}");
             }
         }
     }

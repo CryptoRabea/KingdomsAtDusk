@@ -1,5 +1,7 @@
 ﻿using RTS.Units;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace KingdomsAtDusk.UI
@@ -52,12 +54,19 @@ namespace KingdomsAtDusk.UI
         [SerializeField] private LayerMask groundLayer;
         [SerializeField] private LayerMask unitLayer;
 
+        private RTS.Managers.BuildingManager buildingManager;
+        private RTS.Buildings.WallPlacementController wallPlacementController;
+
         [Header("Settings")]
         [SerializeField] private float raycastDistance = 1000f;
         [SerializeField] private float edgeScrollBorderThickness = 10f;
 
         private CursorState currentState = CursorState.Normal;
         private Mouse mouse;
+
+        // Cached UI raycast data to avoid GC allocations
+        private PointerEventData cachedPointerEventData;
+        private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
 
         public enum CursorState
         {
@@ -87,6 +96,10 @@ namespace KingdomsAtDusk.UI
 
             if (selectionManager == null)
                 selectionManager = Object.FindAnyObjectByType<UnitSelectionManager>();
+
+            // Find placement managers to check if in placement mode
+            buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
+            wallPlacementController = Object.FindAnyObjectByType<RTS.Buildings.WallPlacementController>();
 
             if (useRotatedArrow && baseScrollArrowCursor != null)
                 GenerateRotatedCursors();
@@ -157,6 +170,19 @@ namespace KingdomsAtDusk.UI
 
         private void UpdateCursorState()
         {
+            // Don't change cursor during placement mode - keep it as normal
+            if (buildingManager != null && buildingManager.IsPlacingBuilding)
+            {
+                SetCursor(CursorState.Normal);
+                return;
+            }
+
+            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
+            {
+                SetCursor(CursorState.Normal);
+                return;
+            }
+
             Vector2 pos = mouse.position.ReadValue();
 
             // Edge scrolling first
@@ -164,6 +190,13 @@ namespace KingdomsAtDusk.UI
             if (edgeState != CursorState.Normal)
             {
                 SetCursor(edgeState);
+                return;
+            }
+
+            // Check if mouse is over UI - if so, use normal cursor
+            if (IsMouseOverUI())
+            {
+                SetCursor(CursorState.Normal);
                 return;
             }
 
@@ -326,6 +359,27 @@ namespace KingdomsAtDusk.UI
                 Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             else
                 Cursor.SetCursor(tex, hot, CursorMode.Auto);
+        }
+
+        private bool IsMouseOverUI()
+        {
+            if (EventSystem.current == null)
+                return false;
+
+            // Initialize cached pointer event data if needed
+            if (cachedPointerEventData == null)
+            {
+                cachedPointerEventData = new PointerEventData(EventSystem.current);
+            }
+
+            // Update position
+            cachedPointerEventData.position = mouse.position.ReadValue();
+
+            // Clear previous results and raycast
+            cachedRaycastResults.Clear();
+            EventSystem.current.RaycastAll(cachedPointerEventData, cachedRaycastResults);
+
+            return cachedRaycastResults.Count > 0;
         }
 
         private void OnDisable() => Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);

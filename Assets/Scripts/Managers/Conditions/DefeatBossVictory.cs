@@ -44,11 +44,9 @@ namespace RTS.Core.Conditions
             if (evt.Unit == null) return;
 
             // Check if the dead unit was a boss
-            var bossAI = evt.Unit.GetComponent<BossAI>();
-            if (bossAI != null || evt.Unit.CompareTag(bossTag))
+            if (evt.Unit.TryGetComponent<BossAI>(out var bossAI) || evt.Unit.CompareTag(bossTag))
             {
                 bossDefeated = true;
-                Debug.Log("Victory Condition: Boss Defeated!");
             }
         }
     }

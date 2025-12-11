@@ -30,7 +30,6 @@ namespace RTS.Buildings
             gateAnimation = GetComponent<GateAnimation>();
             if (gateAnimation == null)
             {
-                Debug.LogError($"Gate {name} is missing GateAnimation component!");
             }
 
             // Set gate data on animation component
@@ -55,7 +54,6 @@ namespace RTS.Buildings
                 EventBus.Publish(new GatePlacedEvent(gameObject, transform.position, gateData.animationType));
             }
 
-            Debug.Log($"Gate initialized: {gateData?.buildingName} (Type: {gateData?.animationType})");
         }
 
         /// <summary>
@@ -82,7 +80,6 @@ namespace RTS.Buildings
         {
             if (isOpen || isLocked)
             {
-                Debug.Log($"Gate cannot open: isOpen={isOpen}, isLocked={isLocked}");
                 return;
             }
 
@@ -92,7 +89,6 @@ namespace RTS.Buildings
                 {
                     isOpen = true;
                     EventBus.Publish(new GateOpenedEvent(gameObject));
-                    Debug.Log($"Gate {name} opened");
                 });
             }
         }
@@ -104,7 +100,6 @@ namespace RTS.Buildings
         {
             if (!isOpen || isLocked)
             {
-                Debug.Log($"Gate cannot close: isOpen={isOpen}, isLocked={isLocked}");
                 return;
             }
 
@@ -114,7 +109,6 @@ namespace RTS.Buildings
                 {
                     isOpen = false;
                     EventBus.Publish(new GateClosedEvent(gameObject));
-                    Debug.Log($"Gate {name} closed");
                 });
             }
         }
@@ -136,7 +130,6 @@ namespace RTS.Buildings
         public void Lock()
         {
             isLocked = true;
-            Debug.Log($"Gate {name} locked");
         }
 
         /// <summary>
@@ -145,7 +138,6 @@ namespace RTS.Buildings
         public void Unlock()
         {
             isLocked = false;
-            Debug.Log($"Gate {name} unlocked");
         }
 
         /// <summary>
@@ -216,18 +208,9 @@ namespace RTS.Buildings
         {
             if (gateData == null)
             {
-                Debug.Log("No gate data assigned!");
                 return;
             }
 
-            Debug.Log($"=== Gate Stats: {gateData.buildingName} ===");
-            Debug.Log($"Animation Type: {gateData.animationType}");
-            Debug.Log($"Auto-Open: {gateData.enableAutoOpen}");
-            Debug.Log($"Auto-Open Range: {gateData.autoOpenRange}");
-            Debug.Log($"Manual Control: {gateData.allowManualControl}");
-            Debug.Log($"Open Duration: {gateData.openDuration}s");
-            Debug.Log($"Close Duration: {gateData.closeDuration}s");
-            Debug.Log($"Current State: {(isOpen ? "Open" : "Closed")} {(isLocked ? "[LOCKED]" : "")}");
         }
 
         #endregion

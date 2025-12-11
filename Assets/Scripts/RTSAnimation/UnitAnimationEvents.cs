@@ -76,7 +76,6 @@ namespace RTS.Units.Animation
         {
             // The UnitAnimationController will handle actual damage
             // This is just for effects
-            Debug.Log($"{gameObject.name}: Attack Hit Frame");
         }
 
         /// <summary>
@@ -101,7 +100,6 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnDeathComplete()
         {
-            Debug.Log($"{gameObject.name}: Death Complete");
         }
 
         #endregion
@@ -148,8 +146,7 @@ namespace RTS.Units.Animation
             GameObject effect = Instantiate(effectPrefab, spawnPos, Quaternion.identity);
             
             // Auto-destroy particle effects
-            var particleSystem = effect.GetComponent<ParticleSystem>();
-            if (particleSystem != null)
+            if (effect.TryGetComponent<ParticleSystem>(out var particleSystem))
             {
                 Destroy(effect, particleSystem.main.duration + particleSystem.main.startLifetime.constantMax);
             }

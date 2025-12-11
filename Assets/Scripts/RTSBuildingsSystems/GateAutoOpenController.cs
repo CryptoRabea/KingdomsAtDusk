@@ -116,13 +116,11 @@ namespace RTS.Buildings
             if (unitsInOpenRange.Count > 0 && !gate.IsOpen)
             {
                 // Units are near, open the gate
-                Debug.Log($"Auto-opening gate for {unitsInOpenRange.Count} nearby friendly units");
                 gate.Open();
             }
             else if (unitsInCloseRange.Count == 0 && gate.IsOpen)
             {
                 // No units nearby, close the gate
-                Debug.Log("Auto-closing gate - no friendly units in range");
                 gate.Close();
             }
         }
@@ -134,15 +132,13 @@ namespace RTS.Buildings
 
             // Check if the collider belongs to a valid unit
             // You can add more validation here (e.g., check for UnitHealth, UnitMovement components)
-            var unitHealth = col.GetComponent<RTS.Units.UnitHealth>();
-            if (unitHealth != null && unitHealth.IsDead)
+            if (col.TryGetComponent<RTS.Units.UnitHealth>(out var unitHealth) && unitHealth.IsDead)
             {
                 return false; // Ignore dead units
             }
 
             // Check if it's a building (we want units, not buildings)
-            var building = col.GetComponent<Building>();
-            if (building != null)
+            if (col.TryGetComponent<Building>(out var building))
             {
                 return false; // Ignore buildings
             }
@@ -181,17 +177,11 @@ namespace RTS.Buildings
         [ContextMenu("Print Units in Range")]
         private void DebugPrintUnitsInRange()
         {
-            Debug.Log($"=== Gate Auto-Open Status ===");
-            Debug.Log($"Enabled: {isEnabled}");
-            Debug.Log($"Gate Open: {gate?.IsOpen}");
-            Debug.Log($"Units in Open Range: {unitsInOpenRange.Count}");
-            Debug.Log($"Units in Close Range: {unitsInCloseRange.Count}");
 
             foreach (var unit in unitsInOpenRange)
             {
                 if (unit != null)
                 {
-                    Debug.Log($"  - {unit.gameObject.name} at distance {Vector3.Distance(transform.position, unit.transform.position):F2}");
                 }
             }
         }
@@ -200,7 +190,6 @@ namespace RTS.Buildings
         private void DebugToggleAutoOpen()
         {
             IsEnabled = !IsEnabled;
-            Debug.Log($"Auto-open {(IsEnabled ? "enabled" : "disabled")}");
         }
 
         #endregion

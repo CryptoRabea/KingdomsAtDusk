@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
 
@@ -193,7 +193,9 @@ namespace RTS.Buildings
             //  FIX: Only process if this is a wall and it's nearby
             if (evt.Building == null) return;
 
-            var wallSystem = evt.Building.GetComponent<WallConnectionSystem>();
+            if (evt.Building.TryGetComponent<WallConnectionSystem>(out var wallSystem))
+            {
+            }
             if (wallSystem == null) return;
 
             // Check if nearby
@@ -242,12 +244,10 @@ namespace RTS.Buildings
         [ContextMenu("Print Connections")]
         private void DebugPrintConnections()
         {
-            Debug.Log($"Wall at {transform.position}: {connectedWalls.Count} connections");
             foreach (var wall in connectedWalls)
             {
                 if (wall != null)
                 {
-                    Debug.Log($"  - Connected to wall at {wall.transform.position}");
                 }
             }
         }
@@ -255,12 +255,10 @@ namespace RTS.Buildings
         [ContextMenu("Print All Walls")]
         private void DebugPrintAllWalls()
         {
-            Debug.Log($"Total walls in scene: {allWalls.Count}");
             foreach (var wall in allWalls)
             {
                 if (wall != null)
                 {
-                    Debug.Log($"  - Wall at {wall.transform.position}");
                 }
             }
         }

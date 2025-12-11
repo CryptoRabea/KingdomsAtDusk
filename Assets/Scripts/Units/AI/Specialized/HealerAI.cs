@@ -41,7 +41,9 @@ public class HealerAI : UnitAIController
             var ally = allies[i];
             if (ally == null || ally.gameObject == gameObject) continue;
 
-            var health = ally.GetComponent<UnitHealth>();
+            if (ally.TryGetComponent<UnitHealth>(out var health))
+            {
+            }
             if (health == null || health.IsDead) continue;
 
             float healthPercent = health.HealthPercent;
@@ -81,8 +83,7 @@ public class HealerAI : UnitAIController
 
     private void PerformHeal()
     {
-        var targetHealth = CurrentTarget.GetComponent<UnitHealth>();
-        if (targetHealth != null && !targetHealth.IsDead)
+        if (CurrentTarget.TryGetComponent<UnitHealth>(out var targetHealth) && !targetHealth.IsDead)
         {
             // Heal using negative damage
             targetHealth.Heal(healAmount, gameObject);

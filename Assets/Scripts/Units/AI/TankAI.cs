@@ -57,8 +57,7 @@ namespace RTS.Units.AI
                 var hit = tauntHits[i];
                 if (hit == null) continue;
 
-                var enemyAI = hit.GetComponent<UnitAIController>();
-                if (enemyAI != null && enemyAI.Health != null && !enemyAI.Health.IsDead)
+                if (hit.TryGetComponent<UnitAIController>(out var enemyAI) && enemyAI.Health != null && !enemyAI.Health.IsDead)
                 {
                     // Force them to target this tank
                     enemyAI.SetTarget(transform);
@@ -68,7 +67,6 @@ namespace RTS.Units.AI
 
             if (tauntedUnits.Count > 0)
             {
-                Debug.Log($"{gameObject.name} taunted {tauntedUnits.Count} enemy units!");
             }
 
             // Release taunt after duration

@@ -107,7 +107,6 @@ namespace RTS.Units.Animation
 
             if (animator == null)
             {
-                Debug.LogError($"[ArcherAnimation] Animator not found on {gameObject.name}!");
                 enabled = false;
                 return;
             }
@@ -503,7 +502,6 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnDrawComplete()
         {
-            Debug.Log($"[ArcherAnimation] Draw complete");
         }
 
         /// <summary>
@@ -511,7 +509,6 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnAimComplete()
         {
-            Debug.Log($"[ArcherAnimation] Aim complete");
         }
 
         /// <summary>
@@ -519,7 +516,6 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnArrowRelease()
         {
-            Debug.Log($"[ArcherAnimation] Arrow released!");
             // Spawn arrow projectile here if using projectile system
         }
 
@@ -528,7 +524,6 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnReleaseComplete()
         {
-            Debug.Log($"[ArcherAnimation] Release complete");
         }
 
         public void OnFootstep()

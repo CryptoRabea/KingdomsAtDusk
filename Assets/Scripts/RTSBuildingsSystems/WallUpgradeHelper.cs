@@ -18,19 +18,16 @@ namespace RTS.Buildings
         {
             if (wall == null || newBuildingData == null || newBuildingData.buildingPrefab == null)
             {
-                Debug.LogError("WallUpgradeHelper: Invalid parameters");
                 return null;
             }
 
             // Check if wall can be upgraded
-            var wallConnection = wall.GetComponent<WallConnectionSystem>();
-            if (wallConnection != null)
+            if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
             {
                 int connectionCount = wallConnection.GetConnectionCount();
                 // Don't upgrade corner walls (3+ connections) to prevent breaking wall networks
                 if (connectionCount > 2)
                 {
-                    Debug.LogWarning($"Cannot upgrade wall: too many connections ({connectionCount}). Corner walls cannot be upgraded.");
                     EventBus.Publish(new BuildingPlacementFailedEvent("Cannot upgrade corner walls!"));
                     return null;
                 }
@@ -44,11 +41,9 @@ namespace RTS.Buildings
             if (wallConnection != null)
             {
                 connectedWalls = wallConnection.GetConnectedWalls();
-                Debug.Log($"Wall has {connectedWalls.Count} connections that will be transferred to new building");
             }
 
             // Destroy the wall
-            Debug.Log($"Upgrading wall at {position} to {newBuildingData.buildingName}");
             Object.Destroy(wall);
 
             // Create the new building
@@ -63,22 +58,18 @@ namespace RTS.Buildings
             // Handle tower-specific setup
             if (newBuildingData is TowerDataSO towerData)
             {
-                var towerComponent = newBuilding.GetComponent<Tower>();
-                if (towerComponent != null)
+                if (newBuilding.TryGetComponent<Tower>(out var towerComponent))
                 {
                     towerComponent.SetTowerData(towerData);
-                    Debug.Log($"Assigned tower data to {towerData.buildingName}");
                 }
             }
 
             // Handle gate-specific setup
             if (newBuildingData is GateDataSO gateData)
             {
-                var gateComponent = newBuilding.GetComponent<Gate>();
-                if (gateComponent != null)
+                if (newBuilding.TryGetComponent<Gate>(out var gateComponent))
                 {
                     gateComponent.SetGateData(gateData);
-                    Debug.Log($"Assigned gate data to {gateData.buildingName}");
                 }
             }
 
@@ -92,13 +83,14 @@ namespace RTS.Buildings
             if (connectedWalls != null && connectedWalls.Count > 0)
             {
                 // Add WallConnectionSystem to the new building so it maintains wall continuity
-                var newWallConnection = newBuilding.GetComponent<WallConnectionSystem>();
+                if (newBuilding.TryGetComponent<WallConnectionSystem>(out var newWallConnection))
+                {
+                }
                 if (newWallConnection == null)
                 {
                     newWallConnection = newBuilding.AddComponent<WallConnectionSystem>();
                 }
 
-                Debug.Log($"New building will connect to {connectedWalls.Count} neighboring walls");
 
                 // Force update connections after a short delay
                 var helper = newBuilding.AddComponent<DelayedConnectionUpdater>();
@@ -108,7 +100,6 @@ namespace RTS.Buildings
             // Publish event
             EventBus.Publish(new BuildingPlacedEvent(newBuilding, position));
 
-            Debug.Log($"Successfully upgraded wall to {newBuildingData.buildingName}");
 
             return newBuilding;
         }

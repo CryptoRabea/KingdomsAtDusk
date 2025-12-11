@@ -105,8 +105,12 @@ namespace RTS.Buildings
                     if (!walls.Contains(hit.gameObject))
                     {
                         // Check if it has WallConnectionSystem or is a wall building
-                        var wallComp = hit.GetComponent<WallConnectionSystem>();
-                        var buildingComp = hit.GetComponent<Building>();
+                        if (hit.TryGetComponent<WallConnectionSystem>(out var wallComp))
+                        {
+                        }
+                        if (hit.TryGetComponent<Building>(out var buildingComp))
+                        {
+                        }
 
                         if (wallComp != null || (buildingComp != null && buildingComp.Data?.buildingType == BuildingType.Defensive))
                         {
@@ -136,7 +140,6 @@ namespace RTS.Buildings
         {
             if (wall == null)
             {
-                Debug.LogWarning("Cannot replace wall: wall is null!");
                 return null;
             }
 
@@ -144,19 +147,21 @@ namespace RTS.Buildings
             Quaternion wallRotation = wall.transform.rotation;
 
             // Store wall connection data before destroying it
-            var wallConnection = wall.GetComponent<WallConnectionSystem>();
+            if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
+            {
+            }
             List<WallConnectionSystem> connectedWalls = null;
 
             if (wallConnection != null)
             {
                 connectedWalls = wallConnection.GetConnectedWalls();
-                Debug.Log($"Wall has {connectedWalls.Count} connections that will be transferred to tower");
             }
 
-            var wallBuilding = wall.GetComponent<Building>();
+            if (wall.TryGetComponent<Building>(out var wallBuilding))
+            {
+            }
             string wallName = wallBuilding != null ? wallBuilding.Data?.buildingName : "Wall";
 
-            Debug.Log($"Replacing {wallName} at {wallPosition} with {towerData.buildingName}");
 
             // Create replacement data
             var replacementData = new WallReplacementData
@@ -179,13 +184,14 @@ namespace RTS.Buildings
             if (tower == null || replacementData == null) return;
 
             // Add WallConnectionSystem to tower so it maintains wall continuity
-            var towerWallConnection = tower.GetComponent<WallConnectionSystem>();
+            if (tower.TryGetComponent<WallConnectionSystem>(out var towerWallConnection))
+            {
+            }
             if (towerWallConnection == null)
             {
                 towerWallConnection = tower.AddComponent<WallConnectionSystem>();
             }
 
-            Debug.Log($"Tower placed at wall position, will connect to {replacementData.connectedWalls?.Count ?? 0} neighboring walls");
 
             // Force update connections after a short delay to ensure all systems are initialized
             if (towerWallConnection != null)
@@ -221,7 +227,6 @@ namespace RTS.Buildings
                 // Block replacement of walls with 3+ connections (corner pieces)
                 if (connectionCount > 2)
                 {
-                    Debug.Log($"Cannot replace wall: too many connections ({connectionCount})");
                     return false;
                 }
             }

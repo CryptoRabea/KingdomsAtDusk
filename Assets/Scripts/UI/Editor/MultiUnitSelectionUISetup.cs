@@ -19,7 +19,6 @@ namespace RTS.UI.Editor
         [MenuItem("Tools/RTS/Setup Multi-Unit Selection UI")]
         public static void SetupMultiUnitSelectionUI()
         {
-            Debug.Log("[MultiUnitSelectionUISetup] Starting automated setup...");
 
             // Ensure Prefabs directory exists
             EnsurePrefabsDirectory();
@@ -28,7 +27,6 @@ namespace RTS.UI.Editor
             GameObject unitIconPrefab = CreateUnitIconPrefab();
             if (unitIconPrefab == null)
             {
-                Debug.LogError("[MultiUnitSelectionUISetup] Failed to create Unit Icon Prefab!");
                 return;
             }
 
@@ -42,7 +40,6 @@ namespace RTS.UI.Editor
                     "Please ensure you have a UnitDetailsUI component in your scene before running this setup.",
                     "OK"
                 );
-                Debug.LogError("[MultiUnitSelectionUISetup] UnitDetailsUI not found in scene!");
                 return;
             }
 
@@ -50,15 +47,12 @@ namespace RTS.UI.Editor
             bool success = IntegrateWithUnitDetailsUI(unitDetailsUI, unitIconPrefab);
             if (!success)
             {
-                Debug.LogError("[MultiUnitSelectionUISetup] Failed to integrate with UnitDetailsUI!");
                 return;
             }
 
             // Step 4: Select the UnitDetailsUI in hierarchy
             Selection.activeGameObject = unitDetailsUI.gameObject;
 
-            Debug.Log("[MultiUnitSelectionUISetup] ✅ Setup complete! Multi-Unit Selection UI is ready to use.");
-            Debug.Log($"[MultiUnitSelectionUISetup] Prefab created: {PREFABS_PATH}/{UNIT_ICON_PREFAB_NAME}");
 
             EditorUtility.DisplayDialog(
                 "Setup Complete!",
@@ -107,7 +101,6 @@ namespace RTS.UI.Editor
         /// </summary>
         private static bool IntegrateWithUnitDetailsUI(UnitDetailsUI unitDetailsUI, GameObject unitIconPrefab)
         {
-            Debug.Log("[MultiUnitSelectionUISetup] Integrating with UnitDetailsUI...");
 
             // Get the UnitDetailsUI game object
             GameObject unitDetailsPanel = unitDetailsUI.gameObject;
@@ -122,7 +115,6 @@ namespace RTS.UI.Editor
 
             if (portrait == null)
             {
-                Debug.LogError("[MultiUnitSelectionUISetup] Could not find unit portrait in UnitDetailsUI!");
                 return false;
             }
 
@@ -131,7 +123,6 @@ namespace RTS.UI.Editor
 
             if (statsParent == null)
             {
-                Debug.LogWarning("[MultiUnitSelectionUISetup] Could not auto-detect stats container. Creating manual setup...");
                 return CreateManualSetup(unitDetailsUI, unitIconPrefab);
             }
 
@@ -140,7 +131,9 @@ namespace RTS.UI.Editor
             GameObject multiUnitContainer = CreateMultiUnitSelectionContainer(unitDetailsPanel.transform, unitIconPrefab);
 
             // Add MultiUnitSelectionUI component to the multi-unit container
-            MultiUnitSelectionUI multiUnitUI = multiUnitContainer.GetComponent<MultiUnitSelectionUI>();
+            if (multiUnitContainer.TryGetComponent<MultiUnitSelectionUI>(out var multiUnitUI))
+            {
+            }
             if (multiUnitUI == null)
             {
                 multiUnitUI = multiUnitContainer.AddComponent<MultiUnitSelectionUI>();
@@ -158,7 +151,6 @@ namespace RTS.UI.Editor
             // Mark as dirty
             EditorUtility.SetDirty(unitDetailsUI);
 
-            Debug.Log("[MultiUnitSelectionUISetup] ✅ Integration complete!");
             return true;
         }
 
@@ -200,7 +192,6 @@ namespace RTS.UI.Editor
             Transform existing = statsParent.Find("SingleUnitStatsContainer");
             if (existing != null)
             {
-                Debug.Log("[MultiUnitSelectionUISetup] SingleUnitStatsContainer already exists.");
                 return existing.gameObject;
             }
 
@@ -221,7 +212,6 @@ namespace RTS.UI.Editor
             statsParent.SetParent(container.transform, true);
             container.transform.SetSiblingIndex(siblingIndex);
 
-            Debug.Log("[MultiUnitSelectionUISetup] Created SingleUnitStatsContainer");
             return container;
         }
 
@@ -235,7 +225,6 @@ namespace RTS.UI.Editor
             Transform existing = parent.Find("MultiUnitSelectionContainer");
             if (existing != null)
             {
-                Debug.Log("[MultiUnitSelectionUISetup] MultiUnitSelectionContainer already exists. Updating...");
                 UpdateMultiUnitContainer(existing.gameObject, unitIconPrefab);
                 return existing.gameObject;
             }
@@ -309,7 +298,6 @@ namespace RTS.UI.Editor
 
             EditorUtility.SetDirty(container);
 
-            Debug.Log("[MultiUnitSelectionUISetup] Created MultiUnitSelectionContainer (Square, Auto-scaling)");
             return container;
         }
 
@@ -318,7 +306,9 @@ namespace RTS.UI.Editor
         /// </summary>
         private static void UpdateMultiUnitContainer(GameObject container, GameObject unitIconPrefab)
         {
-            MultiUnitSelectionUI multiUnitUI = container.GetComponent<MultiUnitSelectionUI>();
+            if (container.TryGetComponent<MultiUnitSelectionUI>(out var multiUnitUI))
+            {
+            }
             if (multiUnitUI == null)
             {
                 multiUnitUI = container.AddComponent<MultiUnitSelectionUI>();
@@ -327,7 +317,9 @@ namespace RTS.UI.Editor
             Transform gridContainer = container.transform.Find("UnitIconGrid");
             if (gridContainer != null)
             {
-                GridLayoutGroup grid = gridContainer.GetComponent<GridLayoutGroup>();
+                if (gridContainer.TryGetComponent<GridLayoutGroup>(out var grid))
+                {
+                }
                 RectTransform gridRect = gridContainer.GetComponent<RectTransform>();
 
                 var type = typeof(MultiUnitSelectionUI);
@@ -354,7 +346,6 @@ namespace RTS.UI.Editor
         /// </summary>
         private static bool CreateManualSetup(UnitDetailsUI unitDetailsUI, GameObject unitIconPrefab)
         {
-            Debug.Log("[MultiUnitSelectionUISetup] Creating manual setup...");
 
             GameObject panel = unitDetailsUI.gameObject;
 
@@ -378,12 +369,13 @@ namespace RTS.UI.Editor
             if (singleField != null) singleField.SetValue(unitDetailsUI, singleContainer);
             if (multiField != null) multiField.SetValue(unitDetailsUI, multiContainer);
 
-            MultiUnitSelectionUI multiUI = multiContainer.GetComponent<MultiUnitSelectionUI>();
+            if (multiContainer.TryGetComponent<MultiUnitSelectionUI>(out var multiUI))
+            {
+            }
             if (multiUIField != null && multiUI != null) multiUIField.SetValue(unitDetailsUI, multiUI);
 
             EditorUtility.SetDirty(unitDetailsUI);
 
-            Debug.LogWarning("[MultiUnitSelectionUISetup] Manual setup complete. You may need to manually organize UI elements in the Inspector.");
             return true;
         }
 
@@ -392,14 +384,12 @@ namespace RTS.UI.Editor
         /// </summary>
         private static GameObject CreateUnitIconPrefab()
         {
-            Debug.Log("[MultiUnitSelectionUISetup] Creating Unit Icon Prefab...");
 
             string prefabPath = Path.Combine(PREFABS_PATH, UNIT_ICON_PREFAB_NAME);
             GameObject existingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
             if (existingPrefab != null)
             {
-                Debug.Log("[MultiUnitSelectionUISetup] Unit Icon Prefab already exists.");
                 return existingPrefab;
             }
 
@@ -466,7 +456,6 @@ namespace RTS.UI.Editor
             DestroyImmediate(root);
 
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            Debug.Log($"[MultiUnitSelectionUISetup] ✅ Prefab created: {prefabPath}");
 
             return prefab;
         }

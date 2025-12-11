@@ -87,8 +87,7 @@ namespace KAD.UI.FloatingNumbers
             // We'll use RectTransform scaling for the slider effect
             if (fillImage != null)
             {
-                RectTransform fillRect = fillImage.GetComponent<RectTransform>();
-                if (fillRect != null)
+                if (fillImage.TryGetComponent<RectTransform>(out var fillRect))
                 {
                     // Set anchors to stretch from left
                     fillRect.anchorMin = new Vector2(0, 0);
@@ -97,8 +96,7 @@ namespace KAD.UI.FloatingNumbers
                     fillRect.anchoredPosition = Vector2.zero;
 
                     // Get the parent width to set the fill width
-                    RectTransform parentRect = fillImage.transform.parent.GetComponent<RectTransform>();
-                    if (parentRect != null)
+                    if (fillImage.transform.parent.TryGetComponent<RectTransform>(out var parentRect))
                     {
                         fillRect.sizeDelta = new Vector2(parentRect.sizeDelta.x, 0);
                     }
@@ -164,8 +162,7 @@ namespace KAD.UI.FloatingNumbers
             // Update fill width by scaling the RectTransform
             if (fillImage != null)
             {
-                RectTransform fillRect = fillImage.GetComponent<RectTransform>();
-                if (fillRect != null)
+                if (fillImage.TryGetComponent<RectTransform>(out var fillRect))
                 {
                     // Scale the fill image horizontally based on health percentage
                     fillRect.localScale = new Vector3(currentHealthPercentage, 1, 1);

@@ -36,7 +36,6 @@ namespace RTS.Managers
             
             if (poolService == null)
             {
-                Debug.LogWarning("PoolService not available. WaveManager will use Instantiate.");
             }
 
             // Subscribe to enemy death events
@@ -70,7 +69,6 @@ namespace RTS.Managers
             WaveConfig config = GetWaveConfig(currentWaveNumber);
             
             EventBus.Publish(new WaveStartedEvent(currentWaveNumber, config.TotalEnemyCount));
-            Debug.Log($"Starting Wave {currentWaveNumber} with {config.TotalEnemyCount} enemies");
 
             StartCoroutine(SpawnWaveCoroutine(config));
         }
@@ -124,7 +122,6 @@ namespace RTS.Managers
         {
             if (spawnPoints == null || spawnPoints.Length == 0)
             {
-                Debug.LogError("No spawn points assigned!");
                 return;
             }
 
@@ -135,7 +132,6 @@ namespace RTS.Managers
             GameObject enemyPrefab = config.GetRandomEnemyPrefab();
             if (enemyPrefab == null)
             {
-                Debug.LogWarning("No enemy prefab available!");
                 return;
             }
 
@@ -161,14 +157,12 @@ namespace RTS.Managers
 
         private void ApplyDifficultyScaling(GameObject enemy, WaveConfig config)
         {
-            var health = enemy.GetComponent<Units.UnitHealth>();
-            if (health != null && config.HealthMultiplier > 1f)
+            if (enemy.TryGetComponent<Units.UnitHealth>(out var health) && config.HealthMultiplier > 1f)
             {
                 health.SetMaxHealth(health.MaxHealth * config.HealthMultiplier);
             }
 
-            var combat = enemy.GetComponent<Units.UnitCombat>();
-            if (combat != null && config.DamageMultiplier > 1f)
+            if (enemy.TryGetComponent<Units.UnitCombat>(out var combat) && config.DamageMultiplier > 1f)
             {
                 combat.SetAttackDamage(combat.AttackDamage * config.DamageMultiplier);
             }
@@ -183,7 +177,6 @@ namespace RTS.Managers
                 if (activeEnemies <= 0 && !isSpawningWave)
                 {
                     EventBus.Publish(new WaveCompletedEvent(currentWaveNumber));
-                    Debug.Log($"Wave {currentWaveNumber} completed!");
                 }
             }
         }

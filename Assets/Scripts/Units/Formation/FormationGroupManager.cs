@@ -10,19 +10,8 @@ namespace RTS.Units.Formation
     /// </summary>
     public class FormationGroupManager : MonoBehaviour
     {
-        // Singleton instance
-        private static FormationGroupManager _instance;
-        public static FormationGroupManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindFirstObjectByType<FormationGroupManager>();
-                }
-                return _instance;
-            }
-        }
+        private static FormationGroupManager instance;
+        public static FormationGroupManager Instance => instance;
 
         [Header("Current Formation")]
         [SerializeField] private FormationType currentFormation = FormationType.Box;
@@ -45,7 +34,6 @@ namespace RTS.Units.Formation
                     currentFormation = value;
                     // Clear custom formation when switching to preset
                     currentCustomFormationId = null;
-                    Debug.Log($"Formation changed to: {currentFormation}");
 
                     // Publish event for UI updates
                     EventBus.Publish(new FormationChangedEvent(currentFormation));
@@ -73,14 +61,12 @@ namespace RTS.Units.Formation
                 currentCustomFormationId = formationId;
                 // Set to None to indicate custom formation is active
                 currentFormation = FormationType.None;
-                Debug.Log($"Custom formation '{formation.name}' set");
 
                 // Immediately reshape units if any are selected
                 ReshapeSelectedUnits();
             }
             else
             {
-                Debug.LogWarning($"Custom formation with ID {formationId} not found!");
             }
         }
 
@@ -109,14 +95,12 @@ namespace RTS.Units.Formation
 
         private void Awake()
         {
-            // Singleton setup
-            if (_instance != null && _instance != this)
+            if (instance != null && instance != this)
             {
-                Debug.LogWarning("Multiple FormationGroupManager instances detected! Destroying duplicate.");
                 Destroy(gameObject);
                 return;
             }
-            _instance = this;
+            instance = this;
         }
 
         private void OnEnable()
@@ -196,11 +180,9 @@ namespace RTS.Units.Formation
                         spacing,
                         facingDirection
                     );
-                    Debug.Log($"Using custom formation: {customFormation.name}");
                 }
                 else
                 {
-                    Debug.LogWarning("Custom formation not found, falling back to Box");
                     formationPositions = FormationManager.CalculateFormationPositions(
                         centerPosition,
                         unitCount,
@@ -244,14 +226,12 @@ namespace RTS.Units.Formation
                 Vector3 newPosition = formationPositions[index];
 
                 // Set forced move to new formation position
-                var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
-                if (aiController != null)
+                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, newPosition);
                 }
 
-                var movement = unit.GetComponent<UnitMovement>();
-                if (movement != null)
+                if (unit.TryGetComponent<UnitMovement>(out var movement))
                 {
                     movement.SetDestination(newPosition);
                 }
@@ -260,7 +240,6 @@ namespace RTS.Units.Formation
             }
 
             string formationName = IsUsingCustomFormation ? GetCurrentCustomFormation()?.name : currentFormation.ToString();
-            Debug.Log($"Reshaped {selectionManager.SelectionCount} units into {formationName} formation");
         }
 
         /// <summary>

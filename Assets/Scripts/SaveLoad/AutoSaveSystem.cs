@@ -22,7 +22,6 @@ namespace RTS.SaveLoad
             saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
             if (saveLoadService == null)
             {
-                Debug.LogWarning("AutoSaveSystem: ISaveLoadService not found! Auto-save disabled.");
                 enabled = false;
                 return;
             }
@@ -56,7 +55,6 @@ namespace RTS.SaveLoad
         {
             if (settings.autoSaveOnQuit && saveLoadService != null)
             {
-                Debug.Log("Performing auto-save on quit...");
                 PerformAutoSave();
             }
         }
@@ -71,7 +69,6 @@ namespace RTS.SaveLoad
 
             if (success)
             {
-                Debug.Log($" Auto-save successful: {autoSaveName}");
 
                 // Move to next slot
                 currentAutoSaveIndex = (currentAutoSaveIndex + 1) % settings.maxAutoSaves;
@@ -81,7 +78,6 @@ namespace RTS.SaveLoad
             }
             else
             {
-                Debug.LogError($" Auto-save failed: {autoSaveName}");
             }
         }
 
@@ -148,7 +144,6 @@ namespace RTS.SaveLoad
                 for (int i = 0; i < toDelete; i++)
                 {
                     saveLoadService.DeleteSave(sortedAutoSaves[i].Name);
-                    Debug.Log($"Deleted old auto-save: {sortedAutoSaves[i].Name}");
                 }
             }
         }

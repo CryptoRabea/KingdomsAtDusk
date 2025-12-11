@@ -99,7 +99,6 @@ public class RTSCameraController : MonoBehaviour
         buildingManager = UnityEngine.Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
         if (buildingManager == null)
         {
-            Debug.LogWarning("RTSCameraController: BuildingManager not found. Camera zoom will not be disabled during placement.");
         }
     }
 

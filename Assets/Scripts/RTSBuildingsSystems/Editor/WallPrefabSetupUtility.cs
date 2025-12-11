@@ -123,14 +123,14 @@ namespace RTS.Buildings.Editor
             if (wallPrefabRoot.GetComponent<Building>() == null)
             {
                 wallPrefabRoot.AddComponent<Building>();
-                Debug.Log("Added Building component");
             }
 
-            WallConnectionSystem wallSystem = wallPrefabRoot.GetComponent<WallConnectionSystem>();
+            if (wallPrefabRoot.TryGetComponent<WallConnectionSystem>(out var wallSystem))
+            {
+            }
             if (wallSystem == null)
             {
                 wallSystem = wallPrefabRoot.AddComponent<WallConnectionSystem>();
-                Debug.Log("Added WallConnectionSystem component");
             }
 
             // Create variant container
@@ -154,7 +154,6 @@ namespace RTS.Buildings.Editor
                 if (existingVariant != null)
                 {
                     variants[i] = existingVariant.gameObject;
-                    Debug.Log($"Using existing variant: {variantName}");
                 }
                 else
                 {
@@ -167,7 +166,6 @@ namespace RTS.Buildings.Editor
                         variants[i] = CreateManualVariant(i, variantName, variantContainer);
                     }
 
-                    Debug.Log($"Created variant: {variantName}");
                 }
 
                 // Set initial state (only first variant active)
@@ -259,7 +257,6 @@ namespace RTS.Buildings.Editor
             Selection.activeGameObject = newWall;
             EditorGUIUtility.PingObject(newWall);
 
-            Debug.Log("Created new Wall Prefab GameObject. Now click 'Setup Wall Prefab' to complete setup.");
         }
 
         private string GetVariantName(int index)

@@ -110,3 +110,10 @@ Logs/AssetImportWorker3.log
 *.obj
 *.gif
 *.blend
+*.shader
+*.cginc
+/Assets/Enviro 3 - Sky and Weather
+/Assets/ThirdParties
+/Assets/VolumetricFog2
+/mdFiles
+/ProfilerCaptures

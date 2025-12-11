@@ -31,17 +31,17 @@ namespace RTS.UI
         {
             if (unit == null)
             {
-                Debug.LogWarning("[UnitIconWithHP] Cannot initialize with null unit!");
                 return;
             }
 
             trackedUnit = unit;
 
             // Get unit components
-            var aiController = unit.GetComponent<RTS.Units.AI.UnitAIController>();
+            if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
+            {
+            }
             if (aiController == null || aiController.Config == null)
             {
-                Debug.LogWarning($"[UnitIconWithHP] Unit {unit.name} doesn't have UnitAIController or Config!");
                 return;
             }
 
@@ -66,8 +66,7 @@ namespace RTS.UI
         {
             if (hpBarFill != null)
             {
-                RectTransform fillRect = hpBarFill.GetComponent<RectTransform>();
-                if (fillRect != null)
+                if (hpBarFill.TryGetComponent<RectTransform>(out var fillRect))
                 {
                     // Set anchors to stretch from left
                     fillRect.anchorMin = new Vector2(0, 0);
@@ -76,8 +75,7 @@ namespace RTS.UI
                     fillRect.anchoredPosition = Vector2.zero;
 
                     // Get the parent width to set the fill width
-                    RectTransform parentRect = hpBarFill.transform.parent.GetComponent<RectTransform>();
-                    if (parentRect != null)
+                    if (hpBarFill.transform.parent.TryGetComponent<RectTransform>(out var parentRect))
                     {
                         fillRect.sizeDelta = new Vector2(parentRect.rect.width, 0);
                     }
@@ -117,8 +115,7 @@ namespace RTS.UI
             float healthPercent = currentHealth / maxHealth;
 
             // Scale the fill image horizontally based on health percentage
-            RectTransform fillRect = hpBarFill.GetComponent<RectTransform>();
-            if (fillRect != null)
+            if (hpBarFill.TryGetComponent<RectTransform>(out var fillRect))
             {
                 fillRect.localScale = new Vector3(healthPercent, 1, 1);
             }

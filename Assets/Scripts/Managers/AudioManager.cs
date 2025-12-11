@@ -279,7 +279,6 @@ namespace RTSGame.Managers
             }
             else
             {
-                Debug.LogWarning($"[AudioManager] Music clip '{musicName}' not found!");
             }
         }
 
@@ -308,7 +307,6 @@ namespace RTSGame.Managers
             }
             else
             {
-                Debug.LogWarning($"[AudioManager] SFX clip '{sfxName}' not found!");
             }
         }
 
@@ -322,7 +320,6 @@ namespace RTSGame.Managers
             }
             else
             {
-                Debug.LogWarning($"[AudioManager] UI SFX clip '{sfxName}' not found!");
             }
         }
 
@@ -336,7 +333,6 @@ namespace RTSGame.Managers
             }
             else
             {
-                Debug.LogWarning($"[AudioManager] Voice clip '{voiceName}' not found!");
             }
         }
 
@@ -350,7 +346,6 @@ namespace RTSGame.Managers
         public void SetAudioDevice(string deviceName)
         {
             // Placeholder - Unity doesn't expose this in the standard API
-            Debug.Log($"[AudioManager] Audio device selection: {deviceName}");
         }
 
         public void RefreshAudioSources()

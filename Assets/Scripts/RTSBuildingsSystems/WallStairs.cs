@@ -52,7 +52,6 @@ namespace RTS.Buildings
             // Set width
             navMeshLink.width = stairWidth;
 
-            Debug.Log($"WallStairs NavMeshLink configured: {gameObject.name}");
         }
 
         private void SetupVisual()
@@ -91,7 +90,6 @@ namespace RTS.Buildings
 
             visualMesh = ramp;
 
-            Debug.Log($"Created default stair visual for {gameObject.name}");
         }
 
         /// <summary>

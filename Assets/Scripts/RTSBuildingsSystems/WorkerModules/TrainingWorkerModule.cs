@@ -6,20 +6,20 @@ using System.Collections.Generic;
 namespace RTS.Buildings.WorkerModules
 {
     /// <summary>
-    /// Optional module: Allocates peasants from campfire to unit training.
-    /// Speeds up unit training when workers are assigned.
-    /// Add this component to a Campfire to enable training worker allocation.
+    /// DEPRECATED: This module caused performance issues and joint queue behavior.
+    /// Each barracks now manages training independently.
+    /// This component is disabled and will be removed in a future update.
     /// </summary>
     [RequireComponent(typeof(Campfire))]
     public class TrainingWorkerModule : MonoBehaviour
     {
         [Header("Worker Settings")]
-        [SerializeField] private bool enableModule = true;
+        [SerializeField] private bool enableModule = false; // Disabled by default
         [SerializeField] private int peasantsPerTraining = 1;
         [SerializeField] private float trainingSpeedBonus = 1.3f;
 
         [Header("Auto-Assignment")]
-        [SerializeField] private bool autoAssignWorkers = true;
+        [SerializeField] private bool autoAssignWorkers = false; // Disabled by default
         [SerializeField] private float assignmentUpdateInterval = 1.5f;
 
         private Campfire campfire;
@@ -73,8 +73,7 @@ namespace RTS.Buildings.WorkerModules
             if (evt.Building == null) return;
 
             // Check if there are more units in queue
-            var trainingQueue = evt.Building.GetComponent<UnitTrainingQueue>();
-            if (trainingQueue != null && trainingQueue.QueueCount == 0)
+            if (evt.Building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue) && trainingQueue.QueueCount == 0)
             {
                 // Release workers if queue is empty
                 ReleaseWorkersFromBuilding(evt.Building);
@@ -93,7 +92,9 @@ namespace RTS.Buildings.WorkerModules
             {
                 if (building == null) continue;
 
-                var trainingQueue = building.GetComponent<UnitTrainingQueue>();
+                if (building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+                {
+                }
                 if (trainingQueue == null) continue;
 
                 // Check if training and needs workers
@@ -116,7 +117,9 @@ namespace RTS.Buildings.WorkerModules
         {
             if (building == null || workforceService == null) return false;
 
-            var trainingQueue = building.GetComponent<UnitTrainingQueue>();
+            if (building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+            {
+            }
             if (trainingQueue == null || trainingQueue.QueueCount == 0) return false;
 
             // Check if we can assign workers
@@ -130,7 +133,6 @@ namespace RTS.Buildings.WorkerModules
                 // Apply training speed bonus
                 ApplyTrainingBonus(building, true);
 
-                Debug.Log($"⚔️ Assigned {peasantsPerTraining} peasants to training at {building.name}");
                 return true;
             }
 
@@ -149,7 +151,6 @@ namespace RTS.Buildings.WorkerModules
                 // Remove training bonus
                 ApplyTrainingBonus(building, false);
 
-                Debug.Log($"⚔️ Released {workerCount} peasants from training");
             }
         }
 
@@ -158,7 +159,9 @@ namespace RTS.Buildings.WorkerModules
             // This would integrate with UnitTrainingQueue to modify training speed
             // In a real implementation, you'd modify the training time
 
-            var trainingQueue = building.GetComponent<UnitTrainingQueue>();
+            if (building.TryGetComponent<UnitTrainingQueue>(out var trainingQueue))
+            {
+            }
             if (trainingQueue == null) return;
 
             // You could add a public method to UnitTrainingQueue like:
@@ -166,7 +169,6 @@ namespace RTS.Buildings.WorkerModules
 
             if (apply)
             {
-                Debug.Log($"Training speed bonus ({trainingSpeedBonus}x) applied");
             }
         }
 
@@ -209,12 +211,10 @@ namespace RTS.Buildings.WorkerModules
         [ContextMenu("Show Assigned Workers")]
         private void DebugShowAssignedWorkers()
         {
-            Debug.Log($"=== Training Workers ({assignedWorkers.Count} assignments) ===");
             foreach (var kvp in assignedWorkers)
             {
                 if (kvp.Key != null)
                 {
-                    Debug.Log($"  {kvp.Key.name}: {kvp.Value} workers");
                 }
             }
         }

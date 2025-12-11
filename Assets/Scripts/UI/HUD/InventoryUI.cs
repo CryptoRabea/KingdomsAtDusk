@@ -41,7 +41,6 @@ namespace RTS.UI.HUD
         {
             if (slotsContainer == null || slotPrefab == null)
             {
-                Debug.LogWarning("InventoryUI: Slots container or prefab not assigned!");
                 return;
             }
 
@@ -53,8 +52,7 @@ namespace RTS.UI.HUD
             slots.Clear();
 
             // Configure grid layout
-            var gridLayout = slotsContainer.GetComponent<GridLayoutGroup>();
-            if (gridLayout != null)
+            if (slotsContainer.TryGetComponent<GridLayoutGroup>(out var gridLayout))
             {
                 gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
                 gridLayout.constraintCount = gridSize.x;
@@ -67,7 +65,9 @@ namespace RTS.UI.HUD
             for (int i = 0; i < totalSlots; i++)
             {
                 GameObject slotObj = Instantiate(slotPrefab, slotsContainer);
-                var slot = slotObj.GetComponent<InventorySlot>();
+                if (slotObj.TryGetComponent<InventorySlot>(out var slot))
+                {
+                }
 
                 if (slot == null)
                 {
@@ -78,8 +78,7 @@ namespace RTS.UI.HUD
                 slots.Add(slot);
 
                 // Set size
-                RectTransform rt = slotObj.GetComponent<RectTransform>();
-                if (rt != null)
+                if (slotObj.TryGetComponent<RectTransform>(out var rt))
                 {
                     rt.sizeDelta = new Vector2(slotSize, slotSize);
                 }

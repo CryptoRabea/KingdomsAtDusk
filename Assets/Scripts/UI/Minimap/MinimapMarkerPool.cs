@@ -127,7 +127,9 @@ namespace RTS.UI.Minimap
                 img.color = markerColor;
             }
 
-            RectTransform rect = markerObj.GetComponent<RectTransform>();
+            if (markerObj.TryGetComponent<RectTransform>(out var rect))
+            {
+            }
             if (rect == null)
             {
                 rect = markerObj.AddComponent<RectTransform>();

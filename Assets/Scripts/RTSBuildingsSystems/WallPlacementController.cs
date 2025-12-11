@@ -42,6 +42,12 @@ namespace RTS.Buildings
         [SerializeField] private Color validLineColor = Color.green;
         [SerializeField] private Color invalidLineColor = Color.red;
 
+        [Header("UI Notification")]
+        [Tooltip("TextMeshProUGUI component to display wall placement warning (optional)")]
+        [SerializeField] private TMPro.TextMeshProUGUI wallPlacementNotificationText;
+        [SerializeField] private string wallPlacementWarningMessage = "WALL BUILDING MODE - Click to place wall segments";
+        [SerializeField] private Color warningTextColor = Color.red;
+
         [Header("Placement Settings")]
         [SerializeField] private bool useGridSnapping = false;
         [SerializeField] private float gridSize = 1f;
@@ -161,7 +167,6 @@ namespace RTS.Buildings
                 Building building = col.GetComponentInParent<Building>();
                 if (building != null)
                 {
-                    Debug.Log($"Wall would overlap building: {col.gameObject.name}");
                     return true;
                 }
             }
@@ -214,7 +219,6 @@ namespace RTS.Buildings
 
             if (closingLoop)
             {
-                Debug.Log("🔒 Closing loop detected - allowing connection back to first pole");
                 return false;
             }
 
@@ -253,14 +257,12 @@ namespace RTS.Buildings
                         float distEndToExistingStart = Vector3.Distance(end, existingStart);
                         float distEndToExistingEnd = Vector3.Distance(end, existingEnd);
 
-                        Debug.Log($"Wall connection check: distances = [{distStartToExistingStart:F2}, {distStartToExistingEnd:F2}, {distEndToExistingStart:F2}, {distEndToExistingEnd:F2}] tolerance={endpointTolerance}");
 
                         if (distStartToExistingStart < endpointTolerance ||
                             distStartToExistingEnd < endpointTolerance ||
                             distEndToExistingStart < endpointTolerance ||
                             distEndToExistingEnd < endpointTolerance)
                         {
-                            Debug.Log($"✅ Allowing wall connection to {col.gameObject.name} (endpoint match)");
                             continue; // Allow endpoint connections
                         }
 
@@ -270,19 +272,16 @@ namespace RTS.Buildings
 
                         if (distStartToMid < endpointTolerance || distEndToMid < endpointTolerance)
                         {
-                            Debug.Log($"✅ Allowing wall connection to {col.gameObject.name} (midpoint match)");
                             continue; // Allow midpoint connections
                         }
 
                         if (SegmentsIntersect2D(start, end, existingStart, existingEnd))
                         {
-                            Debug.Log($"❌ Wall would intersect existing wall: {col.gameObject.name}");
                             return true;
                         }
 
                         if (AreCollinearAndOverlapping(start, end, existingStart, existingEnd))
                         {
-                            Debug.Log($"❌ Wall would overlap existing wall (collinear): {col.gameObject.name}");
                             return true;
                         }
                     }
@@ -295,7 +294,6 @@ namespace RTS.Buildings
                             continue; // Allow placement near wall position
                         }
 
-                        Debug.Log($"Wall would overlap existing wall: {col.gameObject.name} at {wallPos}");
                         return true;
                     }
                 }
@@ -419,7 +417,6 @@ namespace RTS.Buildings
 
             if (resourceService == null)
             {
-                Debug.LogError("WallPlacementController: ResourceService not available!");
             }
 
             // Find fog of war system if not assigned
@@ -428,7 +425,6 @@ namespace RTS.Buildings
                 fogWarSystem = FindFirstObjectByType<csFogWar>();
                 if (fogWarSystem == null)
                 {
-                    Debug.LogWarning("[WallPlacementController] No csFogWar found in scene. Fog of war checks will be skipped.");
                 }
             }
         }
@@ -466,7 +462,6 @@ namespace RTS.Buildings
         {
             if (wallData == null || wallData.buildingPrefab == null)
             {
-                Debug.LogError("Invalid wall data!");
                 return;
             }
 
@@ -479,7 +474,6 @@ namespace RTS.Buildings
             if (useAutoMeshSize)
             {
                 wallMeshLength = DetectWallMeshLength(wallData.buildingPrefab);
-                Debug.Log($"Auto-detected wall mesh length: {wallMeshLength}");
             }
 
             placedWallPositions.Clear();
@@ -487,7 +481,8 @@ namespace RTS.Buildings
 
             CreatePolePreview();
 
-            Debug.Log($"Started placing walls: {wallData.buildingName}");
+            // Show wall placement notification
+            ShowWallPlacementNotification(true);
         }
 
         public void CancelWallPlacement()
@@ -520,6 +515,9 @@ namespace RTS.Buildings
             requiredSegments = 0;
             totalCost.Clear();
             isSnappedToWall = false;
+
+            // Hide wall placement notification
+            ShowWallPlacementNotification(false);
         }
 
         public bool IsPlacingWalls => isPlacingWall;
@@ -573,7 +571,6 @@ namespace RTS.Buildings
                 return Mathf.Max(size, 0.1f);
             }
 
-            Debug.LogWarning($"Could not detect wall mesh length, using transform scale {wallLengthAxis}");
             float scaleValue = wallLengthAxis == WallLengthAxis.X ? wallPrefab.transform.localScale.x :
                               (wallLengthAxis == WallLengthAxis.Y ? wallPrefab.transform.localScale.y : wallPrefab.transform.localScale.z);
             return Mathf.Max(scaleValue, 1f);
@@ -642,7 +639,6 @@ namespace RTS.Buildings
 
                 if (notVisible)
                 {
-                    Debug.Log("Cannot place wall: area not currently visible");
                 }
             }
 
@@ -861,7 +857,6 @@ namespace RTS.Buildings
                     }
                     else
                     {
-                        Debug.Log("Not enough resources to build walls!");
                         EventBus.Publish(new ResourcesSpentEvent(
                             totalCost.GetValueOrDefault(ResourceType.Wood, 0),
                             totalCost.GetValueOrDefault(ResourceType.Food, 0),
@@ -877,7 +872,6 @@ namespace RTS.Buildings
                 (keyboard != null && keyboard.escapeKey.wasPressedThisFrame))
             {
                 CancelWallPlacement();
-                Debug.Log("Wall placement canceled");
             }
         }
 
@@ -914,28 +908,24 @@ namespace RTS.Buildings
             if (firstPoleVisual.TryGetComponent<Collider>(out var collider))
                 Destroy(collider);
 
-            Debug.Log($"First pole placed at {firstPolePosition}");
         }
 
         private void PlaceWallSegments()
         {
             if (!canAfford || requiredSegments == 0 || currentWallData == null)
             {
-                Debug.Log("Cannot place walls!");
                 return;
             }
 
             bool success = resourceService.SpendResources(totalCost);
             if (!success)
             {
-                Debug.LogError("Failed to spend resources!");
                 return;
             }
 
             Vector3 mouseWorld = GetMouseWorldPosition();
             if (mouseWorld == Vector3.zero)
             {
-                Debug.LogWarning("PlaceWallSegments: mouse world position invalid.");
                 return;
             }
 
@@ -976,7 +966,6 @@ namespace RTS.Buildings
             List<WallSegmentData> segmentData = CalculateWallSegmentsWithScaling(firstPolePosition, secondPolePos);
 
             float totalDist = Vector3.Distance(firstPolePosition, secondPolePos);
-            Debug.Log($"[PlaceWalls] Distance: {totalDist:F2}m, Segments: {segmentData.Count}, Mesh Length: {wallMeshLength:F2}m");
 
             foreach (var data in segmentData)
             {
@@ -1030,7 +1019,7 @@ namespace RTS.Buildings
                 for (int i = 0; i < hitCount; i++)
                 {
                     var hit = _overlapResults[i];
-                    if (hit.GetComponent<WallConnectionSystem>() != null)
+                    if (hit.TryGetComponent<WallConnectionSystem>(out var wallConnectionSystem))
                     {
                         EventBus.Publish(new BuildingPlacedEvent(hit.gameObject, data.position));
                         break;
@@ -1038,7 +1027,6 @@ namespace RTS.Buildings
                 }
             }
 
-            Debug.Log($"✅ Placed {segmentData.Count} wall segments with perfect fit!");
 
             EventBus.Publish(new ResourcesSpentEvent(
                 totalCost.GetValueOrDefault(ResourceType.Wood, 0),
@@ -1050,7 +1038,6 @@ namespace RTS.Buildings
 
             if (snappedToExistingWall && autoCompleteOnSnap)
             {
-                Debug.Log("🔒 Wall loop completed! Auto-canceling placement.");
                 CancelWallPlacement();
             }
             else
@@ -1097,7 +1084,6 @@ namespace RTS.Buildings
             requiredSegments = 0;
             totalCost.Clear();
 
-            Debug.Log($"Continuing wall chain from {firstPolePosition}");
         }
 
         #endregion
@@ -1296,6 +1282,22 @@ namespace RTS.Buildings
                 {
                     renderer.sharedMaterial = material;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Show or hide the wall placement notification text.
+        /// </summary>
+        private void ShowWallPlacementNotification(bool show)
+        {
+            if (wallPlacementNotificationText == null) return;
+
+            wallPlacementNotificationText.gameObject.SetActive(show);
+
+            if (show)
+            {
+                wallPlacementNotificationText.text = wallPlacementWarningMessage;
+                wallPlacementNotificationText.color = warningTextColor;
             }
         }
 

@@ -52,7 +52,6 @@ namespace RTS.SaveLoad
 
             if (saveLoadService == null)
             {
-                Debug.LogError("MainMenuLoadPanel: ISaveLoadService not found!");
             }
         }
 
@@ -60,7 +59,6 @@ namespace RTS.SaveLoad
         {
             if (loadPanel == null)
             {
-                Debug.LogError("Load panel not assigned!");
                 return;
             }
 
@@ -114,7 +112,9 @@ namespace RTS.SaveLoad
                 return;
 
             GameObject itemObj = Instantiate(saveListItemPrefab, saveListContent);
-            SaveListItem item = itemObj.GetComponent<SaveListItem>();
+            if (itemObj.TryGetComponent<SaveListItem>(out var item))
+            {
+            }
 
             if (item != null)
             {
@@ -147,7 +147,6 @@ namespace RTS.SaveLoad
 
             string saveName = selectedSaveItem.SaveInfo.saveName;
 
-            Debug.Log($"Loading save from main menu: {saveName}");
 
             // Store the save name to load after scene loads
             PlayerPrefs.SetString("LoadSaveOnStart", saveName);
@@ -173,18 +172,15 @@ namespace RTS.SaveLoad
 
             string saveName = selectedSaveItem.SaveInfo.saveName;
 
-            Debug.Log($"Deleting save: {saveName}");
 
             bool success = saveLoadService.DeleteSave(saveName);
 
             if (success)
             {
-                Debug.Log($"Save deleted: {saveName}");
                 RefreshSaveList();
             }
             else
             {
-                Debug.LogError($"Failed to delete save: {saveName}");
             }
         }
 

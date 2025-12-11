@@ -56,7 +56,6 @@ namespace RTS.UI.Minimap
 
             if (minimapController == null)
             {
-                Debug.LogError("MinimapDragHandler: Could not find MiniMapControllerPro! Please assign it in the inspector.");
                 enabled = false;
             }
         }
@@ -81,7 +80,6 @@ namespace RTS.UI.Minimap
                 Cursor.SetCursor(dragCursor, Vector2.zero, CursorMode.Auto);
             }
 
-            Debug.Log("MinimapDragHandler: Drag started");
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -120,7 +118,6 @@ namespace RTS.UI.Minimap
                 Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             }
 
-            Debug.Log("MinimapDragHandler: Drag ended");
         }
 
         private void MoveCamera(Vector2 screenPosition, Camera eventCamera)

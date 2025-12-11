@@ -276,7 +276,6 @@ namespace FlowField.Editor
 
         private void ScanProject()
         {
-            UnityEngine.Debug.Log("=== Starting NavMesh to FlowField Scan ===");
 
             unitsWithNavMesh.Clear();
             buildingsWithNavMeshObstacle.Clear();
@@ -301,7 +300,7 @@ namespace FlowField.Editor
                 {
                     buildingsWithNavMeshObstacle.Add(obstacle.gameObject);
                 }
-                else if (obstacle.GetComponent<WallNavMeshObstacle>() != null)
+                else if (obstacle.TryGetComponent<WallNavMeshObstacle>(out var wallNavMeshObstacle))
                 {
                     wallsWithNavMeshObstacle.Add(obstacle.gameObject);
                 }
@@ -320,12 +319,6 @@ namespace FlowField.Editor
 
             scanComplete = true;
 
-            UnityEngine.Debug.Log($"Scan complete! Found:\n" +
-                     $"- {unitsWithNavMesh.Count} units with NavMeshAgent\n" +
-                     $"- {buildingsWithNavMeshObstacle.Count} buildings with NavMeshObstacle\n" +
-                     $"- {wallsWithNavMeshObstacle.Count} walls with NavMeshObstacle\n" +
-                     $"- {navMeshSurfaces.Count} NavMeshSurfaces\n" +
-                     $"- {prefabsToUpdate.Count} prefabs to update");
 
             Repaint();
         }
@@ -358,7 +351,6 @@ namespace FlowField.Editor
 
         private void MigrateProject()
         {
-            UnityEngine.Debug.Log("=== Starting NavMesh to FlowField Migration ===");
 
             int totalSteps = 0;
             int currentStep = 0;
@@ -469,7 +461,6 @@ namespace FlowField.Editor
                     "OK"
                 );
 
-                UnityEngine.Debug.Log("=== Migration Complete ===");
 
                 // Rescan to show results
                 ScanProject();
@@ -482,7 +473,6 @@ namespace FlowField.Editor
                     $"An error occurred during migration:\n{e.Message}\n\nCheck the console for details.",
                     "OK"
                 );
-                UnityEngine.Debug.LogError($"Migration error: {e}");
             }
         }
 
@@ -491,7 +481,6 @@ namespace FlowField.Editor
             FlowFieldManager existing = FindFirstObjectByType<FlowFieldManager>();
             if (existing != null)
             {
-                UnityEngine.Debug.Log("FlowFieldManager already exists in scene");
                 return;
             }
 
@@ -513,7 +502,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(manager);
 
-            UnityEngine.Debug.Log("Created FlowFieldManager in scene");
         }
 
         private void ConvertUnitToFlowField(GameObject unit)
@@ -521,9 +509,8 @@ namespace FlowField.Editor
             if (unit == null) return;
 
             // Check if already converted
-            if (unit.GetComponent<FlowFieldFollower>() != null)
+            if (unit.TryGetComponent<FlowFieldFollower>(out var flowFieldFollower))
             {
-                UnityEngine.Debug.LogWarning($"Unit {unit.name} already has FlowFieldFollower");
                 return;
             }
 
@@ -548,7 +535,9 @@ namespace FlowField.Editor
             SetPrivateField(follower, "unitRadius", radius);
 
             // Ensure Rigidbody exists and is configured
-            Rigidbody rb = unit.GetComponent<Rigidbody>();
+            if (unit.TryGetComponent<Rigidbody>(out var rb))
+            {
+            }
             if (rb == null)
             {
                 rb = unit.AddComponent<Rigidbody>();
@@ -580,7 +569,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(unit);
 
-            UnityEngine.Debug.Log($"Converted unit {unit.name} to FlowField (speed: {speed})");
         }
 
         private void ConvertBuildingToFlowField(GameObject building)
@@ -588,9 +576,8 @@ namespace FlowField.Editor
             if (building == null) return;
 
             // Check if already converted
-            if (building.GetComponent<BuildingFlowFieldObstacle>() != null)
+            if (building.TryGetComponent<BuildingFlowFieldObstacle>(out var buildingFlowFieldObstacle))
             {
-                UnityEngine.Debug.LogWarning($"Building {building.name} already has BuildingFlowFieldObstacle");
                 return;
             }
 
@@ -600,8 +587,12 @@ namespace FlowField.Editor
             // Remove NavMesh obstacle components
             if (removeNavMeshComponents)
             {
-                BuildingNavMeshObstacle oldObstacle = building.GetComponent<BuildingNavMeshObstacle>();
-                NavMeshObstacle navObstacle = building.GetComponent<NavMeshObstacle>();
+                if (building.TryGetComponent<BuildingNavMeshObstacle>(out var oldObstacle))
+                {
+                }
+                if (building.TryGetComponent<NavMeshObstacle>(out var navObstacle))
+                {
+                }
 
                 if (oldObstacle != null) DestroyImmediate(oldObstacle);
                 if (navObstacle != null) DestroyImmediate(navObstacle);
@@ -609,7 +600,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(building);
 
-            UnityEngine.Debug.Log($"Converted building {building.name} to FlowField obstacle");
         }
 
         private void ConvertWallToFlowField(GameObject wall)
@@ -617,9 +607,8 @@ namespace FlowField.Editor
             if (wall == null) return;
 
             // Check if already converted
-            if (wall.GetComponent<WallFlowFieldObstacle>() != null)
+            if (wall.TryGetComponent<WallFlowFieldObstacle>(out var wallFlowFieldObstacle))
             {
-                UnityEngine.Debug.LogWarning($"Wall {wall.name} already has WallFlowFieldObstacle");
                 return;
             }
 
@@ -629,8 +618,12 @@ namespace FlowField.Editor
             // Remove NavMesh obstacle components
             if (removeNavMeshComponents)
             {
-                WallNavMeshObstacle oldObstacle = wall.GetComponent<WallNavMeshObstacle>();
-                NavMeshObstacle navObstacle = wall.GetComponent<NavMeshObstacle>();
+                if (wall.TryGetComponent<WallNavMeshObstacle>(out var oldObstacle))
+                {
+                }
+                if (wall.TryGetComponent<NavMeshObstacle>(out var navObstacle))
+                {
+                }
 
                 if (oldObstacle != null) DestroyImmediate(oldObstacle);
                 if (navObstacle != null) DestroyImmediate(navObstacle);
@@ -638,7 +631,6 @@ namespace FlowField.Editor
 
             EditorUtility.SetDirty(wall);
 
-            UnityEngine.Debug.Log($"Converted wall {wall.name} to FlowField obstacle");
         }
 
         private void UpdatePrefab(string prefabPath)
@@ -686,7 +678,6 @@ namespace FlowField.Editor
             if (modified)
             {
                 PrefabUtility.SaveAsPrefabAsset(prefabContents, path);
-                UnityEngine.Debug.Log($"Updated prefab: {prefabPath}");
             }
 
             PrefabUtility.UnloadPrefabContents(prefabContents);

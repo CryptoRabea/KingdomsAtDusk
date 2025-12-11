@@ -142,13 +142,11 @@ namespace RTS.Buildings
         {
             if (isAnimating)
             {
-                Debug.LogWarning("Gate is already animating!");
                 return;
             }
 
             if (gateData == null)
             {
-                Debug.LogError("Gate data not set!");
                 return;
             }
 
@@ -163,13 +161,11 @@ namespace RTS.Buildings
         {
             if (isAnimating)
             {
-                Debug.LogWarning("Gate is already animating!");
                 return;
             }
 
             if (gateData == null)
             {
-                Debug.LogError("Gate data not set!");
                 return;
             }
 
@@ -332,7 +328,6 @@ namespace RTS.Buildings
         {
             if (gateData == null)
             {
-                Debug.LogWarning("Gate data not set! Assign gateData in Inspector or call SetGateData()");
                 return;
             }
             Open();
@@ -343,7 +338,6 @@ namespace RTS.Buildings
         {
             if (gateData == null)
             {
-                Debug.LogWarning("Gate data not set! Assign gateData in Inspector or call SetGateData()");
                 return;
             }
             Close();

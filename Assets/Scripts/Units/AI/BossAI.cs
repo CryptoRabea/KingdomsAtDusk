@@ -91,7 +91,6 @@ namespace RTS.Units.AI
                 Combat.SetAttackDamage(originalDamage * phase2DamageMultiplier);
             }
 
-            Debug.Log($"{gameObject.name} entered PHASE 2! Damage increased!");
 
             // Immediate summon on phase transition
             SummonMinions();
@@ -108,7 +107,6 @@ namespace RTS.Units.AI
                 Combat.SetAttackRate(originalAttackRate * phase3AttackSpeedMultiplier);
             }
 
-            Debug.Log($"{gameObject.name} entered PHASE 3! MAXIMUM POWER!");
 
             // Immediate summon and area attack on phase transition
             SummonMinions();
@@ -143,7 +141,6 @@ namespace RTS.Units.AI
         {
             if (minionPrefab == null)
             {
-                Debug.LogWarning($"{gameObject.name} has no minion prefab assigned!");
                 return;
             }
 
@@ -157,8 +154,7 @@ namespace RTS.Units.AI
                 GameObject minion;
                 if (poolService != null)
                 {
-                    var minionComponent = minionPrefab.GetComponent<Transform>();
-                    if (minionComponent != null)
+                    if (minionPrefab.TryGetComponent<Transform>(out var minionComponent))
                     {
                         var pooledComponent = poolService.Get(minionComponent);
                         minion = pooledComponent.gameObject;
@@ -179,7 +175,6 @@ namespace RTS.Units.AI
                 EventBus.Publish(new UnitSpawnedEvent(minion, spawnPosition));
             }
 
-            Debug.Log($"{gameObject.name} summoned {minionsPerSummon} minions!");
         }
 
         private void PerformAreaAttack()
@@ -193,8 +188,7 @@ namespace RTS.Units.AI
                 var hit = areaAttackHits[i];
                 if (hit == null) continue;
 
-                var health = hit.GetComponent<UnitHealth>();
-                if (health != null && !health.IsDead)
+                if (hit.TryGetComponent<UnitHealth>(out var health) && !health.IsDead)
                 {
                     health.TakeDamage(areaAttackDamage, gameObject);
                     hitCount++;
@@ -203,7 +197,6 @@ namespace RTS.Units.AI
 
             if (hitCount > 0)
             {
-                Debug.Log($"{gameObject.name} performed AREA ATTACK hitting {hitCount} units!");
             }
         }
 

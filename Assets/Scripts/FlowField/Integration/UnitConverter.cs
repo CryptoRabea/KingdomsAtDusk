@@ -68,7 +68,6 @@ namespace FlowField.Integration
                 }
             }
 
-            UnityEngine.Debug.Log($"Converted {convertedCount} units to Flow Field movement");
         }
 
         /// <summary>
@@ -80,9 +79,8 @@ namespace FlowField.Integration
                 return false;
 
             // Check if already has FlowFieldFollower
-            if (unit.GetComponent<FlowFieldFollower>() != null)
+            if (unit.TryGetComponent<FlowFieldFollower>(out var flowFieldFollower))
             {
-                UnityEngine.Debug.LogWarning($"Unit {unit.name} already has FlowFieldFollower");
                 return false;
             }
 
@@ -129,7 +127,9 @@ namespace FlowField.Integration
             SetPrivateField(follower, "unitRadius", radius);
 
             // Ensure Rigidbody exists
-            Rigidbody rb = unit.GetComponent<Rigidbody>();
+            if (unit.TryGetComponent<Rigidbody>(out var rb))
+            {
+            }
             if (rb == null)
             {
                 rb = unit.AddComponent<Rigidbody>();
@@ -142,7 +142,6 @@ namespace FlowField.Integration
                             RigidbodyConstraints.FreezeRotationZ;
             rb.mass = 1f;
 
-            UnityEngine.Debug.Log($"Converted {unit.name} to Flow Field movement (Speed: {speed})");
 
             return true;
         }
@@ -170,14 +169,12 @@ namespace FlowField.Integration
             if (unit == null)
                 return;
 
-            FlowFieldFollower follower = unit.GetComponent<FlowFieldFollower>();
-            if (follower != null)
+            if (unit.TryGetComponent<FlowFieldFollower>(out var follower))
             {
                 Destroy(follower);
             }
 
-            NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
-            if (agent != null)
+            if (unit.TryGetComponent<NavMeshAgent>(out var agent))
             {
                 agent.enabled = true;
             }
@@ -189,7 +186,6 @@ namespace FlowField.Integration
                 unitMovement.enabled = true;
             }
 
-            UnityEngine.Debug.Log($"Reverted {unit.name} to NavMesh movement");
         }
     }
 }

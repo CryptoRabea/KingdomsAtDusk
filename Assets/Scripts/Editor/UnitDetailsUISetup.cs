@@ -65,7 +65,9 @@ namespace RTS.Editor
 
             // Create visual panel as child (this gets hidden/shown)
             GameObject panelRoot = CreateUIElement("UnitDetailsPanel", componentWrapper.transform);
-            RectTransform panelRect = panelRoot.GetComponent<RectTransform>();
+            if (panelRoot.TryGetComponent<RectTransform>(out var panelRect))
+            {
+            }
 
             // Position panel on the left side of screen
             panelRect.anchorMin = new Vector2(0.02f, 0.2f);
@@ -87,7 +89,9 @@ namespace RTS.Editor
 
             // Unit portrait
             GameObject portraitObj = CreateUIElement("UnitPortrait", headerSection.transform);
-            RectTransform portraitRect = portraitObj.GetComponent<RectTransform>();
+            if (portraitObj.TryGetComponent<RectTransform>(out var portraitRect))
+            {
+            }
             portraitRect.sizeDelta = new Vector2(100, 100);
             Image unitPortrait = portraitObj.AddComponent<Image>();
             unitPortrait.color = Color.white;
@@ -95,7 +99,9 @@ namespace RTS.Editor
 
             // Unit name
             GameObject nameObj = CreateTextElement("UnitName", headerSection.transform, "Unit Name", 20, TextAlignmentOptions.Center);
-            TextMeshProUGUI unitNameText = nameObj.GetComponent<TextMeshProUGUI>();
+            if (nameObj.TryGetComponent<TextMeshProUGUI>(out var unitNameText))
+            {
+            }
             unitNameText.fontStyle = FontStyles.Bold;
 
             // Create stats section
@@ -107,13 +113,17 @@ namespace RTS.Editor
 
             // Health bar container
             GameObject healthBarContainer = CreateUIElement("HealthBarContainer", statsSection.transform);
-            RectTransform healthBarRect = healthBarContainer.GetComponent<RectTransform>();
+            if (healthBarContainer.TryGetComponent<RectTransform>(out var healthBarRect))
+            {
+            }
             healthBarRect.sizeDelta = new Vector2(0, 25);
             SetupLayoutElement(healthBarContainer, 0, 25);
 
             // Health bar background
             GameObject healthBarBg = CreateUIElement("HealthBarBg", healthBarContainer.transform);
-            RectTransform healthBarBgRect = healthBarBg.GetComponent<RectTransform>();
+            if (healthBarBg.TryGetComponent<RectTransform>(out var healthBarBgRect))
+            {
+            }
             healthBarBgRect.anchorMin = Vector2.zero;
             healthBarBgRect.anchorMax = Vector2.one;
             healthBarBgRect.offsetMin = Vector2.zero;
@@ -123,7 +133,9 @@ namespace RTS.Editor
 
             // Health bar fill
             GameObject healthBarFillObj = CreateUIElement("HealthBarFill", healthBarBg.transform);
-            RectTransform healthBarFillRect = healthBarFillObj.GetComponent<RectTransform>();
+            if (healthBarFillObj.TryGetComponent<RectTransform>(out var healthBarFillRect))
+            {
+            }
             healthBarFillRect.anchorMin = Vector2.zero;
             healthBarFillRect.anchorMax = new Vector2(1, 1);
             healthBarFillRect.pivot = new Vector2(0, 0.5f);
@@ -179,9 +191,6 @@ namespace RTS.Editor
             EditorUtility.SetDirty(componentWrapper);
             Selection.activeGameObject = componentWrapper;
 
-            Debug.Log("✅ UnitDetailsUI created successfully!");
-            Debug.Log("   - UnitDetailsUI component: ACTIVE (receives events)");
-            Debug.Log("   - UnitDetailsPanel visual: INACTIVE (will show when unit selected)");
         }
 
         // Helper methods

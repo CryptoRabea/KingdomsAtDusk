@@ -25,10 +25,10 @@ namespace RTS.Units.Animation
             }
 
             // Check for required components
-            bool hasAnimator = selected.GetComponent<Animator>() != null;
-            bool hasMovement = selected.GetComponent<UnitMovement>() != null;
-            bool hasCombat = selected.GetComponent<UnitCombat>() != null;
-            bool hasHealth = selected.GetComponent<UnitHealth>() != null;
+            bool hasAnimator = selected.TryGetComponent<Animator>(out var _);
+            bool hasMovement = selected.TryGetComponent<UnitMovement>(out var _);
+            bool hasCombat = selected.TryGetComponent<UnitCombat>(out var _);
+            bool hasHealth = selected.TryGetComponent<UnitHealth>(out var _);
 
             if (!hasAnimator)
             {
@@ -38,7 +38,6 @@ namespace RTS.Units.Animation
                     "Yes", "Cancel"))
                 {
                     selected.AddComponent<Animator>();
-                    Debug.Log("✅ Added Animator component");
                 }
                 else
                 {
@@ -50,7 +49,6 @@ namespace RTS.Units.Animation
             if (selected.GetComponent<UnitAnimationController>() == null)
             {
                 selected.AddComponent<UnitAnimationController>();
-                Debug.Log("✅ Added UnitAnimationController");
             }
 
             // Optionally add UnitAnimationEvents
@@ -62,7 +60,6 @@ namespace RTS.Units.Animation
                 if (selected.GetComponent<UnitAnimationEvents>() == null)
                 {
                     selected.AddComponent<UnitAnimationEvents>();
-                    Debug.Log("✅ Added UnitAnimationEvents");
                 }
             }
 
@@ -75,24 +72,20 @@ namespace RTS.Units.Animation
                 if (selected.GetComponent<UnitAnimationAdvanced>() == null)
                 {
                     selected.AddComponent<UnitAnimationAdvanced>();
-                    Debug.Log("✅ Added UnitAnimationAdvanced");
                 }
             }
 
             // Warnings for missing components
             if (!hasMovement)
             {
-                Debug.LogWarning("⚠️ UnitMovement component not found. Add it for movement animations.");
             }
 
             if (!hasCombat)
             {
-                Debug.LogWarning("⚠️ UnitCombat component not found. Add it for attack animations.");
             }
 
             if (!hasHealth)
             {
-                Debug.LogWarning("⚠️ UnitHealth component not found. Add it for death animations.");
             }
 
             EditorUtility.DisplayDialog(
@@ -120,7 +113,9 @@ namespace RTS.Units.Animation
                 return;
             }
 
-            Animator animator = selected.GetComponent<Animator>();
+            if (selected.TryGetComponent<Animator>(out var animator))
+            {
+            }
             if (animator == null || animator.runtimeAnimatorController == null)
             {
                 EditorUtility.DisplayDialog(
@@ -195,7 +190,6 @@ namespace RTS.Units.Animation
             EditorUtility.FocusProjectWindow();
             Selection.activeObject = config;
 
-            Debug.Log($"✅ Created AnimationConfig at {path}");
         }
     }
 

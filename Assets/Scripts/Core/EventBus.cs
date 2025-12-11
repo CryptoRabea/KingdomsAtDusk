@@ -63,7 +63,6 @@ namespace RTS.Core.Events
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError($"Error invoking event handler for {eventType.Name}: {e.Message}\nStack trace: {e.StackTrace}");
                     }
                 }
             }

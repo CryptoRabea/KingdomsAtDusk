@@ -51,7 +51,7 @@ namespace RTS.UI
         [SerializeField] private Sprite stoneIcon;
 
         [Header("Positioning")]
-        [SerializeField] private Vector2 fixedPosition = new Vector2(0, 200); // Position above HUD
+        [SerializeField] private Vector2 fixedPosition = new Vector2(0, -300); // Position in bottom mid box
         [SerializeField] private bool useFixedPosition = true;
 
         private List<GameObject> activeCostItems = new List<GameObject>();
@@ -154,9 +154,7 @@ namespace RTS.UI
             foreach (var item in activeCostItems)
             {
                 if (item != null)
-                {
                     Destroy(item);
-                }
             }
             activeCostItems.Clear();
 
@@ -169,7 +167,6 @@ namespace RTS.UI
 
             costsContainer.SetActive(true);
 
-            // Create cost items
             foreach (var cost in costs)
             {
                 if (cost.Value <= 0) continue;
@@ -177,52 +174,42 @@ namespace RTS.UI
                 GameObject costItem = Instantiate(costItemPrefab, costsContainer.transform);
                 activeCostItems.Add(costItem);
 
-                // Find icon component - try "Icon" child first, then get from root
-                Image iconImage = costItem.transform.Find("Icon")?.GetComponent<Image>();
+                // --- ICON ---
+                Image iconImage = null;
+                Transform iconTransform = costItem.transform.Find("Icon");
+                if (iconTransform != null)
+                    iconTransform.TryGetComponent<Image>(out iconImage);
                 if (iconImage == null)
-                {
                     iconImage = costItem.GetComponentInChildren<Image>();
-                }
 
-                // Find text component - try multiple common names
-                TextMeshProUGUI costText = costItem.transform.Find("Text")?.GetComponent<TextMeshProUGUI>();
-                if (costText == null)
-                {
-                    costText = costItem.transform.Find("CostText")?.GetComponent<TextMeshProUGUI>();
-                }
-                if (costText == null)
-                {
-                    costText = costItem.transform.Find("Amount")?.GetComponent<TextMeshProUGUI>();
-                }
-                if (costText == null)
-                {
-                    costText = costItem.transform.Find("Value")?.GetComponent<TextMeshProUGUI>();
-                }
-                if (costText == null)
-                {
-                    // Last resort - get any TextMeshProUGUI component in children
-                    costText = costItem.GetComponentInChildren<TextMeshProUGUI>();
-                }
-
-                // Set icon
                 if (iconImage != null)
-                {
                     iconImage.sprite = GetResourceIcon(cost.Key);
+
+                // --- TEXT ---
+                TextMeshProUGUI costText = null;
+
+                string[] possibleNames = { "Text", "CostText", "Amount", "Value" };
+                foreach (var name in possibleNames)
+                {
+                    Transform textTransform = costItem.transform.Find(name);
+                    if (textTransform != null)
+                    {
+                        costText = textTransform.GetComponent<TextMeshProUGUI>();
+                        if (costText != null)
+                            break;
+                    }
                 }
 
-                // Set text
+                if (costText == null)
+                    costText = costItem.GetComponentInChildren<TextMeshProUGUI>();
+
                 if (costText != null)
-                {
                     costText.text = cost.Value.ToString();
-                }
-                else
-                {
-                    Debug.LogWarning($"UniversalTooltip: Could not find TextMeshProUGUI component in cost item prefab for {cost.Key}. Make sure the prefab has a TextMeshProUGUI component.");
-                }
 
                 costItem.SetActive(true);
             }
         }
+
 
         /// <summary>
         /// Update the stats display.

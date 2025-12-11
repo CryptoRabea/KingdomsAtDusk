@@ -44,11 +44,16 @@ namespace RTS.Buildings
         [Header("Debug")]
         [SerializeField] private bool showDebugInfo = true;
 
+        [Header("Performance")]
+        [SerializeField] private float progressUpdateInterval = 0.1f; // Only update progress every 0.1s
+
         private Queue<TrainingQueueEntry> trainingQueue = new Queue<TrainingQueueEntry>();
         private TrainingQueueEntry currentTraining;
         private Building building;
         private IResourcesService resourceService;
         private BuildingDataSO buildingData;
+        private float progressUpdateTimer = 0f;
+        private float lastPublishedProgress = 0f;
 
         public int QueueCount => trainingQueue.Count + (currentTraining != null ? 1 : 0);
         public bool IsTraining => currentTraining != null;
@@ -67,7 +72,6 @@ namespace RTS.Buildings
                 if (spawnPointComponent != null)
                 {
                     spawnPoint = spawnPointComponent.Transform;
-                    Debug.Log($"Using BuildingSpawnPoint from prefab at {spawnPoint.localPosition}");
                 }
                 else
                 {
@@ -76,7 +80,6 @@ namespace RTS.Buildings
                     spawnObj.transform.SetParent(transform);
                     spawnObj.transform.localPosition = Vector3.forward * 3f; // 3 units in front
                     spawnPoint = spawnObj.transform;
-                    Debug.LogWarning($"No BuildingSpawnPoint found in prefab. Auto-created spawn point. Consider adding a BuildingSpawnPoint component to the building prefab.");
                 }
             }
         }
@@ -101,25 +104,41 @@ namespace RTS.Buildings
             {
                 currentTraining.timeRemaining -= Time.deltaTime;
 
-                // Publish progress update
-                if (currentTraining.unitData?.unitConfig != null)
+                // Publish progress update at intervals, not every frame (massive performance boost)
+                progressUpdateTimer += Time.deltaTime;
+                if (progressUpdateTimer >= progressUpdateInterval)
                 {
-                    EventBus.Publish(new TrainingProgressEvent(
-                        gameObject,
-                        currentTraining.unitData.unitConfig.unitName,
-                        currentTraining.Progress
-                    ));
+                    progressUpdateTimer = 0f;
+
+                    // Only publish if progress actually changed significantly
+                    float currentProgress = currentTraining.Progress;
+                    if (Mathf.Abs(currentProgress - lastPublishedProgress) > 0.01f)
+                    {
+                        if (currentTraining.unitData?.unitConfig != null)
+                        {
+                            EventBus.Publish(new TrainingProgressEvent(
+                                gameObject,
+                                currentTraining.unitData.unitConfig.unitName,
+                                currentProgress
+                            ));
+                            lastPublishedProgress = currentProgress;
+                        }
+                    }
                 }
 
                 if (currentTraining.timeRemaining <= 0)
                 {
                     CompleteTraining();
+                    progressUpdateTimer = 0f;
+                    lastPublishedProgress = 0f;
                 }
             }
             else if (trainingQueue.Count > 0)
             {
                 // Start next unit in queue
                 currentTraining = trainingQueue.Dequeue();
+                progressUpdateTimer = 0f;
+                lastPublishedProgress = 0f;
             }
         }
 
@@ -131,14 +150,12 @@ namespace RTS.Buildings
         {
             if (unitData == null || unitData.unitConfig == null)
             {
-                Debug.LogWarning("Cannot train unit: invalid unit data");
                 return false;
             }
 
             // Check queue capacity
             if (QueueCount >= maxQueueSize)
             {
-                Debug.LogWarning($"Training queue is full ({maxQueueSize})");
                 return false;
             }
 
@@ -148,13 +165,11 @@ namespace RTS.Buildings
                 var costs = unitData.GetCosts();
                 if (!resourceService.CanAfford(costs))
                 {
-                    Debug.LogWarning($"Cannot afford {unitData.unitConfig.unitName}");
                     return false;
                 }
 
                 if (!resourceService.SpendResources(costs))
                 {
-                    Debug.LogWarning($"Failed to spend resources for {unitData.unitConfig.unitName}");
                     return false;
                 }
             }
@@ -168,7 +183,6 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($"Started training {unitData.unitConfig.unitName} at {buildingData?.buildingName ?? "Building"}. Queue: {QueueCount}");
             }
 
             return true;
@@ -178,14 +192,12 @@ namespace RTS.Buildings
         {
             if (currentTraining?.unitData?.unitConfig?.unitPrefab == null)
             {
-                Debug.LogError("Cannot complete training: missing unit prefab");
                 currentTraining = null;
                 return;
             }
 
             if (showDebugInfo)
             {
-                Debug.Log($"🎖️ UnitTrainingQueue: Spawning {currentTraining.unitData.unitConfig.unitName} at {spawnPoint.position}");
             }
 
             // Spawn the unit
@@ -197,7 +209,6 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($" UnitTrainingQueue: Unit spawned - {spawnedUnit.name}. Rally point null? {rallyPoint == null}");
             }
 
             // Move to rally point if set - use coroutine to wait for NavMeshAgent to initialize
@@ -209,7 +220,6 @@ namespace RTS.Buildings
             {
                 if (showDebugInfo)
                 {
-                    Debug.LogWarning($"⚠️ UnitTrainingQueue: No rally point set for {gameObject.name}, unit will stay at spawn position");
                 }
             }
 
@@ -224,7 +234,6 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($" Completed training {currentTraining.unitData.unitConfig.unitName}");
             }
 
             currentTraining = null;
@@ -251,7 +260,6 @@ namespace RTS.Buildings
                 }
 
                 resourceService.AddResources(refundAmount);
-                Debug.Log($"Refunded resources for cancelled training");
             }
 
             currentTraining = null;
@@ -263,7 +271,6 @@ namespace RTS.Buildings
         public void ClearQueue()
         {
             trainingQueue.Clear();
-            Debug.Log("Training queue cleared");
         }
 
         /// <summary>
@@ -276,7 +283,6 @@ namespace RTS.Buildings
                 spawnPoint.position = position;
                 if (showDebugInfo)
                 {
-                    Debug.Log($"Spawn point set to {position}");
                 }
             }
         }
@@ -302,7 +308,6 @@ namespace RTS.Buildings
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($"🚩 UnitTrainingQueue: Created rally point for {gameObject.name}");
                 }
             }
 
@@ -311,7 +316,6 @@ namespace RTS.Buildings
 
             if (showDebugInfo)
             {
-                Debug.Log($" UnitTrainingQueue: Rally point set to world position {position} for {gameObject.name}");
             }
         }
 
@@ -349,7 +353,6 @@ namespace RTS.Buildings
         {
             if (showDebugInfo)
             {
-                Debug.Log($"🚩 UnitTrainingQueue: Rally point exists at {destination}, waiting for NavMeshAgent to initialize...");
             }
 
             // Wait a frame for the unit to fully initialize
@@ -357,7 +360,6 @@ namespace RTS.Buildings
 
             if (unit == null)
             {
-                Debug.LogError($" UnitTrainingQueue: Unit destroyed before it could move to rally point!");
                 yield break;
             }
 
@@ -365,19 +367,16 @@ namespace RTS.Buildings
             {
                 if (showDebugInfo)
                 {
-                    Debug.Log($"🎯 UnitTrainingQueue: Issuing move command to {unit.name} to go to {destination}");
                 }
 
                 unitMovement.SetDestination(destination);
 
                 if (showDebugInfo)
                 {
-                    Debug.Log($" UnitTrainingQueue: Unit {unit.name} commanded to move to rally point at {destination}");
                 }
             }
             else
             {
-                Debug.LogError($" UnitTrainingQueue: Spawned unit {unit.name} has no UnitMovement component - cannot move to rally point!");
             }
         }
 
