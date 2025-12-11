@@ -278,6 +278,35 @@ namespace RTS.Editor
                 Log("Removed cross-scene FormationGroupManager reference (using singleton now)");
             }
 
+            // Setup formationDropdown reference if missing
+            var formationDropdownProp = so.FindProperty("formationDropdown");
+            if (formationDropdownProp != null)
+            {
+                if (formationDropdownProp.objectReferenceValue == null)
+                {
+                    // Try to find TMP_Dropdown in scene
+                    var dropdown = unitDetailsUI.GetComponentInChildren<TMP_Dropdown>();
+                    if (dropdown == null)
+                    {
+                        dropdown = FindFirstObjectByType<TMP_Dropdown>();
+                    }
+
+                    if (dropdown != null)
+                    {
+                        formationDropdownProp.objectReferenceValue = dropdown;
+                        Log($"Set formationDropdown reference: {dropdown.gameObject.name}");
+                    }
+                    else
+                    {
+                        Log("ERROR: No TMP_Dropdown found! Run Tools > RTS > Fix Formation Dropdown");
+                    }
+                }
+                else
+                {
+                    Log("formationDropdown already assigned");
+                }
+            }
+
             // Setup FormationSettingsSO reference if missing
             var formationSettingsProp = so.FindProperty("formationSettings");
             if (formationSettingsProp != null)
@@ -295,7 +324,7 @@ namespace RTS.Editor
                     }
                     else
                     {
-                        Log("WARNING: No FormationSettings SO found in project. Create one via: Assets > Create > RTS > Formation Settings");
+                        Log("WARNING: No FormationSettings SO found. Create one via: Assets > Create > RTS > Formation Settings");
                     }
                 }
                 else
@@ -318,27 +347,12 @@ namespace RTS.Editor
                     }
                     else
                     {
-                        Log("INFO: FormationBuilderUI not found (optional - only needed for custom formation creation)");
+                        Log("INFO: FormationBuilderUI not found (optional - run Tools > RTS > Create Formation Builder UI)");
                     }
                 }
-            }
-
-            // Setup FormationSelectorUI reference if missing (optional component)
-            var formationSelectorProp = so.FindProperty("formationSelector");
-            if (formationSelectorProp != null)
-            {
-                if (formationSelectorProp.objectReferenceValue == null)
+                else
                 {
-                    var formationSelector = FindFirstObjectByType<FormationSelectorUI>();
-                    if (formationSelector != null)
-                    {
-                        formationSelectorProp.objectReferenceValue = formationSelector;
-                        Log("Set FormationSelectorUI reference");
-                    }
-                    else
-                    {
-                        Log("INFO: FormationSelectorUI not found (optional component)");
-                    }
+                    Log("FormationBuilderUI already assigned");
                 }
             }
 
