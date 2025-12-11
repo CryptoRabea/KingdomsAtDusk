@@ -168,12 +168,19 @@ namespace RTS.UI
                 }
             }
 
-            // Add "Customize Formation" option
-            customizeFormationIndex = currentIndex;
-            options.Add("⚙️ Customize Formation");
-            currentIndex++;
+            // Add "Customize Formation" option (only if FormationBuilderUI exists)
+            if (formationBuilder != null)
+            {
+                customizeFormationIndex = currentIndex;
+                options.Add("Customize Formation");
+                currentIndex++;
+            }
+            else
+            {
+                customizeFormationIndex = -1; // Not available
+            }
 
-            // Add custom formations from quick list
+            // Add custom formations from quick list (only if CustomFormationManager exists)
             if (CustomFormationManager.Instance != null)
             {
                 var customFormations = CustomFormationManager.Instance.GetAllFormations();
@@ -188,6 +195,7 @@ namespace RTS.UI
                 }
             }
 
+            // Always add options to dropdown, even if only preset formations exist
             formationDropdown.AddOptions(options);
 
             // Set current formation

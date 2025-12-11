@@ -304,27 +304,41 @@ namespace RTS.Editor
                 }
             }
 
-            // Setup FormationBuilderUI reference if missing
+            // Setup FormationBuilderUI reference if missing (optional component)
             var formationBuilderProp = so.FindProperty("formationBuilder");
-            if (formationBuilderProp != null && formationBuilderProp.objectReferenceValue == null)
+            if (formationBuilderProp != null)
             {
-                var formationBuilder = FindFirstObjectByType<FormationBuilderUI>();
-                if (formationBuilder != null)
+                if (formationBuilderProp.objectReferenceValue == null)
                 {
-                    formationBuilderProp.objectReferenceValue = formationBuilder;
-                    Log("Set FormationBuilderUI reference");
+                    var formationBuilder = FindFirstObjectByType<FormationBuilderUI>();
+                    if (formationBuilder != null)
+                    {
+                        formationBuilderProp.objectReferenceValue = formationBuilder;
+                        Log("Set FormationBuilderUI reference");
+                    }
+                    else
+                    {
+                        Log("INFO: FormationBuilderUI not found (optional - only needed for custom formation creation)");
+                    }
                 }
             }
 
-            // Setup FormationSelectorUI reference if missing
+            // Setup FormationSelectorUI reference if missing (optional component)
             var formationSelectorProp = so.FindProperty("formationSelector");
-            if (formationSelectorProp != null && formationSelectorProp.objectReferenceValue == null)
+            if (formationSelectorProp != null)
             {
-                var formationSelector = FindFirstObjectByType<FormationSelectorUI>();
-                if (formationSelector != null)
+                if (formationSelectorProp.objectReferenceValue == null)
                 {
-                    formationSelectorProp.objectReferenceValue = formationSelector;
-                    Log("Set FormationSelectorUI reference");
+                    var formationSelector = FindFirstObjectByType<FormationSelectorUI>();
+                    if (formationSelector != null)
+                    {
+                        formationSelectorProp.objectReferenceValue = formationSelector;
+                        Log("Set FormationSelectorUI reference");
+                    }
+                    else
+                    {
+                        Log("INFO: FormationSelectorUI not found (optional component)");
+                    }
                 }
             }
 
