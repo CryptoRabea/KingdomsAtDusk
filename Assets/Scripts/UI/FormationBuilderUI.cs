@@ -387,6 +387,10 @@ namespace RTS.UI
                 }
 
                 CustomFormationManager.Instance.CreateFormation(currentFormation.name);
+
+                // Add new formations to quick list by default so they appear in dropdown
+                currentFormation.AddToQuickList();
+
                 CustomFormationManager.Instance.UpdateFormation(currentFormation);
 
                 // Switch to edit mode
