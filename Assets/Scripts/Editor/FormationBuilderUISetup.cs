@@ -96,6 +96,27 @@ namespace RTS.Editor
             Image contentBg = contentPanel.AddComponent<Image>();
             contentBg.color = new Color(0.2f, 0.2f, 0.2f, 1f);
 
+            // Add draggable and resizable components
+            DraggablePanel draggable = contentPanel.AddComponent<DraggablePanel>();
+            ResizablePanel resizable = contentPanel.AddComponent<ResizablePanel>();
+
+            // Create title bar (drag handle)
+            GameObject titleBar = new GameObject("TitleBar");
+            titleBar.transform.SetParent(contentPanel.transform, false);
+
+            RectTransform titleBarRect = titleBar.AddComponent<RectTransform>();
+            titleBarRect.anchorMin = new Vector2(0, 1);
+            titleBarRect.anchorMax = Vector2.one;
+            titleBarRect.pivot = new Vector2(0.5f, 1f);
+            titleBarRect.sizeDelta = new Vector2(0, 40);
+            titleBarRect.anchoredPosition = Vector2.zero;
+
+            Image titleBarBg = titleBar.AddComponent<Image>();
+            titleBarBg.color = new Color(0.15f, 0.15f, 0.15f, 1f);
+
+            // Add the draggable component to title bar too
+            titleBar.AddComponent<DraggablePanel>();
+
             // Create title
             GameObject titleObj = new GameObject("Title");
             titleObj.transform.SetParent(contentPanel.transform, false);
@@ -139,6 +160,54 @@ namespace RTS.Editor
 
             // Get the content container from scroll view
             RectTransform gridContainer = scrollView.transform.Find("Viewport/Content").GetComponent<RectTransform>();
+
+            // Add zoom functionality
+            ZoomableScrollRect zoomable = scrollView.AddComponent<ZoomableScrollRect>();
+
+            // Create zoom level display
+            GameObject zoomLevelObj = new GameObject("ZoomLevelText");
+            zoomLevelObj.transform.SetParent(contentPanel.transform, false);
+
+            RectTransform zoomLevelRect = zoomLevelObj.AddComponent<RectTransform>();
+            zoomLevelRect.anchorMin = new Vector2(0, 0.5f);
+            zoomLevelRect.anchorMax = new Vector2(0, 0.5f);
+            zoomLevelRect.pivot = new Vector2(0, 0.5f);
+            zoomLevelRect.sizeDelta = new Vector2(100, 30);
+            zoomLevelRect.anchoredPosition = new Vector2(10, -10);
+
+            TextMeshProUGUI zoomLevelText = zoomLevelObj.AddComponent<TextMeshProUGUI>();
+            zoomLevelText.text = "Zoom: 100%";
+            zoomLevelText.fontSize = 14;
+            zoomLevelText.alignment = TextAlignmentOptions.MidlineLeft;
+            zoomLevelText.color = Color.white;
+
+            // Wire up zoom level text to zoomable component
+            SerializedObject zoomSO = new SerializedObject(zoomable);
+            zoomSO.FindProperty("zoomLevelText").objectReferenceValue = zoomLevelText;
+            zoomSO.ApplyModifiedProperties();
+
+            // Create zoom buttons
+            GameObject zoomInButton = CreateButton("ZoomInButton", "+", new Color(0.4f, 0.6f, 0.4f));
+            zoomInButton.transform.SetParent(contentPanel.transform, false);
+            RectTransform zoomInRect = zoomInButton.GetComponent<RectTransform>();
+            zoomInRect.anchorMin = new Vector2(1, 0.5f);
+            zoomInRect.anchorMax = new Vector2(1, 0.5f);
+            zoomInRect.pivot = new Vector2(1, 0.5f);
+            zoomInRect.sizeDelta = new Vector2(40, 40);
+            zoomInRect.anchoredPosition = new Vector2(-10, 20);
+
+            GameObject zoomOutButton = CreateButton("ZoomOutButton", "-", new Color(0.6f, 0.4f, 0.4f));
+            zoomOutButton.transform.SetParent(contentPanel.transform, false);
+            RectTransform zoomOutRect = zoomOutButton.GetComponent<RectTransform>();
+            zoomOutRect.anchorMin = new Vector2(1, 0.5f);
+            zoomOutRect.anchorMax = new Vector2(1, 0.5f);
+            zoomOutRect.pivot = new Vector2(1, 0.5f);
+            zoomOutRect.sizeDelta = new Vector2(40, 40);
+            zoomOutRect.anchoredPosition = new Vector2(-10, -25);
+
+            // Wire up zoom buttons
+            zoomInButton.GetComponent<Button>().onClick.AddListener(zoomable.ZoomIn);
+            zoomOutButton.GetComponent<Button>().onClick.AddListener(zoomable.ZoomOut);
 
             // Create unit count text
             GameObject countTextObj = new GameObject("UnitCountText");
@@ -206,6 +275,15 @@ namespace RTS.Editor
             so.FindProperty("cellSize").floatValue = 15f;
             so.ApplyModifiedProperties();
 
+            // Add CustomCursorController to canvas if not already there
+            CustomCursorController cursorController = canvas.GetComponent<CustomCursorController>();
+            if (cursorController == null)
+            {
+                cursorController = canvas.gameObject.AddComponent<CustomCursorController>();
+                Debug.Log("Added CustomCursorController to Canvas");
+                Debug.Log("NOTE: Assign custom cursor textures in CustomCursorController component for hover/select/deselect cursors");
+            }
+
             // Hide panel by default
             builderPanel.SetActive(false);
 
@@ -214,9 +292,11 @@ namespace RTS.Editor
 
             Debug.Log("Formation Builder UI created successfully!");
             Debug.Log("Grid Cell Prefab created at: Assets/Prefabs/FormationGridCell.prefab");
+            Debug.Log("Features: Draggable title bar, resizable edges, zoom with mouse wheel, custom cursors");
             Debug.Log("To open the builder, call: FormationBuilderUI.OpenBuilder()");
 
             EditorUtility.SetDirty(builderPanel);
+            EditorUtility.SetDirty(canvas.gameObject);
         }
 
         private static GameObject CreateInputField(string name, string placeholder)
