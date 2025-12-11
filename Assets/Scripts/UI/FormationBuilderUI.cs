@@ -333,6 +333,13 @@ namespace RTS.UI
         /// </summary>
         private void SaveFormation()
         {
+            // Check if CustomFormationManager is available
+            if (CustomFormationManager.Instance == null)
+            {
+                Debug.LogError("CustomFormationManager.Instance is null! Cannot save formation.");
+                return;
+            }
+
             int filledCount = GetFilledCellCount();
             if (filledCount == 0)
             {
