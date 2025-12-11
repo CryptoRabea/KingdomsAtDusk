@@ -278,6 +278,32 @@ namespace RTS.Editor
                 Log("Removed cross-scene FormationGroupManager reference (using singleton now)");
             }
 
+            // Setup FormationSettingsSO reference if missing
+            var formationSettingsProp = so.FindProperty("formationSettings");
+            if (formationSettingsProp != null)
+            {
+                if (formationSettingsProp.objectReferenceValue == null)
+                {
+                    // Try to find FormationSettings SO in project
+                    var guids = AssetDatabase.FindAssets("t:FormationSettingsSO");
+                    if (guids.Length > 0)
+                    {
+                        string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                        var formationSettings = AssetDatabase.LoadAssetAtPath<FormationSettingsSO>(path);
+                        formationSettingsProp.objectReferenceValue = formationSettings;
+                        Log($"Set FormationSettings SO reference: {formationSettings.name}");
+                    }
+                    else
+                    {
+                        Log("WARNING: No FormationSettings SO found in project. Create one via: Assets > Create > RTS > Formation Settings");
+                    }
+                }
+                else
+                {
+                    Log("FormationSettings SO already assigned");
+                }
+            }
+
             // Setup FormationBuilderUI reference if missing
             var formationBuilderProp = so.FindProperty("formationBuilder");
             if (formationBuilderProp != null && formationBuilderProp.objectReferenceValue == null)
@@ -469,6 +495,21 @@ namespace RTS.Editor
                 else
                 {
                     Log("✓ UnitDetailsUI: No cross-scene references");
+                }
+
+                // Check FormationSettingsSO reference
+                var formationSettingsProp = so.FindProperty("formationSettings");
+                if (formationSettingsProp != null)
+                {
+                    if (formationSettingsProp.objectReferenceValue == null)
+                    {
+                        Log("WARNING: UnitDetailsUI is missing FormationSettings SO reference");
+                        Log("  Create one via: Assets > Create > RTS > Formation Settings");
+                    }
+                    else
+                    {
+                        Log("✓ UnitDetailsUI: FormationSettings SO assigned");
+                    }
                 }
             }
 
