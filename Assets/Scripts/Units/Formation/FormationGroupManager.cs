@@ -11,7 +11,17 @@ namespace RTS.Units.Formation
     public class FormationGroupManager : MonoBehaviour
     {
         private static FormationGroupManager instance;
-        public static FormationGroupManager Instance => instance;
+        public static FormationGroupManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindFirstObjectByType<FormationGroupManager>();
+                }
+                return instance;
+            }
+        }
 
         [Header("Current Formation")]
         [SerializeField] private FormationType currentFormation = FormationType.Box;
