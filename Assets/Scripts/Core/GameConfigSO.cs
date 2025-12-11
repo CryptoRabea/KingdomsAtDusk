@@ -46,6 +46,28 @@ namespace KingdomsAtDusk.Core
         // This would affect: campfire gathering, worker allocation, population bonuses
         // Consider: What happens to assigned workers when system is disabled?
 
+        [Header("Circular Lens Vision")]
+        [Tooltip("Enable/disable the circular lens vision system (x-ray vision through obstacles)")]
+        public bool enableLensVision = true;
+
+        [Tooltip("Default radius of the lens vision area")]
+        [Range(5f, 100f)]
+        public float lensVisionRadius = 20f;
+
+        [Tooltip("X-Ray color for player units")]
+        public Color playerUnitXRayColor = new Color(0.3f, 0.7f, 1f, 0.8f);
+
+        [Tooltip("X-Ray color for enemy units")]
+        public Color enemyUnitXRayColor = new Color(1f, 0.3f, 0.3f, 0.8f);
+
+        [Tooltip("Transparency amount for obstacles in lens")]
+        [Range(0f, 1f)]
+        public float obstacleTransparency = 0.3f;
+
+        [Tooltip("Update interval for lens vision (higher = better performance)")]
+        [Range(0.01f, 0.5f)]
+        public float lensVisionUpdateInterval = 0.1f;
+
         [Header("Debug")]
         [Tooltip("Show debug gizmos for worker paths and resource nodes")]
         public bool showDebugGizmos = false;
