@@ -297,6 +297,9 @@ namespace RTS.UI
 
         private void OnFormationChanged(FormationChangedEvent evt)
         {
+            // Rebuild dropdown options to include any newly saved formations
+            InitializeFormationDropdown();
+
             // Update dropdown to match current formation (in case it was changed elsewhere)
             UpdateDropdownToCurrentFormation();
         }
