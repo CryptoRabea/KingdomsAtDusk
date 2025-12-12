@@ -59,7 +59,7 @@ public class LensVisionIntegration : MonoBehaviour
         // Find lens controller if not assigned
         if (lensController == null)
         {
-            lensController = FindObjectOfType<CircularLensVision.CircularLensVision>();
+            lensController = FindFirstObjectByType<CircularLensVision.CircularLensVision>();
         }
 
         if (lensController == null)
@@ -239,7 +239,7 @@ public class LensVisionIntegration : MonoBehaviour
     private void SetupExistingUnits()
     {
         // Find all GameObjects with UnitAIController or similar unit components
-        var unitControllers = FindObjectsOfType<UnitAIController>();
+        var unitControllers = FindObjectsByType<UnitAIController>(FindObjectsSortMode.None);
         foreach (var controller in unitControllers)
         {
             SetupUnit(controller.gameObject);
@@ -249,7 +249,7 @@ public class LensVisionIntegration : MonoBehaviour
     private void SetupExistingBuildings()
     {
         // Find all GameObjects with Building component
-        var buildings = FindObjectsOfType<Building>();
+        var buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
         foreach (var building in buildings)
         {
             SetupBuilding(building.gameObject);
@@ -278,7 +278,7 @@ public class LensVisionIntegration : MonoBehaviour
     /// </summary>
     public void RefreshAllTargetColors()
     {
-        LensVisionTarget[] targets = FindObjectsOfType<LensVisionTarget>();
+        LensVisionTarget[] targets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
 
         foreach (var target in targets)
         {
@@ -307,7 +307,7 @@ public class LensVisionIntegration : MonoBehaviour
     [ContextMenu("Remove All Lens Vision Targets")]
     private void RemoveAllLensVisionTargets()
     {
-        LensVisionTarget[] targets = FindObjectsOfType<LensVisionTarget>();
+        LensVisionTarget[] targets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
 
         foreach (var target in targets)
         {

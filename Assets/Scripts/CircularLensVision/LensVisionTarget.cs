@@ -141,7 +141,7 @@ namespace CircularLensVision
         private void RegisterWithController()
         {
             // Find the lens controller in the scene
-            lensController = FindObjectOfType<CircularLensVision>();
+            lensController = FindFirstObjectByType<CircularLensVision>();
 
             if (lensController != null)
             {
