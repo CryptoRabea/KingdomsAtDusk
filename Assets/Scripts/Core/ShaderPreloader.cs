@@ -85,7 +85,7 @@ namespace RTS.Core
                 Shader.WarmupAllShaders();
                 success = true;
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
             }
 

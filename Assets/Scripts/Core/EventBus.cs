@@ -61,7 +61,7 @@ namespace RTS.Core.Events
                     {
                         (handler as Action<T>)?.Invoke(eventData);
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                     }
                 }

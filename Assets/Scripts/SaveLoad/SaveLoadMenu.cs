@@ -461,7 +461,7 @@ namespace RTS.SaveLoad
                     }
                 }
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
             }
         }

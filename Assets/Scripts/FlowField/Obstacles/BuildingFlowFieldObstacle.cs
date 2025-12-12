@@ -17,7 +17,8 @@ namespace FlowField.Obstacles
         [SerializeField] private float expansionPadding = 0.5f; // Extra space around building
 
         [Header("Cost Settings")]
-        [SerializeField] private byte obstacleCost = GridCell.UNWALKABLE_COST;
+        // TODO: Implement variable obstacle cost in future update
+        // [SerializeField] private byte obstacleCost = GridCell.UNWALKABLE_COST;
         [SerializeField] private bool updateOnEnable = true;
 
         private FlowFieldManager flowFieldManager;

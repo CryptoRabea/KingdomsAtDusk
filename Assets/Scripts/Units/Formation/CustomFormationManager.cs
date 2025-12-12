@@ -280,7 +280,7 @@ namespace RTS.Units.Formation
                 string json = JsonUtility.ToJson(_customFormations, true);
                 File.WriteAllText(_saveFilePath, json);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
@@ -302,7 +302,7 @@ namespace RTS.Units.Formation
                     _customFormations = new CustomFormationsContainer();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _customFormations = new CustomFormationsContainer();
             }
@@ -344,7 +344,7 @@ namespace RTS.Units.Formation
                 File.WriteAllText(filePath, json);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -391,7 +391,7 @@ namespace RTS.Units.Formation
                 SaveFormations();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
