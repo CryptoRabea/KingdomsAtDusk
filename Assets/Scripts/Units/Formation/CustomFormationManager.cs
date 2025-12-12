@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace RTS.Units.Formation
 {
@@ -61,13 +64,33 @@ namespace RTS.Units.Formation
 
 #if UNITY_EDITOR
             // In editor, don't use DontDestroyOnLoad to avoid cleanup warnings
-            // The instance will be recreated when needed
+            // Subscribe to play mode state changes to ensure proper cleanup
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 #else
             DontDestroyOnLoad(gameObject);
 #endif
 
             Initialize();
         }
+
+#if UNITY_EDITOR
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            // Clean up when exiting play mode
+            if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                if (_instance == this)
+                {
+                    _instance = null;
+                    EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+                    if (gameObject != null)
+                    {
+                        DestroyImmediate(gameObject);
+                    }
+                }
+            }
+        }
+#endif
 
         private void OnDestroy()
         {
@@ -76,6 +99,11 @@ namespace RTS.Units.Formation
             {
                 _instance = null;
             }
+
+#if UNITY_EDITOR
+            // Unsubscribe from editor events
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+#endif
 
             // Unsubscribe all events to prevent memory leaks
             OnFormationsChanged = null;
