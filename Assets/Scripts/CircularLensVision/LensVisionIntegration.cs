@@ -4,8 +4,7 @@ using KingdomsAtDusk.Core;
 using RTS.Core.Events;
 using RTS.Buildings;
 using RTS.Units.AI;
-using RTS.Units.AI;
-using RTS.Buildings;
+
 
 /// <summary>
 /// Integration component that automatically sets up lens vision on units and buildings.
@@ -210,8 +209,7 @@ public class LensVisionIntegration : MonoBehaviour
         if (obstacle == null) return;
 
         // Check if already has LensVisionTarget
-        LensVisionTarget existing = obstacle.GetComponent<LensVisionTarget>();
-        if (existing != null) return;
+        if (obstacle.TryGetComponent<LensVisionTarget>(out var existing)) return;
 
         // Add LensVisionTarget component
         LensVisionTarget target = obstacle.AddComponent<LensVisionTarget>();

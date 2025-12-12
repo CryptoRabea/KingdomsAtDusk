@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using RTS.Core.Events;
 using RTS.UI.Minimap;
 using System.Collections;
+using RTS.RTSCamera;
 namespace RTS.UI
 {
     /// <summary>

@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using RTS.Core.Events;
 using RTS.Units.AI;
 using RTS.Buildings;
-using KAD.RTSBuildingsSystems;
 
 namespace RTS.Units
 {
@@ -622,10 +621,10 @@ namespace RTS.Units
                     {
                         ClearSelection();
                         // Clear any selected buildings/gates when selecting units
-                        var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
-                        if (buildingManager != null)
+                        var buildingselectionManager = FindAnyObjectByType<BuildingSelectionManager>();
+                        if (buildingselectionManager != null)
                         {
-                            buildingManager.DeselectBuilding();
+                            buildingselectionManager.DeselectBuilding();
                         }
                     }
 

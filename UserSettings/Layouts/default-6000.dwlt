@@ -741,7 +741,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__top
       displayed: 1
       id: Tool Settings
-      index: 2
+      index: 1
       contents: '{"m_Layout":1,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":-26.6666259765625},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":2,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
@@ -755,7 +755,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__top
       displayed: 1
       id: unity-grid-and-snap-toolbar
-      index: 3
+      index: 2
       contents: '{"m_Layout":1,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":-141.0,"y":-200.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":3,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
@@ -769,7 +769,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__top
       displayed: 1
       id: unity-scene-view-toolbar
-      index: 5
+      index: 4
       contents: '{"m_Layout":1,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":25.333332061767579},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
@@ -1007,7 +1007,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__top
       displayed: 0
       id: Brush Attributes
-      index: 4
+      index: 3
       contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":0.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
@@ -1049,7 +1049,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__left
       displayed: 0
       id: Brush Masks
-      index: 2
+      index: 1
       contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":0.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
@@ -1119,7 +1119,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__top
       displayed: 1
       id: AINavigationOverlay
-      index: 6
+      index: 5
       contents: '{"m_Layout":4,"m_Collapsed":true,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":-43.33331298828125,"y":26.666667938232423},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":1,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 1
@@ -1329,7 +1329,7 @@ MonoBehaviour:
       containerId: overlay-toolbar__top
       displayed: 0
       id: unity-tool-contexts-toolbar
-      index: 1
+      index: 0
       contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":0.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
@@ -1424,7 +1424,7 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -30.548128, y: 2.8388436, z: 87.996056}
+    m_Target: {x: 860.3967, y: 407.1912, z: 4.045616}
     speed: 2
     m_Value: {x: -30.548128, y: 2.8388436, z: 87.996056}
   m_RenderMode: 0
@@ -1472,11 +1472,11 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.057557616, y: -0.21687603, z: 0.0128102945, w: 0.9744178}
+    m_Target: {x: 0.0039996984, y: -0.008406764, z: -0.000033484812, w: -0.99995947}
     speed: 2
     m_Value: {x: -0.057557616, y: 0.21687603, z: -0.0128102945, w: -0.9744178}
   m_Size:
-    m_Target: 0.8772997
+    m_Target: 405.69363
     speed: 2
     m_Value: 0.8772997
   m_Ortho:
@@ -2620,11 +2620,11 @@ MonoBehaviour:
       m_Data: 430768
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 71114
-    - m_Data: 71116
-    - m_Data: 71118
-    - m_Data: 71120
-    - m_Data: 71122
+    - m_Data: 70900
+    - m_Data: 70902
+    - m_Data: 70904
+    - m_Data: 70906
+    - m_Data: 70908
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -2657,11 +2657,11 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 71114
-    - m_Data: 71116
-    - m_Data: 71118
-    - m_Data: 71120
-    - m_Data: 71122
+    - m_Data: 70900
+    - m_Data: 70902
+    - m_Data: 70904
+    - m_Data: 70906
+    - m_Data: 70908
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
