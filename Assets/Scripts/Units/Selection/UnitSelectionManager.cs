@@ -566,6 +566,15 @@ namespace RTS.Units
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
+            // Check if we clicked on a building first - if so, don't process unit selection
+            // Let BuildingSelectionManager handle it
+            if (Physics.Raycast(ray, 1000f, buildingLayer))
+            {
+                // Clicked on building - clear unit selection and let BuildingSelectionManager handle it
+                ClearSelection();
+                return false;
+            }
+
             //  Use RaycastNonAlloc instead of RaycastAll - zero GC!
             int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, selectableLayer);
 
@@ -633,12 +642,14 @@ namespace RTS.Units
                     return true;
                 }
 
-                // Hit something but no valid unit found (e.g., building) - clear unit selection
+                // Hit something but no valid unit found (e.g., building) - clear unit selection only
+                // Let BuildingSelectionManager handle building selections
                 ClearSelection();
                 return false;
             }
 
-            // Clicked empty space - clear both unit and building selections
+            // Clicked empty space - clear unit selection only
+            // Let BuildingSelectionManager handle building selections on empty clicks
             ClearSelection();
             var buildingMgr = FindAnyObjectByType<BuildingSelectionManager>();
             if (buildingMgr != null)
