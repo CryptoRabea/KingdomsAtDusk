@@ -621,6 +621,12 @@ namespace RTS.Units
                     if (!additive)
                     {
                         ClearSelection();
+                        // Clear any selected buildings/gates when selecting units
+                        var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
+                        if (buildingManager != null)
+                        {
+                            buildingManager.DeselectBuilding();
+                        }
                     }
 
                     SelectUnit(selectedUnit);
@@ -632,8 +638,13 @@ namespace RTS.Units
                 return false;
             }
 
-            // Clicked empty space - clear selection
+            // Clicked empty space - clear both unit and building selections
             ClearSelection();
+            var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
+            if (buildingManager != null)
+            {
+                buildingManager.DeselectBuilding();
+            }
             return false;
         }
 
