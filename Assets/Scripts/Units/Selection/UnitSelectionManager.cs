@@ -566,6 +566,15 @@ namespace RTS.Units
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
+            // Check if we clicked on a building first - if so, don't process unit selection
+            // Let BuildingSelectionManager handle it
+            if (Physics.Raycast(ray, 1000f, buildingLayer))
+            {
+                // Clicked on building - clear unit selection and let BuildingSelectionManager handle it
+                ClearSelection();
+                return false;
+            }
+
             //  Use RaycastNonAlloc instead of RaycastAll - zero GC!
             int hitCount = Physics.RaycastNonAlloc(ray, raycastHitsCache, 1000f, selectableLayer);
 
