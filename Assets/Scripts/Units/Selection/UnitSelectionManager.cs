@@ -633,18 +633,15 @@ namespace RTS.Units
                     return true;
                 }
 
-                // Hit something but no valid unit found (e.g., building) - clear unit selection
+                // Hit something but no valid unit found (e.g., building) - clear unit selection only
+                // Let BuildingSelectionManager handle building selections
                 ClearSelection();
                 return false;
             }
 
-            // Clicked empty space - clear both unit and building selections
+            // Clicked empty space - clear unit selection only
+            // Let BuildingSelectionManager handle building selections on empty clicks
             ClearSelection();
-            var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
-            if (buildingManager != null)
-            {
-                buildingManager.DeselectBuilding();
-            }
             return false;
         }
 
