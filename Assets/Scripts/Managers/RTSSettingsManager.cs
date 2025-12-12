@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using RTS.Core.Services;
 using RTSGame.Settings;
+using RTS.CameraControl;
 using System;
 using System.IO;
 using AudioSettings = RTSGame.Settings.AudioSettings;
