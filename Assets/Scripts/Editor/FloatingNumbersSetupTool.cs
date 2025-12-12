@@ -153,7 +153,7 @@ namespace RTS.Editor
             }
 
             // Check if FloatingNumbersManager already exists
-            FloatingNumbersManager existingManager = FindObjectOfType<FloatingNumbersManager>();
+            FloatingNumbersManager existingManager = FindAnyObjectByType<FloatingNumbersManager>();
             if (existingManager != null)
             {
                 statusMessage = "FloatingNumbersManager already exists in scene!";
@@ -553,7 +553,7 @@ namespace RTS.Editor
             Debug.Log("Next steps:");
             Debug.Log("1. Add this code to GameManager.InitializeServices():");
             Debug.Log("   // Floating Numbers System");
-            Debug.Log("   var floatingNumbersManager = FindObjectOfType<KAD.UI.FloatingNumbers.FloatingNumbersManager>();");
+            Debug.Log("   var floatingNumbersManager = FindAnyObjectByType<KAD.UI.FloatingNumbers.FloatingNumbersManager>();");
             Debug.Log("   if (floatingNumbersManager != null)");
             Debug.Log("       ServiceLocator.Register<IFloatingNumberService>(floatingNumbersManager);");
             Debug.Log("");
