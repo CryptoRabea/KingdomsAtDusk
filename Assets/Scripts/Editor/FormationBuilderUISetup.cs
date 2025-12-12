@@ -96,11 +96,7 @@ namespace RTS.Editor
             Image contentBg = contentPanel.AddComponent<Image>();
             contentBg.color = new Color(0.2f, 0.2f, 0.2f, 1f);
 
-            // Add draggable and resizable components
-            DraggablePanel draggable = contentPanel.AddComponent<DraggablePanel>();
-            ResizablePanel resizable = contentPanel.AddComponent<ResizablePanel>();
-
-            // Create title bar (drag handle)
+            // Create title bar (drag handle) FIRST
             GameObject titleBar = new GameObject("TitleBar");
             titleBar.transform.SetParent(contentPanel.transform, false);
 
@@ -114,8 +110,22 @@ namespace RTS.Editor
             Image titleBarBg = titleBar.AddComponent<Image>();
             titleBarBg.color = new Color(0.15f, 0.15f, 0.15f, 1f);
 
-            // Add the draggable component to title bar too
-            titleBar.AddComponent<DraggablePanel>();
+            // Add draggable component to title bar and wire it up
+            DraggablePanel draggable = titleBar.AddComponent<DraggablePanel>();
+            SerializedObject draggableSO = new SerializedObject(draggable);
+            draggableSO.FindProperty("panelRectTransform").objectReferenceValue = contentRect;
+            draggableSO.FindProperty("dragHandleRect").objectReferenceValue = titleBarRect;
+            draggableSO.FindProperty("canvas").objectReferenceValue = canvas;
+            draggableSO.ApplyModifiedProperties();
+
+            // Add resizable component to content panel and wire it up
+            ResizablePanel resizable = contentPanel.AddComponent<ResizablePanel>();
+            SerializedObject resizableSO = new SerializedObject(resizable);
+            resizableSO.FindProperty("panelRectTransform").objectReferenceValue = contentRect;
+            resizableSO.FindProperty("minSize").vector2Value = new Vector2(600, 600);
+            resizableSO.FindProperty("maxSize").vector2Value = new Vector2(1400, 1000);
+            resizableSO.FindProperty("resizeHandleSize").floatValue = 20f;
+            resizableSO.ApplyModifiedProperties();
 
             // Create title
             GameObject titleObj = new GameObject("Title");
