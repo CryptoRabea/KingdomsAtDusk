@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
+using RTS.Buildings;
+using RTS.Units.AI;
 
 namespace CircularLensVision.Editor
 {

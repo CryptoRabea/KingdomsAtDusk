@@ -1,6 +1,9 @@
 using UnityEngine;
 using CircularLensVision;
 using KingdomsAtDusk.Core;
+using RTS.Core.Events;
+using RTS.Buildings;
+using RTS.Units.AI;
 
 /// <summary>
 /// Integration component that automatically sets up lens vision on units and buildings.
@@ -95,7 +98,7 @@ public class LensVisionIntegration : MonoBehaviour
     {
         // Subscribe to EventBus events
         EventBus.Subscribe<UnitSpawnedEvent>(OnUnitSpawned);
-        EventBus.Subscribe<UnitDespawnedEvent>(OnUnitDespawned);
+        EventBus.Subscribe<UnitSpawnedEvent>(OnUnitDespawned);
         EventBus.Subscribe<BuildingPlacedEvent>(OnBuildingPlaced);
         EventBus.Subscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
     }
@@ -104,7 +107,7 @@ public class LensVisionIntegration : MonoBehaviour
     {
         // Unsubscribe from EventBus events
         EventBus.Unsubscribe<UnitSpawnedEvent>(OnUnitSpawned);
-        EventBus.Unsubscribe<UnitDespawnedEvent>(OnUnitDespawned);
+        EventBus.Unsubscribe<UnitSpawnedEvent>(OnUnitDespawned);
         EventBus.Unsubscribe<BuildingPlacedEvent>(OnBuildingPlaced);
         EventBus.Unsubscribe<BuildingDestroyedEvent>(OnBuildingDestroyed);
     }
@@ -139,7 +142,7 @@ public class LensVisionIntegration : MonoBehaviour
         SetupUnit(evt.Unit);
     }
 
-    private void OnUnitDespawned(UnitDespawnedEvent evt)
+    private void OnUnitDespawned(UnitSpawnedEvent evt)
     {
         // LensVisionTarget will automatically unregister on disable/destroy
     }

@@ -118,3 +118,12 @@ Logs/AssetImportWorker3.log
 /mdFiles
 /ProfilerCaptures
 /Assets/Book of The Dead
+*.brush
+/Assets/Free UI build package
+/Assets/Plugins
+/Assets/ProceduralTerrainPainter
+/Assets/Epic Game Hits SFX
+/Assets/Samples
+/Assets/TerrainDemoScene_URP
+/UserSettings
+/UserSettings
