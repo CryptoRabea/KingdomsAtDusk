@@ -14,7 +14,7 @@ namespace RTS.Units.Animation
         [SerializeField] private AudioClip[] attackSounds;
         [SerializeField] private AudioClip[] hitSounds;
         [SerializeField] private AudioClip deathSound;
-        
+
         [Header("Volume Settings")]
         [Range(0f, 1f)]
         [SerializeField] private float footstepVolume = 0.5f;
@@ -34,12 +34,23 @@ namespace RTS.Units.Animation
         [SerializeField] private bool randomizePitch = true;
         [SerializeField] private float pitchVariation = 0.1f;
 
+        [Header("Performance Optimization")]
+        [SerializeField] private bool enableDistanceCulling = true;
+        [SerializeField] private float maxFootstepDistance = 50f;
+        [SerializeField] private float minFootstepInterval = 0.2f;
+        [SerializeField] private int maxConcurrentFootsteps = 20;
+
+        private static int currentFootstepCount = 0;
+        private static readonly object footstepLock = new object();
+        private float lastFootstepTime = 0f;
+        private Camera mainCamera;
+
         private void Awake()
         {
             if (audioSource == null)
             {
                 audioSource = GetComponent<AudioSource>();
-                
+
                 if (audioSource == null)
                 {
                     audioSource = gameObject.AddComponent<AudioSource>();
@@ -47,6 +58,8 @@ namespace RTS.Units.Animation
                     audioSource.spatialBlend = 1f; // 3D sound
                 }
             }
+
+            mainCamera = Camera.main;
         }
 
         #region Animation Event Callbacks
@@ -56,7 +69,39 @@ namespace RTS.Units.Animation
         /// </summary>
         public void OnFootstep()
         {
-            PlayRandomSound(footstepSounds, footstepVolume);
+            PlayFootstepSound();
+        }
+
+        /// <summary>
+        /// Called from animation event for right foot step.
+        /// </summary>
+        public void RightFoot()
+        {
+            PlayFootstepSound();
+        }
+
+        /// <summary>
+        /// Called from animation event for left foot step.
+        /// </summary>
+        public void LeftFoot()
+        {
+            PlayFootstepSound();
+        }
+
+        /// <summary>
+        /// Called from animation event for right foot step (alternate name).
+        /// </summary>
+        public void RightFootStep()
+        {
+            PlayFootstepSound();
+        }
+
+        /// <summary>
+        /// Called from animation event for left foot step (alternate name).
+        /// </summary>
+        public void LeftFootStep()
+        {
+            PlayFootstepSound();
         }
 
         /// <summary>
@@ -105,6 +150,64 @@ namespace RTS.Units.Animation
         #endregion
 
         #region Audio Playback
+
+        /// <summary>
+        /// Plays a footstep sound with performance optimizations.
+        /// </summary>
+        private void PlayFootstepSound()
+        {
+            // Performance optimization: Check minimum interval between footsteps
+            float timeSinceLastFootstep = Time.time - lastFootstepTime;
+            if (timeSinceLastFootstep < minFootstepInterval)
+            {
+                return;
+            }
+
+            // Performance optimization: Distance culling
+            if (enableDistanceCulling && mainCamera != null)
+            {
+                float distanceToCamera = Vector3.Distance(transform.position, mainCamera.transform.position);
+                if (distanceToCamera > maxFootstepDistance)
+                {
+                    return;
+                }
+            }
+
+            // Performance optimization: Limit concurrent footsteps globally
+            lock (footstepLock)
+            {
+                if (currentFootstepCount >= maxConcurrentFootsteps)
+                {
+                    return;
+                }
+                currentFootstepCount++;
+            }
+
+            lastFootstepTime = Time.time;
+            PlayRandomSound(footstepSounds, footstepVolume);
+
+            // Decrement counter after sound duration
+            if (footstepSounds != null && footstepSounds.Length > 0 && footstepSounds[0] != null)
+            {
+                float soundDuration = footstepSounds[0].length;
+                Invoke(nameof(DecrementFootstepCount), soundDuration);
+            }
+            else
+            {
+                Invoke(nameof(DecrementFootstepCount), 0.5f); // Default duration
+            }
+        }
+
+        /// <summary>
+        /// Decrements the global footstep counter.
+        /// </summary>
+        private void DecrementFootstepCount()
+        {
+            lock (footstepLock)
+            {
+                currentFootstepCount = Mathf.Max(0, currentFootstepCount - 1);
+            }
+        }
 
         private void PlayRandomSound(AudioClip[] clips, float volume)
         {
