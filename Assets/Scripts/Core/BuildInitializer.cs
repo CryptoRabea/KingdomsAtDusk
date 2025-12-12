@@ -127,6 +127,7 @@ namespace RTS.Core
             }
             catch (System.Exception)
             {
+                // Exception intentionally ignored - non-critical initialization
             }
 
             if (success)
