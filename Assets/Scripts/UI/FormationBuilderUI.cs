@@ -386,12 +386,24 @@ namespace RTS.UI
                     formationNameInput.text = uniqueName;
                 }
 
-                CustomFormationManager.Instance.CreateFormation(currentFormation.name);
+                // Create formation returns the newly created formation with proper ID
+                var newFormation = CustomFormationManager.Instance.CreateFormation(currentFormation.name);
+
+                // Copy the positions we designed to the newly created formation
+                newFormation.positions.Clear();
+                foreach (var pos in currentFormation.positions)
+                {
+                    newFormation.AddPosition(pos.position);
+                }
 
                 // Add new formations to quick list by default so they appear in dropdown
-                currentFormation.AddToQuickList();
+                newFormation.AddToQuickList();
 
-                CustomFormationManager.Instance.UpdateFormation(currentFormation);
+                // Update the formation with positions and quick list flag
+                CustomFormationManager.Instance.UpdateFormation(newFormation);
+
+                // Update our reference to use the properly saved formation
+                currentFormation = newFormation;
 
                 // Switch to edit mode
                 isEditMode = true;
