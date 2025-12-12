@@ -173,8 +173,8 @@ namespace RTS.Editor
 
             // Current Status
             GUILayout.Label("Current Scene Status:", EditorStyles.boldLabel);
-            DrawManagerStatus("FormationGroupManager", FindObjectOfType<FormationGroupManager>() != null);
-            DrawManagerStatus("CustomFormationManager", FindObjectOfType<CustomFormationManager>() != null);
+            DrawManagerStatus("FormationGroupManager", FindFirstObjectByType<FormationGroupManager>() != null);
+            DrawManagerStatus("CustomFormationManager", FindFirstObjectByType<CustomFormationManager>() != null);
             DrawManagerStatus("FormationSettingsSO", formationSettings != null);
 
             EditorGUILayout.Space(10);
@@ -630,7 +630,7 @@ namespace RTS.Editor
 
         private FormationGroupManager CreateFormationGroupManager()
         {
-            var existing = FindObjectOfType<FormationGroupManager>();
+            var existing = FindFirstObjectByType<FormationGroupManager>();
             if (existing != null)
             {
                 Debug.LogWarning("FormationGroupManager already exists in scene.");
@@ -662,7 +662,7 @@ namespace RTS.Editor
 
         private CustomFormationManager CreateCustomFormationManager()
         {
-            var existing = FindObjectOfType<CustomFormationManager>();
+            var existing = FindFirstObjectByType<CustomFormationManager>();
             if (existing != null)
             {
                 Debug.LogWarning("CustomFormationManager already exists in scene.");
@@ -1441,12 +1441,12 @@ namespace RTS.Editor
             List<string> success = new List<string>();
 
             // Check managers
-            if (FindObjectOfType<FormationGroupManager>() != null)
+            if (FindFirstObjectByType<FormationGroupManager>() != null)
                 success.Add("✓ FormationGroupManager found");
             else
                 issues.Add("✗ FormationGroupManager missing");
 
-            if (FindObjectOfType<CustomFormationManager>() != null)
+            if (FindFirstObjectByType<CustomFormationManager>() != null)
                 success.Add("✓ CustomFormationManager found");
             else
                 issues.Add("✗ CustomFormationManager missing");
