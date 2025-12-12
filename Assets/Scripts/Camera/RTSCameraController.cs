@@ -3,8 +3,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Camera))]
-public class RTSCameraController : MonoBehaviour
+namespace RTS.Camera
+{
+    [RequireComponent(typeof(Camera))]
+    public class RTSCameraController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 15f;
@@ -104,7 +106,7 @@ public class RTSCameraController : MonoBehaviour
 
     private bool IsMouseOverUI()
     {
-        if (EventSystem.current == null)
+        if (EventSystem.current == null || Mouse.current == null)
             return false;
 
         // Initialize if needed (in case EventSystem wasn't ready at Awake)
@@ -374,5 +376,6 @@ public class RTSCameraController : MonoBehaviour
             // Update camera position with new Y
             transform.position = new Vector3(transform.position.x, newY, transform.position.z);
         }
+    }
     }
 }

@@ -189,50 +189,21 @@ namespace RTS.Units
 
         private void IssueMoveCommand(Vector3 destination)
         {
+            IssueMoveCommandInternal(destination);
+        }
+
+        private void IssueForcedMoveCommand(Vector3 destination)
+        {
+            IssueMoveCommandInternal(destination);
+        }
+
+        private void IssueMoveCommandInternal(Vector3 destination)
+        {
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
             int unitCount = selectionManager.SelectionCount;
-            List<Vector3> formationPositions;
-
-            // Calculate formation positions based on current formation setting
-            if (unitCount > 1 && formationGroupManager != null && formationGroupManager.ShouldUseFormation())
-            {
-                FormationType formationType = formationGroupManager.CurrentFormation;
-                float spacing = formationGroupManager.GetSpacing(unitCount);
-
-                // Calculate facing direction (from camera to destination)
-                Vector3 cameraPos = mainCamera.transform.position;
-                Vector3 facingDirection = (destination - cameraPos);
-                facingDirection.y = 0;
-                facingDirection.Normalize();
-
-                formationPositions = FormationManager.CalculateFormationPositions(
-                    destination,
-                    unitCount,
-                    formationType,
-                    spacing,
-                    facingDirection
-                );
-
-                // Validate positions if enabled in settings
-                if (formationGroupManager.FormationSettings != null && formationGroupManager.FormationSettings.validatePositions)
-                {
-                    formationPositions = FormationManager.ValidateFormationPositions(
-                        formationPositions,
-                        formationGroupManager.FormationSettings.maxValidationDistance
-                    );
-                }
-            }
-            else
-            {
-                // Single unit or no formation - all go to same point
-                formationPositions = new List<Vector3>();
-                for (int i = 0; i < unitCount; i++)
-                {
-                    formationPositions.Add(destination);
-                }
-            }
+            List<Vector3> formationPositions = CalculateFormationPositions(destination, unitCount);
 
             // Move units to their formation positions
             int index = 0;
@@ -242,7 +213,7 @@ namespace RTS.Units
 
                 Vector3 unitDestination = formationPositions[index];
 
-                // Set as forced move with destination so unit can resume aggro when it arrives
+                // Set forced move with destination so unit can resume aggro when it arrives
                 if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
                 {
                     aiController.SetForcedMove(true, unitDestination);
@@ -257,32 +228,11 @@ namespace RTS.Units
             }
 
             // Show visual feedback
-            if (moveMarkerPrefab != null)
-            {
-                // Use the ground Y position with a small offset to keep marker above ground
-                Vector3 spawnPosition = new Vector3(
-                    destination.x,
-                    destination.y + markerHeightOffset,
-                    destination.z
-                );
-
-                // Use the prefab's rotation
-                Quaternion spawnRotation = moveMarkerPrefab.transform.rotation;
-
-                // Instantiate the marker
-                GameObject marker = Instantiate(moveMarkerPrefab, spawnPosition, spawnRotation);
-
-                Destroy(marker, markerLifetime);
-            }
-
+            ShowMoveMarker(destination);
         }
 
-        private void IssueForcedMoveCommand(Vector3 destination)
+        private List<Vector3> CalculateFormationPositions(Vector3 destination, int unitCount)
         {
-            if (selectionManager == null || selectionManager.SelectionCount == 0)
-                return;
-
-            int unitCount = selectionManager.SelectionCount;
             List<Vector3> formationPositions;
 
             // Calculate formation positions based on current formation setting
@@ -324,47 +274,27 @@ namespace RTS.Units
                 }
             }
 
-            // Force move all selected units (ignore combat/aggro, resume when reaching destination)
-            int index = 0;
-            foreach (var unit in selectionManager.SelectedUnits)
-            {
-                if (unit == null || index >= formationPositions.Count) continue;
+            return formationPositions;
+        }
 
-                Vector3 unitDestination = formationPositions[index];
+        private void ShowMoveMarker(Vector3 destination)
+        {
+            if (moveMarkerPrefab == null) return;
 
-                // Clear AI target and set forced move flag with destination
-                if (unit.TryGetComponent<RTS.Units.AI.UnitAIController>(out var aiController))
-                {
-                    aiController.SetForcedMove(true, unitDestination);
-                }
+            // Use the ground Y position with a small offset to keep marker above ground
+            Vector3 spawnPosition = new Vector3(
+                destination.x,
+                destination.y + markerHeightOffset,
+                destination.z
+            );
 
-                if (unit.TryGetComponent<UnitMovement>(out var movement))
-                {
-                    movement.SetDestination(unitDestination);
-                }
+            // Use the prefab's rotation
+            Quaternion spawnRotation = moveMarkerPrefab.transform.rotation;
 
-                index++;
-            }
+            // Instantiate the marker
+            GameObject marker = Instantiate(moveMarkerPrefab, spawnPosition, spawnRotation);
 
-            // Show visual feedback
-            if (moveMarkerPrefab != null)
-            {
-                // Use the ground Y position with a small offset to keep marker above ground
-                Vector3 spawnPosition = new Vector3(
-                    destination.x,
-                    destination.y + markerHeightOffset,
-                    destination.z
-                );
-
-                // Use the prefab's rotation
-                Quaternion spawnRotation = moveMarkerPrefab.transform.rotation;
-
-                // Instantiate the marker
-                GameObject marker = Instantiate(moveMarkerPrefab, spawnPosition, spawnRotation);
-
-                Destroy(marker, markerLifetime);
-            }
-
+            Destroy(marker, markerLifetime);
         }
 
         private void IssueAttackCommand(Transform target)

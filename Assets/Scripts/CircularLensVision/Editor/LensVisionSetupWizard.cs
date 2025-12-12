@@ -181,7 +181,7 @@ namespace CircularLensVision.Editor
                 int setupCount = 0;
 
                 // Setup units
-                var units = FindObjectsOfType<UnitAIController>();
+                var units = FindObjectsByType<UnitAIController>(FindObjectsSortMode.None);
                 foreach (var unit in units)
                 {
                     if (unit.GetComponent<LensVisionTarget>() == null)
@@ -192,7 +192,7 @@ namespace CircularLensVision.Editor
                 }
 
                 // Setup buildings
-                var buildings = FindObjectsOfType<Building>();
+                var buildings = FindObjectsByType<Building>(FindObjectsSortMode.None);
                 foreach (var building in buildings)
                 {
                     if (building.GetComponent<LensVisionTarget>() == null)
@@ -239,7 +239,7 @@ namespace CircularLensVision.Editor
                 int removeCount = 0;
 
                 // Remove LensVisionTarget components
-                var targets = FindObjectsOfType<LensVisionTarget>();
+                var targets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
                 foreach (var target in targets)
                 {
                     Undo.DestroyObjectImmediate(target);
@@ -247,7 +247,7 @@ namespace CircularLensVision.Editor
                 }
 
                 // Remove CircularLensVision components
-                var lensVisions = FindObjectsOfType<CircularLensVision>();
+                var lensVisions = FindObjectsByType<CircularLensVision>(FindObjectsSortMode.None);
                 foreach (var lensVision in lensVisions)
                 {
                     Undo.DestroyObjectImmediate(lensVision);
@@ -255,7 +255,7 @@ namespace CircularLensVision.Editor
                 }
 
                 // Remove integration components
-                var integrations = FindObjectsOfType<LensVisionIntegration>();
+                var integrations = FindObjectsByType<LensVisionIntegration>(FindObjectsSortMode.None);
                 foreach (var integration in integrations)
                 {
                     Undo.DestroyObjectImmediate(integration);
@@ -263,7 +263,7 @@ namespace CircularLensVision.Editor
                 }
 
                 // Remove debug components
-                var debugs = FindObjectsOfType<LensVisionDebug>();
+                var debugs = FindObjectsByType<LensVisionDebug>(FindObjectsSortMode.None);
                 foreach (var debug in debugs)
                 {
                     Undo.DestroyObjectImmediate(debug);
