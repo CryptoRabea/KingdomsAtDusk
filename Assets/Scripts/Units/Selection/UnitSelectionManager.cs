@@ -651,14 +651,20 @@ namespace RTS.Units
 
             ClearSelection();
 
+            // Clear any selected buildings/gates when drag-selecting units
+            var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
+            if (buildingManager != null)
+            {
+                buildingManager.DeselectBuilding();
+            }
+
             Rect selectionRect = GetScreenRect(start, end);
             List<UnitSelectable> unitsInBox = new List<UnitSelectable>();
-            List<BuildingSelectable> buildingsInBox = new List<BuildingSelectable>();
 
             //  Use cached units if available, otherwise fallback to FindObjectsByType
             IEnumerable<UnitSelectable> unitsToCheck = useCachedUnits ? allSelectableUnits : FindObjectsByType<UnitSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 
-            // Check units
+            // Check units only (selection box should not select buildings)
             foreach (var selectable in unitsToCheck)
             {
                 if (selectable == null || !PassesTypeFilter(selectable))
@@ -673,67 +679,29 @@ namespace RTS.Units
                 }
             }
 
-            // Check buildings (including walls, towers, etc.)
-            BuildingSelectable[] allBuildings = FindObjectsByType<BuildingSelectable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            foreach (var buildingSelectable in allBuildings)
+            // Apply max selection limit and distance sorting if enabled
+            if (enableMaxSelection && unitsInBox.Count > maxSelectionCount)
             {
-                if (buildingSelectable == null)
-                    continue;
-
-                Vector3 screenPos = mainCamera.WorldToScreenPoint(buildingSelectable.transform.position);
-
-                // Check if within selection rectangle and in front of camera
-                if (screenPos.z > 0 && selectionRect.Contains(screenPos))
+                if (sortByDistance)
                 {
-                    buildingsInBox.Add(buildingSelectable);
-                }
-            }
-
-            // Favor the type with more count
-            if (unitsInBox.Count > buildingsInBox.Count)
-            {
-                // Select units only
-                // Apply max selection limit and distance sorting if enabled
-                if (enableMaxSelection && unitsInBox.Count > maxSelectionCount)
-                {
-                    if (sortByDistance)
+                    // Sort by distance from drag start position
+                    Vector3 dragStartWorld = mainCamera.ScreenToWorldPoint(new Vector3(start.x, start.y, mainCamera.nearClipPlane));
+                    unitsInBox.Sort((a, b) =>
                     {
-                        // Sort by distance from drag start position
-                        Vector3 dragStartWorld = mainCamera.ScreenToWorldPoint(new Vector3(start.x, start.y, mainCamera.nearClipPlane));
-                        unitsInBox.Sort((a, b) =>
-                        {
-                            float distA = Vector3.Distance(a.transform.position, dragStartWorld);
-                            float distB = Vector3.Distance(b.transform.position, dragStartWorld);
-                            return distA.CompareTo(distB);
-                        });
-                    }
-
-                    // Take only the maximum allowed
-                    unitsInBox = unitsInBox.GetRange(0, maxSelectionCount);
+                        float distA = Vector3.Distance(a.transform.position, dragStartWorld);
+                        float distB = Vector3.Distance(b.transform.position, dragStartWorld);
+                        return distA.CompareTo(distB);
+                    });
                 }
 
-                // Select all units in the final list
-                foreach (var unit in unitsInBox)
-                {
-                    SelectUnit(unit);
-                }
+                // Take only the maximum allowed
+                unitsInBox = unitsInBox.GetRange(0, maxSelectionCount);
             }
-            else if (buildingsInBox.Count > 0)
-            {
-                // Select buildings only
-                // Use BuildingSelectionManager for multi-select
-                var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
-                if (buildingManager != null)
-                {
-                    // Deselect current building first
-                    buildingManager.DeselectBuilding();
-                }
 
-                // Select all buildings in box
-                foreach (var building in buildingsInBox)
-                {
-                    building.Select();
-                }
+            // Select all units in the final list
+            foreach (var unit in unitsInBox)
+            {
+                SelectUnit(unit);
             }
         }
 
