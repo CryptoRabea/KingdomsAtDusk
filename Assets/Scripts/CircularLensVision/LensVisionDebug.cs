@@ -64,7 +64,7 @@ namespace CircularLensVision
 
             if (lensController == null)
             {
-                lensController = FindObjectOfType<CircularLensVision>();
+                lensController = FindFirstObjectByType<CircularLensVision>();
             }
 
             if (lensController == null)
@@ -140,7 +140,7 @@ namespace CircularLensVision
         private void UpdateStats()
         {
             // Count active targets
-            LensVisionTarget[] allTargets = FindObjectsOfType<LensVisionTarget>();
+            LensVisionTarget[] allTargets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
             totalTargetCount = allTargets.Length;
             activeTargetCount = 0;
 
@@ -221,7 +221,7 @@ namespace CircularLensVision
         [ContextMenu("Log All Targets Info")]
         public void LogAllTargetsInfo()
         {
-            LensVisionTarget[] targets = FindObjectsOfType<LensVisionTarget>();
+            LensVisionTarget[] targets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"=== LENS VISION TARGETS ({targets.Length} total) ===");
@@ -255,7 +255,7 @@ namespace CircularLensVision
         [ContextMenu("Refresh All Targets")]
         public void RefreshAllTargets()
         {
-            LensVisionTarget[] targets = FindObjectsOfType<LensVisionTarget>();
+            LensVisionTarget[] targets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
 
             foreach (var target in targets)
             {
