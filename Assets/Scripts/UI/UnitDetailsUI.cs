@@ -122,8 +122,6 @@ namespace RTS.UI
                 return;
             }
 
-            Debug.Log("Initializing Formation Dropdown...");
-
             // Clear existing options and mappings
             formationDropdown.ClearOptions();
             formationTypeIndexMap.Clear();
@@ -135,7 +133,6 @@ namespace RTS.UI
             // Add preset formations from FormationSettings SO
             if (formationSettings != null && formationSettings.availableFormations != null && formationSettings.availableFormations.Count > 0)
             {
-                Debug.Log($"Loading {formationSettings.availableFormations.Count} formations from FormationSettings SO");
                 foreach (FormationType formationType in formationSettings.availableFormations)
                 {
                     options.Add(FormatFormationName(formationType));
@@ -155,27 +152,22 @@ namespace RTS.UI
                 }
             }
 
-            Debug.Log($"Added {currentIndex} preset formations to dropdown");
-
             // Add "Customize Formation" option (only if FormationBuilderUI exists)
             if (formationBuilder != null)
             {
                 customizeFormationIndex = currentIndex;
                 options.Add("Customize Formation");
                 currentIndex++;
-                Debug.Log("Added 'Customize Formation' option");
             }
             else
             {
                 customizeFormationIndex = -1; // Not available
-                Debug.Log("FormationBuilderUI not assigned - 'Customize Formation' option not available");
             }
 
             // Add custom formations from quick list (only if CustomFormationManager exists)
             if (CustomFormationManager.Instance != null)
             {
                 var customFormations = CustomFormationManager.Instance.GetAllFormations();
-                int customCount = 0;
                 foreach (var formation in customFormations)
                 {
                     if (formation.isInQuickList)
@@ -183,21 +175,14 @@ namespace RTS.UI
                         options.Add(formation.name);
                         customFormationIndexMap[currentIndex] = formation.id;
                         currentIndex++;
-                        customCount++;
                     }
                 }
-                Debug.Log($"Added {customCount} custom formations to dropdown");
-            }
-            else
-            {
-                Debug.Log("CustomFormationManager.Instance is null - no custom formations added");
             }
 
             // Always add options to dropdown, even if only preset formations exist
             if (options.Count > 0)
             {
                 formationDropdown.AddOptions(options);
-                Debug.Log($"Successfully added {options.Count} total options to dropdown");
             }
             else
             {

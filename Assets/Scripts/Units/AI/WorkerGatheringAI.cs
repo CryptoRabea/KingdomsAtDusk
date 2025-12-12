@@ -240,7 +240,7 @@ namespace KingdomsAtDusk.Units.AI
             // Deposit resources to resource manager
             if (carriedResources > 0)
             {
-                var resourceManager = ServiceLocator.Get<ResourceManager>();
+                var resourceManager = ServiceLocator.TryGet<ResourceManager>();
 
                 if (resourceManager != null)
                 {

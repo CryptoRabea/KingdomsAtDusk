@@ -125,9 +125,13 @@ namespace RTS.Managers
                 return;
             }
 
-            // Select random spawn point
+            // Select random spawn point (with null check)
             Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            
+            if (spawnPoint == null)
+            {
+                return;
+            }
+
             // Get enemy prefab (would normally come from config)
             GameObject enemyPrefab = config.GetRandomEnemyPrefab();
             if (enemyPrefab == null)
@@ -139,7 +143,12 @@ namespace RTS.Managers
             GameObject enemy;
             if (poolService != null)
             {
-                enemy = poolService.Get(enemyPrefab.transform).gameObject;
+                Transform spawnedTransform = poolService.Get(enemyPrefab.transform);
+                if (spawnedTransform == null)
+                {
+                    return;
+                }
+                enemy = spawnedTransform.gameObject;
                 enemy.transform.position = spawnPoint.position;
                 enemy.transform.rotation = spawnPoint.rotation;
             }

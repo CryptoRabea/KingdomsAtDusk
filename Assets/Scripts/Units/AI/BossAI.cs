@@ -40,7 +40,7 @@ namespace RTS.Units.AI
 
         private void Start()
         {
-            poolService = ServiceLocator.Get<IPoolService>();
+            poolService = ServiceLocator.TryGet<IPoolService>();
 
             if (Combat != null)
             {

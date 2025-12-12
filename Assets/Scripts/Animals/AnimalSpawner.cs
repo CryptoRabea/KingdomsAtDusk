@@ -50,7 +50,7 @@ namespace RTS.Animals
 
         private void Start()
         {
-            poolService = ServiceLocator.Get<IPoolService>();
+            poolService = ServiceLocator.TryGet<IPoolService>();
 
             if (spawnOnStart)
             {

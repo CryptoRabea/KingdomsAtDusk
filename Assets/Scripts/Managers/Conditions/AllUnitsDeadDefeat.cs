@@ -25,7 +25,7 @@ namespace RTS.Core.Conditions
         {
             allUnitsDead = false;
             checkTimer = 0f;
-            resourcesService = ServiceLocator.Get<IResourcesService>();
+            resourcesService = ServiceLocator.TryGet<IResourcesService>();
         }
 
         public override void Cleanup()

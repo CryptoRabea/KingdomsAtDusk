@@ -299,21 +299,17 @@ public class LensVisionIntegration : MonoBehaviour
         SetupExistingObstacles();
         SetupExistingUnits();
         SetupExistingBuildings();
-        Debug.Log("LensVisionIntegration: Setup complete for all objects in scene.");
     }
 
     [ContextMenu("Remove All Lens Vision Targets")]
     private void RemoveAllLensVisionTargets()
     {
         LensVisionTarget[] targets = FindObjectsOfType<LensVisionTarget>();
-        int count = targets.Length;
 
         foreach (var target in targets)
         {
             DestroyImmediate(target);
         }
-
-        Debug.Log($"LensVisionIntegration: Removed {count} LensVisionTarget components.");
     }
 #endif
 }
