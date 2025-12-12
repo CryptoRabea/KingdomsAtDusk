@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-namespace RTS.RTSCamera
+namespace RTS.Camera
 {
     [RequireComponent(typeof(Camera))]
     public class RTSCameraController : MonoBehaviour
