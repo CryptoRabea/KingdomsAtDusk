@@ -35,11 +35,19 @@ namespace RTS.Units.Formation
         private CustomFormationsContainer _customFormations;
         private string _saveFilePath;
 
+        // ScriptableObject that holds user custom formation data at runtime
+        private UserCustomFormationSettingsSO _userFormationSettings;
+
         // Events
         public event Action<List<CustomFormationData>> OnFormationsChanged;
         public event Action<CustomFormationData> OnFormationAdded;
         public event Action<CustomFormationData> OnFormationUpdated;
         public event Action<string> OnFormationDeleted;
+
+        /// <summary>
+        /// Gets the UserCustomFormationSettingsSO instance
+        /// </summary>
+        public UserCustomFormationSettingsSO UserFormationSettings => _userFormationSettings;
 
         private void Awake()
         {
@@ -79,6 +87,16 @@ namespace RTS.Units.Formation
         private void Initialize()
         {
             _saveFilePath = Path.Combine(Application.persistentDataPath, "CustomFormations.json");
+
+            // Create runtime instance of UserCustomFormationSettingsSO
+            _userFormationSettings = UserCustomFormationSettingsSO.CreateRuntimeInstance();
+
+            // Wire up events from the SO to forward to our events
+            _userFormationSettings.OnFormationsChanged += (formations) => OnFormationsChanged?.Invoke(formations);
+            _userFormationSettings.OnFormationAdded += (formation) => OnFormationAdded?.Invoke(formation);
+            _userFormationSettings.OnFormationUpdated += (formation) => OnFormationUpdated?.Invoke(formation);
+            _userFormationSettings.OnFormationDeleted += (id) => OnFormationDeleted?.Invoke(id);
+
             LoadFormations();
         }
 
@@ -114,6 +132,12 @@ namespace RTS.Units.Formation
             CustomFormationData newFormation = new CustomFormationData(name);
             _customFormations.formations.Add(newFormation);
 
+            // Add to ScriptableObject
+            if (_userFormationSettings != null)
+            {
+                _userFormationSettings.AddFormation(newFormation);
+            }
+
             OnFormationAdded?.Invoke(newFormation);
             OnFormationsChanged?.Invoke(_customFormations.formations);
 
@@ -131,6 +155,12 @@ namespace RTS.Units.Formation
             {
                 updatedFormation.modifiedDate = DateTime.Now;
                 _customFormations.formations[index] = updatedFormation;
+
+                // Update in ScriptableObject
+                if (_userFormationSettings != null)
+                {
+                    _userFormationSettings.UpdateFormation(updatedFormation);
+                }
 
                 OnFormationUpdated?.Invoke(updatedFormation);
                 OnFormationsChanged?.Invoke(_customFormations.formations);
@@ -169,6 +199,12 @@ namespace RTS.Units.Formation
             int removed = _customFormations.formations.RemoveAll(f => f.id == id);
             if (removed > 0)
             {
+                // Remove from ScriptableObject
+                if (_userFormationSettings != null)
+                {
+                    _userFormationSettings.RemoveFormation(id);
+                }
+
                 OnFormationDeleted?.Invoke(id);
                 OnFormationsChanged?.Invoke(_customFormations.formations);
 
@@ -188,6 +224,12 @@ namespace RTS.Units.Formation
             {
                 CustomFormationData clone = original.Clone();
                 _customFormations.formations.Add(clone);
+
+                // Add to ScriptableObject
+                if (_userFormationSettings != null)
+                {
+                    _userFormationSettings.AddFormation(clone);
+                }
 
                 OnFormationAdded?.Invoke(clone);
                 OnFormationsChanged?.Invoke(_customFormations.formations);
@@ -262,6 +304,12 @@ namespace RTS.Units.Formation
                 _customFormations = new CustomFormationsContainer();
             }
 
+            // Initialize the ScriptableObject with loaded formations
+            if (_userFormationSettings != null)
+            {
+                _userFormationSettings.Initialize(_customFormations.formations);
+            }
+
             OnFormationsChanged?.Invoke(_customFormations.formations);
         }
 
@@ -271,6 +319,13 @@ namespace RTS.Units.Formation
         public void ClearAllFormations()
         {
             _customFormations.formations.Clear();
+
+            // Clear ScriptableObject
+            if (_userFormationSettings != null)
+            {
+                _userFormationSettings.ClearAllFormations();
+            }
+
             OnFormationsChanged?.Invoke(_customFormations.formations);
             SaveFormations();
         }
@@ -310,6 +365,12 @@ namespace RTS.Units.Formation
                 if (!merge)
                 {
                     _customFormations = imported;
+
+                    // Reinitialize ScriptableObject
+                    if (_userFormationSettings != null)
+                    {
+                        _userFormationSettings.Initialize(_customFormations.formations);
+                    }
                 }
                 else
                 {
@@ -320,6 +381,12 @@ namespace RTS.Units.Formation
                         // Ensure unique name
                         formation.name = GetUniqueFormationName(formation.name);
                         _customFormations.formations.Add(formation);
+
+                        // Add to ScriptableObject
+                        if (_userFormationSettings != null)
+                        {
+                            _userFormationSettings.AddFormation(formation);
+                        }
                     }
                 }
 
