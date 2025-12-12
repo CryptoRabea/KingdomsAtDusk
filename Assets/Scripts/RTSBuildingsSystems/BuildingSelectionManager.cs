@@ -1,4 +1,5 @@
 using RTS.Core.Events;
+using RTS.Units;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -42,6 +43,12 @@ namespace RTS.Buildings
         private int clickCount = 0;
         private float lastClickTimestamp = 0f;
 
+        // Deferred deselection to prevent instant clearing
+        private bool pendingDeselection = false;
+        private float deselectionDelay = 0.1f;
+        private float deselectionTimer = 0f;
+        private UnitSelectionManager cachedUnitManager;
+
         public BuildingSelectable CurrentlySelectedBuilding => selectedBuildings.Count > 0 ? selectedBuildings[0] : null;
         public IReadOnlyList<BuildingSelectable> SelectedBuildings => selectedBuildings;
         public int SelectionCount => selectedBuildings.Count;
@@ -64,6 +71,9 @@ namespace RTS.Buildings
             // Find BuildingManager to check if in placement mode
             buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
             wallPlacementController = Object.FindAnyObjectByType<WallPlacementController>();
+
+            // Cache unit selection manager reference for cross-selection clearing
+            cachedUnitManager = Object.FindAnyObjectByType<UnitSelectionManager>();
         }
         private bool IsMouseOverUI()
         {
@@ -122,6 +132,28 @@ namespace RTS.Buildings
             if (positionAction != null)
             {
                 positionAction.action.Disable();
+            }
+        }
+
+        private void Update()
+        {
+            // Handle deferred deselection
+            if (pendingDeselection)
+            {
+                deselectionTimer += Time.deltaTime;
+
+                if (deselectionTimer >= deselectionDelay)
+                {
+                    // Clear both buildings and units
+                    ClearSelection();
+                    if (cachedUnitManager != null)
+                    {
+                        cachedUnitManager.ClearSelection();
+                    }
+
+                    pendingDeselection = false;
+                    deselectionTimer = 0f;
+                }
             }
         }
 
@@ -223,7 +255,7 @@ namespace RTS.Buildings
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, buildingLayer))
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, buildingLayer))
             {
                 if (hit.collider.TryGetComponent<BuildingSelectable>(out var clickedBuilding))
                 {
@@ -249,7 +281,7 @@ namespace RTS.Buildings
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, buildingLayer))
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, buildingLayer))
             {
                 if (hit.collider.TryGetComponent<BuildingSelectable>(out var clickedBuilding))
                 {
@@ -267,12 +299,16 @@ namespace RTS.Buildings
 
         private void TrySelectBuilding(Vector2 screenPosition)
         {
+            // Cancel any pending deselection - we're clicking something
+            pendingDeselection = false;
+            deselectionTimer = 0f;
+
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
             Ray ray = mainCamera.ScreenPointToRay(screenPosition);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, buildingLayer))
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, buildingLayer))
             {
                 if (hit.collider != null)
                 {
@@ -304,8 +340,9 @@ namespace RTS.Buildings
                     Debug.Log("BuildingSelectionManager: No building hit, deselecting all.");
             }
 
-            // Clicked empty space - deselect all buildings
-            ClearSelection();
+            // Clicked empty space - schedule deferred deselection
+            pendingDeselection = true;
+            deselectionTimer = 0f;
         }
 
         private void SelectBuilding(BuildingSelectable building)
@@ -316,6 +353,11 @@ namespace RTS.Buildings
                 selectedBuildings.Add(building);
                 building.Select();
 
+                // Clear unit selection when selecting buildings
+                if (cachedUnitManager != null)
+                {
+                    cachedUnitManager.ClearSelection();
+                }
             }
         }
 
