@@ -85,7 +85,7 @@ namespace CircularLensVision
             mainCamera = Camera.main;
             if (mainCamera == null)
             {
-                mainCamera = FindObjectOfType<Camera>();
+                mainCamera = FindFirstObjectByType<Camera>();
             }
 
             spatialGrid = new Dictionary<Vector2Int, List<LensVisionTarget>>();
@@ -103,7 +103,7 @@ namespace CircularLensVision
         private void OnEnable()
         {
             // Register all existing targets
-            LensVisionTarget[] existingTargets = FindObjectsOfType<LensVisionTarget>();
+            LensVisionTarget[] existingTargets = FindObjectsByType<LensVisionTarget>(FindObjectsSortMode.None);
             foreach (var target in existingTargets)
             {
                 RegisterTarget(target);

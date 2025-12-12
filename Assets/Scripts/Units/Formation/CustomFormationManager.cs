@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace RTS.Units.Formation
 {
@@ -61,13 +64,33 @@ namespace RTS.Units.Formation
 
 #if UNITY_EDITOR
             // In editor, don't use DontDestroyOnLoad to avoid cleanup warnings
-            // The instance will be recreated when needed
+            // Subscribe to play mode state changes to ensure proper cleanup
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 #else
             DontDestroyOnLoad(gameObject);
 #endif
 
             Initialize();
         }
+
+#if UNITY_EDITOR
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            // Clean up when exiting play mode
+            if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                if (_instance == this)
+                {
+                    _instance = null;
+                    EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+                    if (gameObject != null)
+                    {
+                        DestroyImmediate(gameObject);
+                    }
+                }
+            }
+        }
+#endif
 
         private void OnDestroy()
         {
@@ -76,6 +99,11 @@ namespace RTS.Units.Formation
             {
                 _instance = null;
             }
+
+#if UNITY_EDITOR
+            // Unsubscribe from editor events
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+#endif
 
             // Unsubscribe all events to prevent memory leaks
             OnFormationsChanged = null;
@@ -91,11 +119,8 @@ namespace RTS.Units.Formation
             // Create runtime instance of UserCustomFormationSettingsSO
             _userFormationSettings = UserCustomFormationSettingsSO.CreateRuntimeInstance();
 
-            // Wire up events from the SO to forward to our events
-            _userFormationSettings.OnFormationsChanged += (formations) => OnFormationsChanged?.Invoke(formations);
-            _userFormationSettings.OnFormationAdded += (formation) => OnFormationAdded?.Invoke(formation);
-            _userFormationSettings.OnFormationUpdated += (formation) => OnFormationUpdated?.Invoke(formation);
-            _userFormationSettings.OnFormationDeleted += (id) => OnFormationDeleted?.Invoke(id);
+            // Note: We don't forward SO events to avoid double-firing
+            // CustomFormationManager handles its own events directly
 
             LoadFormations();
         }
@@ -132,10 +157,10 @@ namespace RTS.Units.Formation
             CustomFormationData newFormation = new CustomFormationData(name);
             _customFormations.formations.Add(newFormation);
 
-            // Add to ScriptableObject
+            // Sync to ScriptableObject - reinitialize to avoid duplication
             if (_userFormationSettings != null)
             {
-                _userFormationSettings.AddFormation(newFormation);
+                _userFormationSettings.Initialize(_customFormations.formations);
             }
 
             OnFormationAdded?.Invoke(newFormation);
@@ -156,10 +181,10 @@ namespace RTS.Units.Formation
                 updatedFormation.modifiedDate = DateTime.Now;
                 _customFormations.formations[index] = updatedFormation;
 
-                // Update in ScriptableObject
+                // Sync to ScriptableObject - reinitialize to avoid duplication
                 if (_userFormationSettings != null)
                 {
-                    _userFormationSettings.UpdateFormation(updatedFormation);
+                    _userFormationSettings.Initialize(_customFormations.formations);
                 }
 
                 OnFormationUpdated?.Invoke(updatedFormation);
@@ -182,6 +207,12 @@ namespace RTS.Units.Formation
                 formation.name = newName;
                 formation.modifiedDate = DateTime.Now;
 
+                // Sync to ScriptableObject
+                if (_userFormationSettings != null)
+                {
+                    _userFormationSettings.Initialize(_customFormations.formations);
+                }
+
                 OnFormationUpdated?.Invoke(formation);
                 OnFormationsChanged?.Invoke(_customFormations.formations);
 
@@ -199,10 +230,10 @@ namespace RTS.Units.Formation
             int removed = _customFormations.formations.RemoveAll(f => f.id == id);
             if (removed > 0)
             {
-                // Remove from ScriptableObject
+                // Sync to ScriptableObject
                 if (_userFormationSettings != null)
                 {
-                    _userFormationSettings.RemoveFormation(id);
+                    _userFormationSettings.Initialize(_customFormations.formations);
                 }
 
                 OnFormationDeleted?.Invoke(id);
@@ -225,10 +256,10 @@ namespace RTS.Units.Formation
                 CustomFormationData clone = original.Clone();
                 _customFormations.formations.Add(clone);
 
-                // Add to ScriptableObject
+                // Sync to ScriptableObject
                 if (_userFormationSettings != null)
                 {
-                    _userFormationSettings.AddFormation(clone);
+                    _userFormationSettings.Initialize(_customFormations.formations);
                 }
 
                 OnFormationAdded?.Invoke(clone);
@@ -277,7 +308,7 @@ namespace RTS.Units.Formation
                 string json = JsonUtility.ToJson(_customFormations, true);
                 File.WriteAllText(_saveFilePath, json);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
         }
@@ -299,7 +330,7 @@ namespace RTS.Units.Formation
                     _customFormations = new CustomFormationsContainer();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _customFormations = new CustomFormationsContainer();
             }
@@ -320,10 +351,10 @@ namespace RTS.Units.Formation
         {
             _customFormations.formations.Clear();
 
-            // Clear ScriptableObject
+            // Sync to ScriptableObject
             if (_userFormationSettings != null)
             {
-                _userFormationSettings.ClearAllFormations();
+                _userFormationSettings.Initialize(_customFormations.formations);
             }
 
             OnFormationsChanged?.Invoke(_customFormations.formations);
@@ -341,7 +372,7 @@ namespace RTS.Units.Formation
                 File.WriteAllText(filePath, json);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -365,12 +396,6 @@ namespace RTS.Units.Formation
                 if (!merge)
                 {
                     _customFormations = imported;
-
-                    // Reinitialize ScriptableObject
-                    if (_userFormationSettings != null)
-                    {
-                        _userFormationSettings.Initialize(_customFormations.formations);
-                    }
                 }
                 else
                 {
@@ -381,20 +406,20 @@ namespace RTS.Units.Formation
                         // Ensure unique name
                         formation.name = GetUniqueFormationName(formation.name);
                         _customFormations.formations.Add(formation);
-
-                        // Add to ScriptableObject
-                        if (_userFormationSettings != null)
-                        {
-                            _userFormationSettings.AddFormation(formation);
-                        }
                     }
+                }
+
+                // Sync to ScriptableObject once after all changes
+                if (_userFormationSettings != null)
+                {
+                    _userFormationSettings.Initialize(_customFormations.formations);
                 }
 
                 OnFormationsChanged?.Invoke(_customFormations.formations);
                 SaveFormations();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

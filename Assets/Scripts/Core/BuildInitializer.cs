@@ -40,7 +40,7 @@ namespace RTS.Core
             {
                 InitializeBuildSettings();
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
             }
         }
@@ -125,8 +125,9 @@ namespace RTS.Core
                 Shader.WarmupAllShaders();
                 success = true;
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
+                // Exception intentionally ignored - non-critical initialization
             }
 
             if (success)

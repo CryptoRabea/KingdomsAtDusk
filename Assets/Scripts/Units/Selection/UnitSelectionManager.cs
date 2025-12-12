@@ -651,6 +651,11 @@ namespace RTS.Units
             // Clicked empty space - clear unit selection only
             // Let BuildingSelectionManager handle building selections on empty clicks
             ClearSelection();
+            var buildingMgr = FindAnyObjectByType<BuildingSelectionManager>();
+            if (buildingMgr != null)
+            {
+                buildingMgr.DeselectBuilding();
+            }
             return false;
         }
 

@@ -65,6 +65,16 @@ providers = {
 		priority = -10
 		defaultAction = null
 	}
+	journal = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
+	archetype = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
 }
 objectSelectors = {
 }

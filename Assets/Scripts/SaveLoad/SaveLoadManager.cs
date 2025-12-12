@@ -127,7 +127,7 @@ namespace RTS.SaveLoad
 
                 return true;
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return false;
             }
@@ -174,7 +174,7 @@ namespace RTS.SaveLoad
 
                 return true;
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return false;
             }
@@ -207,7 +207,7 @@ namespace RTS.SaveLoad
                 }
                 return false;
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return false;
             }
@@ -259,7 +259,7 @@ namespace RTS.SaveLoad
                     isQuickSave = saveName == settings.quickSaveSlotName
                 };
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return null;
             }
@@ -408,7 +408,7 @@ namespace RTS.SaveLoad
 
                     buildingsData.Add(buildingData);
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
                 }
             }
@@ -482,7 +482,7 @@ namespace RTS.SaveLoad
 
                     unitsData.Add(unitData);
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
                 }
             }
@@ -696,7 +696,7 @@ namespace RTS.SaveLoad
                     restoredCount++;
                     Log($"  ✓ Restored building: {buildingData.buildingDataName} at {buildingData.position.ToVector3()}");
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
                 }
             }
@@ -759,7 +759,7 @@ namespace RTS.SaveLoad
                     restoredCount++;
                     Log($"  ✓ Restored unit: {unitData.unitConfigName} at {unitData.position.ToVector3()}");
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
                 }
             }

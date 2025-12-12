@@ -18,7 +18,8 @@ namespace RTS.Units.Animation
         [SerializeField] private float drawDuration = 0.5f;
         [SerializeField] private float aimDuration = 0.3f;
         [SerializeField] private float releaseDuration = 0.4f;
-        [SerializeField] private bool allowAimWhileMoving = true;
+        // TODO: Implement aim-while-moving feature in future update
+        // [SerializeField] private bool allowAimWhileMoving = true;
 
         [Header("Movement Settings")]
         [SerializeField] private float directionSmoothTime = 0.1f;
