@@ -4,6 +4,8 @@ using KingdomsAtDusk.Core;
 using RTS.Core.Events;
 using RTS.Buildings;
 using RTS.Units.AI;
+using RTS.Units.AI;
+using RTS.Buildings;
 
 /// <summary>
 /// Integration component that automatically sets up lens vision on units and buildings.
