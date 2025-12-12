@@ -14,7 +14,8 @@ namespace RTS.Animals
         [SerializeField] private Terrain terrain;
 
         [Header("Sampling Settings")]
-        [SerializeField] private float sampleRadius = 5f;
+        // TODO: Implement sampling radius feature in future update
+        // [SerializeField] private float sampleRadius = 5f;
         [SerializeField] private int samplePoints = 4;
 
         private Dictionary<BiomeType, BiomeData> biomeLookup = new Dictionary<BiomeType, BiomeData>();

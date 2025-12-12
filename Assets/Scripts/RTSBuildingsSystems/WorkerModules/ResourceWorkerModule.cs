@@ -16,7 +16,8 @@ namespace RTS.Buildings.WorkerModules
         [Header("Worker Settings")]
         [SerializeField] private bool enableModule = true;
         [SerializeField] private int peasantsPerResourceBuilding = 3;
-        [SerializeField] private float resourceProductionBonus = 1.5f;
+        // TODO: Implement production bonus multiplier in future update
+        // [SerializeField] private float resourceProductionBonus = 1.5f;
 
         [Header("Auto-Assignment")]
         [SerializeField] private bool autoAssignWorkers = true;
