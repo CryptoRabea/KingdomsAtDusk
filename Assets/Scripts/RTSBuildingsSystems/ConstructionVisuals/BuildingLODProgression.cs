@@ -17,7 +17,11 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         [SerializeField] private MeshRenderer lodGrouptargetRenderer;
+=======
+        [SerializeField] private MeshRenderer lodGroup;
+>>>>>>> Stashed changes
 =======
         [SerializeField] private MeshRenderer lodGroup;
 >>>>>>> Stashed changes
