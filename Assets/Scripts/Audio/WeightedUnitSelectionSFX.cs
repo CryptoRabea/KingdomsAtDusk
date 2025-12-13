@@ -141,7 +141,12 @@ namespace RTS.Audio
             }
 
             // Get selected units
-            List<GameObject> selectedUnits = new List<GameObject>(selectionManager.SelectedUnits);
+            List<GameObject> selectedUnits = new List<GameObject>();
+            foreach (var unit in selectionManager.SelectedUnits)
+            {
+                if (unit != null)
+                    selectedUnits.Add(unit.gameObject);
+            }
 
             // Find matching clip set
             WeightedClipSet matchingSet = FindMatchingClipSet(selectedUnits, selectionCount);

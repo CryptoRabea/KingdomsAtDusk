@@ -175,7 +175,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             // Set initial LOD to highest (LOD 7 = base)
             if (lodGrouptargetRenderer != null && reverseDirection)
             {
-                SetLODLevel(7, GetV(7));
+                SetLODLevel(7);
             }
         }
 
@@ -197,7 +197,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             if (targetLOD != currentLOD)
             {
                 currentLOD = targetLOD;
-                SetLODLevel(currentLOD, GetV(currentLOD));
+                SetLODLevel(currentLOD);
             }
 
             // Update particle effects
@@ -223,17 +223,13 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             }
         }
 
-        private short GetV(int lodLevel)
-        {
-            return lodGrouptargetRenderer.forceMeshLod = (short)lodLevel;
-        }
-
-        private void SetLODLevel(int lodLevel, short v)
+        private void SetLODLevel(int lodLevel)
         {
             if (lodGrouptargetRenderer == null) return;
-            short v1 = v;
 
-            Debug.Log($"[BuildingLOD] Set LOD to {lodLevel}");
+            // Force the mesh renderer to use a specific LOD index
+            // LOD 7 = index 7 (base), LOD 0 = index 0 (complete)
+            lodGrouptargetRenderer.forceMeshLod = (short)lodLevel;
         }
 
         private void UpdateParticleEffects(float progress)
@@ -276,8 +272,13 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         {
             if (parentBuilding == null) return;
 
-            // Don't play audio if building is not actually constructed (still in preview or disabled)
+            // Don't play audio if building is in preview/placement mode (not yet placed)
+            // Only play sounds after construction has actually started (building is placed)
             if (!parentBuilding.enabled || !parentBuilding.gameObject.activeInHierarchy)
+                return;
+
+            // Check if we're still in placement preview - construction progress only updates after placement
+            if (progress <= 0f)
                 return;
 
             float constructionTime = parentBuilding.Data.constructionTime;
@@ -433,7 +434,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 
             // Ensure final LOD is active (LOD 0 - complete building)
             currentLOD = 0;
-            SetLODLevel(0, GetV(0));
+            SetLODLevel(0);
 
             // Release forced LOD to allow normal LOD behavior based on distance
             if (lodGrouptargetRenderer != null)
