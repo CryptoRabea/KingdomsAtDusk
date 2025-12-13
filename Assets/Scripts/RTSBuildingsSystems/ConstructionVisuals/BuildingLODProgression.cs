@@ -14,23 +14,8 @@ namespace RTSBuildingsSystems.ConstructionVisuals
     {
         [Header("LOD Configuration")]
         [Tooltip("the mesh renderer component on the building")]
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
         [SerializeField] private MeshRenderer lodGrouptargetRenderer;
-=======
-        [SerializeField] private MeshRenderer lodGroup;
->>>>>>> Stashed changes
-=======
-        [SerializeField] private MeshRenderer lodGroup;
->>>>>>> Stashed changes
-=======
-        [SerializeField] private MeshRenderer lodGroup;
->>>>>>> Stashed changes
-=======
-        [SerializeField] private MeshRenderer lodGroup;
->>>>>>> Stashed changes
+=
 
         [Tooltip("Total number of LOD levels in the mesh (e.g., 8 for LOD 0-7)")]
         [SerializeField] private int lodLevels = 8;
@@ -291,6 +276,11 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         {
             if (parentBuilding == null) return;
 
+            // Don't play audio if building is not actually constructed (still in preview or disabled)
+            if (!parentBuilding.enabled || !parentBuilding.gameObject.activeInHierarchy)
+                return;
+
+            float constructionTime = parentBuilding.ConstructionTime;
             float constructionTime = parentBuilding.Data.constructionTime;
             float elapsedTime = progress * constructionTime;
 
@@ -487,7 +477,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
                 lodGrouptargetRenderer.forceMeshLod = -1;
             }
         }
-
+https://github.com/CryptoRabea/KingdomsAtDuskU_6.3/pull/96/conflict?name=Assets%252FScripts%252FRTSBuildingsSystems%252FConstructionVisuals%252FBuildingLODProgression.cs&ancestor_oid=44fad145ae5cfea39761a8640bfe38371e878b04&base_oid=ae6fa31d3b660136885b0f91f397ccbab3299e0a&head_oid=a528bc0120a56df67767342c20a584e8cfd02569
         // Public methods for external control
         public void EnableHealthBar(bool enable)
         {
