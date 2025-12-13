@@ -2,7 +2,19 @@
 - Project name: KingdomsAtDusk
 - Unity version: Unity 6000.3.0f1
 - Active game object:
-  - Name: AllyFootman (2)
+<<<<<<< Updated upstream
+  - Name: AllyFootman
   - Tag: PlayerUnit
   - Layer: Ally
+=======
+  - Name: BarracksPrefab
+  - Tag: Untagged
+  - Layer: 11
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->

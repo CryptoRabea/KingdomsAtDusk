@@ -367,7 +367,7 @@ namespace RTS.Managers
             {
                 if (meshRenderer != null)
                 {
-                    meshRenderer.forcedLOD = 0; // Force highest detail LOD
+                    meshRenderer.forceMeshLod = 0; // Force highest detail LOD
                 }
             }
 
