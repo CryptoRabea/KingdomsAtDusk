@@ -292,6 +292,11 @@ namespace RTSBuildingsSystems.ConstructionVisuals
                     effect.audioSource.loop = effect.loop;
                     effect.audioSource.volume = effect.volume;
                     effect.audioSource.spatialBlend = effect.spatialBlend;
+                    effect.audioSource.playOnAwake = false;
+                    effect.audioSource.priority = 0; // Highest priority
+                    effect.audioSource.minDistance = 1f;
+                    effect.audioSource.maxDistance = 500f;
+                    effect.audioSource.rolloffMode = AudioRolloffMode.Linear;
                 }
 
                 float startTime = effect.useAbsoluteTime ? effect.startTime : effect.startTime * constructionTime;
