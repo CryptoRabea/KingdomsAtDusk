@@ -2,7 +2,7 @@
 - Project name: KingdomsAtDusk
 - Unity version: Unity 6000.3.0f1
 - Active game object:
-  - Name: Occlusion Area
+  - Name: Terrain
   - Tag: Untagged
-  - Layer: Default
+  - Layer: Ground
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
