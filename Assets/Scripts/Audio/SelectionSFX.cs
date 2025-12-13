@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
-
 using RTS.Units;
 namespace RTS.Audio
 {
@@ -52,8 +51,6 @@ namespace RTS.Audio
         private void Awake()
         {
             // Check if this is on a building or unit
-            isBuilding = GetComponent<Buildings.Building>() != null || GetComponent<Buildings.BuildingSelectable>() != null;
-            isUnit = GetComponent<RTS.Units.UnitController>() != null || GetComponent<RTS.Units.UnitSelectable>() != null;
             isBuilding = TryGetComponent<Buildings.Building>(out _) || TryGetComponent<Buildings.BuildingSelectable>(out _);
             isUnit = TryGetComponent<UnitSelectable>(out _);
 
