@@ -13,8 +13,8 @@ namespace RTSBuildingsSystems.ConstructionVisuals
     public class BuildingLODProgression : BaseConstructionVisual
     {
         [Header("LOD Configuration")]
-        [Tooltip("Mesh renderer with LOD levels built into the mesh asset")]
-        [SerializeField] private MeshRenderer targetRenderer;
+        [Tooltip("the mesh renderer component on the building")]
+        [SerializeField] private MeshRenderer lodGrouptargetRenderer;
 
         [Tooltip("Total number of LOD levels in the mesh (e.g., 8 for LOD 0-7)")]
         [SerializeField] private int lodLevels = 8;
@@ -428,7 +428,6 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             // Release forced LOD to allow normal LOD behavior based on distance
             if (lodGrouptargetRenderer != null)
             {
-                targetRenderer.forcedLOD = -1; // -1 releases the forced LOD
                 lodGrouptargetRenderer.forceMeshLod = -1; // -1 releases the forced LOD
             }
 
@@ -464,7 +463,6 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             // Release forced LOD
             if (lodGrouptargetRenderer != null)
             {
-                targetRenderer.forcedLOD = -1;
                 lodGrouptargetRenderer.forceMeshLod = -1;
             }
         }
