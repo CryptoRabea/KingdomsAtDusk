@@ -4,5 +4,5 @@
 - Active game object:
   - Name: FogOfWarManager
   - Tag: Untagged
-  - Layer: Default
+  - Layer: Ground
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
