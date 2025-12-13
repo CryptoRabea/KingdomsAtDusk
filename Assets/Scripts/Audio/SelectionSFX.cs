@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
 
+using RTS.Units;
 namespace RTS.Audio
 {
     /// <summary>
@@ -53,6 +54,8 @@ namespace RTS.Audio
             // Check if this is on a building or unit
             isBuilding = GetComponent<Buildings.Building>() != null || GetComponent<Buildings.BuildingSelectable>() != null;
             isUnit = GetComponent<RTS.Units.UnitController>() != null || GetComponent<RTS.Units.UnitSelectable>() != null;
+            isBuilding = TryGetComponent<Buildings.Building>(out _) || TryGetComponent<Buildings.BuildingSelectable>(out _);
+            isUnit = TryGetComponent<UnitSelectable>(out _);
 
             // Create audio source
             audioSource = gameObject.AddComponent<AudioSource>();
