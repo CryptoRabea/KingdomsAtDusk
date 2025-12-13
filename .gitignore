@@ -3,13 +3,15 @@
 [Tt]emp/
 Library/
 Logs/
-
+Agents/
 # VS / Rider
 .vscode/
 .idea/
 *.sln
 *.pidb
 *.booproj
+
+*Agents
 
 # Auto-generated
 *.suo
