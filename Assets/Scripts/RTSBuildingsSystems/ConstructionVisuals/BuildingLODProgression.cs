@@ -6,27 +6,21 @@ using RTS.Buildings;
 namespace RTSBuildingsSystems.ConstructionVisuals
 {
     /// <summary>
-    /// Manages building LOD progression during construction using Unity's LODGroup.
+    /// Manages building LOD progression during construction using MeshRenderer.forceMeshLod.
     /// Transitions from LOD 7 (base) to LOD 0 (complete building) based on construction time.
     /// Includes particle effects, audio, floating numbers, and progress UI.
     /// </summary>
     public class BuildingLODProgression : BaseConstructionVisual
     {
         [Header("LOD Configuration")]
-        [Tooltip("LODGroup component on the building")]
-        [SerializeField] private LODGroup lodGroup;
+        [Tooltip("Mesh renderer with LOD levels built into the mesh asset")]
+        [SerializeField] private MeshRenderer targetRenderer;
 
-        [Tooltip("Total number of LOD levels (e.g., 8 for LOD 7 to LOD 0)")]
+        [Tooltip("Total number of LOD levels in the mesh (e.g., 8 for LOD 0-7)")]
         [SerializeField] private int lodLevels = 8;
 
         [Tooltip("Start from highest LOD number (7) to lowest (0)")]
         [SerializeField] private bool reverseDirection = true;
-
-        [Tooltip("If true, LODs transition smoothly. If false, they switch instantly.")]
-        [SerializeField] private bool smoothTransition = true;
-
-        [Tooltip("Duration for smooth transition between LODs (in seconds)")]
-        [SerializeField] private float transitionDuration = 0.3f;
 
         [Header("Construction Effects")]
         [SerializeField] private ConstructionParticleEffect[] particleEffects;
@@ -72,9 +66,6 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 
         // Private state
         private int currentLOD = 7; // Start with base (LOD 7)
-        private int targetLOD = 7;
-        private float transitionProgress = 1f;
-        private float currentLODValue = 0f; // For smooth LOD transitions (0-1 range for Unity LODGroup)
         private Dictionary<int, bool> activeParticles = new Dictionary<int, bool>();
         private Dictionary<int, bool> activeAudio = new Dictionary<int, bool>();
         private float lastFloatingNumberTime;
@@ -144,13 +135,13 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 
         protected override void Initialize()
         {
-            // Find LODGroup if not assigned
-            if (lodGroup == null)
+            // Find MeshRenderer if not assigned
+            if (targetRenderer == null)
             {
-                lodGroup = GetComponentInParent<LODGroup>();
-                if (lodGroup == null)
+                targetRenderer = GetComponentInChildren<MeshRenderer>();
+                if (targetRenderer == null)
                 {
-                    lodGroup = GetComponentInChildren<LODGroup>();
+                    targetRenderer = GetComponent<MeshRenderer>();
                 }
             }
 
@@ -181,7 +172,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             isConstructionComplete = false;
 
             // Set initial LOD to highest (LOD 7 = base)
-            if (lodGroup != null && reverseDirection)
+            if (targetRenderer != null && reverseDirection)
             {
                 SetLODLevel(7);
             }
@@ -198,41 +189,14 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             // Calculate target LOD based on progress (0-1)
             // LOD 7 at 0% -> LOD 0 at 100%
             float lodProgress = progress * (lodLevels - 1);
-            int newTargetLOD = reverseDirection ? (lodLevels - 1) - Mathf.FloorToInt(lodProgress) : Mathf.FloorToInt(lodProgress);
-            newTargetLOD = Mathf.Clamp(newTargetLOD, 0, lodLevels - 1);
+            int targetLOD = reverseDirection ? (lodLevels - 1) - Mathf.FloorToInt(lodProgress) : Mathf.FloorToInt(lodProgress);
+            targetLOD = Mathf.Clamp(targetLOD, 0, lodLevels - 1);
 
-            // Update LOD transition
-            if (newTargetLOD != targetLOD)
+            // Update LOD if changed
+            if (targetLOD != currentLOD)
             {
-                targetLOD = newTargetLOD;
-                if (smoothTransition)
-                {
-                    transitionProgress = 0f;
-                }
-                else
-                {
-                    currentLOD = targetLOD;
-                    SetLODLevel(currentLOD);
-                }
-            }
-
-            // Smooth transition between LODs
-            if (smoothTransition && transitionProgress < 1f)
-            {
-                transitionProgress += Time.deltaTime / transitionDuration;
-                transitionProgress = Mathf.Clamp01(transitionProgress);
-
-                if (transitionProgress >= 1f)
-                {
-                    currentLOD = targetLOD;
-                    SetLODLevel(currentLOD);
-                }
-                else
-                {
-                    // Interpolate between current and target LOD
-                    float lerpedLOD = Mathf.Lerp(currentLOD, targetLOD, transitionProgress);
-                    SetLODLevelSmooth(lerpedLOD);
-                }
+                currentLOD = targetLOD;
+                SetLODLevel(currentLOD);
             }
 
             // Update particle effects
@@ -260,29 +224,13 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 
         private void SetLODLevel(int lodLevel)
         {
-            if (lodGroup == null) return;
+            if (targetRenderer == null) return;
 
-            // Convert LOD level to normalized value (0-1) for Unity's LODGroup
-            // LOD 7 should force highest detail, LOD 0 should be normal
-            float normalizedValue = CalculateLODValue(lodLevel);
-            currentLODValue = normalizedValue;
-            lodGroup.ForceLOD(lodLevel);
-        }
+            // Force the mesh renderer to use a specific LOD index
+            // LOD 7 = index 7 (base), LOD 0 = index 0 (complete)
+            targetRenderer.forcedLOD = lodLevel;
 
-        private void SetLODLevelSmooth(float lodLevel)
-        {
-            if (lodGroup == null) return;
-
-            // Force to nearest LOD level for smooth appearance
-            int nearestLOD = Mathf.RoundToInt(lodLevel);
-            lodGroup.ForceLOD(Mathf.Clamp(nearestLOD, 0, lodLevels - 1));
-        }
-
-        private float CalculateLODValue(int lodLevel)
-        {
-            // Convert LOD level to Unity's normalized distance value
-            // This is a simplified version - adjust based on your LOD setup
-            return 1f - ((float)lodLevel / (lodLevels - 1));
+            Debug.Log($"[BuildingLOD] Set LOD to {lodLevel}");
         }
 
         private void UpdateParticleEffects(float progress)
@@ -473,12 +421,12 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 
             // Ensure final LOD is active (LOD 0 - complete building)
             currentLOD = 0;
-            targetLOD = 0;
+            SetLODLevel(0);
 
-            // Release LOD forcing to allow normal LOD behavior
-            if (lodGroup != null)
+            // Release forced LOD to allow normal LOD behavior based on distance
+            if (targetRenderer != null)
             {
-                lodGroup.ForceLOD(-1); // -1 releases the forced LOD
+                targetRenderer.forcedLOD = -1; // -1 releases the forced LOD
             }
 
             // Switch to health bar if enabled
@@ -511,9 +459,9 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             }
 
             // Release forced LOD
-            if (lodGroup != null)
+            if (targetRenderer != null)
             {
-                lodGroup.ForceLOD(-1);
+                targetRenderer.forcedLOD = -1;
             }
         }
 
