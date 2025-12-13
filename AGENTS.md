@@ -10,5 +10,8 @@
   - Name: BarracksPrefab
   - Tag: Untagged
   - Layer: 11
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
