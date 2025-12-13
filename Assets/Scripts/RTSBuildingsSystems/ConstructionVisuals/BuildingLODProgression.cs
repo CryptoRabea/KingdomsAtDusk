@@ -15,7 +15,11 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         [Header("LOD Configuration")]
         [Tooltip("the mesh renderer component on the building")]
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         [SerializeField] private MeshRenderer lodGrouptargetRenderer;
+=======
+        [SerializeField] private MeshRenderer lodGroup;
+>>>>>>> Stashed changes
 =======
         [SerializeField] private MeshRenderer lodGroup;
 >>>>>>> Stashed changes
