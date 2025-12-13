@@ -14,7 +14,11 @@ namespace RTSBuildingsSystems.ConstructionVisuals
     {
         [Header("LOD Configuration")]
         [Tooltip("the mesh renderer component on the building")]
+<<<<<<< Updated upstream
         [SerializeField] private MeshRenderer lodGrouptargetRenderer;
+=======
+        [SerializeField] private MeshRenderer lodGroup;
+>>>>>>> Stashed changes
 
         [Tooltip("Total number of LOD levels in the mesh (e.g., 8 for LOD 0-7)")]
         [SerializeField] private int lodLevels = 8;
