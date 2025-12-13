@@ -136,12 +136,12 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         protected override void Initialize()
         {
             // Find MeshRenderer if not assigned
-            if (targetRenderer == null)
+            if (lodGrouptargetRenderer == null)
             {
-                targetRenderer = GetComponentInChildren<MeshRenderer>();
-                if (targetRenderer == null)
+                lodGrouptargetRenderer = GetComponentInChildren<MeshRenderer>();
+                if (lodGrouptargetRenderer == null)
                 {
-                    targetRenderer = GetComponent<MeshRenderer>();
+                    lodGrouptargetRenderer = GetComponent<MeshRenderer>();
                 }
             }
 
@@ -172,9 +172,9 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             isConstructionComplete = false;
 
             // Set initial LOD to highest (LOD 7 = base)
-            if (targetRenderer != null && reverseDirection)
+            if (lodGrouptargetRenderer != null && reverseDirection)
             {
-                SetLODLevel(7);
+                SetLODLevel(7, GetV(7));
             }
         }
 
@@ -196,7 +196,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             if (targetLOD != currentLOD)
             {
                 currentLOD = targetLOD;
-                SetLODLevel(currentLOD);
+                SetLODLevel(currentLOD, GetV(currentLOD));
             }
 
             // Update particle effects
@@ -222,13 +222,15 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             }
         }
 
-        private void SetLODLevel(int lodLevel)
+        private short GetV(int lodLevel)
         {
-            if (targetRenderer == null) return;
+            return lodGrouptargetRenderer.forceMeshLod = (short)lodLevel;
+        }
 
-            // Force the mesh renderer to use a specific LOD index
-            // LOD 7 = index 7 (base), LOD 0 = index 0 (complete)
-            targetRenderer.forcedLOD = lodLevel;
+        private void SetLODLevel(int lodLevel, short v)
+        {
+            if (lodGrouptargetRenderer == null) return;
+            short v1 = v;
 
             Debug.Log($"[BuildingLOD] Set LOD to {lodLevel}");
         }
@@ -421,12 +423,13 @@ namespace RTSBuildingsSystems.ConstructionVisuals
 
             // Ensure final LOD is active (LOD 0 - complete building)
             currentLOD = 0;
-            SetLODLevel(0);
+            SetLODLevel(0, GetV(0));
 
             // Release forced LOD to allow normal LOD behavior based on distance
-            if (targetRenderer != null)
+            if (lodGrouptargetRenderer != null)
             {
                 targetRenderer.forcedLOD = -1; // -1 releases the forced LOD
+                lodGrouptargetRenderer.forceMeshLod = -1; // -1 releases the forced LOD
             }
 
             // Switch to health bar if enabled
@@ -459,9 +462,10 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             }
 
             // Release forced LOD
-            if (targetRenderer != null)
+            if (lodGrouptargetRenderer != null)
             {
                 targetRenderer.forcedLOD = -1;
+                lodGrouptargetRenderer.forceMeshLod = -1;
             }
         }
 
