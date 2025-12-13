@@ -30,10 +30,6 @@ namespace RTS.Buildings
         [SerializeField] private bool enableDoubleClick = true;
         [SerializeField] private float doubleClickTime = 0.3f;
 
-        [Header("Audio")]
-        [SerializeField] private AudioClip rallyPointSetSFX;
-        [SerializeField] private float rallyPointSFXVolume = 1f;
-
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = true;
 
@@ -386,20 +382,6 @@ namespace RTS.Buildings
 
         private void OnRightClick(InputAction.CallbackContext context)
         {
-            // Don't process right-clicks if currently placing a building or wall
-            // (right-click should cancel placement instead)
-            if (buildingManager != null && buildingManager.IsPlacingBuilding)
-            {
-                if (enableDebugLogs)
-                return;
-            }
-
-            if (wallPlacementController != null && wallPlacementController.IsPlacingWalls)
-            {
-                if (enableDebugLogs)
-                return;
-            }
-
             // Only process right-clicks if a building is selected
             if (CurrentlySelectedBuilding == null)
             {
@@ -462,12 +444,7 @@ namespace RTS.Buildings
                         rallyFlag.SetRallyPointPosition(hit.point);
                         rallyFlag.ShowFlag(); // Show flag when rally point is set
                     }
-
-                    // Play rally point set SFX
-                    if (rallyPointSetSFX != null)
-                    {
-                        AudioSource.PlayClipAtPoint(rallyPointSetSFX, hit.point, rallyPointSFXVolume);
-                    }
+                    
 
                 }
                
