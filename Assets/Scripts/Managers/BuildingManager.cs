@@ -361,6 +361,16 @@ namespace RTS.Managers
                 gridVisualizer.Show();
             }
 
+            // Force LOD 0 (final building) for preview so player sees completed building
+            var meshRenderers = previewBuilding.GetComponentsInChildren<MeshRenderer>();
+            foreach (var meshRenderer in meshRenderers)
+            {
+                if (meshRenderer != null)
+                {
+                    meshRenderer.forcedLOD = 0; // Force highest detail LOD
+                }
+            }
+
             SetPreviewMaterial(validPlacementMaterial);
         }
 
