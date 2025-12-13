@@ -40,20 +40,23 @@ Updated to show construction progress in the building detail panel when a buildi
 
 ## Setup Instructions
 
-### Step 1: Prepare LOD Meshes
+### Step 1: Setup Unity LODGroup
 
 1. Create 8 LOD versions of your building model:
-   - **LOD 7** (Index 0): Base/foundation only
-   - **LOD 6** (Index 1): Foundation + basic structure
-   - **LOD 5** (Index 2): ~25% complete
-   - **LOD 4** (Index 3): ~37.5% complete
-   - **LOD 3** (Index 4): ~50% complete
-   - **LOD 2** (Index 5): ~62.5% complete
-   - **LOD 1** (Index 6): ~87.5% complete
-   - **LOD 0** (Index 7): Fully complete building
+   - **LOD 7**: Base/foundation only
+   - **LOD 6**: Foundation + basic structure
+   - **LOD 5**: ~25% complete
+   - **LOD 4**: ~37.5% complete
+   - **LOD 3**: ~50% complete
+   - **LOD 2**: ~62.5% complete
+   - **LOD 1**: ~87.5% complete
+   - **LOD 0**: Fully complete building
 
-2. Place all LOD meshes as children of your building prefab
-3. Each LOD should be a separate GameObject
+2. Add a **LODGroup** component to your building prefab (or to a child GameObject with all meshes)
+3. Configure the LODGroup in the inspector:
+   - Set LOD levels to 8 (LOD 0 through LOD 7)
+   - Assign your mesh renderers to each LOD level
+   - Adjust the screen percentages as needed (the script will override these during construction)
 
 ### Step 2: Add BuildingLODProgression Component
 
@@ -61,18 +64,18 @@ Updated to show construction progress in the building detail panel when a buildi
 2. Add the **BuildingLODProgression** component
 3. The component will automatically attach to your building's construction system
 
-### Step 3: Configure LOD Meshes
+### Step 3: Configure LOD Settings
 
 In the **BuildingLODProgression** inspector:
 
 1. Expand the **LOD Configuration** section
-2. Drag your LOD meshes into the **Lod Meshes** array (size 8):
-   - Element 0 → LOD 7 GameObject (base)
-   - Element 1 → LOD 6 GameObject
-   - ...
-   - Element 7 → LOD 0 GameObject (complete)
-3. Configure transition settings:
-   - **Smooth Transition**: Enable for crossfade between LODs
+2. Assign the **LOD Group** reference:
+   - The script will auto-detect it if on the same GameObject or parent
+   - Or manually drag the LODGroup component into the field
+3. Configure LOD settings:
+   - **LOD Levels**: Number of LOD levels (default 8 for LOD 0-7)
+   - **Reverse Direction**: Enable to go from LOD 7 (base) → LOD 0 (complete)
+   - **Smooth Transition**: Enable for smooth LOD changes
    - **Transition Duration**: Time for smooth transitions (default 0.3s)
 
 ### Step 4: Setup World-Space Progress Bar (Optional)
@@ -208,31 +211,31 @@ The BuildingDetailsUI has been enhanced to show construction progress:
 
 ## How It Works
 
-### LOD Progression
+### LOD Progression with Unity's LODGroup
 
-The system calculates which LOD to display based on construction progress:
+The system uses `LODGroup.ForceLOD()` to control which LOD level is visible during construction:
 
 ```
-Progress (0-1) → LOD Level
-0.00 (0%)      → LOD 7 (base)
-0.14 (14%)     → LOD 6
-0.28 (28%)     → LOD 5
-0.42 (42%)     → LOD 4
-0.57 (57%)     → LOD 3
-0.71 (71%)     → LOD 2
-0.85 (85%)     → LOD 1
-1.00 (100%)    → LOD 0 (complete)
+Progress (0-1) → LOD Level Forced
+0.00 (0%)      → LOD 7 (base) forced
+0.14 (14%)     → LOD 6 forced
+0.28 (28%)     → LOD 5 forced
+0.42 (42%)     → LOD 4 forced
+0.57 (57%)     → LOD 3 forced
+0.71 (71%)     → LOD 2 forced
+0.85 (85%)     → LOD 1 forced
+1.00 (100%)    → LOD 0 forced, then released (-1) for normal LOD behavior
 ```
 
 **Example**: A building with 7 second construction time:
-- At 0s: LOD 7 (base)
-- At 1s: LOD 6
-- At 2s: LOD 5
-- At 3s: LOD 4
-- At 4s: LOD 3
-- At 5s: LOD 2
-- At 6s: LOD 1
-- At 7s: LOD 0 (complete)
+- At 0s: Forces LOD 7 (base) - shows foundation only
+- At 1s: Forces LOD 6 - shows foundation + basic structure
+- At 2s: Forces LOD 5 - shows ~28% complete
+- At 3s: Forces LOD 4 - shows ~42% complete
+- At 4s: Forces LOD 3 - shows ~57% complete
+- At 5s: Forces LOD 2 - shows ~71% complete
+- At 6s: Forces LOD 1 - shows ~85% complete
+- At 7s: Forces LOD 0, then releases forcing - building complete, LOD now based on camera distance
 
 ### Particle Effect Timing
 
@@ -335,9 +338,11 @@ float progress = lodSystem.ConstructionProgress;
 ## Troubleshooting
 
 ### LODs not switching
-- Ensure all LOD meshes are assigned in the correct array order
+- Ensure LODGroup component is assigned and has 8 LOD levels configured
 - Check that the Building component has `requiresConstruction = true`
 - Verify that `constructionTime` is set correctly
+- Ensure **Reverse Direction** is enabled to go from LOD 7 → LOD 0
+- Check that each LOD level in LODGroup has renderers assigned
 
 ### Particles not playing
 - Check that particle systems are assigned
