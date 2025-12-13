@@ -81,6 +81,12 @@ namespace RTS.Units
         private UnitConfigSO lastClickedUnitConfig = null;
         private BuildingDataSO lastClickedBuildingData = null;
 
+        // Deferred deselection to prevent instant clearing
+        private bool pendingDeselection = false;
+        private float deselectionDelay = 0.1f;
+        private float deselectionTimer = 0f;
+        private BuildingSelectionManager cachedBuildingManager;
+
         //  UI Detection - Cached
         private PointerEventData cachedPointerEventData;
         private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
@@ -135,6 +141,9 @@ namespace RTS.Units
             // Find BuildingManager and WallPlacementController to check placement mode
             buildingManager = Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
             wallPlacementController = Object.FindAnyObjectByType<WallPlacementController>();
+
+            // Cache building selection manager reference for cross-selection clearing
+            cachedBuildingManager = Object.FindAnyObjectByType<BuildingSelectionManager>();
         }
 
         private void OnEnable()
@@ -213,6 +222,25 @@ namespace RTS.Units
             // Show performance stats if enabled
             if (showPerformanceStats && Time.frameCount % 60 == 0)
             {
+            }
+
+            // Handle deferred deselection
+            if (pendingDeselection)
+            {
+                deselectionTimer += Time.deltaTime;
+
+                if (deselectionTimer >= deselectionDelay)
+                {
+                    // Clear both units and buildings
+                    ClearSelection();
+                    if (cachedBuildingManager != null)
+                    {
+                        cachedBuildingManager.DeselectBuilding();
+                    }
+
+                    pendingDeselection = false;
+                    deselectionTimer = 0f;
+                }
             }
         }
 
@@ -558,6 +586,10 @@ namespace RTS.Units
 
         private bool TrySingleSelection(Vector2 screenPosition)
         {
+            // Cancel any pending deselection - we're clicking something
+            pendingDeselection = false;
+            deselectionTimer = 0f;
+
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
@@ -631,10 +663,9 @@ namespace RTS.Units
                     {
                         ClearSelection();
                         // Clear any selected buildings/gates when selecting units
-                        var buildingManager = FindAnyObjectByType<BuildingSelectionManager>();
-                        if (buildingManager != null)
+                        if (cachedBuildingManager != null)
                         {
-                            buildingManager.DeselectBuilding();
+                            cachedBuildingManager.DeselectBuilding();
                         }
                     }
 
@@ -648,14 +679,9 @@ namespace RTS.Units
                 return false;
             }
 
-            // Clicked empty space - clear unit selection only
-            // Let BuildingSelectionManager handle building selections on empty clicks
-            ClearSelection();
-            var buildingMgr = FindAnyObjectByType<BuildingSelectionManager>();
-            if (buildingMgr != null)
-            {
-                buildingMgr.DeselectBuilding();
-            }
+            // Clicked empty space - schedule deferred deselection
+            pendingDeselection = true;
+            deselectionTimer = 0f;
             return false;
         }
 
@@ -1061,7 +1087,7 @@ namespace RTS.Units
             EventBus.Publish(new SelectionChangedEvent(selectedUnits.Count));
         }
 
-        private void ClearSelection()
+        public void ClearSelection()
         {
             foreach (var unit in selectedUnits)
             {
