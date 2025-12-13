@@ -500,19 +500,19 @@ namespace RTS.UI
             }
 
             float progress = buildingComponent.ConstructionProgress;
-            float timeRemaining = buildingComponent.ConstructionTime - progress;
+            float timeRemaining = buildingComponent.Data.constructionTime - progress;
 
             // Update progress bar
             if (constructionProgressBar != null)
             {
-                constructionProgressBar.fillAmount = progress / buildingComponent.ConstructionTime;
+                constructionProgressBar.fillAmount = progress / buildingComponent.Data.constructionTime;
                 constructionProgressBar.color = constructionBarColor;
             }
 
             // Update progress text
             if (constructionProgressText != null)
             {
-                float percentage = (progress / buildingComponent.ConstructionTime) * 100f;
+                float percentage = (progress / buildingComponent.Data.constructionTime) * 100f;
                 constructionProgressText.text = $"Construction: {Mathf.RoundToInt(percentage)}%";
             }
 

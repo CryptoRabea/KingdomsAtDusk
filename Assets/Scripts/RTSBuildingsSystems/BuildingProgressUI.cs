@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-
+using RTS.Buildings;
+using RTS.UI;
 namespace RTSBuildingsSystems
 {
     /// <summary>
@@ -74,7 +75,7 @@ namespace RTSBuildingsSystems
             // Set building name
             if (buildingNameText != null && building != null)
             {
-                buildingNameText.text = building.BuildingName;
+                buildingNameText.text = building.Data?.buildingName;
             }
         }
 

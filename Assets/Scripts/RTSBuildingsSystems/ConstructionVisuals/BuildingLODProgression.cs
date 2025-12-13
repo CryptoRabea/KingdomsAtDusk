@@ -289,7 +289,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         {
             if (parentBuilding == null) return;
 
-            float constructionTime = parentBuilding.ConstructionTime;
+            float constructionTime = parentBuilding.Data.constructionTime;
             float elapsedTime = progress * constructionTime;
 
             for (int i = 0; i < particleEffects.Length; i++)
@@ -325,7 +325,7 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         {
             if (parentBuilding == null) return;
 
-            float constructionTime = parentBuilding.ConstructionTime;
+            float constructionTime = parentBuilding.Data.constructionTime;
             float elapsedTime = progress * constructionTime;
 
             for (int i = 0; i < audioEffects.Length; i++)
