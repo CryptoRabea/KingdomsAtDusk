@@ -172,7 +172,8 @@ namespace RTSBuildingsSystems.ConstructionVisuals
             isConstructionComplete = false;
 
             // Set initial LOD to highest (LOD 7 = base)
-            if (targetRenderer != null && reverseDirection)
+            // Only if building is actually placed (not preview)
+            if (targetRenderer != null && reverseDirection && parentBuilding != null && parentBuilding.gameObject.scene.isLoaded)
             {
                 SetLODLevel(7);
             }
@@ -237,6 +238,10 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         {
             if (parentBuilding == null) return;
 
+            // Don't play particles if building is not actually constructed (still in preview or disabled)
+            if (!parentBuilding.enabled || !parentBuilding.gameObject.activeInHierarchy)
+                return;
+
             float constructionTime = parentBuilding.ConstructionTime;
             float elapsedTime = progress * constructionTime;
 
@@ -272,6 +277,10 @@ namespace RTSBuildingsSystems.ConstructionVisuals
         private void UpdateAudioEffects(float progress)
         {
             if (parentBuilding == null) return;
+
+            // Don't play audio if building is not actually constructed (still in preview or disabled)
+            if (!parentBuilding.enabled || !parentBuilding.gameObject.activeInHierarchy)
+                return;
 
             float constructionTime = parentBuilding.ConstructionTime;
             float elapsedTime = progress * constructionTime;
