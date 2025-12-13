@@ -227,7 +227,7 @@ namespace RTS.Units
                 }
 
                 // Publish move command event for SFX
-                EventBus.Publish(new UnitMoveCommandEvent(unit, unitDestination));
+                EventBus.Publish(new UnitMoveCommandEvent(unit.gameObject, unitDestination));
 
                 index++;
             }
@@ -336,7 +336,7 @@ namespace RTS.Units
                 }
 
                 // Publish attack command event for SFX
-                EventBus.Publish(new UnitAttackCommandEvent(unit, target.gameObject, targetType));
+                EventBus.Publish(new UnitAttackCommandEvent(unit.gameObject, target.gameObject, targetType));
             }
 
         }
