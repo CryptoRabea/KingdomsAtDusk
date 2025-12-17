@@ -554,6 +554,8 @@ namespace RTS.Buildings
         public List<WallConnectionSystem> connectedWalls;  // External wall connections to maintain
 
         // Legacy support - returns first wall
-        public GameObject originalWall => (originalWalls != null && originalWalls.Count > 0) ? originalWalls[0] : null;
+        public GameObject OriginalWall => (originalWalls != null && originalWalls.Count > 0) ? originalWalls[0] : null;
+
+        public GameObject originalWall { get; internal set; }
     }
 }
