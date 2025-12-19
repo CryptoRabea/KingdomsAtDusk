@@ -686,31 +686,26 @@ namespace FischlWorks_FogWar
 
             int scanResult = 0;
 
-            for (int xIterator = -1; xIterator < additionalRadius + 1; xIterator++)
+            // Iterate through a square region around the central levelCoordinates
+            for (int xIterator = -additionalRadius; xIterator <= additionalRadius; xIterator++)
             {
-                for (int yIterator = -1; yIterator < additionalRadius + 1; yIterator++)
                 {
-                    if (CheckLevelGridRange(new Vector2Int(
+                    Vector2Int currentCheckCoordinates = new Vector2Int(
                         levelCoordinates.x + xIterator,
-                        levelCoordinates.y + yIterator)) == false)
+                        levelCoordinates.y + yIterator);
+
+                    // Only check visibility for cells that are within the level grid range
+                    if (CheckLevelGridRange(currentCheckCoordinates))
                     {
-                        scanResult = 0;
-
-                        break;
+                        if (shadowcaster.fogField[currentCheckCoordinates.x][currentCheckCoordinates.y] == Shadowcaster.LevelColumn.ETileVisibility.Revealed)
+                        {
+                            return true; // Found at least one revealed tile in the additional radius
+                        }
                     }
-
-                    scanResult += Convert.ToInt32(
-                        shadowcaster.fogField[levelCoordinates.x + xIterator][levelCoordinates.y + yIterator] ==
-                        Shadowcaster.LevelColumn.ETileVisibility.Revealed);
                 }
             }
-
-            if (scanResult > 0)
-            {
-                return true;
-            }
-
-            return false;
+            
+            return false; // No revealed tiles found in the additional radius
         }
 
 

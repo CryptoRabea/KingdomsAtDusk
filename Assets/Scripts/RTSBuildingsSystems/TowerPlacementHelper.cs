@@ -66,8 +66,40 @@ namespace RTS.Buildings
 
             if (nearest != null)
             {
-                outPosition = nearest.transform.position;
-                outWall = nearest;
+                // Calculate rotation from wall direction
+                outRotation = CalculateWallRotation(nearest);
+
+                // Find all wall segments that the tower will cover
+                if (towerData.replaceMultipleSegments)
+                {
+                    outWalls = FindWallSegmentsToCover(nearest, towerData, out Vector3 adjustedPosition);
+
+                    // Use adjusted position if allowed
+                    if (towerData.allowPositionAdjustment)
+                    {
+                        // Check if adjustment is within allowed range
+                        float adjustmentDistance = Vector3.Distance(nearest.transform.position, adjustedPosition);
+                        if (adjustmentDistance <= towerData.maxPositionAdjustment)
+                        {
+                            outPosition = adjustedPosition;
+                        }
+                        else
+                        {
+                            outPosition = nearest.transform.position;
+                        }
+                    }
+                    else
+                    {
+                        outPosition = nearest.transform.position;
+                    }
+                }
+                else
+                {
+                    // Single wall replacement
+                    outPosition = nearest.transform.position;
+                    outWalls.Add(nearest);
+                }
+
                 return true;
             }
 
@@ -120,6 +152,161 @@ namespace RTS.Buildings
             }
 
             return walls;
+        }
+
+        /// <summary>
+        /// Calculate perfect rotation from wall direction.
+        /// Removes X and Z rotation components, keeping only Y (yaw) for alignment.
+        /// </summary>
+        private Quaternion CalculateWallRotation(GameObject wall)
+        {
+            if (wall == null) return Quaternion.identity;
+
+            // Get wall rotation and extract only the Y axis rotation
+            Quaternion wallRot = wall.transform.rotation;
+            Vector3 euler = wallRot.eulerAngles;
+            euler.x = 0f; // Remove pitch
+            euler.z = 0f; // Remove roll
+
+            return Quaternion.Euler(euler);
+        }
+
+        /// <summary>
+        /// Find all wall segments that the tower will cover based on its size.
+        /// Returns list of walls and calculates optimal centered position.
+        /// </summary>
+        private List<GameObject> FindWallSegmentsToCover(GameObject centerWall, TowerDataSO towerData, out Vector3 centerPosition)
+        {
+            List<GameObject> wallsToCover = new List<GameObject>();
+            centerPosition = centerWall.transform.position;
+
+            if (centerWall == null || towerData == null)
+            {
+                return wallsToCover;
+            }
+
+            // Get the wall connection system
+            WallConnectionSystem centerWallSystem = centerWall.GetComponent<WallConnectionSystem>();
+            if (centerWallSystem == null)
+            {
+                // If no connection system, just return the center wall
+                wallsToCover.Add(centerWall);
+                return wallsToCover;
+            }
+
+            // Get wall direction vector
+            Vector3 wallDirection = centerWall.transform.forward;
+            wallDirection.y = 0;
+            wallDirection.Normalize();
+
+            // Calculate how far the tower extends from center in each direction
+            float halfTowerLength = towerData.towerWallLength / 2f;
+
+            // Find all connected walls along the wall line
+            List<GameObject> connectedWalls = new List<GameObject>();
+            connectedWalls.Add(centerWall);
+
+            // Get walls connected to center wall
+            List<WallConnectionSystem> centerConnections = centerWallSystem.GetConnectedWalls();
+
+            // Traverse in both directions along the wall
+            TraverseWallDirection(centerWall, centerWallSystem, wallDirection, halfTowerLength, connectedWalls);
+            TraverseWallDirection(centerWall, centerWallSystem, -wallDirection, halfTowerLength, connectedWalls);
+
+            // Calculate the actual center position based on walls found
+            if (connectedWalls.Count > 1)
+            {
+                // Find the geometric center of all wall segments
+                Vector3 minPoint = connectedWalls[0].transform.position;
+                Vector3 maxPoint = connectedWalls[0].transform.position;
+
+                foreach (var wall in connectedWalls)
+                {
+                    Vector3 wallPos = wall.transform.position;
+
+                    // Project onto wall direction to find min/max along the wall line
+                    float projection = Vector3.Dot(wallPos - centerWall.transform.position, wallDirection);
+
+                    if (projection < Vector3.Dot(minPoint - centerWall.transform.position, wallDirection))
+                        minPoint = wallPos;
+                    if (projection > Vector3.Dot(maxPoint - centerWall.transform.position, wallDirection))
+                        maxPoint = wallPos;
+                }
+
+                centerPosition = (minPoint + maxPoint) / 2f;
+            }
+
+            wallsToCover = connectedWalls;
+            return wallsToCover;
+        }
+
+        /// <summary>
+        /// Traverse wall connections in a specific direction to find segments within tower range.
+        /// </summary>
+        private void TraverseWallDirection(GameObject startWall, WallConnectionSystem startSystem, Vector3 direction, float maxDistance, List<GameObject> foundWalls)
+        {
+            float currentDistance = 0f;
+            GameObject currentWall = startWall;
+            WallConnectionSystem currentSystem = startSystem;
+
+            while (currentDistance < maxDistance)
+            {
+                // Find the next wall in this direction
+                GameObject nextWall = FindNextWallInDirection(currentWall, currentSystem, direction);
+
+                if (nextWall == null || foundWalls.Contains(nextWall))
+                    break;
+
+                // Calculate distance to next wall
+                float distToNext = Vector3.Distance(currentWall.transform.position, nextWall.transform.position);
+                currentDistance += distToNext;
+
+                if (currentDistance <= maxDistance)
+                {
+                    foundWalls.Add(nextWall);
+                    currentWall = nextWall;
+                    currentSystem = nextWall.GetComponent<WallConnectionSystem>();
+
+                    if (currentSystem == null)
+                        break;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find the next connected wall in a specific direction.
+        /// </summary>
+        private GameObject FindNextWallInDirection(GameObject currentWall, WallConnectionSystem wallSystem, Vector3 direction)
+        {
+            if (wallSystem == null) return null;
+
+            List<WallConnectionSystem> connections = wallSystem.GetConnectedWalls();
+            GameObject bestMatch = null;
+            float bestAlignment = -1f;
+
+            foreach (var connectedSystem in connections)
+            {
+                if (connectedSystem == null) continue;
+
+                GameObject connectedWall = connectedSystem.gameObject;
+                Vector3 toConnected = (connectedWall.transform.position - currentWall.transform.position).normalized;
+                toConnected.y = 0;
+
+                float alignment = Vector3.Dot(toConnected, direction);
+
+                // Must be in the same direction (positive dot product)
+                if (alignment > 0.5f && alignment > bestAlignment)
+                {
+                    bestAlignment = alignment;
+                    bestMatch = connectedWall;
+                }
+            }
+
+            return bestMatch;
         }
 
         /// <summary>

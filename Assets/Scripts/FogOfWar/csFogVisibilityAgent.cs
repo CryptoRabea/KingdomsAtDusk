@@ -1,18 +1,3 @@
-/*
- * Created :    Winter 2022
- * Author :     SeungGeon Kim (keithrek@hanmail.net)
- * Project :    FogWar
- * Filename :   csFogVisibilityAgent.cs (non-static monobehaviour module)
- * 
- * All Content (C) 2022 Unlimited Fischl Works, all rights reserved.
- */
-
-/*
- * This script is just an example of what you can do with the visibility check interface.
- * You can create whatever agent that you want based on this script.
- * Also, I recommend you to change the part where the FogWar module is fetched with Find()...
- */
-
 
 
 using UnityEngine;                  // Monobehaviour
@@ -41,7 +26,7 @@ namespace FischlWorks_FogWar
         [SerializeField]
         [Range(0, 2)]
         private int additionalRadius = 0;
-
+        
         private List<MeshRenderer> meshRenderers = null;
         private List<SkinnedMeshRenderer> skinnedMeshRenderers = null;
 
@@ -60,6 +45,12 @@ namespace FischlWorks_FogWar
 
             meshRenderers = GetComponentsInChildren<MeshRenderer>().ToList();
             skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
+        }
+        
+        private void OnEnable()
+        {
+            // If fogWar is still null after Start (or if it was never assigned), disable this component to prevent errors.
+            if (fogWar == null) enabled = false;
         }
 
 
@@ -97,14 +88,9 @@ namespace FischlWorks_FogWar
             if (fogWar.CheckWorldGridRange(transform.position) == false)
             {
                 Gizmos.color = Color.red;
-
                 Gizmos.DrawWireSphere(
-                    new Vector3(
-                        Mathf.RoundToInt(transform.position.x),
-                        0,
-                        Mathf.RoundToInt(transform.position.z)),
-                    (fogWar._UnitScale / 2.0f) + additionalRadius);
-
+                    transform.position, // Use the actual object position
+                    (additionalRadius + 0.5f) * fogWar._UnitScale); // Calculate radius based on grid units
                 return;
             }
 
@@ -116,13 +102,9 @@ namespace FischlWorks_FogWar
             {
                 Gizmos.color = Color.yellow;
             }
-
             Gizmos.DrawWireSphere(
-                new Vector3(
-                    Mathf.RoundToInt(transform.position.x),
-                    0,
-                    Mathf.RoundToInt(transform.position.z)),
-                (fogWar._UnitScale / 2.0f) + additionalRadius);
+                transform.position, // Use the actual object position
+                (additionalRadius + 0.5f) * fogWar._UnitScale); // Calculate radius based on grid units
         }
 #endif
     }
