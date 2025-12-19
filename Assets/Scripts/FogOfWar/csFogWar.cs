@@ -689,6 +689,7 @@ namespace FischlWorks_FogWar
             // Iterate through a square region around the central levelCoordinates
             for (int xIterator = -additionalRadius; xIterator <= additionalRadius; xIterator++)
             {
+                for (int yIterator = -additionalRadius; yIterator <= additionalRadius; yIterator++)
                 {
                     Vector2Int currentCheckCoordinates = new Vector2Int(
                         levelCoordinates.x + xIterator,
