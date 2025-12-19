@@ -65,6 +65,7 @@ namespace RTS.Audio
         [SerializeField] private bool showDebugLogs = false;
 
         private AudioSource audioSource;
+        private readonly List<AudioClip> validClipsCache = new();
 
         private void Awake()
         {
@@ -79,18 +80,18 @@ namespace RTS.Audio
         private void OnEnable()
         {
             // Subscribe to command events
-            EventBus.Subscribe<UnitMoveCommandEvent>(OnMoveCommand);
-            EventBus.Subscribe<UnitAttackCommandEvent>(OnAttackCommand);
+            EventBus.Subscribe<RTS.Units.UnitMoveCommandEvent>(OnMoveCommand);
+            EventBus.Subscribe<RTS.Units.UnitAttackCommandEvent>(OnAttackCommand);
         }
 
         private void OnDisable()
         {
             // Unsubscribe from events
-            EventBus.Unsubscribe<UnitMoveCommandEvent>(OnMoveCommand);
-            EventBus.Unsubscribe<UnitAttackCommandEvent>(OnAttackCommand);
+            EventBus.Unsubscribe<RTS.Units.UnitMoveCommandEvent>(OnMoveCommand);
+            EventBus.Unsubscribe<RTS.Units.UnitAttackCommandEvent>(OnAttackCommand);
         }
 
-        private void OnMoveCommand(UnitMoveCommandEvent evt)
+        private void OnMoveCommand(RTS.Units.UnitMoveCommandEvent evt)
         {
             // Only respond to commands for this unit
             if (evt.Unit != gameObject)
@@ -102,13 +103,13 @@ namespace RTS.Audio
             }
         }
 
-        private void OnAttackCommand(UnitAttackCommandEvent evt)
+        private void OnAttackCommand(RTS.Units.UnitAttackCommandEvent evt)
         {
             // Only respond to commands for this unit
             if (evt.Unit != gameObject)
                 return;
-
-            // Choose appropriate command settings based on target type
+ (Unit or Building)
+            // Choose appropriate command settings based on target type (Unit or Building)
             CommandSFXSettings settings = evt.TargetType == AttackTargetType.Unit
                 ? attackUnitCommand
                 : attackBuildingCommand;
@@ -141,15 +142,15 @@ namespace RTS.Audio
                 return;
             }
 
-            // Filter out null clips
-            List<AudioClip> validClips = new List<AudioClip>();
+            // Filter out null clips (reuse cached list to avoid allocations)
+            validClipsCache.Clear();
             foreach (var clip in settings.clips)
             {
                 if (clip != null)
-                    validClips.Add(clip);
+                    validClipsCache.Add(clip);
             }
 
-            if (validClips.Count == 0)
+            if (validClipsCache.Count == 0)
             {
                 if (showDebugLogs)
                     Debug.LogWarning($"[UnitCommandSFX] All clips are null for {commandName} command on {gameObject.name}");
@@ -157,7 +158,7 @@ namespace RTS.Audio
             }
 
             // Select random clip
-            AudioClip clipToPlay = validClips[Random.Range(0, validClips.Count)];
+            AudioClip clipToPlay = validClipsCache[Random.Range(0, validClipsCache.Count)];
 
             // Configure audio source
             audioSource.clip = clipToPlay;

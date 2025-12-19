@@ -178,14 +178,13 @@ namespace RTS.Buildings
 
 
             // Create replacement data
-          var replacementData = new WallReplacementData
-{
-    originalWalls = new List<GameObject> { wall },
-    position = wallPosition,
-    rotation = wallRotation,
-    connectedWalls = connectedWalls
-};
-
+            var replacementData = new WallReplacementData
+            {
+                originalWall = wall,
+                position = wallPosition,
+                rotation = wallRotation,
+                connectedWalls = connectedWalls
+            };
 
             return replacementData;
         }
