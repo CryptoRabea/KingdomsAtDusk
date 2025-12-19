@@ -1,18 +1,3 @@
-/*
- * Created :    Winter 2022
- * Author :     SeungGeon Kim (keithrek@hanmail.net)
- * Project :    FogWar
- * Filename :   csFogVisibilityAgent.cs (non-static monobehaviour module)
- * 
- * All Content (C) 2022 Unlimited Fischl Works, all rights reserved.
- */
-
-/*
- * This script is just an example of what you can do with the visibility check interface.
- * You can create whatever agent that you want based on this script.
- * Also, I recommend you to change the part where the FogWar module is fetched with Find()...
- */
-
 
 
 using UnityEngine;                  // Monobehaviour
