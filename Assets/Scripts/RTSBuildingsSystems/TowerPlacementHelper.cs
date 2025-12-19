@@ -67,13 +67,20 @@ namespace RTS.Buildings
 
             if (nearest != null)
             {
-                // Calculate rotation from wall direction
-                outRotation = CalculateWallRotation(nearest);
-
                 // Find all wall segments that the tower will cover
                 if (towerData.replaceMultipleSegments)
                 {
                     outWalls = FindWallSegmentsToCover(nearest, towerData, out Vector3 adjustedPosition);
+
+                    // Calculate rotation from ALL walls being replaced for best alignment
+                    if (outWalls.Count > 1)
+                    {
+                        outRotation = CalculateRotationFromMultipleWalls(outWalls);
+                    }
+                    else
+                    {
+                        outRotation = CalculateWallRotation(nearest);
+                    }
 
                     // Use adjusted position if allowed
                     if (towerData.allowPositionAdjustment)
@@ -99,6 +106,7 @@ namespace RTS.Buildings
                     // Single wall replacement
                     outPosition = nearest.transform.position;
                     outWalls.Add(nearest);
+                    outRotation = CalculateWallRotation(nearest);
                 }
 
                 return true;
@@ -166,14 +174,97 @@ namespace RTS.Buildings
         }
 
         /// <summary>
+        /// Calculate rotation from multiple walls for perfect alignment.
+        /// Analyzes all walls to determine the overall wall direction.
+        /// </summary>
+        private Quaternion CalculateRotationFromMultipleWalls(List<GameObject> walls)
+        {
+            if (walls == null || walls.Count == 0) return Quaternion.identity;
+            if (walls.Count == 1) return CalculateWallRotation(walls[0]);
+
+            // Find the two endpoints of the wall line
+            Vector3 minPoint = walls[0].transform.position;
+            Vector3 maxPoint = walls[0].transform.position;
+            float minProj = 0f;
+            float maxProj = 0f;
+
+            // Use first wall's forward as initial reference direction
+            Vector3 referenceDir = walls[0].transform.forward;
+            referenceDir.y = 0f;
+            referenceDir.Normalize();
+
+            // Find min and max points along the wall line
+            foreach (var wall in walls)
+            {
+                Vector3 wallPos = wall.transform.position;
+                float projection = Vector3.Dot(wallPos - walls[0].transform.position, referenceDir);
+
+                if (projection < minProj)
+                {
+                    minProj = projection;
+                    minPoint = wallPos;
+                }
+                if (projection > maxProj)
+                {
+                    maxProj = projection;
+                    maxPoint = wallPos;
+                }
+            }
+
+            // Calculate direction from min to max point (the wall line direction)
+            Vector3 wallLineDirection = (maxPoint - minPoint).normalized;
+            wallLineDirection.y = 0f; // Ensure horizontal
+
+            if (wallLineDirection.sqrMagnitude < 0.01f)
+            {
+                // Walls are at the same position, fallback to first wall's rotation
+                return CalculateWallRotation(walls[0]);
+            }
+
+            // Create rotation looking along the wall line
+            return Quaternion.LookRotation(wallLineDirection);
+        }
+
+        /// <summary>
         /// Calculate perfect rotation from wall direction.
-        /// Removes X and Z rotation components, keeping only Y (yaw) for alignment.
+        /// Uses connected walls to determine actual wall direction for perfect alignment.
+        /// Falls back to wall's rotation if no connections are available.
         /// </summary>
         private Quaternion CalculateWallRotation(GameObject wall)
         {
             if (wall == null) return Quaternion.identity;
 
-            // Get wall rotation and extract only the Y axis rotation
+            // Try to get wall direction from connections (most accurate)
+            WallConnectionSystem wallSystem = wall.GetComponent<WallConnectionSystem>();
+            if (wallSystem != null)
+            {
+                List<WallConnectionSystem> connections = wallSystem.GetConnectedWalls();
+
+                if (connections != null && connections.Count > 0)
+                {
+                    // Calculate direction from first connection
+                    Vector3 directionToConnection = (connections[0].transform.position - wall.transform.position).normalized;
+                    directionToConnection.y = 0f; // Flatten to horizontal plane
+
+                    if (directionToConnection.sqrMagnitude > 0.01f)
+                    {
+                        // Create rotation looking along the wall direction
+                        return Quaternion.LookRotation(directionToConnection);
+                    }
+                }
+            }
+
+            // Fallback: Use wall's forward direction (assuming walls are oriented along their length)
+            Vector3 wallForward = wall.transform.forward;
+            wallForward.y = 0f;
+            wallForward.Normalize();
+
+            if (wallForward.sqrMagnitude > 0.01f)
+            {
+                return Quaternion.LookRotation(wallForward);
+            }
+
+            // Final fallback: Extract Y rotation from wall
             Quaternion wallRot = wall.transform.rotation;
             Vector3 euler = wallRot.eulerAngles;
             euler.x = 0f; // Remove pitch
