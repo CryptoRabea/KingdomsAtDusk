@@ -108,7 +108,7 @@ namespace RTS.Audio
             // Only respond to commands for this unit
             if (evt.Unit != gameObject)
                 return;
- (Unit or Building)
+
             // Choose appropriate command settings based on target type (Unit or Building)
             CommandSFXSettings settings = evt.TargetType == AttackTargetType.Unit
                 ? attackUnitCommand
