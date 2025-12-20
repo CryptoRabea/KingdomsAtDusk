@@ -153,3 +153,4 @@ AGENTS.md
 /Assets/AmplifyShader
 *.pcache
 /UserSettings
+/ProjectSettings
