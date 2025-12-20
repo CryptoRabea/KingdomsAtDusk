@@ -30,13 +30,12 @@ namespace RTS.Buildings
 
         /// <summary>
         /// Try to snap position to nearest wall within range.
-        /// Returns true if snapped, and outputs the snapped position, rotation, and wall object(s).
+        /// Returns true if snapped, and outputs the snapped position and wall object.
         /// </summary>
-        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out Quaternion outRotation, out List<GameObject> outWalls)
+        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out GameObject outWall)
         {
             outPosition = position;
-            outRotation = Quaternion.identity;
-            outWalls = new List<GameObject>();
+            outWall = null;
 
             if (towerData == null || !towerData.canReplaceWalls)
             {
@@ -67,20 +66,13 @@ namespace RTS.Buildings
 
             if (nearest != null)
             {
+                // Calculate rotation from wall direction
+                outRotation = CalculateWallRotation(nearest);
+
                 // Find all wall segments that the tower will cover
                 if (towerData.replaceMultipleSegments)
                 {
                     outWalls = FindWallSegmentsToCover(nearest, towerData, out Vector3 adjustedPosition);
-
-                    // Calculate rotation from ALL walls being replaced for best alignment
-                    if (outWalls.Count > 1)
-                    {
-                        outRotation = CalculateRotationFromMultipleWalls(outWalls);
-                    }
-                    else
-                    {
-                        outRotation = CalculateWallRotation(nearest);
-                    }
 
                     // Use adjusted position if allowed
                     if (towerData.allowPositionAdjustment)
@@ -106,23 +98,12 @@ namespace RTS.Buildings
                     // Single wall replacement
                     outPosition = nearest.transform.position;
                     outWalls.Add(nearest);
-                    outRotation = CalculateWallRotation(nearest);
                 }
 
                 return true;
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Overload for backward compatibility (returns single wall).
-        /// </summary>
-        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out GameObject outWall)
-        {
-            bool result = TrySnapToWall(position, towerData, out outPosition, out Quaternion rotation, out List<GameObject> walls);
-            outWall = walls.Count > 0 ? walls[0] : null;
-            return result;
         }
 
         /// <summary>
@@ -174,97 +155,14 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Calculate rotation from multiple walls for perfect alignment.
-        /// Analyzes all walls to determine the overall wall direction.
-        /// </summary>
-        private Quaternion CalculateRotationFromMultipleWalls(List<GameObject> walls)
-        {
-            if (walls == null || walls.Count == 0) return Quaternion.identity;
-            if (walls.Count == 1) return CalculateWallRotation(walls[0]);
-
-            // Find the two endpoints of the wall line
-            Vector3 minPoint = walls[0].transform.position;
-            Vector3 maxPoint = walls[0].transform.position;
-            float minProj = 0f;
-            float maxProj = 0f;
-
-            // Use first wall's forward as initial reference direction
-            Vector3 referenceDir = walls[0].transform.forward;
-            referenceDir.y = 0f;
-            referenceDir.Normalize();
-
-            // Find min and max points along the wall line
-            foreach (var wall in walls)
-            {
-                Vector3 wallPos = wall.transform.position;
-                float projection = Vector3.Dot(wallPos - walls[0].transform.position, referenceDir);
-
-                if (projection < minProj)
-                {
-                    minProj = projection;
-                    minPoint = wallPos;
-                }
-                if (projection > maxProj)
-                {
-                    maxProj = projection;
-                    maxPoint = wallPos;
-                }
-            }
-
-            // Calculate direction from min to max point (the wall line direction)
-            Vector3 wallLineDirection = (maxPoint - minPoint).normalized;
-            wallLineDirection.y = 0f; // Ensure horizontal
-
-            if (wallLineDirection.sqrMagnitude < 0.01f)
-            {
-                // Walls are at the same position, fallback to first wall's rotation
-                return CalculateWallRotation(walls[0]);
-            }
-
-            // Create rotation looking along the wall line
-            return Quaternion.LookRotation(wallLineDirection);
-        }
-
-        /// <summary>
         /// Calculate perfect rotation from wall direction.
-        /// Uses connected walls to determine actual wall direction for perfect alignment.
-        /// Falls back to wall's rotation if no connections are available.
+        /// Removes X and Z rotation components, keeping only Y (yaw) for alignment.
         /// </summary>
         private Quaternion CalculateWallRotation(GameObject wall)
         {
             if (wall == null) return Quaternion.identity;
 
-            // Try to get wall direction from connections (most accurate)
-            WallConnectionSystem wallSystem = wall.GetComponent<WallConnectionSystem>();
-            if (wallSystem != null)
-            {
-                List<WallConnectionSystem> connections = wallSystem.GetConnectedWalls();
-
-                if (connections != null && connections.Count > 0)
-                {
-                    // Calculate direction from first connection
-                    Vector3 directionToConnection = (connections[0].transform.position - wall.transform.position).normalized;
-                    directionToConnection.y = 0f; // Flatten to horizontal plane
-
-                    if (directionToConnection.sqrMagnitude > 0.01f)
-                    {
-                        // Create rotation looking along the wall direction
-                        return Quaternion.LookRotation(directionToConnection);
-                    }
-                }
-            }
-
-            // Fallback: Use wall's forward direction (assuming walls are oriented along their length)
-            Vector3 wallForward = wall.transform.forward;
-            wallForward.y = 0f;
-            wallForward.Normalize();
-
-            if (wallForward.sqrMagnitude > 0.01f)
-            {
-                return Quaternion.LookRotation(wallForward);
-            }
-
-            // Final fallback: Extract Y rotation from wall
+            // Get wall rotation and extract only the Y axis rotation
             Quaternion wallRot = wall.transform.rotation;
             Vector3 euler = wallRot.eulerAngles;
             euler.x = 0f; // Remove pitch
@@ -421,83 +319,46 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Replace wall(s) with a tower.
+        /// Replace a wall with a tower.
         /// Stores wall connection data and returns it for the tower to inherit.
-        /// Handles both single and multi-segment replacement.
         /// </summary>
-        public WallReplacementData ReplaceWallWithTower(List<GameObject> walls, TowerDataSO towerData)
+        public WallReplacementData ReplaceWallWithTower(GameObject wall, TowerDataSO towerData)
         {
-            if (walls == null || walls.Count == 0)
+            if (wall == null)
             {
                 return null;
             }
 
-            // Use center wall as reference
-            GameObject centerWall = walls[0];
-            Vector3 wallPosition = centerWall.transform.position;
-            Quaternion wallRotation = centerWall.transform.rotation;
+            Vector3 wallPosition = wall.transform.position;
+            Quaternion wallRotation = wall.transform.rotation;
 
-            // Collect all connections from all walls being replaced
-            List<WallConnectionSystem> allConnectedWalls = new List<WallConnectionSystem>();
-
-            foreach (var wall in walls)
+            // Store wall connection data before destroying it
+            if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
             {
-                if (wall == null) continue;
+            }
+            List<WallConnectionSystem> connectedWalls = null;
 
-                if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
-                {
-                    List<WallConnectionSystem> connections = wallConnection.GetConnectedWalls();
-                    foreach (var conn in connections)
-                    {
-                        // Only add connections that are NOT part of the walls being replaced
-                        bool isBeingReplaced = false;
-                        foreach (var replacedWall in walls)
-                        {
-                            if (conn.gameObject == replacedWall)
-                            {
-                                isBeingReplaced = true;
-                                break;
-                            }
-                        }
-
-                        if (!isBeingReplaced && !allConnectedWalls.Contains(conn))
-                        {
-                            allConnectedWalls.Add(conn);
-                        }
-                    }
-                }
+            if (wallConnection != null)
+            {
+                connectedWalls = wallConnection.GetConnectedWalls();
             }
 
-            // Calculate optimal position (average of all wall positions)
-            if (walls.Count > 1)
+            if (wall.TryGetComponent<Building>(out var wallBuilding))
             {
-                Vector3 totalPos = Vector3.zero;
-                foreach (var wall in walls)
-                {
-                    totalPos += wall.transform.position;
-                }
-                wallPosition = totalPos / walls.Count;
             }
+            string wallName = wallBuilding != null ? wallBuilding.Data?.buildingName : "Wall";
+
 
             // Create replacement data
             var replacementData = new WallReplacementData
             {
-                originalWalls = new List<GameObject>(walls),
+                originalWall = wall,
                 position = wallPosition,
                 rotation = wallRotation,
-                connectedWalls = allConnectedWalls
+                connectedWalls = connectedWalls
             };
 
             return replacementData;
-        }
-
-        /// <summary>
-        /// Overload for single wall replacement (backward compatibility).
-        /// </summary>
-        public WallReplacementData ReplaceWallWithTower(GameObject wall, TowerDataSO towerData)
-        {
-            if (wall == null) return null;
-            return ReplaceWallWithTower(new List<GameObject> { wall }, towerData);
         }
 
         /// <summary>
@@ -634,19 +495,13 @@ namespace RTS.Buildings
 
     /// <summary>
     /// Data structure for storing wall replacement information.
-    /// Used when replacing wall(s) with a tower or gate.
-    /// Supports both single and multi-segment replacement.
+    /// Used when replacing a wall with a tower or gate.
     /// </summary>
     public class WallReplacementData
     {
-        public List<GameObject> originalWalls;  // All walls being replaced
-        public Vector3 position;                // Calculated optimal position
-        public Quaternion rotation;             // Wall rotation for tower alignment
-        public List<WallConnectionSystem> connectedWalls;  // External wall connections to maintain
-
-        // Legacy support - returns first wall
-        public GameObject OriginalWall => (originalWalls != null && originalWalls.Count > 0) ? originalWalls[0] : null;
-
-        public GameObject originalWall { get; internal set; }
+        public GameObject originalWall;
+        public Vector3 position;
+        public Quaternion rotation;
+        public List<WallConnectionSystem> connectedWalls;
     }
 }

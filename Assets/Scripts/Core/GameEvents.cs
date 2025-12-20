@@ -548,47 +548,4 @@ namespace RTS.Core.Events
             AnimalType = animalType;
         }
     }
-
-    // ==================== UNIT COMMAND EVENTS ====================
-
-    /// <summary>
-    /// Event published when a unit receives a move command
-    /// </summary>
-    public struct UnitMoveCommandEvent
-    {
-        public GameObject Unit;
-        public Vector3 Destination;
-
-        public UnitMoveCommandEvent(GameObject unit, Vector3 destination)
-        {
-            Unit = unit;
-            Destination = destination;
-        }
-    }
-
-    /// <summary>
-    /// Event published when a unit receives an attack command
-    /// </summary>
-    public struct UnitAttackCommandEvent
-    {
-        public GameObject Unit;
-        public GameObject Target;
-        public AttackTargetType TargetType;
-
-        public UnitAttackCommandEvent(GameObject unit, GameObject target, AttackTargetType targetType)
-        {
-            Unit = unit;
-            Target = target;
-            TargetType = targetType;
-        }
-    }
-
-    /// <summary>
-    /// Type of target being attacked
-    /// </summary>
-    public enum AttackTargetType
-    {
-        Unit,
-        Building
-    }
 }

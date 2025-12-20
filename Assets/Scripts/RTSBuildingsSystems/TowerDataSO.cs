@@ -62,18 +62,6 @@ namespace RTS.Buildings
         [Tooltip("Snap distance to walls for placement")]
         public float wallSnapDistance = 2f;
 
-        [Tooltip("Length of the tower along the wall (in units). Used to calculate how many wall segments to replace.")]
-        public float towerWallLength = 2f;
-
-        [Tooltip("If true, tower will automatically replace wall segments that it covers. If false, only replaces the nearest wall.")]
-        public bool replaceMultipleSegments = true;
-
-        [Tooltip("If true and tower doesn't perfectly align with wall segments, it will adjust position to fit. If false, keeps exact wall position.")]
-        public bool allowPositionAdjustment = true;
-
-        [Tooltip("Maximum position offset allowed when adjusting tower position to align with wall segments (in units).")]
-        public float maxPositionAdjustment = 1f;
-
         /// <summary>
         /// Get tower description with combat stats.
         /// </summary>
