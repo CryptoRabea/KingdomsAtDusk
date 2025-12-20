@@ -152,3 +152,4 @@ AGENTS.md
 /Assets/PolishedSurfaces
 /Assets/AmplifyShader
 *.pcache
+/UserSettings
