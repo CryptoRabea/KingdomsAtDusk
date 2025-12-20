@@ -66,40 +66,9 @@ namespace RTS.Buildings
 
             if (nearest != null)
             {
-                // Calculate rotation from wall direction
-                outRotation = CalculateWallRotation(nearest);
-
-                // Find all wall segments that the tower will cover
-                if (towerData.replaceMultipleSegments)
-                {
-                    outWalls = FindWallSegmentsToCover(nearest, towerData, out Vector3 adjustedPosition);
-
-                    // Use adjusted position if allowed
-                    if (towerData.allowPositionAdjustment)
-                    {
-                        // Check if adjustment is within allowed range
-                        float adjustmentDistance = Vector3.Distance(nearest.transform.position, adjustedPosition);
-                        if (adjustmentDistance <= towerData.maxPositionAdjustment)
-                        {
-                            outPosition = adjustedPosition;
-                        }
-                        else
-                        {
-                            outPosition = nearest.transform.position;
-                        }
-                    }
-                    else
-                    {
-                        outPosition = nearest.transform.position;
-                    }
-                }
-                else
-                {
-                    // Single wall replacement
-                    outPosition = nearest.transform.position;
-                    outWalls.Add(nearest);
-                }
-
+                // Single wall replacement - snap to wall position
+                outPosition = nearest.transform.position;
+                outWall = nearest;
                 return true;
             }
 
@@ -200,7 +169,8 @@ namespace RTS.Buildings
             wallDirection.Normalize();
 
             // Calculate how far the tower extends from center in each direction
-            float halfTowerLength = towerData.towerWallLength / 2f;
+            // Using default tower size since towerWallLength property doesn't exist yet
+            float halfTowerLength = 2.5f;
 
             // Find all connected walls along the wall line
             List<GameObject> connectedWalls = new List<GameObject>();
