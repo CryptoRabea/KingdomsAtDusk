@@ -62,10 +62,12 @@ namespace RTS.SaveLoad
 
         public void OpenPanel()
         {
+            // Ensure references are set (Awake/Start may not have run if object started disabled)
             if (loadPanel == null)
-            {
-                return;
-            }
+                loadPanel = gameObject;
+
+            if (saveLoadService == null)
+                saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
 
             loadPanel.SetActive(true);
             RefreshSaveList();
@@ -202,6 +204,9 @@ namespace RTS.SaveLoad
         // Public API
         public bool HasSaves()
         {
+            if (saveLoadService == null)
+                saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
+
             if (saveLoadService == null)
                 return false;
 
