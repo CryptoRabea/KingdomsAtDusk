@@ -113,9 +113,6 @@ namespace RTS.Units.Formation
 
         private void OnDestroy()
         {
-            // Mark as quitting to prevent new instance creation during shutdown
-            _applicationIsQuitting = true;
-
             // Clear the static instance when this object is destroyed
             if (_instance == this)
             {
