@@ -22,7 +22,7 @@ namespace RTS.Managers
 
         [Header("Fog of War")]
         [SerializeField] private RTS_FogOfWar fogWarSystem;
-        [Tooltip("If null, will search for csFogWar in scene")]
+        [Tooltip("If null, will search for RTS_FogOfWar in scene")]
         [SerializeField] private int localPlayerId = 0;
         [Tooltip("Player ID for fog of war visibility checks")]
 
