@@ -107,6 +107,10 @@ namespace RTS.UI
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClicked);
 
+            // LoadButton is an alternate load game button (in addition to continueButton)
+            if (LoadButton != null)
+                LoadButton.onClick.AddListener(OnContinueClicked);
+
             if (creditsButton != null)
                 creditsButton.onClick.AddListener(OnCreditsClicked);
 
@@ -171,20 +175,24 @@ namespace RTS.UI
 
         private void OnContinueClicked()
         {
+            Debug.Log("[MainMenuManager] OnContinueClicked");
 
             if (!HasAnySaves())
             {
+                Debug.Log("[MainMenuManager] No saves found, returning");
                 return;
             }
 
             // Open load panel
             if (loadPanel != null)
             {
+                Debug.Log("[MainMenuManager] Opening load panel");
                 SetPanelActive(mainMenuPanel, false);
                 loadPanel.OpenPanel();
             }
             else
             {
+                Debug.LogWarning("[MainMenuManager] loadPanel is null!");
             }
         }
 
@@ -273,5 +281,18 @@ namespace RTS.UI
         {
             OnNewGameClicked();
         }
+
+        /// <summary>
+        /// Shows the main menu panel. Called when returning from sub-panels.
+        /// </summary>
+        public void ReturnToMainMenu()
+        {
+            ShowMainMenu();
+        }
+
+        /// <summary>
+        /// Gets the main menu panel GameObject for external access.
+        /// </summary>
+        public GameObject MainMenuPanel => mainMenuPanel;
     }
 }
