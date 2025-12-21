@@ -5,19 +5,15 @@ namespace RTS.UI.Minimap
     /// <summary>
     /// ScriptableObject configuration for the minimap system.
     /// Provides centralized settings for performance tuning and visual customization.
-    ///
-    /// NOTE: If a PlayAreaBounds component is present in the scene, it will override
-    /// the World Bounds settings below. Use PlayAreaBounds for a visual gizmo-based
-    /// approach to defining the play area.
     /// </summary>
     [CreateAssetMenu(fileName = "MinimapConfig", menuName = "RTS/UI/Minimap Config")]
     public class MinimapConfig : ScriptableObject
     {
-        [Header("World Bounds (Fallback)")]
-        [Tooltip("Minimum world coordinates (X, Z). Overridden by PlayAreaBounds if present.")]
+        [Header("World Bounds")]
+        [Tooltip("Minimum world coordinates (X, Z)")]
         public Vector2 worldMin = new Vector2(-1000f, -1000f);
 
-        [Tooltip("Maximum world coordinates (X, Z). Overridden by PlayAreaBounds if present.")]
+        [Tooltip("Maximum world coordinates (X, Z)")]
         public Vector2 worldMax = new Vector2(1000f, 1000f);
 
         [Header("Render Settings")]

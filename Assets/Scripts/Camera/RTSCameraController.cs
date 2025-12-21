@@ -1,30 +1,23 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using RTS.Core;
 
 namespace RTS.CameraControl
 {
     [RequireComponent(typeof(Camera))]
     public class RTSCameraController : MonoBehaviour
-    {
-        [Header("Play Area")]
-        [Tooltip("Reference to PlayAreaBounds. If set, overrides minPosition/maxPosition.")]
-        [SerializeField] private PlayAreaBounds playAreaBounds;
-
-        [Header("Movement")]
-        public float moveSpeed = 15f;
-        public float sprintMultiplier = 2.5f;
-        public float dragSpeed = 0.5f;
-        public float edgeScrollSpeed = 20f;
-        public float panBorderThickness = 10f;
-        public bool useEdgeScroll = true;
-        [Tooltip("Fallback min position if PlayAreaBounds is not set.")]
-        public Vector2 minPosition;
-        [Tooltip("Fallback max position if PlayAreaBounds is not set.")]
-        public Vector2 maxPosition;
-        public bool isCamInverted = false;
+{
+    [Header("Movement")]
+    public float moveSpeed = 15f;
+    public float sprintMultiplier = 2.5f; // Speed multiplier when sprinting
+    public float dragSpeed = 0.5f;
+    public float edgeScrollSpeed = 20f;
+    public float panBorderThickness = 10f;
+    public bool useEdgeScroll = true;
+    public Vector2 minPosition;
+    public Vector2 maxPosition;
+    public bool isCamInverted = false;
 
     [Header("Viewport Settings")]
     [Tooltip("Camera viewport height (0-1). If viewport is smaller than screen, UI below viewport counts as edge.")]
@@ -66,34 +59,24 @@ namespace RTS.CameraControl
     // Building placement reference
     private RTS.Managers.BuildingManager buildingManager;
 
-        private PointerEventData cachedPointerEventData;
-        private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
-
-        // Cached bounds for clamping
-        private Vector2 effectiveMinPosition;
-        private Vector2 effectiveMaxPosition;
-
-        private void Awake()
+    private PointerEventData cachedPointerEventData;
+    private List<RaycastResult> cachedRaycastResults = new List<RaycastResult>();
+    private void Awake()
+    {
+        if (EventSystem.current != null)
         {
-            if (EventSystem.current != null)
-            {
-                cachedPointerEventData = new PointerEventData(EventSystem.current);
-            }
+            cachedPointerEventData = new PointerEventData(EventSystem.current);
+        }
 
-            // Find PlayAreaBounds if not assigned
-            if (playAreaBounds == null)
-            {
-                playAreaBounds = PlayAreaBounds.Instance;
-            }
-
-            // Set effective bounds from PlayAreaBounds or fallback to inspector values
-            UpdateBoundsFromPlayArea();
-
+        if (minPosition == Vector2.zero)
+        {  minPosition =new Vector2(-1000f,-1000f); }
+        if (maxPosition == Vector2.zero)
+        {  maxPosition =new Vector2(1000f,1000f); }
             cam = GetComponent<Camera>();
-            inputActions = new InputSystem_Actions();
+        inputActions = new InputSystem_Actions();
 
-            // Store initial rotation
-            initialRotation = transform.eulerAngles.y;
+        // Store initial rotation
+        initialRotation = transform.eulerAngles.y;
 
         // WASD / Arrow movement
         inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
@@ -107,35 +90,12 @@ namespace RTS.CameraControl
         inputActions.Player.Rotate.performed += ctx => rotationInput = ctx.ReadValue<float>();
         inputActions.Player.Rotate.canceled += ctx => rotationInput = 0f;
 
-            // Sprint (Shift)
-            inputActions.Player.Sprint.performed += ctx => isSprinting = true;
-            inputActions.Player.Sprint.canceled += ctx => isSprinting = false;
-        }
+        // Sprint (Shift)
+        inputActions.Player.Sprint.performed += ctx => isSprinting = true;
+        inputActions.Player.Sprint.canceled += ctx => isSprinting = false;
+    }
 
-        private void UpdateBoundsFromPlayArea()
-        {
-            if (playAreaBounds != null)
-            {
-                effectiveMinPosition = playAreaBounds.WorldMin;
-                effectiveMaxPosition = playAreaBounds.WorldMax;
-            }
-            else
-            {
-                // Fallback to inspector values
-                if (minPosition == Vector2.zero)
-                {
-                    minPosition = new Vector2(-1000f, -1000f);
-                }
-                if (maxPosition == Vector2.zero)
-                {
-                    maxPosition = new Vector2(1000f, 1000f);
-                }
-                effectiveMinPosition = minPosition;
-                effectiveMaxPosition = maxPosition;
-            }
-        }
-
-        private void Start()
+    private void Start()
     {
         // Find BuildingManager to check placement state
         buildingManager = UnityEngine.Object.FindAnyObjectByType<RTS.Managers.BuildingManager>();
@@ -253,11 +213,11 @@ namespace RTS.CameraControl
         Vector3 movement = Quaternion.Euler(0, transform.eulerAngles.y, 0) * dir.normalized * currentSpeed * Time.deltaTime;
         transform.position += movement;
 
-        // Clamp position to play area bounds
+        // Clamp position
         transform.position = new Vector3(
-            Mathf.Clamp(transform.position.x, effectiveMinPosition.x, effectiveMaxPosition.x),
+            Mathf.Clamp(transform.position.x, minPosition.x, maxPosition.x),
             transform.position.y,
-            Mathf.Clamp(transform.position.z, effectiveMinPosition.y, effectiveMaxPosition.y)
+            Mathf.Clamp(transform.position.z, minPosition.y, maxPosition.y)
         );
     }
     private void HandleZoom()
