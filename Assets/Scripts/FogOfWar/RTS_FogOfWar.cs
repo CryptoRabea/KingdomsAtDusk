@@ -1,22 +1,197 @@
-using System.Collections.Generic;
-using UnityEngine;
+using RTS.FogOfWar;
+using System;                       // Convert
+using System.Collections.Generic;   // List
+using System.IO;                    // Directory
+using System.Linq;                  // Enumerable
+using UnityEditor;                  // Handles
+using UnityEngine;                  // Monobehaviour
 
-namespace RTS.FogOfWar
+
+
+namespace RTS.FogWar
 {
 
 
     public class RTS_FogOfWar : MonoBehaviour
     {
-        [Header("Grid")]
-        public int levelDimensionX = 128;
-        public int levelDimensionY = 128;
-        public float unitScale = 1f;
+        /// A class for storing the base level data.
+        ///
+        /// This class is later serialized into Json format.\n
+        /// Empty spaces are stored as 0, while the obstacles are stored as 1.\n
+        /// If a level is loaded instead of being scanned,
+        /// the level dimension properties of csFogWar will be replaced by the level data.
+        [System.Serializable]
+        public class LevelData
+        {
+            public void AddColumn(LevelColumn levelColumn)
+            {
+                levelRow.Add(levelColumn);
+            }
 
-        [Header("Revealers")]
-        [SerializeField] private List<FogRevealer> fogRevealers = new();
+            // Indexer definition
+            public LevelColumn this[int index]
+            {
+                get
+                {
+                    if (index >= 0 && index < levelRow.Count)
+                    {
+                        return levelRow[index];
+                    }
+                    else
+                    {
 
-        [Header("Terrain Binding")]
-        [SerializeField] private TerrainFogBinder terrainFogBinder;
+                        return null;
+                    }
+                }
+                set
+                {
+                    if (index >= 0 && index < levelRow.Count)
+                    {
+                        levelRow[index] = value;
+                    }
+                    else
+                    {
+
+                        return;
+                    }
+                }
+            }
+
+            // Adding private getter / setters are not allowed for serialization
+            public int levelDimensionX = 0;
+            public int levelDimensionY = 0;
+
+            public float unitScale = 0;
+
+            public float scanSpacingPerUnit = 0;
+
+            [SerializeField]
+            private List<LevelColumn> levelRow = new List<LevelColumn>();
+        }
+
+
+
+        [System.Serializable]
+        public class LevelColumn
+        {
+            public LevelColumn(IEnumerable<ETileState> stateTiles)
+            {
+                levelColumn = new List<ETileState>(stateTiles);
+            }
+
+            // If I create a separate Tile class, it will impact the size of the save file (but enums will be saved as int)
+            public enum ETileState
+            {
+                Empty,
+                Obstacle
+            }
+
+            // Indexer definition
+            public ETileState this[int index]
+            {
+                get
+                {
+                    if (index >= 0 && index < levelColumn.Count)
+                    {
+                        return levelColumn[index];
+                    }
+                    else
+                    {
+
+                        return ETileState.Empty;
+                    }
+                }
+                set
+                {
+                    if (index >= 0 && index < levelColumn.Count)
+                    {
+                        levelColumn[index] = value;
+                    }
+                    else
+                    {
+
+                        return;
+                    }
+                }
+            }
+
+            [SerializeField]
+            private List<ETileState> levelColumn = new List<ETileState>();
+        }
+
+
+
+        [System.Serializable]
+        public class FogRevealer
+        {
+            public FogRevealer(Transform revealerTransform, int sightRange, bool updateOnlyOnMove)
+            {
+                this.revealerTransform = revealerTransform;
+                this.sightRange = sightRange;
+                this.updateOnlyOnMove = updateOnlyOnMove;
+            }
+
+            public Vector2Int GetCurrentLevelCoordinates(RTS_FogOfWar fogWar)
+            {
+                // Return last known position if transform was destroyed
+                if (revealerTransform == null)
+                {
+                    return currentLevelCoordinates;
+                }
+
+                currentLevelCoordinates = new Vector2Int(
+                    fogWar.GetUnitX(revealerTransform.position.x),
+                    fogWar.GetUnitY(revealerTransform.position.z));
+
+                return currentLevelCoordinates;
+            }
+
+            // To be assigned manually by the user
+            [SerializeField]
+            private Transform revealerTransform = null;
+            // These are called expression-bodied properties btw, being stricter here because these are not pure data containers
+            public Transform _RevealerTransform => revealerTransform;
+
+            [SerializeField]
+            private int sightRange = 0;
+            public int _SightRange => sightRange;
+
+            [SerializeField]
+            private bool updateOnlyOnMove = true;
+            public bool _UpdateOnlyOnMove => updateOnlyOnMove;
+
+            private Vector2Int currentLevelCoordinates = new Vector2Int();
+            public Vector2Int _CurrentLevelCoordinates
+            {
+                get
+                {
+                    lastSeenAt = currentLevelCoordinates;
+
+                    return currentLevelCoordinates;
+                }
+            }
+
+            [Header("Debug")]
+            [SerializeField]
+            private Vector2Int lastSeenAt = new Vector2Int(Int32.MaxValue, Int32.MaxValue);
+            public Vector2Int _LastSeenAt => lastSeenAt;
+
+            // Check if revealer is still valid (not destroyed)
+            public bool IsValid => revealerTransform != null;
+        }
+
+
+
+        [BigHeader("Basic Properties")]
+        [SerializeField]
+        private List<FogRevealer> fogRevealers = null;
+        public List<FogRevealer> _FogRevealers => fogRevealers;
+        [SerializeField]
+        private Transform levelMidPoint = null;
+        public Transform _LevelMidPoint => levelMidPoint;
+        [SerializeField]
+        [Range(1, 30)]
+        private float FogRefreshRate = 10;
 
         [BigHeader("Fog Properties")]
         [SerializeField]
@@ -83,8 +258,14 @@ namespace RTS.FogOfWar
         // External shadowcaster module
         public Shadowcaster shadowcaster { get; private set; } = new Shadowcaster();
 
-        private Texture2D fogTexture;
-        private byte[] fogData;
+        public LevelData levelData { get; private set; } = new LevelData();
+
+        // The primitive plane which will act as a mesh for rendering the fog with
+        private GameObject fogPlane = null;
+
+        private float FogRefreshRateTimer = 0;
+
+        private const string levelScanDataPath = "/LevelData";
 
         // Store the initial fixed position of levelMidPoint to keep fog in world space
         private Vector3 fixedLevelMidPoint;
@@ -118,23 +299,16 @@ namespace RTS.FogOfWar
                 LoadLevelData();
             }
 
-            // Find PlayAreaBounds if not assigned
-            if (playAreaBounds == null)
-            {
-                playAreaBounds = PlayAreaBounds.Instance;
-            }
-
-            // Initialize grid dimensions based on play area
-            InitializeGridFromPlayArea();
-
             InitializeFog();
 
             // This part passes the needed references to the shadowcaster
             shadowcaster.Initialize(this);
 
-            terrainFogBinder.fogTexture = fogTexture;
-            terrainFogBinder.ApplyFog();
+            // This is needed because we do not update the fog when there's no unit-scale movement of each fogRevealer
+            ForceUpdateFog();
         }
+
+
 
         private void Update()
         {
@@ -343,30 +517,53 @@ namespace RTS.FogOfWar
             fogPlaneTextureLerpTarget.Apply();
         }
 
-        // ================================
-        // GRID CONVERSION
-        // ================================
 
-        public Vector2Int WorldToLevel(Vector3 world)
+
+        private void ScanLevel()
         {
-            return new Vector2Int(
-                Mathf.FloorToInt(world.x / unitScale + levelDimensionX * 0.5f),
-                Mathf.FloorToInt(world.z / unitScale + levelDimensionY * 0.5f)
-            );
+
+            // These operations have no real computational meaning, but it will bring consistency to the data
+            levelData.levelDimensionX = levelDimensionX;
+            levelData.levelDimensionY = levelDimensionY;
+            levelData.unitScale = unitScale;
+            levelData.scanSpacingPerUnit = scanSpacingPerUnit;
+
+            for (int xIterator = 0; xIterator < levelDimensionX; xIterator++)
+            {
+                // Adding a new list for column (y axis) for each unit in row (x axis)
+                levelData.AddColumn(new LevelColumn(Enumerable.Repeat(LevelColumn.ETileState.Empty, levelDimensionY)));
+
+                for (int yIterator = 0; yIterator < levelDimensionY; yIterator++)
+                {
+                    bool isObstacleHit = Physics.BoxCast(
+                        new Vector3(
+                            GetWorldX(xIterator),
+                            fixedLevelMidPoint.y + rayStartHeight,
+                            GetWorldY(yIterator)),
+                        new Vector3(
+                            (unitScale - scanSpacingPerUnit) / 2.0f,
+                            unitScale / 2.0f,
+                            (unitScale - scanSpacingPerUnit) / 2.0f),
+                        Vector3.down,
+                        Quaternion.identity,
+                        rayMaxDistance,
+                        obstacleLayers,
+                        (QueryTriggerInteraction)(2 - Convert.ToInt32(ignoreTriggers)));
+
+                    if (isObstacleHit == true)
+                    {
+                        levelData[xIterator][yIterator] = LevelColumn.ETileState.Obstacle;
+                    }
+                }
+            }
+
         }
 
-        public bool CheckLevelGridRange(Vector2Int p)
-        {
-            return p.x >= 0 && p.y >= 0 &&
-                   p.x < levelDimensionX &&
-                   p.y < levelDimensionY;
-        }
 
-        // ================================
-        // VISIBILITY API (CANONICAL)
-        // ================================
 
-        public bool CheckVisibility(Vector3 worldPos)
+        // We intend to use Application.dataPath only for accessing project files directory (only in unity editor)
+#if UNITY_EDITOR
+        private void SaveScanAsLevelData()
         {
             string fullPath = Application.dataPath + levelScanDataPath + "/" + levelNameToSave + ".json";
 
