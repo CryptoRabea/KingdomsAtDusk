@@ -243,7 +243,6 @@ namespace RTS.Units
             // Calculate formation positions based on current formation setting
             if (unitCount > 1 && formationGroupManager != null && formationGroupManager.ShouldUseFormation())
             {
-                FormationType formationType = formationGroupManager.CurrentFormation;
                 float spacing = formationGroupManager.GetSpacing(unitCount);
 
                 // Calculate facing direction (from camera to destination)
@@ -252,13 +251,44 @@ namespace RTS.Units
                 facingDirection.y = 0;
                 facingDirection.Normalize();
 
-                formationPositions = FormationManager.CalculateFormationPositions(
-                    destination,
-                    unitCount,
-                    formationType,
-                    spacing,
-                    facingDirection
-                );
+                // Check if using custom formation
+                if (formationGroupManager.IsUsingCustomFormation)
+                {
+                    CustomFormationData customFormation = formationGroupManager.GetCurrentCustomFormation();
+                    if (customFormation != null)
+                    {
+                        formationPositions = FormationManager.CalculateCustomFormationPositions(
+                            destination,
+                            unitCount,
+                            customFormation,
+                            spacing,
+                            facingDirection
+                        );
+                    }
+                    else
+                    {
+                        // Fallback to Box formation if custom formation not found
+                        formationPositions = FormationManager.CalculateFormationPositions(
+                            destination,
+                            unitCount,
+                            FormationType.Box,
+                            spacing,
+                            facingDirection
+                        );
+                    }
+                }
+                else
+                {
+                    // Use preset formation
+                    FormationType formationType = formationGroupManager.CurrentFormation;
+                    formationPositions = FormationManager.CalculateFormationPositions(
+                        destination,
+                        unitCount,
+                        formationType,
+                        spacing,
+                        facingDirection
+                    );
+                }
 
                 // Validate positions if enabled in settings
                 if (formationGroupManager.FormationSettings != null && formationGroupManager.FormationSettings.validatePositions)

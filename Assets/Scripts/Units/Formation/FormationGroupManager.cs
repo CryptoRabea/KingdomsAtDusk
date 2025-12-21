@@ -292,7 +292,7 @@ namespace RTS.Units.Formation
         /// </summary>
         public bool ShouldUseFormation()
         {
-            return currentFormation != FormationType.None;
+            return currentFormation != FormationType.None || IsUsingCustomFormation;
         }
 
         /// <summary>
