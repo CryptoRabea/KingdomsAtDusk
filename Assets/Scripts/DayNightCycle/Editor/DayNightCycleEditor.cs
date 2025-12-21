@@ -130,32 +130,6 @@ namespace RTS.DayNightCycle.Editor
 
             Debug.Log("[Day-Night Cycle] Time Display UI created. You'll need to add TextMeshProUGUI components for time, day, and phase display.");
         }
-
-        [MenuItem("Assets/Create/RTS/Day Night Cycle/Config", false, 1)]
-        public static void CreateDayNightConfig()
-        {
-            DayNightConfigSO config = ScriptableObject.CreateInstance<DayNightConfigSO>();
-
-            string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-            if (string.IsNullOrEmpty(path))
-            {
-                path = "Assets";
-            }
-            else if (!System.IO.Directory.Exists(path))
-            {
-                path = System.IO.Path.GetDirectoryName(path);
-            }
-
-            string assetPath = AssetDatabase.GenerateUniqueAssetPath($"{path}/DayNightConfig.asset");
-            AssetDatabase.CreateAsset(config, assetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            EditorUtility.FocusProjectWindow();
-            Selection.activeObject = config;
-
-            Debug.Log($"[Day-Night Cycle] Created DayNightConfigSO at: {assetPath}");
-        }
     }
 
     /// <summary>
