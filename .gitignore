@@ -163,3 +163,5 @@ UserSettings/Layouts/default-6000.dwlt
 /Assets/Mono Limbo
 /Assets/Hovl Studio
 /ProjectSettings
+*.tif
+*.raw
