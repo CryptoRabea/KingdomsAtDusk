@@ -498,7 +498,7 @@ namespace RTS.FogOfWar
                     }
                 }
             }
-            
+
             return false; // No revealed tiles found in the additional radius
         }
 
