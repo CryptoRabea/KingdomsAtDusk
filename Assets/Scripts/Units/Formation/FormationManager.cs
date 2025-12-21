@@ -189,7 +189,7 @@ namespace RTS.Units.Formation
             {
                 for (int col = 0; col < columns && unitIndex < count; col++)
                 {
-                    Vector3 pos = startPos + new Vector3(col * spacing, 0, -row * spacing);
+                    Vector3 pos = startPos + new Vector3(col * spacing, 0, row * spacing);
                     positions.Add(pos);
                     unitIndex++;
                 }
