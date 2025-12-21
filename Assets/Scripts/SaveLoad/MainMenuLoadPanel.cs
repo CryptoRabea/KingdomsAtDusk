@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using RTS.Core.Services;
 
 namespace RTS.SaveLoad
@@ -9,6 +11,7 @@ namespace RTS.SaveLoad
     /// <summary>
     /// Main menu load game panel.
     /// Displays save files and allows loading them.
+    /// Works independently without requiring ISaveLoadService to be registered.
     /// Should be used in the MainMenu scene.
     /// </summary>
     public class MainMenuLoadPanel : MonoBehaviour
@@ -23,16 +26,15 @@ namespace RTS.SaveLoad
         [SerializeField] private TextMeshProUGUI noSavesText;
 
         [Header("Settings")]
+        [SerializeField] private SaveLoadSettings settings;
         [SerializeField] private string gameSceneName = "GameScene";
 
-        private ISaveLoadService saveLoadService;
         private List<SaveListItem> saveListItems = new List<SaveListItem>();
         private SaveListItem selectedSaveItem = null;
 
         private void Awake()
         {
             // Auto-reference self if loadPanel not assigned
-            // This allows the script to be placed directly on the panel GameObject
             if (loadPanel == null)
                 loadPanel = gameObject;
 
@@ -53,10 +55,10 @@ namespace RTS.SaveLoad
 
         private void Start()
         {
-            saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
-
-            if (saveLoadService == null)
+            // Try to find settings if not assigned
+            if (settings == null)
             {
+                settings = Resources.Load<SaveLoadSettings>("SaveLoadSettings");
             }
         }
 
@@ -66,8 +68,8 @@ namespace RTS.SaveLoad
             if (loadPanel == null)
                 loadPanel = gameObject;
 
-            if (saveLoadService == null)
-                saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
+            if (settings == null)
+                settings = Resources.Load<SaveLoadSettings>("SaveLoadSettings");
 
             loadPanel.SetActive(true);
             RefreshSaveList();
@@ -83,7 +85,7 @@ namespace RTS.SaveLoad
 
         private void RefreshSaveList()
         {
-            if (saveLoadService == null || saveListContent == null)
+            if (saveListContent == null)
                 return;
 
             // Clear existing items
@@ -95,8 +97,8 @@ namespace RTS.SaveLoad
             saveListItems.Clear();
             selectedSaveItem = null;
 
-            // Get all saves
-            string[] saves = saveLoadService.GetAllSaves();
+            // Get all saves directly from file system
+            string[] saves = GetAllSavesFromDisk();
 
             // Show/hide "no saves" message
             if (noSavesText != null)
@@ -113,6 +115,83 @@ namespace RTS.SaveLoad
             UpdateButtonStates();
         }
 
+        private string[] GetAllSavesFromDisk()
+        {
+            string savePath = GetSaveDirectoryPath();
+            if (!Directory.Exists(savePath))
+            {
+                return new string[0];
+            }
+
+            string extension = settings != null ? settings.saveFileExtension : ".sav";
+            string[] files = Directory.GetFiles(savePath, "*" + extension);
+            return files.Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();
+        }
+
+        private string GetSaveDirectoryPath()
+        {
+            string saveDir = settings != null ? settings.saveDirectory : "Saves";
+            return Path.Combine(Application.persistentDataPath, saveDir);
+        }
+
+        private string GetSaveFilePath(string saveName)
+        {
+            string extension = settings != null ? settings.saveFileExtension : ".sav";
+            string fileName = saveName;
+            if (!fileName.EndsWith(extension))
+            {
+                fileName += extension;
+            }
+            return Path.Combine(GetSaveDirectoryPath(), fileName);
+        }
+
+        private SaveFileInfo GetSaveInfoFromDisk(string saveName)
+        {
+            try
+            {
+                string filePath = GetSaveFilePath(saveName);
+                if (!File.Exists(filePath))
+                {
+                    return null;
+                }
+
+                FileInfo fileInfo = new FileInfo(filePath);
+
+                // Create basic info from file metadata
+                var info = new SaveFileInfo
+                {
+                    fileName = Path.GetFileName(filePath),
+                    saveName = saveName,
+                    saveDate = fileInfo.LastWriteTime,
+                    fileSize = fileInfo.Length,
+                    isAutoSave = saveName.StartsWith("AutoSave"),
+                    isQuickSave = saveName.StartsWith("QuickSave")
+                };
+
+                // Try to read save data for more details
+                try
+                {
+                    string json = File.ReadAllText(filePath);
+                    GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(json);
+                    if (saveData != null)
+                    {
+                        info.playTime = saveData.playTime;
+                        info.gameVersion = saveData.gameVersion;
+                    }
+                }
+                catch
+                {
+                    // Ignore parsing errors, use basic info
+                }
+
+                return info;
+            }
+            catch
+            {
+                return new SaveFileInfo { saveName = saveName, fileName = saveName };
+            }
+        }
+
         private void CreateSaveListItem(string saveName)
         {
             if (saveListItemPrefab == null || saveListContent == null)
@@ -121,11 +200,7 @@ namespace RTS.SaveLoad
             GameObject itemObj = Instantiate(saveListItemPrefab, saveListContent);
             if (itemObj.TryGetComponent<SaveListItem>(out var item))
             {
-            }
-
-            if (item != null)
-            {
-                SaveFileInfo info = saveLoadService.GetSaveInfo(saveName);
+                SaveFileInfo info = GetSaveInfoFromDisk(saveName);
                 item.Initialize(info ?? new SaveFileInfo { saveName = saveName, fileName = saveName });
                 item.OnSelected += OnSaveItemSelected;
                 saveListItems.Add(item);
@@ -149,11 +224,10 @@ namespace RTS.SaveLoad
 
         private void OnLoadButtonClicked()
         {
-            if (saveLoadService == null || selectedSaveItem == null)
+            if (selectedSaveItem == null)
                 return;
 
             string saveName = selectedSaveItem.SaveInfo.saveName;
-
 
             // Store the save name to load after scene loads
             PlayerPrefs.SetString("LoadSaveOnStart", saveName);
@@ -174,20 +248,23 @@ namespace RTS.SaveLoad
 
         private void OnDeleteButtonClicked()
         {
-            if (saveLoadService == null || selectedSaveItem == null)
+            if (selectedSaveItem == null)
                 return;
 
             string saveName = selectedSaveItem.SaveInfo.saveName;
+            string filePath = GetSaveFilePath(saveName);
 
-
-            bool success = saveLoadService.DeleteSave(saveName);
-
-            if (success)
+            try
             {
-                RefreshSaveList();
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    RefreshSaveList();
+                }
             }
-            else
+            catch (System.Exception e)
             {
+                Debug.LogError($"Failed to delete save file: {e.Message}");
             }
         }
 
@@ -204,13 +281,10 @@ namespace RTS.SaveLoad
         // Public API
         public bool HasSaves()
         {
-            if (saveLoadService == null)
-                saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
+            if (settings == null)
+                settings = Resources.Load<SaveLoadSettings>("SaveLoadSettings");
 
-            if (saveLoadService == null)
-                return false;
-
-            string[] saves = saveLoadService.GetAllSaves();
+            string[] saves = GetAllSavesFromDisk();
             return saves != null && saves.Length > 0;
         }
     }
