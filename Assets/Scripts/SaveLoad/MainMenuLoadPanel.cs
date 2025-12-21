@@ -180,7 +180,7 @@ namespace RTS.SaveLoad
                 {
                     fileName = Path.GetFileName(filePath),
                     saveName = saveName,
-                    saveDate = fileInfo.LastWriteTime,
+                    saveDate = fileInfo.LastWriteTime.ToString("g"),
                     fileSize = fileInfo.Length,
                     isAutoSave = saveName.StartsWith("AutoSave"),
                     isQuickSave = saveName.StartsWith("QuickSave")
@@ -288,7 +288,7 @@ namespace RTS.SaveLoad
 
             var text = textObj.AddComponent<TextMeshProUGUI>();
             var info = GetSaveInfoFromDisk(saveName);
-            text.text = $"{saveName}\n<size=12>{info?.saveDate.ToString("g") ?? "Unknown date"}</size>";
+            text.text = $"{saveName}\n<size=12>{info?.saveDate ?? "Unknown date"}</size>";
             text.fontSize = 18;
             text.color = Color.white;
             text.alignment = TextAlignmentOptions.Left;
