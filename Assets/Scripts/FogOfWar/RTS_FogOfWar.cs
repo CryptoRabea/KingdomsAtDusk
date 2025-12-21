@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RTS.FogOfWar
@@ -86,16 +86,10 @@ namespace RTS.FogOfWar
         private Texture2D fogTexture;
         private byte[] fogData;
 
-<<<<<<< HEAD
         // Store the initial fixed position of levelMidPoint to keep fog in world space
         private Vector3 fixedLevelMidPoint;
 
 
-=======
-        // ================================
-        // UNITY
-        // ================================
->>>>>>> parent of ce9ccdd (Add unified PlayAreaBounds for minimap, camera, and fog of war)
 
         // --- --- ---
 
@@ -124,7 +118,6 @@ namespace RTS.FogOfWar
                 LoadLevelData();
             }
 
-<<<<<<< HEAD
             // Find PlayAreaBounds if not assigned
             if (playAreaBounds == null)
             {
@@ -138,20 +131,12 @@ namespace RTS.FogOfWar
 
             // This part passes the needed references to the shadowcaster
             shadowcaster.Initialize(this);
-=======
-            shadowcaster.Initialize(levelDimensionX, levelDimensionY);
-            CreateFogTexture();
->>>>>>> parent of ce9ccdd (Add unified PlayAreaBounds for minimap, camera, and fog of war)
 
             terrainFogBinder.fogTexture = fogTexture;
             terrainFogBinder.ApplyFog();
         }
 
-<<<<<<< HEAD
         private void Update()
-=======
-        void Update()
->>>>>>> parent of ce9ccdd (Add unified PlayAreaBounds for minimap, camera, and fog of war)
         {
             UpdateFog();
         }
