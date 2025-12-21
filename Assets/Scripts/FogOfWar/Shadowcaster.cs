@@ -1,178 +1,126 @@
-
-
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-namespace FischlWorks_FogWar
+namespace RTS.FogOfWar
 {
+    /// <summary>
+    /// Shadowcasting Fog of War solver (grid-based).
+    /// Visuals are handled by terrain shader.
+    /// This class ONLY manages visibility data.
+    /// </summary>
     public class Shadowcaster
     {
-        #region FogField
+        // =============================
+        // TILE VISIBILITY
+        // =============================
 
-        public class FogField
+        public enum TileVisibility : byte
         {
-            private List<LevelColumn> levelRow = new List<LevelColumn>();
-            private Color32[] cachedColors;
-
-            public void AddColumn(LevelColumn column)
-            {
-                levelRow.Add(column);
-            }
-
-            public void Reset(csFogWar fogWar)
-            {
-                foreach (var col in levelRow)
-                    col.Reset(fogWar);
-            }
-
-            public LevelColumn this[int index] => levelRow[index];
-
-            public Color32[] GetColors(float fogPlaneAlpha, csFogWar fogWar)
-            {
-                int width = levelRow.Count;
-                int height = levelRow[0].Count;
-
-                if (cachedColors == null || cachedColors.Length != width * height)
-                    cachedColors = new Color32[width * height];
-
-                for (int x = 0; x < width; x++)
-                {
-                    for (int y = 0; y < height; y++)
-                    {
-                        int vis = (int)levelRow[x][y];
-                        float alpha = 1f - vis;
-
-                        if (fogWar.keepRevealedTiles &&
-                            vis == (int)LevelColumn.ETileVisibility.PreviouslyRevealed)
-                        {
-                            alpha = fogWar.revealedTileOpacity;
-                        }
-
-                        cachedColors[y * width + x] =
-                            new Color(1f, 1f, 1f, alpha * fogPlaneAlpha);
-                    }
-                }
-
-                return cachedColors;
-            }
+            Hidden = 0,
+            Revealed = 1,
+            PreviouslyRevealed = 2
         }
 
-        #endregion
+        // =============================
+        // FOG FIELD
+        // =============================
 
-        #region LevelColumn
+        public TileVisibility[,] fogField;
 
-        public class LevelColumn
+        private int width;
+        private int height;
+
+        // =============================
+        // INITIALIZATION
+        // =============================
+
+        public void Initialize(int width, int height)
         {
-            public enum ETileVisibility
+            this.width = width;
+            this.height = height;
+
+            fogField = new TileVisibility[width, height];
+
+            Reset();
+        }
+
+        public void Reset(bool keepMemory = false)
+        {
+            for (int x = 0; x < width; x++)
             {
-                Hidden,
-                Revealed,
-                PreviouslyRevealed
-            }
-
-            private readonly List<ETileVisibility> tiles;
-
-            public LevelColumn(IEnumerable<ETileVisibility> initial)
-            {
-                tiles = new List<ETileVisibility>(initial);
-            }
-
-            public int Count => tiles.Count;
-
-            public ETileVisibility this[int index]
-            {
-                get => tiles[index];
-                set => tiles[index] = value;
-            }
-
-            public void Reset(csFogWar fogWar)
-            {
-                for (int i = 0; i < tiles.Count; i++)
+                for (int y = 0; y < height; y++)
                 {
-                    if (!fogWar.keepRevealedTiles)
-                    {
-                        tiles[i] = ETileVisibility.Hidden;
-                    }
-                    else if (tiles[i] == ETileVisibility.Revealed)
-                    {
-                        tiles[i] = ETileVisibility.PreviouslyRevealed;
-                    }
+                    if (keepMemory && fogField[x, y] == TileVisibility.Revealed)
+                        fogField[x, y] = TileVisibility.PreviouslyRevealed;
+                    else
+                        fogField[x, y] = TileVisibility.Hidden;
                 }
             }
         }
 
-        #endregion
+        // =============================
+        // PUBLIC API
+        // =============================
 
-        #region Internals
-
-        private csFogWar fogWar;
-        public FogField fogField { get; private set; } = new FogField();
-
-        private struct Quadrant
+        public void Reveal(Vector2Int origin, int radius)
         {
-            public int xx, xy, yx, yy;
-        }
+            if (!InBounds(origin))
+                return;
 
-        private static readonly Quadrant[] quadrants =
-        {
-            new Quadrant { xx = 1, xy = 0, yx = 0, yy = 1 },
-            new Quadrant { xx = 0, xy = 1, yx = 1, yy = 0 },
-            new Quadrant { xx = -1, xy = 0, yx = 0, yy = 1 },
-            new Quadrant { xx = 0, xy = -1, yx = 1, yy = 0 }
-        };
+            SetVisible(origin.x, origin.y);
 
-        #endregion
-
-        #region Initialization
-
-        public void Initialize(csFogWar fogWar)
-        {
-            this.fogWar = fogWar;
-
-            fogField = new FogField();
-
-            for (int x = 0; x < fogWar.levelData.levelDimensionX; x++)
+            for (int oct = 0; oct < 8; oct++)
             {
-                fogField.AddColumn(
-                    new LevelColumn(
-                        Enumerable.Repeat(
-                            LevelColumn.ETileVisibility.Hidden,
-                            fogWar.levelData.levelDimensionY
-                        )
-                    )
+                CastLight(
+                    origin.x,
+                    origin.y,
+                    1,
+                    1.0f,
+                    0.0f,
+                    radius,
+                    OCTANTS[oct, 0],
+                    OCTANTS[oct, 1],
+                    OCTANTS[oct, 2],
+                    OCTANTS[oct, 3]
                 );
             }
         }
 
-        public void ResetTileVisibility()
+        public bool IsVisible(Vector2Int p)
         {
-            fogField.Reset(fogWar);
+            if (!InBounds(p))
+                return false;
+
+            return fogField[p.x, p.y] == TileVisibility.Revealed;
         }
 
-        #endregion
+        // =============================
+        // SHADOWCASTING CORE
+        // =============================
 
-        #region Shadowcasting Core
-
-        public void ProcessLevelData(Vector2Int origin, int radius)
+        private static readonly int[,] OCTANTS =
         {
-            Reveal(origin);
-
-            foreach (var q in quadrants)
-            {
-                CastLight(origin.x, origin.y, 1, 1.0f, 0.0f, radius,
-                    q.xx, q.xy, q.yx, q.yy);
-            }
-        }
+            { 1,  0,  0,  1 },
+            { 0,  1,  1,  0 },
+            { -1, 0,  0,  1 },
+            { 0, -1, 1,  0 },
+            { -1, 0,  0, -1 },
+            { 0, -1,-1,  0 },
+            { 1,  0,  0, -1 },
+            { 0,  1,-1,  0 }
+        };
 
         private void CastLight(
-            int cx, int cy,
+            int cx,
+            int cy,
             int row,
             float startSlope,
             float endSlope,
             int radius,
-            int xx, int xy,
-            int yx, int yy)
+            int xx,
+            int xy,
+            int yx,
+            int yy)
         {
             if (startSlope < endSlope)
                 return;
@@ -188,31 +136,31 @@ namespace FischlWorks_FogWar
                     int dx = -distance;
                     int dy = deltaY;
 
-                    float lSlope = (deltaY - 0.5f) / (dx + 0.5f);
-                    float rSlope = (deltaY + 0.5f) / (dx - 0.5f);
+                    float leftSlope = (deltaY - 0.5f) / (dx + 0.5f);
+                    float rightSlope = (deltaY + 0.5f) / (dx - 0.5f);
 
-                    if (rSlope > startSlope)
+                    if (rightSlope > startSlope)
                         continue;
-                    if (lSlope < endSlope)
+                    if (leftSlope < endSlope)
                         break;
 
                     int mapX = cx + dx * xx + dy * xy;
                     int mapY = cy + dx * yx + dy * yy;
 
-                    if (!fogWar.CheckLevelGridRange(new Vector2Int(mapX, mapY)))
+                    Vector2Int p = new Vector2Int(mapX, mapY);
+
+                    if (!InBounds(p))
                         continue;
 
-                    Reveal(mapX, mapY);
+                    SetVisible(mapX, mapY);
 
-                    bool isBlocked =
-                        fogWar.levelData[mapX][mapY] ==
-                        csFogWar.LevelColumn.ETileState.Obstacle;
+                    bool isBlocking = false; // <-- hook LOS blockers here later
 
                     if (blocked)
                     {
-                        if (isBlocked)
+                        if (isBlocking)
                         {
-                            nextStartSlope = rSlope;
+                            nextStartSlope = rightSlope;
                             continue;
                         }
                         else
@@ -223,13 +171,11 @@ namespace FischlWorks_FogWar
                     }
                     else
                     {
-                        if (isBlocked && distance < radius)
+                        if (isBlocking && distance < radius)
                         {
                             blocked = true;
-                            CastLight(cx, cy, distance + 1,
-                                startSlope, lSlope, radius,
-                                xx, xy, yx, yy);
-                            nextStartSlope = rSlope;
+                            CastLight(cx, cy, distance + 1, startSlope, leftSlope, radius, xx, xy, yx, yy);
+                            nextStartSlope = rightSlope;
                         }
                     }
                 }
@@ -239,26 +185,19 @@ namespace FischlWorks_FogWar
             }
         }
 
-        #endregion
+        // =============================
+        // HELPERS
+        // =============================
 
-        #region Reveal Helpers
-
-        private void Reveal(Vector2Int p)
+        private void SetVisible(int x, int y)
         {
-            if (!fogWar.CheckLevelGridRange(p))
-                return;
-
-            fogField[p.x][p.y] = LevelColumn.ETileVisibility.Revealed;
+            if (fogField[x, y] == TileVisibility.Hidden)
+                fogField[x, y] = TileVisibility.Revealed;
         }
 
-        private void Reveal(int x, int y)
+        private bool InBounds(Vector2Int p)
         {
-            if (!fogWar.CheckLevelGridRange(new Vector2Int(x, y)))
-                return;
-
-            fogField[x][y] = LevelColumn.ETileVisibility.Revealed;
+            return p.x >= 0 && p.y >= 0 && p.x < width && p.y < height;
         }
-
-        #endregion
     }
 }

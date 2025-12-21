@@ -1,15 +1,4 @@
-/*
- * FogOfWarView.cs
- * Adapter for integrating Fog of War system with RTS architecture
- * Automatically registers all units and buildings as fog revealers
- * 
- * Integrates with:
- * - EventBus for unit/building spawn/destroy events
- * - Component-based architecture for unit/building detection
- * - Service Locator pattern for decoupled access
- */
 
-using FischlWorks_FogWar;
 using RTS.Buildings;
 using RTS.Core.Events;
 using RTS.Units;
@@ -26,7 +15,7 @@ namespace RTS.FogOfWar
     public class FogOfWarView : MonoBehaviour
     {
         [Header("Core References")]
-        [SerializeField] private csFogWar fogWarSystem;
+        [SerializeField] private RTS_FogOfWar fogWarSystem;
         [Tooltip("If null, will search for csFogWar in scene")]
 
         [Header("Default Sight Ranges")]
@@ -62,7 +51,7 @@ namespace RTS.FogOfWar
             // Find fog war system if not assigned
             if (fogWarSystem == null)
             {
-                fogWarSystem = FindFirstObjectByType<csFogWar>();
+                fogWarSystem = FindFirstObjectByType<RTS_FogOfWar>();
 
                 if (fogWarSystem == null)
                 {
@@ -240,11 +229,11 @@ namespace RTS.FogOfWar
             }
 
             // Create FogRevealer and add to fog war system
-            var fogRevealer = new csFogWar.FogRevealer(
-                entity.transform,
-                sightRange,
-                entityUpdateOnMove
-            );
+            var fogRevealer = new RTS_FogOfWar.FogRevealer(
+    entity.transform,
+    sightRange
+);
+
 
             int revealerIndex = fogWarSystem.AddFogRevealer(fogRevealer);
 

@@ -1,12 +1,12 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
-using RTS.Core.Services;
-using RTS.Core.Events;
+using KAD.RTSBuildingsSystems;
 using RTS.Buildings;
+using RTS.Core.Events;
+using RTS.Core.Services;
+using RTS.FogOfWar;
 using System.Collections.Generic;
 using System.Linq;
-using KAD.RTSBuildingsSystems;
-using FischlWorks_FogWar; // Legacy fog of war namespace
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace RTS.Managers
 {
@@ -21,7 +21,7 @@ namespace RTS.Managers
         [SerializeField] private LayerMask groundLayer;
 
         [Header("Fog of War")]
-        [SerializeField] private csFogWar fogWarSystem;
+        [SerializeField] private RTS_FogOfWar fogWarSystem;
         [Tooltip("If null, will search for csFogWar in scene")]
         [SerializeField] private int localPlayerId = 0;
         [Tooltip("Player ID for fog of war visibility checks")]
@@ -146,7 +146,7 @@ namespace RTS.Managers
             // Find fog of war system if not assigned
             if (fogWarSystem == null)
             {
-                fogWarSystem = FindFirstObjectByType<csFogWar>();
+                fogWarSystem = FindFirstObjectByType<RTS_FogOfWar>();
                 if (fogWarSystem == null)
                 {
                 }

@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using FischlWorks_FogWar;
-
+using RTS.FogOfWar;
 namespace KAD.UI.FloatingNumbers
 {
     /// <summary>
@@ -26,7 +25,7 @@ namespace KAD.UI.FloatingNumbers
         private int frameCounter;
 
         // Fog of war system reference (cached)
-        private csFogWar fogWarSystem;
+        private RTS_FogOfWar fogWarSystem;
         private bool fogWarChecked = false;
 
         private void Awake()
@@ -218,7 +217,7 @@ namespace KAD.UI.FloatingNumbers
             // Try to get fog war system if not already cached
             if (!fogWarChecked)
             {
-                fogWarSystem = Object.FindFirstObjectByType<csFogWar>();
+                fogWarSystem = Object.FindFirstObjectByType<RTS_FogOfWar>();
                 fogWarChecked = true;
             }
 

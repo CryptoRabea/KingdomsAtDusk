@@ -7,7 +7,6 @@ using RTS.Core.Events;
 using RTS.Buildings;
 using RTS.Units;
 using RTS.Units.AI;
-using FischlWorks_FogWar;
 
 namespace RTS.SaveLoad
 {
