@@ -65,6 +65,9 @@ namespace RTS.Units.Formation
         /// </summary>
         public void SetCustomFormation(string formationId)
         {
+            if (CustomFormationManager.Instance == null)
+                return;
+
             CustomFormationData formation = CustomFormationManager.Instance.GetFormation(formationId);
             if (formation != null)
             {
@@ -75,9 +78,6 @@ namespace RTS.Units.Formation
                 // Immediately reshape units if any are selected
                 ReshapeSelectedUnits();
             }
-            else
-            {
-            }
         }
 
         /// <summary>
@@ -86,6 +86,9 @@ namespace RTS.Units.Formation
         public CustomFormationData GetCurrentCustomFormation()
         {
             if (string.IsNullOrEmpty(currentCustomFormationId))
+                return null;
+
+            if (CustomFormationManager.Instance == null)
                 return null;
 
             return CustomFormationManager.Instance.GetFormation(currentCustomFormationId);
