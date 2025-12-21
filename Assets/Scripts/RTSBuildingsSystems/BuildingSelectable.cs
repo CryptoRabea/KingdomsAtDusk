@@ -28,12 +28,18 @@ namespace RTS.Buildings
         // Optional advanced visualizer component
         private BuildingSelectionVisualizer selectionVisualizer;
 
+        // Building reference for audio playback
+        private Building building;
+
         public bool IsSelected { get { return isSelected; } }
 
         private void Awake()
         {
             // Check for optional advanced visualizer component
             selectionVisualizer = GetComponent<BuildingSelectionVisualizer>();
+
+            // Get building reference for audio playback
+            building = GetComponent<Building>();
 
             if (useColorHighlight)
             {
@@ -56,6 +62,9 @@ namespace RTS.Buildings
             if (isSelected) return;
 
             isSelected = true;
+
+            // Play selection audio
+            PlaySelectionAudio();
 
             // Use advanced visualizer if available
             if (selectionVisualizer != null)
@@ -125,6 +134,14 @@ namespace RTS.Buildings
             }
 
             EventBus.Publish(new BuildingDeselectedEvent(gameObject));
+        }
+
+        private void PlaySelectionAudio()
+        {
+            if (building != null && building.Data != null && building.Data.selectionAudio != null)
+            {
+                AudioSource.PlayClipAtPoint(building.Data.selectionAudio, transform.position);
+            }
         }
     }
 }
