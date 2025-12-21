@@ -2,19 +2,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using RTS.Core.Services;
 
 namespace RTS.SaveLoad
 {
     /// <summary>
-    /// Main menu load game panel.
-    /// Displays save files and allows loading them.
-    /// Should be used in the MainMenu scene.
+    /// Main menu load game panel - simplified and self-contained.
+    /// Works independently without requiring any external assets.
     /// </summary>
     public class MainMenuLoadPanel : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private GameObject loadPanel;
         [SerializeField] private Transform saveListContent;
         [SerializeField] private GameObject saveListItemPrefab;
         [SerializeField] private Button loadButton;
@@ -23,22 +23,23 @@ namespace RTS.SaveLoad
         [SerializeField] private TextMeshProUGUI noSavesText;
 
         [Header("Settings")]
+        [SerializeField] private string saveDirectory = "Saves";
+        [SerializeField] private string saveFileExtension = ".sav";
         [SerializeField] private string gameSceneName = "GameScene";
 
-        private ISaveLoadService saveLoadService;
         private List<SaveListItem> saveListItems = new List<SaveListItem>();
         private SaveListItem selectedSaveItem = null;
+        private bool isInitialized = false;
 
         private void Awake()
         {
-            // Auto-reference self if loadPanel not assigned
-            // This allows the script to be placed directly on the panel GameObject
-            if (loadPanel == null)
-                loadPanel = gameObject;
+            Initialize();
+        }
 
-            // Hide panel initially
-            if (loadPanel != null)
-                loadPanel.SetActive(false);
+        private void Initialize()
+        {
+            if (isInitialized) return;
+            isInitialized = true;
 
             // Setup button listeners
             if (loadButton != null)
@@ -51,40 +52,45 @@ namespace RTS.SaveLoad
             UpdateButtonStates();
         }
 
-        private void Start()
-        {
-            saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
-
-            if (saveLoadService == null)
-            {
-            }
-        }
-
+        /// <summary>
+        /// Opens the load panel and refreshes the save list.
+        /// Call this from MainMenuManager when the Continue/Load button is clicked.
+        /// </summary>
         public void OpenPanel()
         {
-            // Ensure references are set (Awake/Start may not have run if object started disabled)
-            if (loadPanel == null)
-                loadPanel = gameObject;
+            Debug.Log("[MainMenuLoadPanel] OpenPanel called");
 
-            if (saveLoadService == null)
-                saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
+            // Ensure initialized
+            Initialize();
 
-            loadPanel.SetActive(true);
+            // Show the panel (this GameObject)
+            gameObject.SetActive(true);
+
+            Debug.Log($"[MainMenuLoadPanel] Panel active: {gameObject.activeSelf}");
+
+            // Refresh the save list
             RefreshSaveList();
         }
 
+        /// <summary>
+        /// Closes the load panel.
+        /// </summary>
         public void ClosePanel()
         {
-            if (loadPanel != null)
+            Debug.Log("[MainMenuLoadPanel] ClosePanel called");
+            gameObject.SetActive(false);
+
+            // Return to main menu
+            var mainMenuManager = FindAnyObjectByType<RTS.UI.MainMenuManager>();
+            if (mainMenuManager != null)
             {
-                loadPanel.SetActive(false);
+                mainMenuManager.ReturnToMainMenu();
             }
         }
 
         private void RefreshSaveList()
         {
-            if (saveLoadService == null || saveListContent == null)
-                return;
+            Debug.Log("[MainMenuLoadPanel] RefreshSaveList called");
 
             // Clear existing items
             foreach (var item in saveListItems)
@@ -95,8 +101,9 @@ namespace RTS.SaveLoad
             saveListItems.Clear();
             selectedSaveItem = null;
 
-            // Get all saves
-            string[] saves = saveLoadService.GetAllSaves();
+            // Get all saves directly from file system
+            string[] saves = GetAllSavesFromDisk();
+            Debug.Log($"[MainMenuLoadPanel] Found {saves.Length} save files");
 
             // Show/hide "no saves" message
             if (noSavesText != null)
@@ -105,31 +112,213 @@ namespace RTS.SaveLoad
             }
 
             // Create list items
-            foreach (var saveName in saves)
+            if (saveListContent != null)
             {
-                CreateSaveListItem(saveName);
+                foreach (var saveName in saves)
+                {
+                    CreateSaveListItem(saveName);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[MainMenuLoadPanel] saveListContent is not assigned!");
             }
 
             UpdateButtonStates();
         }
 
-        private void CreateSaveListItem(string saveName)
+        private string[] GetAllSavesFromDisk()
         {
-            if (saveListItemPrefab == null || saveListContent == null)
-                return;
+            string savePath = GetSaveDirectoryPath();
+            Debug.Log($"[MainMenuLoadPanel] Looking for saves in: {savePath}");
 
-            GameObject itemObj = Instantiate(saveListItemPrefab, saveListContent);
-            if (itemObj.TryGetComponent<SaveListItem>(out var item))
+            if (!Directory.Exists(savePath))
             {
+                Debug.Log($"[MainMenuLoadPanel] Save directory does not exist");
+                return new string[0];
             }
 
-            if (item != null)
+            try
             {
-                SaveFileInfo info = saveLoadService.GetSaveInfo(saveName);
+                string[] files = Directory.GetFiles(savePath, "*" + saveFileExtension);
+                Debug.Log($"[MainMenuLoadPanel] Found files: {string.Join(", ", files.Select(Path.GetFileName))}");
+                return files.Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[MainMenuLoadPanel] Error reading save directory: {e.Message}");
+                return new string[0];
+            }
+        }
+
+        private string GetSaveDirectoryPath()
+        {
+            return Path.Combine(Application.persistentDataPath, saveDirectory);
+        }
+
+        private string GetSaveFilePath(string saveName)
+        {
+            string fileName = saveName;
+            if (!fileName.EndsWith(saveFileExtension))
+            {
+                fileName += saveFileExtension;
+            }
+            return Path.Combine(GetSaveDirectoryPath(), fileName);
+        }
+
+        private SaveFileInfo GetSaveInfoFromDisk(string saveName)
+        {
+            try
+            {
+                string filePath = GetSaveFilePath(saveName);
+                if (!File.Exists(filePath))
+                    return null;
+
+                FileInfo fileInfo = new FileInfo(filePath);
+
+                var info = new SaveFileInfo
+                {
+                    fileName = Path.GetFileName(filePath),
+                    saveName = saveName,
+                    saveDate = fileInfo.LastWriteTime,
+                    fileSize = fileInfo.Length,
+                    isAutoSave = saveName.StartsWith("AutoSave"),
+                    isQuickSave = saveName.StartsWith("QuickSave")
+                };
+
+                // Try to read save data for more details
+                try
+                {
+                    string json = File.ReadAllText(filePath);
+                    GameSaveData saveData = JsonUtility.FromJson<GameSaveData>(json);
+                    if (saveData != null)
+                    {
+                        info.playTime = saveData.playTime;
+                        info.gameVersion = saveData.gameVersion;
+                    }
+                }
+                catch
+                {
+                    // Ignore parsing errors, use basic info
+                }
+
+                return info;
+            }
+            catch
+            {
+                return new SaveFileInfo { saveName = saveName, fileName = saveName };
+            }
+        }
+
+        private void CreateSaveListItem(string saveName)
+        {
+            if (saveListContent == null)
+            {
+                Debug.LogWarning("[MainMenuLoadPanel] Cannot create save list item - saveListContent is null");
+                return;
+            }
+
+            GameObject itemObj = null;
+
+            // Use prefab if available, otherwise create a simple button
+            if (saveListItemPrefab != null)
+            {
+                itemObj = Instantiate(saveListItemPrefab, saveListContent);
+            }
+            else
+            {
+                // Create a simple fallback UI element
+                itemObj = CreateSimpleSaveButton(saveName);
+            }
+
+            if (itemObj == null) return;
+
+            // Try to get SaveListItem component
+            if (itemObj.TryGetComponent<SaveListItem>(out var item))
+            {
+                SaveFileInfo info = GetSaveInfoFromDisk(saveName);
                 item.Initialize(info ?? new SaveFileInfo { saveName = saveName, fileName = saveName });
                 item.OnSelected += OnSaveItemSelected;
                 saveListItems.Add(item);
             }
+            else
+            {
+                // If no SaveListItem component, add click handler directly
+                var button = itemObj.GetComponent<Button>();
+                if (button != null)
+                {
+                    string capturedSaveName = saveName;
+                    button.onClick.AddListener(() => OnSimpleSaveSelected(capturedSaveName, itemObj));
+                }
+            }
+        }
+
+        private GameObject CreateSimpleSaveButton(string saveName)
+        {
+            // Create a simple button for the save entry
+            GameObject buttonObj = new GameObject($"Save_{saveName}");
+            buttonObj.transform.SetParent(saveListContent, false);
+
+            // Add RectTransform
+            var rectTransform = buttonObj.AddComponent<RectTransform>();
+            rectTransform.sizeDelta = new Vector2(0, 60);
+
+            // Add LayoutElement for vertical layout
+            var layoutElement = buttonObj.AddComponent<LayoutElement>();
+            layoutElement.minHeight = 60;
+            layoutElement.preferredHeight = 60;
+
+            // Add background image
+            var image = buttonObj.AddComponent<Image>();
+            image.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+
+            // Add button
+            var button = buttonObj.AddComponent<Button>();
+            button.targetGraphic = image;
+
+            // Create text child
+            GameObject textObj = new GameObject("Text");
+            textObj.transform.SetParent(buttonObj.transform, false);
+
+            var textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(10, 5);
+            textRect.offsetMax = new Vector2(-10, -5);
+
+            var text = textObj.AddComponent<TextMeshProUGUI>();
+            var info = GetSaveInfoFromDisk(saveName);
+            text.text = $"{saveName}\n<size=12>{info?.saveDate.ToString("g") ?? "Unknown date"}</size>";
+            text.fontSize = 18;
+            text.color = Color.white;
+            text.alignment = TextAlignmentOptions.Left;
+
+            return buttonObj;
+        }
+
+        private string selectedSimpleSaveName = null;
+        private GameObject selectedSimpleButton = null;
+
+        private void OnSimpleSaveSelected(string saveName, GameObject buttonObj)
+        {
+            Debug.Log($"[MainMenuLoadPanel] Selected save: {saveName}");
+
+            // Reset previous selection color
+            if (selectedSimpleButton != null)
+            {
+                var prevImage = selectedSimpleButton.GetComponent<Image>();
+                if (prevImage != null) prevImage.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+            }
+
+            // Set new selection
+            selectedSimpleSaveName = saveName;
+            selectedSimpleButton = buttonObj;
+
+            // Highlight selected
+            var image = buttonObj.GetComponent<Image>();
+            if (image != null) image.color = new Color(0.2f, 0.5f, 0.2f, 1f);
+
+            UpdateButtonStates();
         }
 
         private void OnSaveItemSelected(SaveListItem item)
@@ -144,16 +333,30 @@ namespace RTS.SaveLoad
             selectedSaveItem = item;
             selectedSaveItem.SetSelected(true);
 
+            Debug.Log($"[MainMenuLoadPanel] Selected: {item.SaveInfo.saveName}");
             UpdateButtonStates();
         }
 
         private void OnLoadButtonClicked()
         {
-            if (saveLoadService == null || selectedSaveItem == null)
+            string saveName = null;
+
+            if (selectedSaveItem != null)
+            {
+                saveName = selectedSaveItem.SaveInfo.saveName;
+            }
+            else if (!string.IsNullOrEmpty(selectedSimpleSaveName))
+            {
+                saveName = selectedSimpleSaveName;
+            }
+
+            if (string.IsNullOrEmpty(saveName))
+            {
+                Debug.LogWarning("[MainMenuLoadPanel] No save selected");
                 return;
+            }
 
-            string saveName = selectedSaveItem.SaveInfo.saveName;
-
+            Debug.Log($"[MainMenuLoadPanel] Loading save: {saveName}");
 
             // Store the save name to load after scene loads
             PlayerPrefs.SetString("LoadSaveOnStart", saveName);
@@ -167,33 +370,47 @@ namespace RTS.SaveLoad
             }
             else
             {
-                // Fallback to direct scene loading
+                Debug.Log("[MainMenuLoadPanel] No SceneTransitionManager found, loading directly");
                 UnityEngine.SceneManagement.SceneManager.LoadScene(gameSceneName);
             }
         }
 
         private void OnDeleteButtonClicked()
         {
-            if (saveLoadService == null || selectedSaveItem == null)
+            string saveName = null;
+
+            if (selectedSaveItem != null)
+            {
+                saveName = selectedSaveItem.SaveInfo.saveName;
+            }
+            else if (!string.IsNullOrEmpty(selectedSimpleSaveName))
+            {
+                saveName = selectedSimpleSaveName;
+            }
+
+            if (string.IsNullOrEmpty(saveName))
                 return;
 
-            string saveName = selectedSaveItem.SaveInfo.saveName;
+            string filePath = GetSaveFilePath(saveName);
+            Debug.Log($"[MainMenuLoadPanel] Deleting save: {filePath}");
 
-
-            bool success = saveLoadService.DeleteSave(saveName);
-
-            if (success)
+            try
             {
-                RefreshSaveList();
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    RefreshSaveList();
+                }
             }
-            else
+            catch (System.Exception e)
             {
+                Debug.LogError($"[MainMenuLoadPanel] Failed to delete save file: {e.Message}");
             }
         }
 
         private void UpdateButtonStates()
         {
-            bool hasSelection = selectedSaveItem != null;
+            bool hasSelection = selectedSaveItem != null || !string.IsNullOrEmpty(selectedSimpleSaveName);
 
             if (loadButton != null)
                 loadButton.interactable = hasSelection;
@@ -201,17 +418,16 @@ namespace RTS.SaveLoad
                 deleteButton.interactable = hasSelection;
         }
 
-        // Public API
+        /// <summary>
+        /// Checks if there are any save files available.
+        /// Called by MainMenuManager to determine if Continue button should be enabled.
+        /// </summary>
         public bool HasSaves()
         {
-            if (saveLoadService == null)
-                saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
-
-            if (saveLoadService == null)
-                return false;
-
-            string[] saves = saveLoadService.GetAllSaves();
-            return saves != null && saves.Length > 0;
+            string[] saves = GetAllSavesFromDisk();
+            bool hasSaves = saves != null && saves.Length > 0;
+            Debug.Log($"[MainMenuLoadPanel] HasSaves: {hasSaves}");
+            return hasSaves;
         }
     }
 }

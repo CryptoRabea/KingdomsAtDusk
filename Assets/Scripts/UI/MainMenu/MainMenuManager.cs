@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
-using RTS.Core.Services;
 using RTS.SaveLoad;
 using RTSGame.UI.Settings;
 
@@ -51,9 +50,6 @@ namespace RTS.UI
         private InputSystem_Actions inputActions;
         private InputAction cancelAction;
 
-        // Services
-        private ISaveLoadService saveLoadService;
-
         private void Awake()
         {
             // Initialize Input System
@@ -89,9 +85,6 @@ namespace RTS.UI
 
         private void Start()
         {
-            // Get save load service
-            saveLoadService = ServiceLocator.TryGet<ISaveLoadService>();
-
             // Try to find load panel if not assigned
             if (loadPanel == null)
             {
@@ -113,6 +106,10 @@ namespace RTS.UI
 
             if (settingsButton != null)
                 settingsButton.onClick.AddListener(OnSettingsClicked);
+
+            // LoadButton is an alternate load game button (in addition to continueButton)
+            if (LoadButton != null)
+                LoadButton.onClick.AddListener(OnContinueClicked);
 
             if (creditsButton != null)
                 creditsButton.onClick.AddListener(OnCreditsClicked);
@@ -178,20 +175,24 @@ namespace RTS.UI
 
         private void OnContinueClicked()
         {
+            Debug.Log("[MainMenuManager] OnContinueClicked");
 
             if (!HasAnySaves())
             {
+                Debug.Log("[MainMenuManager] No saves found, returning");
                 return;
             }
 
             // Open load panel
             if (loadPanel != null)
             {
+                Debug.Log("[MainMenuManager] Opening load panel");
                 SetPanelActive(mainMenuPanel, false);
                 loadPanel.OpenPanel();
             }
             else
             {
+                Debug.LogWarning("[MainMenuManager] loadPanel is null!");
             }
         }
 
@@ -249,11 +250,11 @@ namespace RTS.UI
 
         private bool HasAnySaves()
         {
-            if (saveLoadService == null)
-                return false;
+            // Use load panel's HasSaves method which reads directly from disk
+            if (loadPanel != null)
+                return loadPanel.HasSaves();
 
-            string[] saves = saveLoadService.GetAllSaves();
-            return saves != null && saves.Length > 0;
+            return false;
         }
 
         private void UpdateContinueButtonState()
@@ -280,5 +281,18 @@ namespace RTS.UI
         {
             OnNewGameClicked();
         }
+
+        /// <summary>
+        /// Shows the main menu panel. Called when returning from sub-panels.
+        /// </summary>
+        public void ReturnToMainMenu()
+        {
+            ShowMainMenu();
+        }
+
+        /// <summary>
+        /// Gets the main menu panel GameObject for external access.
+        /// </summary>
+        public GameObject MainMenuPanel => mainMenuPanel;
     }
 }
