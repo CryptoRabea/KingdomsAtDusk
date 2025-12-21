@@ -1,4 +1,3 @@
-using RTS.FogOfWar;
 using System;                       // Convert
 using System.Collections.Generic;   // List
 using System.IO;                    // Directory
@@ -8,7 +7,7 @@ using UnityEngine;                  // Monobehaviour
 
 
 
-namespace RTS.FogWar
+namespace RTS.FogOfWar
 {
 
 
