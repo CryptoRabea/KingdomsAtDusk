@@ -32,6 +32,9 @@ namespace RTS.Managers
         [SerializeField] private RTSGame.Managers.RTSSettingsManager settingsManager;
         [SerializeField] private RTSGame.Managers.AudioManager audioManager;
 
+        [Header("Day-Night Cycle")]
+        [SerializeField] private RTS.DayNightCycle.DayNightCycleManager dayNightCycleManager;
+
         [Header("Settings")]
         [SerializeField] private bool initializeOnAwake = true;
 
@@ -94,6 +97,9 @@ namespace RTS.Managers
 
             // 9. UI systems (floating numbers, etc.)
             InitializeFloatingNumbersManager();
+
+            // 10. Day-Night Cycle system
+            InitializeDayNightCycleManager();
 
         }
 
@@ -246,6 +252,25 @@ namespace RTS.Managers
             }
 
             ServiceLocator.Register<ISettingsService>(settingsManager);
+        }
+
+        private void InitializeDayNightCycleManager()
+        {
+            if (dayNightCycleManager == null)
+            {
+                // Try to find it in the scene
+                dayNightCycleManager = FindAnyObjectByType<RTS.DayNightCycle.DayNightCycleManager>();
+
+                if (dayNightCycleManager == null)
+                {
+                    // Day-Night Cycle is optional - don't create automatically
+                    // as it requires configuration via DayNightConfigSO
+                    return;
+                }
+            }
+
+            // The DayNightCycleManager registers itself in its Start() method
+            // This is just to ensure we have a reference for save/load
         }
 
         private void OnDestroy()

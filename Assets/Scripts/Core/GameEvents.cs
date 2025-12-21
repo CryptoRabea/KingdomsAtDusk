@@ -548,4 +548,129 @@ namespace RTS.Core.Events
             AnimalType = animalType;
         }
     }
+
+    // ==================== TIME & DAY-NIGHT CYCLE EVENTS ====================
+
+    /// <summary>
+    /// Event published when a new in-game hour begins.
+    /// </summary>
+    public struct HourChangedEvent
+    {
+        public int PreviousHour;
+        public int NewHour;
+        public int CurrentDay;
+
+        public HourChangedEvent(int previousHour, int newHour, int currentDay)
+        {
+            PreviousHour = previousHour;
+            NewHour = newHour;
+            CurrentDay = currentDay;
+        }
+    }
+
+    /// <summary>
+    /// Event published when the day phase changes (Dawn, Day, Dusk, Night).
+    /// </summary>
+    public struct DayPhaseChangedEvent
+    {
+        public RTS.DayNightCycle.DayPhase PreviousPhase;
+        public RTS.DayNightCycle.DayPhase NewPhase;
+        public int CurrentDay;
+
+        public DayPhaseChangedEvent(RTS.DayNightCycle.DayPhase previousPhase, RTS.DayNightCycle.DayPhase newPhase, int currentDay)
+        {
+            PreviousPhase = previousPhase;
+            NewPhase = newPhase;
+            CurrentDay = currentDay;
+        }
+    }
+
+    /// <summary>
+    /// Event published when a new day begins (midnight transition).
+    /// </summary>
+    public struct NewDayEvent
+    {
+        public int PreviousDay;
+        public int NewDay;
+
+        public NewDayEvent(int previousDay, int newDay)
+        {
+            PreviousDay = previousDay;
+            NewDay = newDay;
+        }
+    }
+
+    /// <summary>
+    /// Event published when the time scale changes.
+    /// </summary>
+    public struct TimeScaleChangedEvent
+    {
+        public float PreviousScale;
+        public float NewScale;
+
+        public TimeScaleChangedEvent(float previousScale, float newScale)
+        {
+            PreviousScale = previousScale;
+            NewScale = newScale;
+        }
+    }
+
+    /// <summary>
+    /// Event published when dawn begins (useful for gameplay triggers).
+    /// </summary>
+    public struct DawnStartedEvent
+    {
+        public int CurrentDay;
+
+        public DawnStartedEvent(int currentDay)
+        {
+            CurrentDay = currentDay;
+        }
+    }
+
+    /// <summary>
+    /// Event published when night begins (useful for enemy spawning, etc.).
+    /// </summary>
+    public struct NightStartedEvent
+    {
+        public int CurrentDay;
+
+        public NightStartedEvent(int currentDay)
+        {
+            CurrentDay = currentDay;
+        }
+    }
+
+    /// <summary>
+    /// Event published continuously with time updates (for UI and smooth animations).
+    /// Throttled to avoid performance issues - fires every frame when subscribed.
+    /// </summary>
+    public struct TimeUpdatedEvent
+    {
+        public float CurrentHour;      // Current hour with decimal (e.g., 14.5 = 2:30 PM)
+        public float DayProgress;      // 0-1 progress through the day
+        public int CurrentDay;         // Current day number
+        public RTS.DayNightCycle.DayPhase CurrentPhase;
+
+        public TimeUpdatedEvent(float currentHour, float dayProgress, int currentDay, RTS.DayNightCycle.DayPhase currentPhase)
+        {
+            CurrentHour = currentHour;
+            DayProgress = dayProgress;
+            CurrentDay = currentDay;
+            CurrentPhase = currentPhase;
+        }
+    }
+
+    /// <summary>
+    /// Event published when time is paused or resumed.
+    /// </summary>
+    public struct TimePausedEvent
+    {
+        public bool IsPaused;
+
+        public TimePausedEvent(bool isPaused)
+        {
+            IsPaused = isPaused;
+        }
+    }
 }
