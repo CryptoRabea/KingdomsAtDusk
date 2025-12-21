@@ -93,13 +93,112 @@ namespace RTS.Core.Services
 
     /// <summary>
     /// Interface for time/day-night cycle management.
+    /// Provides comprehensive control over the game's day-night system.
     /// </summary>
     public interface ITimeService
     {
+        // ===== Core Time Properties =====
+
+        /// <summary>
+        /// Current time as hour of day (0-24, where 12.5 = 12:30 PM).
+        /// </summary>
         float CurrentTime { get; }
-        float DayProgress { get; } // 0-1
+
+        /// <summary>
+        /// Current hour as integer (0-23).
+        /// </summary>
+        int CurrentHour { get; }
+
+        /// <summary>
+        /// Current minute within the hour (0-59).
+        /// </summary>
+        int CurrentMinute { get; }
+
+        /// <summary>
+        /// Progress through the current day (0-1, where 0.5 = noon).
+        /// </summary>
+        float DayProgress { get; }
+
+        /// <summary>
+        /// Current day number (starting from 1).
+        /// </summary>
         int CurrentDay { get; }
+
+        /// <summary>
+        /// Current phase of the day (Dawn, Day, Dusk, Night).
+        /// </summary>
+        RTS.DayNightCycle.DayPhase CurrentPhase { get; }
+
+        // ===== Time Control =====
+
+        /// <summary>
+        /// Current time scale multiplier.
+        /// </summary>
+        float TimeScale { get; }
+
+        /// <summary>
+        /// Whether time progression is currently paused.
+        /// </summary>
+        bool IsTimePaused { get; }
+
+        /// <summary>
+        /// Set the time scale (speed of time progression).
+        /// </summary>
         void SetTimeScale(float scale);
+
+        /// <summary>
+        /// Pause time progression.
+        /// </summary>
+        void PauseTime();
+
+        /// <summary>
+        /// Resume time progression.
+        /// </summary>
+        void ResumeTime();
+
+        /// <summary>
+        /// Set the current time to a specific hour.
+        /// </summary>
+        void SetTime(float hour);
+
+        /// <summary>
+        /// Skip forward by the specified number of hours.
+        /// </summary>
+        void AdvanceTime(float hours);
+
+        // ===== Utility Methods =====
+
+        /// <summary>
+        /// Check if it's currently daytime (between dawn end and dusk start).
+        /// </summary>
+        bool IsDaytime { get; }
+
+        /// <summary>
+        /// Check if it's currently nighttime (between dusk end and dawn start).
+        /// </summary>
+        bool IsNighttime { get; }
+
+        /// <summary>
+        /// Get formatted time string (e.g., "14:30" or "2:30 PM").
+        /// </summary>
+        string GetFormattedTime(bool use24Hour = true);
+
+        /// <summary>
+        /// Get the name of the current phase as a string.
+        /// </summary>
+        string GetPhaseName();
+
+        // ===== Save/Load Support =====
+
+        /// <summary>
+        /// Get time data for saving.
+        /// </summary>
+        RTS.SaveLoad.TimeData GetSaveData();
+
+        /// <summary>
+        /// Load time data from save.
+        /// </summary>
+        void LoadSaveData(RTS.SaveLoad.TimeData data);
     }
 
     /// <summary>
