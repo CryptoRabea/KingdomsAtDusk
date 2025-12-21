@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using RTS.Units.Formation;
 using RTS.CameraControl;
+using RTS.Core.Events;
 
 namespace RTS.Units
 {
@@ -225,6 +226,9 @@ namespace RTS.Units
                     movement.SetDestination(unitDestination);
                 }
 
+                // Publish move command event for SFX
+                EventBus.Publish(new UnitMoveCommandEvent(unit.gameObject, unitDestination));
+
                 index++;
             }
 
@@ -303,6 +307,13 @@ namespace RTS.Units
             if (selectionManager == null || selectionManager.SelectionCount == 0)
                 return;
 
+            // Determine target type (Unit or Building)
+            AttackTargetType targetType = AttackTargetType.Unit;
+            if (target.GetComponent<Buildings.Building>() != null || target.GetComponent<Buildings.BuildingHealth>() != null)
+            {
+                targetType = AttackTargetType.Building;
+            }
+
             // Make all selected units attack the target
             foreach (var unit in selectionManager.SelectedUnits)
             {
@@ -323,6 +334,9 @@ namespace RTS.Units
                 {
                     movement.FollowTarget(target);
                 }
+
+                // Publish attack command event for SFX
+                EventBus.Publish(new UnitAttackCommandEvent(unit.gameObject, target.gameObject, targetType));
             }
 
         }

@@ -71,8 +71,9 @@ namespace RTS.Managers
         // Tower placement state
         private bool isPlacingTower = false;
         private TowerDataSO currentTowerData;
-        private GameObject wallToReplace;
+        private List<GameObject> wallsToReplace = new List<GameObject>();  // Support multi-segment replacement
         private bool isSnappedToWall = false;
+        private Quaternion towerSnappedRotation = Quaternion.identity;  // Tower rotation from wall alignment
         private WallReplacementData wallReplacementData;
 
         // Gate placement state
@@ -298,8 +299,9 @@ namespace RTS.Managers
 
             isPlacingTower = false;
             currentTowerData = null;
-            wallToReplace = null;
+            wallsToReplace.Clear();
             isSnappedToWall = false;
+            towerSnappedRotation = Quaternion.identity;
             wallReplacementData = null;
 
             isPlacingGate = false;
@@ -361,6 +363,16 @@ namespace RTS.Managers
                 gridVisualizer.Show();
             }
 
+            // Force LOD 0 (final building) for preview so player sees completed building
+            var meshRenderers = previewBuilding.GetComponentsInChildren<MeshRenderer>();
+            foreach (var meshRenderer in meshRenderers)
+            {
+                if (meshRenderer != null)
+                {
+                    meshRenderer.forceMeshLod = 0; // Force highest detail LOD
+                }
+            }
+
             SetPreviewMaterial(validPlacementMaterial);
         }
 
@@ -384,15 +396,19 @@ namespace RTS.Managers
                 // Handle tower wall snapping
                 if (isPlacingTower && currentTowerData != null && enableTowerWallSnapping && towerPlacementHelper != null)
                 {
-                    if (towerPlacementHelper.TrySnapToWall(position, currentTowerData, out Vector3 wallSnapPos, out GameObject wall))
+                    if (towerPlacementHelper.TrySnapToWall(position, currentTowerData, out Vector3 wallSnapPos, out Quaternion wallSnapRot, out List<GameObject> walls))
                     {
                         position = wallSnapPos;
-                        wallToReplace = wall;
+                        wallsToReplace = walls;
                         isSnappedToWall = true;
+                        towerSnappedRotation = wallSnapRot;
+
+                        // Update preview rotation to match wall
+                        previewBuilding.transform.rotation = wallSnapRot;
                     }
                     else
                     {
-                        wallToReplace = null;
+                        wallsToReplace.Clear();
                         isSnappedToWall = false;
                     }
                 }
@@ -538,15 +554,23 @@ namespace RTS.Managers
             }
 
             // Handle wall replacement for towers
-            if (isPlacingTower && wallToReplace != null && autoReplaceWalls && isSnappedToWall && towerPlacementHelper != null)
+            if (isPlacingTower && wallsToReplace != null && wallsToReplace.Count > 0 && autoReplaceWalls && isSnappedToWall && towerPlacementHelper != null)
             {
-
                 // Store wall connection data before destroying
-                wallReplacementData = towerPlacementHelper.ReplaceWallWithTower(wallToReplace, currentTowerData);
+                wallReplacementData = towerPlacementHelper.ReplaceWallWithTower(wallsToReplace, currentTowerData);
 
-                // Destroy the wall
-                Destroy(wallToReplace);
-                wallToReplace = null;
+                // Destroy all wall segments being replaced
+                foreach (var wall in wallsToReplace)
+                {
+                    if (wall != null)
+                    {
+                        Destroy(wall);
+                    }
+                }
+                wallsToReplace.Clear();
+
+                // Use the snapped rotation for the tower (like gates do)
+                rotation = towerSnappedRotation;
             }
 
             // Handle wall replacement for gates
@@ -666,10 +690,22 @@ namespace RTS.Managers
                 if (wallSystem != null)
                 {
                     // Special case: If placing a tower/gate that will replace THIS specific wall, allow it
-                    if (isPlacingTower && wallToReplace != null &&
-                        (col.gameObject == wallToReplace || col.transform.IsChildOf(wallToReplace.transform)))
+                    if (isPlacingTower && wallsToReplace != null && wallsToReplace.Count > 0)
                     {
-                        continue; // Skip - we're replacing this wall
+                        // Check if this wall is one of the walls being replaced
+                        bool isBeingReplaced = false;
+                        foreach (var wall in wallsToReplace)
+                        {
+                            if (col.gameObject == wall || col.transform.IsChildOf(wall.transform))
+                            {
+                                isBeingReplaced = true;
+                                break;
+                            }
+                        }
+                        if (isBeingReplaced)
+                        {
+                            continue; // Skip - we're replacing this wall
+                        }
                     }
                     if (isPlacingGate && wallToReplaceForGate != null &&
                         (col.gameObject == wallToReplaceForGate || col.transform.IsChildOf(wallToReplaceForGate.transform)))

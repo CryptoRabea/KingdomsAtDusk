@@ -30,12 +30,13 @@ namespace RTS.Buildings
 
         /// <summary>
         /// Try to snap position to nearest wall within range.
-        /// Returns true if snapped, and outputs the snapped position and wall object.
+        /// Returns true if snapped, and outputs the snapped position, rotation, and wall object(s).
         /// </summary>
-        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out GameObject outWall)
+        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out Quaternion outRotation, out List<GameObject> outWalls)
         {
             outPosition = position;
-            outWall = null;
+            outRotation = Quaternion.identity;
+            outWalls = new List<GameObject>();
 
             if (towerData == null || !towerData.canReplaceWalls)
             {
@@ -66,13 +67,54 @@ namespace RTS.Buildings
 
             if (nearest != null)
             {
-                // Single wall replacement - snap to wall position
-                outPosition = nearest.transform.position;
-                outWall = nearest;
+                // Calculate rotation from wall direction
+                outRotation = CalculateWallRotation(nearest);
+
+                // Find all wall segments that the tower will cover
+                if (towerData.replaceMultipleSegments)
+                {
+                    outWalls = FindWallSegmentsToCover(nearest, towerData, out Vector3 adjustedPosition);
+
+                    // Use adjusted position if allowed
+                    if (towerData.allowPositionAdjustment)
+                    {
+                        // Check if adjustment is within allowed range
+                        float adjustmentDistance = Vector3.Distance(nearest.transform.position, adjustedPosition);
+                        if (adjustmentDistance <= towerData.maxPositionAdjustment)
+                        {
+                            outPosition = adjustedPosition;
+                        }
+                        else
+                        {
+                            outPosition = nearest.transform.position;
+                        }
+                    }
+                    else
+                    {
+                        outPosition = nearest.transform.position;
+                    }
+                }
+                else
+                {
+                    // Single wall replacement
+                    outPosition = nearest.transform.position;
+                    outWalls.Add(nearest);
+                }
+
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Overload for backward compatibility (returns single wall).
+        /// </summary>
+        public bool TrySnapToWall(Vector3 position, TowerDataSO towerData, out Vector3 outPosition, out GameObject outWall)
+        {
+            bool result = TrySnapToWall(position, towerData, out outPosition, out Quaternion rotation, out List<GameObject> walls);
+            outWall = walls.Count > 0 ? walls[0] : null;
+            return result;
         }
 
         /// <summary>
@@ -169,8 +211,7 @@ namespace RTS.Buildings
             wallDirection.Normalize();
 
             // Calculate how far the tower extends from center in each direction
-            // Using default tower size since towerWallLength property doesn't exist yet
-            float halfTowerLength = 2.5f;
+            float halfTowerLength = towerData.towerWallLength / 2f;
 
             // Find all connected walls along the wall line
             List<GameObject> connectedWalls = new List<GameObject>();
@@ -289,46 +330,83 @@ namespace RTS.Buildings
         }
 
         /// <summary>
-        /// Replace a wall with a tower.
+        /// Replace wall(s) with a tower.
         /// Stores wall connection data and returns it for the tower to inherit.
+        /// Handles both single and multi-segment replacement.
         /// </summary>
-        public WallReplacementData ReplaceWallWithTower(GameObject wall, TowerDataSO towerData)
+        public WallReplacementData ReplaceWallWithTower(List<GameObject> walls, TowerDataSO towerData)
         {
-            if (wall == null)
+            if (walls == null || walls.Count == 0)
             {
                 return null;
             }
 
-            Vector3 wallPosition = wall.transform.position;
-            Quaternion wallRotation = wall.transform.rotation;
+            // Use center wall as reference
+            GameObject centerWall = walls[0];
+            Vector3 wallPosition = centerWall.transform.position;
+            Quaternion wallRotation = centerWall.transform.rotation;
 
-            // Store wall connection data before destroying it
-            if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
+            // Collect all connections from all walls being replaced
+            List<WallConnectionSystem> allConnectedWalls = new List<WallConnectionSystem>();
+
+            foreach (var wall in walls)
             {
-            }
-            List<WallConnectionSystem> connectedWalls = null;
+                if (wall == null) continue;
 
-            if (wallConnection != null)
+                if (wall.TryGetComponent<WallConnectionSystem>(out var wallConnection))
+                {
+                    List<WallConnectionSystem> connections = wallConnection.GetConnectedWalls();
+                    foreach (var conn in connections)
+                    {
+                        // Only add connections that are NOT part of the walls being replaced
+                        bool isBeingReplaced = false;
+                        foreach (var replacedWall in walls)
+                        {
+                            if (conn.gameObject == replacedWall)
+                            {
+                                isBeingReplaced = true;
+                                break;
+                            }
+                        }
+
+                        if (!isBeingReplaced && !allConnectedWalls.Contains(conn))
+                        {
+                            allConnectedWalls.Add(conn);
+                        }
+                    }
+                }
+            }
+
+            // Calculate optimal position (average of all wall positions)
+            if (walls.Count > 1)
             {
-                connectedWalls = wallConnection.GetConnectedWalls();
+                Vector3 totalPos = Vector3.zero;
+                foreach (var wall in walls)
+                {
+                    totalPos += wall.transform.position;
+                }
+                wallPosition = totalPos / walls.Count;
             }
-
-            if (wall.TryGetComponent<Building>(out var wallBuilding))
-            {
-            }
-            string wallName = wallBuilding != null ? wallBuilding.Data?.buildingName : "Wall";
-
 
             // Create replacement data
             var replacementData = new WallReplacementData
             {
-                originalWall = wall,
+                originalWalls = new List<GameObject>(walls),
                 position = wallPosition,
                 rotation = wallRotation,
-                connectedWalls = connectedWalls
+                connectedWalls = allConnectedWalls
             };
 
             return replacementData;
+        }
+
+        /// <summary>
+        /// Overload for single wall replacement (backward compatibility).
+        /// </summary>
+        public WallReplacementData ReplaceWallWithTower(GameObject wall, TowerDataSO towerData)
+        {
+            if (wall == null) return null;
+            return ReplaceWallWithTower(new List<GameObject> { wall }, towerData);
         }
 
         /// <summary>
@@ -465,13 +543,19 @@ namespace RTS.Buildings
 
     /// <summary>
     /// Data structure for storing wall replacement information.
-    /// Used when replacing a wall with a tower or gate.
+    /// Used when replacing wall(s) with a tower or gate.
+    /// Supports both single and multi-segment replacement.
     /// </summary>
     public class WallReplacementData
     {
-        public GameObject originalWall;
-        public Vector3 position;
-        public Quaternion rotation;
-        public List<WallConnectionSystem> connectedWalls;
+        public List<GameObject> originalWalls;  // All walls being replaced
+        public Vector3 position;                // Calculated optimal position
+        public Quaternion rotation;             // Wall rotation for tower alignment
+        public List<WallConnectionSystem> connectedWalls;  // External wall connections to maintain
+
+        // Legacy support - returns first wall
+        public GameObject OriginalWall => (originalWalls != null && originalWalls.Count > 0) ? originalWalls[0] : null;
+
+        public GameObject originalWall { get; internal set; }
     }
 }

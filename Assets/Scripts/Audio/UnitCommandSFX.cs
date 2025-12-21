@@ -66,7 +66,6 @@ namespace RTS.Audio
         [SerializeField] private bool showDebugLogs = false;
 
         private AudioSource audioSource;
-        private readonly List<AudioClip> validClipsCache = new();
 
         private void Awake()
         {
@@ -81,18 +80,18 @@ namespace RTS.Audio
         private void OnEnable()
         {
             // Subscribe to command events
-            EventBus.Subscribe<RTS.Units.UnitMoveCommandEvent>(OnMoveCommand);
-            EventBus.Subscribe<RTS.Units.UnitAttackCommandEvent>(OnAttackCommand);
+            EventBus.Subscribe<UnitMoveCommandEvent>(OnMoveCommand);
+            EventBus.Subscribe<UnitAttackCommandEvent>(OnAttackCommand);
         }
 
         private void OnDisable()
         {
             // Unsubscribe from events
-            EventBus.Unsubscribe<RTS.Units.UnitMoveCommandEvent>(OnMoveCommand);
-            EventBus.Unsubscribe<RTS.Units.UnitAttackCommandEvent>(OnAttackCommand);
+            EventBus.Unsubscribe<UnitMoveCommandEvent>(OnMoveCommand);
+            EventBus.Unsubscribe<UnitAttackCommandEvent>(OnAttackCommand);
         }
 
-        private void OnMoveCommand(RTS.Units.UnitMoveCommandEvent evt)
+        private void OnMoveCommand(UnitMoveCommandEvent evt)
         {
             // Only respond to commands for this unit
             if (evt.Unit != gameObject)
@@ -104,7 +103,7 @@ namespace RTS.Audio
             }
         }
 
-        private void OnAttackCommand(RTS.Units.UnitAttackCommandEvent evt)
+        private void OnAttackCommand(UnitAttackCommandEvent evt)
         {
             // Only respond to commands for this unit
             if (evt.Unit != gameObject)
@@ -143,15 +142,15 @@ namespace RTS.Audio
                 return;
             }
 
-            // Filter out null clips (reuse cached list to avoid allocations)
-            validClipsCache.Clear();
+            // Filter out null clips
+            List<AudioClip> validClips = new List<AudioClip>();
             foreach (var clip in settings.clips)
             {
                 if (clip != null)
-                    validClipsCache.Add(clip);
+                    validClips.Add(clip);
             }
 
-            if (validClipsCache.Count == 0)
+            if (validClips.Count == 0)
             {
                 if (showDebugLogs)
                     Debug.LogWarning($"[UnitCommandSFX] All clips are null for {commandName} command on {gameObject.name}");
@@ -159,7 +158,7 @@ namespace RTS.Audio
             }
 
             // Select random clip
-            AudioClip clipToPlay = validClipsCache[Random.Range(0, validClipsCache.Count)];
+            AudioClip clipToPlay = validClips[Random.Range(0, validClips.Count)];
 
             // Configure audio source
             audioSource.clip = clipToPlay;

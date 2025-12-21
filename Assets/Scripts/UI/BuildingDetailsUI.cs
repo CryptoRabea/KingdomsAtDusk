@@ -36,6 +36,13 @@ namespace RTS.UI
         [SerializeField] private GameObject setRallyPointButton;
         [SerializeField] private TextMeshProUGUI setRallyPointButtonText;
 
+        [Header("Construction Progress")]
+        [SerializeField] private GameObject constructionProgressPanel;
+        [SerializeField] private Image constructionProgressBar;
+        [SerializeField] private TextMeshProUGUI constructionProgressText;
+        [SerializeField] private TextMeshProUGUI constructionTimeRemainingText;
+        [SerializeField] private Color constructionBarColor = new Color(0.2f, 0.5f, 1f, 0.8f);
+
         [Header("References")]
         [SerializeField] private BuildingSelectionManager selectionManager;
         [SerializeField] private UniversalTooltip unitTooltip;
@@ -63,7 +70,7 @@ namespace RTS.UI
             EventBus.Unsubscribe<BuildingDeselectedEvent>(OnBuildingDeselected);
             EventBus.Unsubscribe<TrainingProgressEvent>(OnTrainingProgress);
 
-            
+
         }
 
         private void Start()
@@ -102,6 +109,12 @@ namespace RTS.UI
             {
                 isSettingRallyPoint = selectionManager.IsSpawnPointMode();
                 UpdateRallyPointButtonText();
+            }
+
+            // Update construction progress if building is under construction
+            if (buildingComponent != null && !buildingComponent.IsConstructed)
+            {
+                UpdateConstructionProgress();
             }
         }
 
@@ -169,9 +182,9 @@ namespace RTS.UI
             if (panelRoot != null)
             {
                 panelRoot.SetActive(true);
-                
+
             }
-            
+
 
             // Update building info
             if (buildingNameText != null)
@@ -194,8 +207,18 @@ namespace RTS.UI
                 buildingIcon.enabled = false;
             }
 
+            // Show construction progress if building is under construction
+            if (!building.IsConstructed)
+            {
+                ShowConstructionProgress(building);
+            }
+            else
+            {
+                HideConstructionProgress();
+            }
+
             // Show training options if building can train units
-            if (data.canTrainUnits && trainingQueue != null)
+            if (data.canTrainUnits && trainingQueue != null && building.IsConstructed)
             {
                 ShowTrainingOptions(data);
                 if (trainingQueuePanel != null)
@@ -439,7 +462,7 @@ namespace RTS.UI
             selectionManager.SetSpawnPointMode(isSettingRallyPoint);
             UpdateRallyPointButtonText();
 
-            
+
         }
 
         private void UpdateRallyPointButtonText()
@@ -447,6 +470,57 @@ namespace RTS.UI
             if (setRallyPointButtonText != null)
             {
                 setRallyPointButtonText.text = isSettingRallyPoint ? "Cancel" : "Set Rally Point";
+            }
+        }
+
+        private void ShowConstructionProgress(Building building)
+        {
+            if (constructionProgressPanel != null)
+            {
+                constructionProgressPanel.SetActive(true);
+            }
+
+            UpdateConstructionProgress();
+        }
+
+        private void HideConstructionProgress()
+        {
+            if (constructionProgressPanel != null)
+            {
+                constructionProgressPanel.SetActive(false);
+            }
+        }
+
+        private void UpdateConstructionProgress()
+        {
+            if (buildingComponent == null || buildingComponent.IsConstructed)
+            {
+                HideConstructionProgress();
+                return;
+            }
+
+            float progress = buildingComponent.ConstructionProgress;
+            float timeRemaining = buildingComponent.Data.constructionTime - progress;
+
+            // Update progress bar
+            if (constructionProgressBar != null)
+            {
+                constructionProgressBar.fillAmount = progress / buildingComponent.Data.constructionTime;
+                constructionProgressBar.color = constructionBarColor;
+            }
+
+            // Update progress text
+            if (constructionProgressText != null)
+            {
+                float percentage = (progress / buildingComponent.Data.constructionTime) * 100f;
+                constructionProgressText.text = $"Construction: {Mathf.RoundToInt(percentage)}%";
+            }
+
+            // Update time remaining text
+            if (constructionTimeRemainingText != null)
+            {
+                int seconds = Mathf.CeilToInt(timeRemaining);
+                constructionTimeRemainingText.text = $"Time Remaining: {seconds}s";
             }
         }
     }
