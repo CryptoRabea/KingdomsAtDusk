@@ -11,7 +11,7 @@
 
 using RTS.Buildings;
 using RTS.Core.Events;
-using RTS.FogWar;
+using RTS.FogOfWar;
 using RTS.Units;
 using System.Collections.Generic;
 using System.Linq;

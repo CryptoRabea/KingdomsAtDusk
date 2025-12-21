@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using RTS.FogOfWar;
-using RTS.FogWar;
 namespace KAD.UI.FloatingNumbers
 {
     /// <summary>

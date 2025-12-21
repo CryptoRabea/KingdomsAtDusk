@@ -1,6 +1,6 @@
 
 
-using RTS.FogWar;
+using RTS.FogOfWar;
 using System.Collections.Generic;   // List
 using System.Linq;                  // Enumerable
 using UnityEngine;                  // Vector2
