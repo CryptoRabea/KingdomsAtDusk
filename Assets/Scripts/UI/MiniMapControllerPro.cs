@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using RTS.Core.Events;
+using RTS.Core;
 using RTS.UI.Minimap;
 using RTS.CameraControl;
 using System.Collections;
@@ -25,11 +26,16 @@ namespace RTS.UI
         [Header("Configuration")]
         [SerializeField] private MinimapConfig config;
 
+        [Header("Play Area")]
+        [Tooltip("Reference to PlayAreaBounds. If not set, will use config world bounds.")]
+        [SerializeField] private PlayAreaBounds playAreaBounds;
+
         [Header("UI References")]
         [SerializeField] private RectTransform miniMapRect;
         [SerializeField] private RawImage miniMapImage;
 
         [Header("Camera References")]
+        [Tooltip("Assign your pre-configured minimap camera here. If left empty, one will be created.")]
         [SerializeField] private Camera miniMapCamera;
         [SerializeField] private RTSCameraController cameraController;
 
@@ -72,6 +78,12 @@ namespace RTS.UI
                 return;
             }
 
+            // Find PlayAreaBounds if not assigned
+            if (playAreaBounds == null)
+            {
+                playAreaBounds = PlayAreaBounds.Instance;
+            }
+
             // Auto-find camera controller if not set
             if (cameraController == null)
             {
@@ -93,7 +105,7 @@ namespace RTS.UI
             // Initialize marker managers
             InitializeMarkerManagers();
 
-            // FIX: Update marker managers with camera view bounds after camera setup
+            // Update marker managers with camera view bounds after camera setup
             if (config.renderWorldMap && miniMapCamera != null)
             {
                 Bounds cameraBounds = GetCameraViewBounds();
@@ -294,30 +306,47 @@ namespace RTS.UI
                 return;
             }
 
-            // Setup camera
-            if (miniMapCamera == null)
+            // Get world bounds from PlayAreaBounds or fall back to config
+            Vector2 worldSize;
+            Vector3 worldCenter;
+
+            if (playAreaBounds != null)
+            {
+                worldSize = playAreaBounds.Size;
+                worldCenter = playAreaBounds.Center;
+            }
+            else
+            {
+                worldSize = config.WorldSize;
+                worldCenter = config.WorldCenter;
+            }
+
+            // Only create a new camera if one wasn't assigned
+            bool cameraWasAssigned = miniMapCamera != null;
+            if (!cameraWasAssigned)
             {
                 GameObject camObj = new GameObject("MiniMapCamera");
                 miniMapCamera = camObj.AddComponent<Camera>();
             }
 
-            // Configure camera
+            // Configure camera render target
             miniMapCamera.targetTexture = miniMapRenderTexture;
             miniMapCamera.orthographic = true;
 
-            // FIX: Calculate orthographic size to fit entire world bounds
-            // For a square render texture, ensure both X and Z dimensions fit
-            float worldWidth = config.WorldSize.x;   // X dimension
-            float worldDepth = config.WorldSize.y;   // Z dimension (worldSize.y represents Z in 2D)
+            // Calculate orthographic size to fit entire play area
+            float worldWidth = worldSize.x;
+            float worldDepth = worldSize.y;
 
             // Use the larger dimension to ensure entire world is visible
-            // This prevents distortion and ensures markers align correctly
             miniMapCamera.orthographicSize = Mathf.Max(worldWidth, worldDepth) / 2f;
 
-            // Position camera above world center
-            Vector3 worldCenter = config.WorldCenter;
-            worldCenter.y = config.minimapCameraHeight;
-            miniMapCamera.transform.SetPositionAndRotation(worldCenter, Quaternion.Euler(90f, 0f, 0f));
+            // Position camera above world center (only if we created the camera or it needs repositioning)
+            if (!cameraWasAssigned)
+            {
+                Vector3 cameraPosition = worldCenter;
+                cameraPosition.y = config.minimapCameraHeight;
+                miniMapCamera.transform.SetPositionAndRotation(cameraPosition, Quaternion.Euler(90f, 0f, 0f));
+            }
 
             // Set render settings
             miniMapCamera.cullingMask = config.minimapLayers;
@@ -325,13 +354,11 @@ namespace RTS.UI
             miniMapCamera.backgroundColor = config.backgroundColor;
             miniMapCamera.depth = -10;
 
-
-            // Remove audio listener
+            // Remove audio listener if present
             if (miniMapCamera.TryGetComponent<AudioListener>(out var listener))
             {
                 Destroy(listener);
             }
-
         }
 
         #endregion
@@ -426,12 +453,27 @@ namespace RTS.UI
         /// </summary>
         private Bounds GetCameraViewBounds()
         {
+            // Get world center from PlayAreaBounds or config
+            Vector3 worldCenter;
+            Vector2 worldSize;
+
+            if (playAreaBounds != null)
+            {
+                worldCenter = playAreaBounds.Center;
+                worldSize = playAreaBounds.Size;
+            }
+            else
+            {
+                worldCenter = config.WorldCenter;
+                worldSize = config.WorldSize;
+            }
+
             if (miniMapCamera == null)
             {
-                // Fallback to config bounds if camera not set up yet
+                // Fallback to bounds if camera not set up yet
                 return new Bounds(
-                    config.WorldCenter,
-                    new Vector3(config.WorldSize.x, 0, config.WorldSize.y)
+                    worldCenter,
+                    new Vector3(worldSize.x, 0, worldSize.y)
                 );
             }
 
@@ -446,10 +488,9 @@ namespace RTS.UI
             float viewWidth = orthoSize * aspect * 2f;  // World X extent
             float viewDepth = orthoSize * 2f;            // World Z extent
 
-            Vector3 center = config.WorldCenter;
             Vector3 size = new Vector3(viewWidth, 0, viewDepth);
 
-            return new Bounds(center, size);
+            return new Bounds(worldCenter, size);
         }
 
         private void MoveCameraToPosition(Vector3 targetPosition)
