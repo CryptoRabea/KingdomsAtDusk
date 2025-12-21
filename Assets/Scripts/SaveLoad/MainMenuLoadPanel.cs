@@ -31,6 +31,11 @@ namespace RTS.SaveLoad
 
         private void Awake()
         {
+            // Auto-reference self if loadPanel not assigned
+            // This allows the script to be placed directly on the panel GameObject
+            if (loadPanel == null)
+                loadPanel = gameObject;
+
             // Hide panel initially
             if (loadPanel != null)
                 loadPanel.SetActive(false);
