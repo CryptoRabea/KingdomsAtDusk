@@ -33,6 +33,7 @@ namespace RTS.UI
         [SerializeField] private Button newGameButton;
         [SerializeField] private Button continueButton;
         [SerializeField] private Button settingsButton;
+        [SerializeField] private Button LoadButton;
         [SerializeField] private Button creditsButton;
         [SerializeField] private Button quitButton;
 
