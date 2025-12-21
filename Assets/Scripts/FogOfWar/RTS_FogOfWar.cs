@@ -13,7 +13,7 @@ namespace RTS.FogOfWar
         [Header("Grid")]
         [Tooltip("Resolution of the fog grid. Higher = more detailed fog but more processing.")]
         public int gridResolution = 128;
-        [Tooltip("World units per fog grid cell. Calculated automatically if usePlayAreaBounds is true.")]
+        [Tooltip("World units per fog grid cell. Calculated automatically from PlayAreaBounds.")]
         public float unitScale = 1f;
 
         [Header("Revealers")]
