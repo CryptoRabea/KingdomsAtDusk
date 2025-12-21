@@ -1,13 +1,19 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
+using RTS.Core;
 
 namespace RTS.FogOfWar
 {
     public class RTS_FogOfWar : MonoBehaviour
     {
+        [Header("Play Area")]
+        [Tooltip("Reference to PlayAreaBounds. If not set, will try to find one in the scene.")]
+        [SerializeField] private PlayAreaBounds playAreaBounds;
+
         [Header("Grid")]
-        public int levelDimensionX = 128;
-        public int levelDimensionY = 128;
+        [Tooltip("Resolution of the fog grid. Higher = more detailed fog but more processing.")]
+        public int gridResolution = 128;
+        [Tooltip("World units per fog grid cell. Calculated automatically if usePlayAreaBounds is true.")]
         public float unitScale = 1f;
 
         [Header("Revealers")]
@@ -24,6 +30,19 @@ namespace RTS.FogOfWar
         private Texture2D fogTexture;
         private byte[] fogData;
 
+        // Cached play area values
+        private Vector3 playAreaCenter;
+        private Vector2 playAreaSize;
+        private int levelDimensionX;
+        private int levelDimensionY;
+
+        // Public accessors for other systems
+        public PlayAreaBounds PlayArea => playAreaBounds;
+        public Vector3 PlayAreaCenter => playAreaCenter;
+        public Vector2 PlayAreaSize => playAreaSize;
+        public int GridWidth => levelDimensionX;
+        public int GridHeight => levelDimensionY;
+
         // ================================
         // UNITY
         // ================================
@@ -37,11 +56,48 @@ namespace RTS.FogOfWar
                 return;
             }
 
+            // Find PlayAreaBounds if not assigned
+            if (playAreaBounds == null)
+            {
+                playAreaBounds = PlayAreaBounds.Instance;
+            }
+
+            // Initialize grid dimensions based on play area
+            InitializeGridFromPlayArea();
+
             shadowcaster.Initialize(levelDimensionX, levelDimensionY);
             CreateFogTexture();
 
+            // Pass play area info to terrain binder
+            terrainFogBinder.SetPlayAreaBounds(playAreaBounds);
             terrainFogBinder.fogTexture = fogTexture;
             terrainFogBinder.ApplyFog();
+        }
+
+        private void InitializeGridFromPlayArea()
+        {
+            if (playAreaBounds != null)
+            {
+                playAreaCenter = playAreaBounds.Center;
+                playAreaSize = playAreaBounds.Size;
+
+                // Calculate unit scale to fit grid resolution to play area
+                float maxDimension = Mathf.Max(playAreaSize.x, playAreaSize.y);
+                unitScale = maxDimension / gridResolution;
+
+                // Use square grid based on resolution
+                levelDimensionX = gridResolution;
+                levelDimensionY = gridResolution;
+            }
+            else
+            {
+                // Fallback: assume center at origin, use grid resolution
+                playAreaCenter = Vector3.zero;
+                playAreaSize = new Vector2(gridResolution * unitScale, gridResolution * unitScale);
+                levelDimensionX = gridResolution;
+                levelDimensionY = gridResolution;
+                Debug.LogWarning("[RTS_FogOfWar] No PlayAreaBounds found. Using default grid centered at origin.");
+            }
         }
 
         void Update()
@@ -115,12 +171,31 @@ namespace RTS.FogOfWar
         // GRID CONVERSION
         // ================================
 
+        /// <summary>
+        /// Convert world position to fog grid cell coordinates.
+        /// Grid is centered on the PlayAreaBounds center.
+        /// </summary>
         public Vector2Int WorldToLevel(Vector3 world)
         {
+            // Calculate offset from play area center
+            float offsetX = world.x - playAreaCenter.x;
+            float offsetZ = world.z - playAreaCenter.z;
+
+            // Convert to grid coordinates (center of grid is at levelDimension/2)
             return new Vector2Int(
-                Mathf.FloorToInt(world.x / unitScale + levelDimensionX * 0.5f),
-                Mathf.FloorToInt(world.z / unitScale + levelDimensionY * 0.5f)
+                Mathf.FloorToInt(offsetX / unitScale + levelDimensionX * 0.5f),
+                Mathf.FloorToInt(offsetZ / unitScale + levelDimensionY * 0.5f)
             );
+        }
+
+        /// <summary>
+        /// Convert fog grid cell to world position.
+        /// </summary>
+        public Vector3 LevelToWorld(Vector2Int cell)
+        {
+            float worldX = (cell.x - levelDimensionX * 0.5f) * unitScale + playAreaCenter.x;
+            float worldZ = (cell.y - levelDimensionY * 0.5f) * unitScale + playAreaCenter.z;
+            return new Vector3(worldX, 0, worldZ);
         }
 
         public bool CheckLevelGridRange(Vector2Int p)
