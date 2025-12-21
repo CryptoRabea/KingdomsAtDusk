@@ -351,7 +351,16 @@ namespace RTS.FogOfWar
         private void InitializeVariables()
         {
             // Store the initial fixed position to keep fog in world space
-            fixedLevelMidPoint = levelMidPoint.position;
+            // Use the transform's position as fallback if levelMidPoint is not assigned
+            if (levelMidPoint != null)
+            {
+                fixedLevelMidPoint = levelMidPoint.position;
+            }
+            else
+            {
+                fixedLevelMidPoint = transform.position;
+                Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
+            }
 
             // This is for faster development iteration purposes
             if (obstacleLayers.value == 0)
@@ -404,7 +413,11 @@ namespace RTS.FogOfWar
         {
             UpdateFogField();
 
-            Graphics.CopyTexture(fogPlaneTextureLerpTarget, fogPlaneTextureLerpBuffer);
+            // Safety check - ensure textures are initialized before copying
+            if (fogPlaneTextureLerpTarget != null && fogPlaneTextureLerpBuffer != null)
+            {
+                Graphics.CopyTexture(fogPlaneTextureLerpTarget, fogPlaneTextureLerpBuffer);
+            }
         }
 
 
@@ -487,6 +500,12 @@ namespace RTS.FogOfWar
         // Doing shader business on the script, if we pull this out as a shader pass, same operations must be repeated
         private void UpdateFogPlaneTextureBuffer()
         {
+            // Safety check - ensure textures are initialized
+            if (fogPlaneTextureLerpBuffer == null || fogPlaneTextureLerpTarget == null)
+            {
+                return;
+            }
+
             Color32[] bufferPixels = fogPlaneTextureLerpBuffer.GetPixels32();
             Color32[] targetPixels = fogPlaneTextureLerpTarget.GetPixels32();
 
@@ -509,6 +528,12 @@ namespace RTS.FogOfWar
 
         private void UpdateFogPlaneTextureTarget()
         {
+            // Safety check - ensure fog plane and textures are initialized
+            if (fogPlane == null || fogPlaneTextureLerpTarget == null)
+            {
+                return;
+            }
+
             fogPlane.GetComponent<MeshRenderer>().material.SetColor("_Color", fogColor);
 
             fogPlaneTextureLerpTarget.SetPixels32(shadowcaster.fogField.GetColors(fogPlaneAlpha, this));
