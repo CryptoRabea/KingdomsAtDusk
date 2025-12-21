@@ -1,13 +1,15 @@
 
 
-using UnityEngine;                  // Monobehaviour
+using RTS.FogOfWar;
 using System.Collections.Generic;   // List
 using System.Linq;                  // ToList
+using UnityEngine;                  // Monobehaviour
 
 
 
 namespace RTS.FogOfWar
 {
+
 
 
 
@@ -53,22 +55,58 @@ namespace RTS.FogOfWar
 
         private void Update()
         {
-            if (fogWar == null)
+            if (fogWar == null || fogWar.CheckWorldGridRange(transform.position) == false)
+            {
                 return;
+            }
 
-            // Terrain fog is shader-based.
-            // Unit visibility is handled elsewhere.
-            visibility = true;
+            visibility = fogWar.CheckVisibility(transform.position, additionalRadius);
 
-            foreach (MeshRenderer r in meshRenderers)
-                r.enabled = visibility;
+            foreach (MeshRenderer renderer in meshRenderers)
+            {
+                renderer.enabled = visibility;
+            }
 
-            foreach (SkinnedMeshRenderer r in skinnedMeshRenderers)
-                r.enabled = visibility;
+            foreach (SkinnedMeshRenderer renderer in skinnedMeshRenderers)
+            {
+                renderer.enabled = visibility;
+            }
         }
 
 
 
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            if (fogWar == null || Application.isPlaying == false)
+            {
+                return;
+            }
 
+            if (fogWar.CheckWorldGridRange(transform.position) == false)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(
+                    transform.position, // Use the actual object position
+                    (additionalRadius + 0.5f) * fogWar._UnitScale); // Calculate radius based on grid units
+                return;
+            }
+
+            if (fogWar.CheckVisibility(transform.position, additionalRadius) == true)
+            {
+                Gizmos.color = Color.green;
+            }
+            else
+            {
+                Gizmos.color = Color.yellow;
+            }
+            Gizmos.DrawWireSphere(
+                transform.position, // Use the actual object position
+                (additionalRadius + 0.5f) * fogWar._UnitScale); // Calculate radius based on grid units
+        }
+#endif
     }
+
+
+
 }
