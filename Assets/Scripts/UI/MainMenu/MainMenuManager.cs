@@ -1,298 +1,247 @@
-using UnityEngine;
-using UnityEngine.UI;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using TMPro;
+using UnityEngine;
 using UnityEngine.InputSystem;
-using RTS.SaveLoad;
-using RTSGame.UI.Settings;
+using UnityEngine.UI;
 
 namespace RTS.UI
 {
-    /// <summary>
-    /// Manages the main menu UI with buttons for:
-    /// - New Game
-    /// - Continue (Load Game)
-    /// - Settings
-    /// - Credits
-    /// - Quit
-    /// Uses the new Input System for keyboard/gamepad navigation
-    /// Integrates with SaveLoadService for save game management
-    /// </summary>
     public class MainMenuManager : MonoBehaviour
     {
-        [Header("Menu Panels")]
+        private enum MenuState
+        {
+            Main,
+            Load,
+            Settings,
+            Credits
+        }
+
+        [Header("Panels")]
         [SerializeField] private GameObject mainMenuPanel;
+        [SerializeField] private GameObject loadPanel;
         [SerializeField] private GameObject settingsPanel;
         [SerializeField] private GameObject creditsPanel;
-        [SerializeField] private MainMenuLoadPanel loadPanel;
 
-        [Header("Advanced Settings (Optional)")]
-        [SerializeField] private SettingsPanel settingsPanelController;
-
-        [Header("Buttons")]
+        [Header("Main Menu Buttons")]
         [SerializeField] private Button newGameButton;
         [SerializeField] private Button continueButton;
+        [SerializeField] private Button loadGameButton;
         [SerializeField] private Button settingsButton;
-        [SerializeField] private Button LoadButton;
         [SerializeField] private Button creditsButton;
         [SerializeField] private Button quitButton;
 
-        [Header("Settings Buttons")]
-        [SerializeField] private Button backFromSettingsButton;
+        [Header("Load Panel UI")]
+        [SerializeField] private Transform saveListContent;
+        [SerializeField] private GameObject saveListItemPrefab;
+        [SerializeField] private Button loadButton;
+        [SerializeField] private Button deleteButton;
+        [SerializeField] private Button backButton;
+        [SerializeField] private TextMeshProUGUI noSavesText;
 
-        [Header("Credits Buttons")]
-        [SerializeField] private Button backFromCreditsButton;
+        [Header("Save Settings")]
+        [SerializeField] private string saveDirectory = "Saves";
+        [SerializeField] private string saveExtension = ".sav";
 
-        [Header("Version Display")]
+        [Header("Version")]
         [SerializeField] private TextMeshProUGUI versionText;
         [SerializeField] private string versionPrefix = "v";
 
-        // Input System
-        private InputSystem_Actions inputActions;
+        private MenuState currentState = MenuState.Main;
+        private readonly List<GameObject> saveButtons = new();
+        private string selectedSave;
+
+        private InputSystem_Actions input;
         private InputAction cancelAction;
+
+        // ---------------- INIT ----------------
 
         private void Awake()
         {
-            // Initialize Input System
-            inputActions = new InputSystem_Actions();
+            input = new InputSystem_Actions();
+            cancelAction = input.UI.Cancel;
 
-            // Get the Cancel action from UI map for ESC/Back navigation
-            cancelAction = inputActions.UI.Cancel;
+            newGameButton.onClick.AddListener(StartNewGame);
+            continueButton.onClick.AddListener(OpenLoadPanel);
+            loadGameButton.onClick.AddListener(OpenLoadPanel);
+            settingsButton.onClick.AddListener(() => SwitchState(MenuState.Settings));
+            creditsButton.onClick.AddListener(() => SwitchState(MenuState.Credits));
+            quitButton.onClick.AddListener(QuitGame);
+
+            loadButton.onClick.AddListener(LoadSelectedSave);
+            deleteButton.onClick.AddListener(DeleteSelectedSave);
+            backButton.onClick.AddListener(ReturnToMainMenu);
         }
 
         private void OnEnable()
         {
-            // Enable UI input actions
-            inputActions.UI.Enable();
-
-            // Subscribe to Cancel action (ESC key or gamepad B button)
-            if (cancelAction != null)
-            {
-                cancelAction.performed += OnCancelPerformed;
-            }
+            input.UI.Enable();
+            cancelAction.performed += OnCancel;
         }
 
         private void OnDisable()
         {
-            // Unsubscribe from Cancel action
-            if (cancelAction != null)
-            {
-                cancelAction.performed -= OnCancelPerformed;
-            }
-
-            // Disable UI input actions
-            inputActions.UI.Disable();
+            cancelAction.performed -= OnCancel;
+            input.UI.Disable();
         }
 
         private void Start()
         {
-            // Try to find load panel if not assigned
-            if (loadPanel == null)
-            {
-                loadPanel = FindAnyObjectByType<MainMenuLoadPanel>(FindObjectsInactive.Include);
-            }
+            SwitchState(MenuState.Main);
 
-            // Try to find settings panel controller if not assigned
-            if (settingsPanelController == null && settingsPanel != null)
-            {
-                settingsPanelController = settingsPanel.GetComponent<SettingsPanel>();
-            }
-
-            // Setup button listeners
-            if (newGameButton != null)
-                newGameButton.onClick.AddListener(OnNewGameClicked);
-
-            if (continueButton != null)
-                continueButton.onClick.AddListener(OnContinueClicked);
-
-            if (settingsButton != null)
-                settingsButton.onClick.AddListener(OnSettingsClicked);
-
-            // LoadButton is an alternate load game button (in addition to continueButton)
-            if (LoadButton != null)
-                LoadButton.onClick.AddListener(OnContinueClicked);
-
-            if (creditsButton != null)
-                creditsButton.onClick.AddListener(OnCreditsClicked);
-
-            if (quitButton != null)
-                quitButton.onClick.AddListener(OnQuitClicked);
-
-            if (backFromSettingsButton != null)
-                backFromSettingsButton.onClick.AddListener(OnBackFromSettings);
-
-            if (backFromCreditsButton != null)
-                backFromCreditsButton.onClick.AddListener(OnBackFromCredits);
-
-            // Show main menu panel
-            ShowMainMenu();
-
-            // Display version
             if (versionText != null)
-            {
                 versionText.text = $"{versionPrefix}{Application.version}";
-            }
 
-            // Check if save game exists for Continue button
-            UpdateContinueButtonState();
-
+            UpdateContinueButtons();
         }
 
-        private void OnCancelPerformed(InputAction.CallbackContext context)
+        // ---------------- INPUT ----------------
+
+        private void OnCancel(InputAction.CallbackContext ctx)
         {
-            // Handle ESC key / Cancel button (gamepad B)
-            if (settingsPanel != null && settingsPanel.activeSelf)
-            {
-                OnBackFromSettings();
-            }
-            else if (creditsPanel != null && creditsPanel.activeSelf)
-            {
-                OnBackFromCredits();
-            }
-            else if (mainMenuPanel != null && mainMenuPanel.activeSelf)
-            {
-                // On main menu, ESC quits the game
-                OnQuitClicked();
-            }
-        }
-
-        private void ShowMainMenu()
-        {
-            SetPanelActive(mainMenuPanel, true);
-            SetPanelActive(settingsPanel, false);
-            SetPanelActive(creditsPanel, false);
-        }
-
-        private void OnNewGameClicked()
-        {
-
-            // Clear any load-on-start flag
-            PlayerPrefs.DeleteKey("LoadSaveOnStart");
-            PlayerPrefs.Save();
-
-            // Load game scene
-            SceneTransitionManager.Instance.LoadGameScene();
-        }
-
-        private void OnContinueClicked()
-        {
-            Debug.Log("[MainMenuManager] OnContinueClicked");
-
-            if (!HasAnySaves())
-            {
-                Debug.Log("[MainMenuManager] No saves found, returning");
-                return;
-            }
-
-            // Open load panel
-            if (loadPanel != null)
-            {
-                Debug.Log("[MainMenuManager] Opening load panel");
-                SetPanelActive(mainMenuPanel, false);
-                loadPanel.OpenPanel();
-            }
+            if (currentState == MenuState.Main)
+                QuitGame();
             else
-            {
-                Debug.LogWarning("[MainMenuManager] loadPanel is null!");
-            }
+                ReturnToMainMenu();
         }
 
-        private void OnSettingsClicked()
+        // ---------------- STATE ----------------
+
+        private void SwitchState(MenuState state)
         {
-            SetPanelActive(mainMenuPanel, false);
+            currentState = state;
 
-            // Use the advanced settings panel controller if available
-            if (settingsPanelController != null)
-            {
-                settingsPanelController.Open();
-            }
-            else
-            {
-                // Fallback to simple panel activation
-                SetPanelActive(settingsPanel, true);
-            }
+            mainMenuPanel.SetActive(state == MenuState.Main);
+            loadPanel.SetActive(state == MenuState.Load);
+            settingsPanel.SetActive(state == MenuState.Settings);
+            creditsPanel.SetActive(state == MenuState.Credits);
+
+            if (state == MenuState.Load)
+                RefreshSaveList();
         }
 
-        private void OnCreditsClicked()
-        {
-            SetPanelActive(mainMenuPanel, false);
-            SetPanelActive(creditsPanel, true);
-        }
-
-        private void OnQuitClicked()
-        {
-            SceneTransitionManager.Instance.QuitGame();
-        }
-
-        private void OnBackFromSettings()
-        {
-
-            // Close the advanced settings panel if it's being used
-            if (settingsPanelController != null)
-            {
-                settingsPanelController.Close();
-            }
-
-            ShowMainMenu();
-        }
-
-        private void OnBackFromCredits()
-        {
-            ShowMainMenu();
-        }
-
-        private void SetPanelActive(GameObject panel, bool active)
-        {
-            if (panel != null)
-            {
-                panel.SetActive(active);
-            }
-        }
-
-        private bool HasAnySaves()
-        {
-            // Use load panel's HasSaves method which reads directly from disk
-            if (loadPanel != null)
-                return loadPanel.HasSaves();
-
-            return false;
-        }
-
-        private void UpdateContinueButtonState()
-        {
-            if (continueButton != null)
-            {
-                // Disable continue button if no saves exist
-                continueButton.interactable = HasAnySaves();
-            }
-        }
-
-        // Public API for external scripts
-        public void ShowSettings()
-        {
-            OnSettingsClicked();
-        }
-
-        public void ShowCredits()
-        {
-            OnCreditsClicked();
-        }
-
-        public void StartNewGame()
-        {
-            OnNewGameClicked();
-        }
-
-        /// <summary>
-        /// Shows the main menu panel. Called when returning from sub-panels.
-        /// </summary>
         public void ReturnToMainMenu()
         {
-            ShowMainMenu();
+            SwitchState(MenuState.Main);
         }
 
-        /// <summary>
-        /// Gets the main menu panel GameObject for external access.
-        /// </summary>
-        public GameObject MainMenuPanel => mainMenuPanel;
+        // ---------------- MAIN MENU ----------------
+
+        private void StartNewGame()
+        {
+            PlayerPrefs.DeleteKey("LoadSaveOnStart");
+            PlayerPrefs.Save();
+            FindAnyObjectByType<SceneTransitionManager>()?.LoadGameScene();
+        }
+
+        private void QuitGame()
+        {
+            Application.Quit();
+        }
+
+        private void UpdateContinueButtons()
+        {
+            bool hasSaves = GetSaveFiles().Length > 0;
+            continueButton.interactable = hasSaves;
+            loadGameButton.interactable = hasSaves;
+        }
+
+        // ---------------- LOAD PANEL ----------------
+
+        private void OpenLoadPanel()
+        {
+            if (GetSaveFiles().Length == 0)
+                return;
+
+            SwitchState(MenuState.Load);
+        }
+
+        private void RefreshSaveList()
+        {
+            foreach (var btn in saveButtons)
+                Destroy(btn);
+
+            saveButtons.Clear();
+            selectedSave = null;
+
+            var saves = GetSaveFiles();
+            noSavesText.gameObject.SetActive(saves.Length == 0);
+
+            foreach (var save in saves)
+            {
+                var obj = Instantiate(saveListItemPrefab, saveListContent);
+                var text = obj.GetComponentInChildren<TextMeshProUGUI>();
+                var button = obj.GetComponent<Button>();
+
+                text.text = save;
+                button.onClick.AddListener(() => SelectSave(save, obj));
+
+                saveButtons.Add(obj);
+            }
+
+            UpdateLoadButtons();
+        }
+
+        private void SelectSave(string saveName, GameObject obj)
+        {
+            selectedSave = saveName;
+
+            foreach (var b in saveButtons)
+                b.GetComponent<Image>().color = Color.white;
+
+            obj.GetComponent<Image>().color = new Color(0.2f, 0.6f, 0.2f);
+            UpdateLoadButtons();
+        }
+
+        private void UpdateLoadButtons()
+        {
+            bool valid = !string.IsNullOrEmpty(selectedSave);
+            loadButton.interactable = valid;
+            deleteButton.interactable = valid;
+        }
+
+        private void LoadSelectedSave()
+        {
+            if (string.IsNullOrEmpty(selectedSave))
+                return;
+
+            PlayerPrefs.SetString("LoadSaveOnStart", selectedSave);
+            PlayerPrefs.Save();
+
+            FindAnyObjectByType<SceneTransitionManager>()?.LoadGameScene();
+        }
+
+        private void DeleteSelectedSave()
+        {
+            if (string.IsNullOrEmpty(selectedSave))
+                return;
+
+            string path = Path.Combine(
+                Application.persistentDataPath,
+                saveDirectory,
+                selectedSave + saveExtension
+            );
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            RefreshSaveList();
+            UpdateContinueButtons();
+        }
+
+        // ---------------- FILE SYSTEM ----------------
+
+        private string[] GetSaveFiles()
+        {
+            string dir = Path.Combine(Application.persistentDataPath, saveDirectory);
+            if (!Directory.Exists(dir))
+                return new string[0];
+
+            return Directory
+                .GetFiles(dir, "*" + saveExtension)
+                .Select(Path.GetFileNameWithoutExtension)
+                .ToArray();
+        }
     }
 }
