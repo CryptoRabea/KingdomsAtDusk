@@ -1,6 +1,7 @@
 using FlowField.Formation;
 using FlowField.Movement;
 using RTS.Units;
+using RTS.Units.Formation;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,16 +11,13 @@ namespace Assets.Scripts.FlowField.Integration
     /// Integration adapter for RTS command system
     /// Replaces NavMesh-based movement with Flow Field movement
     /// Works with existing UnitSelectionManager and RTSCommandHandler
+    /// NOTE: This should NOT be active at the same time as RTSCommandHandler
     /// </summary>
     public class FlowFieldRTSCommandHandler : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private FlowFieldFormationController formationController;
-
-        [Header("Formation")]
-        [SerializeField]
-        private FlowFieldFormationController.FormationType defaultFormation =
-            FlowFieldFormationController.FormationType.Box;
+        [SerializeField] private FormationGroupManager formationGroupManager;
 
         [Header("Input")]
         [SerializeField] private bool doubleClickForForcedMove = true;
@@ -31,7 +29,6 @@ namespace Assets.Scripts.FlowField.Integration
 
         private Camera mainCamera;
         private float lastClickTime;
-        private FlowFieldFormationController.FormationType currentFormation;
 
         // Cache for selected units
         private List<FlowFieldFollower> selectedUnits = new List<FlowFieldFollower>();
@@ -39,18 +36,51 @@ namespace Assets.Scripts.FlowField.Integration
         private void Awake()
         {
             mainCamera = Camera.main;
-            currentFormation = defaultFormation;
 
             if (formationController == null)
             {
                 formationController = gameObject.AddComponent<FlowFieldFormationController>();
+            }
+
+            if (formationGroupManager == null)
+            {
+                formationGroupManager = FindFirstObjectByType<FormationGroupManager>();
             }
         }
 
         private void Update()
         {
             HandleRightClickCommand();
-            HandleFormationHotkeys();
+        }
+
+        /// <summary>
+        /// Convert FormationGroupManager's FormationType to FlowFieldFormationController's FormationType
+        /// </summary>
+        private FlowFieldFormationController.FormationType ConvertFormationType(FormationType type)
+        {
+            switch (type)
+            {
+                case FormationType.None: return FlowFieldFormationController.FormationType.None;
+                case FormationType.Line: return FlowFieldFormationController.FormationType.Line;
+                case FormationType.Column: return FlowFieldFormationController.FormationType.Column;
+                case FormationType.Box: return FlowFieldFormationController.FormationType.Box;
+                case FormationType.Wedge: return FlowFieldFormationController.FormationType.Wedge;
+                case FormationType.Circle: return FlowFieldFormationController.FormationType.Circle;
+                case FormationType.Scatter: return FlowFieldFormationController.FormationType.Scatter;
+                default: return FlowFieldFormationController.FormationType.Box;
+            }
+        }
+
+        /// <summary>
+        /// Get current formation from FormationGroupManager
+        /// </summary>
+        private FlowFieldFormationController.FormationType GetCurrentFormation()
+        {
+            if (formationGroupManager != null)
+            {
+                return ConvertFormationType(formationGroupManager.CurrentFormation);
+            }
+            return FlowFieldFormationController.FormationType.Box;
         }
 
         /// <summary>
@@ -103,11 +133,11 @@ namespace Assets.Scripts.FlowField.Integration
             if (selectedUnits.Count == 0)
                 return;
 
-            // Move units in formation
+            // Move units in formation using the shared FormationGroupManager setting
             formationController.MoveUnitsInFormation(
                 selectedUnits,
                 destination,
-                currentFormation
+                GetCurrentFormation()
             );
 
         }
@@ -128,7 +158,7 @@ namespace Assets.Scripts.FlowField.Integration
             formationController.MoveUnitsInFormation(
                 selectedUnits,
                 targetPosition,
-                currentFormation
+                GetCurrentFormation()
             );
 
         }
@@ -157,38 +187,6 @@ namespace Assets.Scripts.FlowField.Integration
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Handle formation hotkeys (F1-F6 for different formations)
-        /// </summary>
-        private void HandleFormationHotkeys()
-        {
-            if (Input.GetKeyDown(KeyCode.F1))
-                SetFormation(FlowFieldFormationController.FormationType.Line);
-
-            if (Input.GetKeyDown(KeyCode.F2))
-                SetFormation(FlowFieldFormationController.FormationType.Column);
-
-            if (Input.GetKeyDown(KeyCode.F3))
-                SetFormation(FlowFieldFormationController.FormationType.Box);
-
-            if (Input.GetKeyDown(KeyCode.F4))
-                SetFormation(FlowFieldFormationController.FormationType.Wedge);
-
-            if (Input.GetKeyDown(KeyCode.F5))
-                SetFormation(FlowFieldFormationController.FormationType.Circle);
-
-            if (Input.GetKeyDown(KeyCode.F6))
-                SetFormation(FlowFieldFormationController.FormationType.Scatter);
-        }
-
-        /// <summary>
-        /// Set current formation type
-        /// </summary>
-        public void SetFormation(FlowFieldFormationController.FormationType formation)
-        {
-            currentFormation = formation;
         }
 
         /// <summary>
