@@ -1,12 +1,3 @@
-/*
- * Created :    Winter 2022
- * Author :     SeungGeon Kim (keithrek@hanmail.net)
- * Project :    FogWar
- * Filename :   csHomebrewFogWar.cs (non-static monobehaviour module)
- * 
- * All Content (C) 2022 Unlimited Fischl Works, all rights reserved.
- */
-
 
 
 using System;                       // Convert
@@ -422,55 +413,50 @@ namespace FischlWorks_FogWar
 
         private void UpdateFog()
         {
-            // Fog plane stays at fixed world position - do not update it every frame
-
             FogRefreshRateTimer += Time.deltaTime;
 
-            if (FogRefreshRateTimer < 1 / FogRefreshRate)
+            if (FogRefreshRateTimer < 1f / FogRefreshRate)
             {
                 UpdateFogPlaneTextureBuffer();
-
                 return;
             }
-            else
-            {
-                // This is to cancel out minor excess values
-                FogRefreshRateTimer -= 1 / FogRefreshRate;
-            }
 
-            foreach (FogRevealer fogRevealer in fogRevealers)
+            FogRefreshRateTimer = 0f;
+
+            bool needsUpdate = false;
+
+            foreach (var revealer in fogRevealers)
             {
-                // Skip destroyed revealers
-                if (!fogRevealer.IsValid)
-                {
+                if (!revealer.IsValid)
                     continue;
-                }
 
-                if (fogRevealer._UpdateOnlyOnMove == false)
+                Vector2Int current = revealer.GetCurrentLevelCoordinates(this);
+
+                if (!revealer._UpdateOnlyOnMove || current != revealer._LastSeenAt)
                 {
+                    needsUpdate = true;
                     break;
-                }
-
-                Vector2Int currentLevelCoordinates = fogRevealer.GetCurrentLevelCoordinates(this);
-
-                if (currentLevelCoordinates != fogRevealer._LastSeenAt)
-                {
-                    break;
-                }
-
-                if (fogRevealer == fogRevealers.Last())
-                {
-                    return;
                 }
             }
+
+            if (!needsUpdate)
+                return;
 
             UpdateFogField();
-
             UpdateFogPlaneTextureBuffer();
         }
 
 
 
+        public void ForceImmediateUpdateIfNeeded(Vector3 worldPos)
+        {
+            Vector2Int lvl = WorldToLevel(worldPos);
+
+            if (!CheckLevelGridRange(lvl))
+                return;
+
+            UpdateFogField();
+        }
         private void UpdateFogField()
         {
             shadowcaster.ResetTileVisibility();
@@ -758,8 +744,8 @@ namespace FischlWorks_FogWar
         /// Converts world coordinate to unit world coordinates.
         public int GetUnitX(float xValue)
         {
-            return Mathf.RoundToInt((xValue - fixedLevelMidPoint.x) / unitScale);
-        }
+            return Mathf.FloorToInt((xValue - fixedLevelMidPoint.x) / unitScale);
+        }        
 
 
 
@@ -779,7 +765,7 @@ namespace FischlWorks_FogWar
         /// Converts world coordinate to unit world coordinates.
         public int GetUnitY(float yValue)
         {
-            return Mathf.RoundToInt((yValue - fixedLevelMidPoint.z) / unitScale);
+            return Mathf.FloorToInt((yValue - fixedLevelMidPoint.z) / unitScale);
         }
 
 

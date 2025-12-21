@@ -57,6 +57,8 @@ namespace FischlWorks_FogWar
 
         private void Update()
         {
+            fogWar.ForceImmediateUpdateIfNeeded(transform.position);
+
             if (fogWar == null || fogWar.CheckWorldGridRange(transform.position) == false)
             {
                 return;
