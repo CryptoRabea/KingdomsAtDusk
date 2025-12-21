@@ -15,10 +15,18 @@ namespace RTS.Units.Formation
     public class CustomFormationManager : MonoBehaviour
     {
         private static CustomFormationManager _instance;
+        private static bool _applicationIsQuitting = false;
+
         public static CustomFormationManager Instance
         {
             get
             {
+                // Don't create new instances when the application is quitting
+                if (_applicationIsQuitting)
+                {
+                    return null;
+                }
+
                 if (_instance == null)
                 {
                     _instance = FindFirstObjectByType<CustomFormationManager>();
@@ -76,9 +84,15 @@ namespace RTS.Units.Formation
 #if UNITY_EDITOR
         private void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            // Clean up when exiting play mode
-            if (state == PlayModeStateChange.ExitingPlayMode)
+            // Reset the quitting flag when entering play mode
+            if (state == PlayModeStateChange.EnteredPlayMode)
             {
+                _applicationIsQuitting = false;
+            }
+            // Clean up when exiting play mode
+            else if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                _applicationIsQuitting = true;
                 if (_instance == this)
                 {
                     _instance = null;
@@ -92,8 +106,16 @@ namespace RTS.Units.Formation
         }
 #endif
 
+        private void OnApplicationQuit()
+        {
+            _applicationIsQuitting = true;
+        }
+
         private void OnDestroy()
         {
+            // Mark as quitting to prevent new instance creation during shutdown
+            _applicationIsQuitting = true;
+
             // Clear the static instance when this object is destroyed
             if (_instance == this)
             {
