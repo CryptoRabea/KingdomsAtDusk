@@ -1,19 +1,3 @@
-/*
- * Created :    Winter 2022
- * Author :     SeungGeon Kim (keithrek@hanmail.net)
- * Project :    FogWar
- * Filename :   Shadowcaster.cs (non-static module)
- * 
- * All Content (C) 2022 Unlimited Fischl Works, all rights reserved.
- */
-
-/*
- * This part of the code utilizes the algorithm known as "Shadowcasting", the FOV algorithm of retro Roguelikes.
- * http://www.adammil.net/blog/v125_Roguelike_Vision_Algorithms.html
- * The subject is wonderfully explained in depth inside the above link.
- * https://www.albertford.com/shadowcasting
- * By the way, this script is based on the above version of the implementation. Be sure to check it out!
- */
 
 
 

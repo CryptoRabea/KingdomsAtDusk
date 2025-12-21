@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Services;
 using RTS.Units.AI;
-using KingdomsAtDusk.FogOfWar;
 
 namespace RTS.SaveLoad
 {
@@ -32,7 +31,6 @@ namespace RTS.SaveLoad
         public List<UnitSaveData> units = new List<UnitSaveData>();
 
         // World state
-        public FogOfWarData fogOfWar;
         public CameraData cameraState;
 
         public GameSaveData()
@@ -207,47 +205,12 @@ namespace RTS.SaveLoad
     #region Fog of War Data
 
     [System.Serializable]
-    public class FogOfWarData
-    {
-        public int gridWidth;
-        public int gridHeight;
-        public float cellSize;
-        public Vector3Serializable gridOrigin;
-
-        // Vision state grid (flattened 2D array)
-        public byte[] visionStates; // VisionState enum as byte array
-
-        public FogOfWarData() { }
-
-        public FogOfWarData(FogOfWarGrid grid)
-        {
-            if (grid != null)
-            {
-                gridWidth = grid.Width;
-                gridHeight = grid.Height;
-                cellSize = grid.CellSize;
-                gridOrigin = new Vector3Serializable(grid.Origin);
-
-                // Flatten the grid into a 1D array
-                visionStates = new byte[gridWidth * gridHeight];
-                for (int x = 0; x < gridWidth; x++)
-                {
-                    for (int y = 0; y < gridHeight; y++)
-                    {
-                        Vector2Int cell = new Vector2Int(x, y);
-                        VisionState state = grid.GetState(cell);
-                        visionStates[x * gridHeight + y] = (byte)state;
-                    }
-                }
-            }
-        }
-    }
+   
 
     #endregion
 
     #region Camera Data
 
-    [System.Serializable]
     public class CameraData
     {
         public Vector3Serializable position;

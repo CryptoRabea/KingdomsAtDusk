@@ -7,7 +7,6 @@ using RTS.Core.Events;
 using RTS.Buildings;
 using RTS.Units;
 using RTS.Units.AI;
-using KingdomsAtDusk.FogOfWar;
 using FischlWorks_FogWar;
 
 namespace RTS.SaveLoad
@@ -294,7 +293,6 @@ namespace RTS.SaveLoad
             data.units = CollectUnitsData();
 
             // World state
-            data.fogOfWar = CollectFogOfWarData();
             data.cameraState = CollectCameraData();
 
             return data;
@@ -491,21 +489,7 @@ namespace RTS.SaveLoad
             return unitsData;
         }
 
-        private FogOfWarData CollectFogOfWarData()
-        {
-            // Find FogOfWarManager in scene
-            var fowManager = FindAnyObjectByType<csFogWar>();
-            if (fowManager == null)
-            {
-                Log("No FogOfWarManager found in scene");
-                return new FogOfWarData();
-            }
-
-            // Access the grid through reflection or make it public
-            // For now, return empty data - will need FogOfWarManager modifications
-            Log("Fog of War data collection requires FogOfWarManager modifications");
-            return new FogOfWarData();
-        }
+     
 
         private CameraData CollectCameraData()
         {
@@ -573,8 +557,7 @@ namespace RTS.SaveLoad
             RestoreUnitsData(saveData.units);
 
             // Restore world state
-            if (saveData.fogOfWar != null)
-                RestoreFogOfWarData(saveData.fogOfWar);
+           
             if (saveData.cameraState != null)
                 RestoreCameraData(saveData.cameraState);
 
@@ -805,11 +788,7 @@ namespace RTS.SaveLoad
             }
         }
 
-        private void RestoreFogOfWarData(FogOfWarData data)
-        {
-            // Would require FogOfWarManager modifications
-            Log("Fog of War restoration not fully implemented");
-        }
+       
 
         private void RestoreCameraData(CameraData data)
         {

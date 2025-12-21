@@ -1,15 +1,4 @@
-//
-// Created :    Spring 2023
-// Author :     SeungGeon Kim (keithrek@hanmail.net)
-// Project :    FogWar
-// Filename :   FogPlane.shader (cg shader)
-// 
-// All Content (C) 2022 Unlimited Fischl Works, all rights reserved.
-//
 
-// This shader is based on an implementation of fog shader by rito15
-// https://rito15.github.io/posts/fog-of-war/
-// The main difference is that the lerping of fragment shader happens in csFogWar (CPU), not in an additional shader pass
 
 Shader "FogWar/FogPlane"
 {
