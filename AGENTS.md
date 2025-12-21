@@ -2,7 +2,7 @@
 - Project name: KingdomsAtDusk
 - Unity version: Unity 6000.3.0f1
 - Active game object:
-  - Name: MainMenuManager
+  - Name: Viewport
   - Tag: Untagged
   - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
