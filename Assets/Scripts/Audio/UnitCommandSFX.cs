@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using RTS.Core.Events;
 using RTS.Units;
+using UnitAttackCommandEvent = RTS.Core.Events.UnitAttackCommandEvent;
+using UnitMoveCommandEvent = RTS.Units.UnitMoveCommandEvent;
 
 namespace RTS.Audio
 {
@@ -110,11 +112,11 @@ namespace RTS.Audio
                 return;
 
             // Choose appropriate command settings based on target type (Unit or Building)
-            CommandSFXSettings settings = evt.TargetType == AttackTargetType.Unit
+            CommandSFXSettings settings = evt.TargetType == Core.Events.AttackTargetType.Unit
                 ? attackUnitCommand
                 : attackBuildingCommand;
 
-            string commandName = evt.TargetType == AttackTargetType.Unit
+            string commandName = evt.TargetType == Core.Events.AttackTargetType.Unit
                 ? "Attack Unit"
                 : "Attack Building";
 
