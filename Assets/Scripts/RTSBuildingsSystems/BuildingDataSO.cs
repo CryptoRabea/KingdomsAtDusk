@@ -90,6 +90,10 @@ namespace RTS.Buildings
         public bool providesHousing = false;
         public int housingCapacity = 0;
 
+        [Header("Audio")]
+        [Tooltip("Audio clip played when this building is selected")]
+        public AudioClip selectionAudio;
+
         [Header("Additional Properties (Optional)")]
         public int maxHealth = 100;
         public float repairCostMultiplier = 0.5f; // 50% of build cost to repair
