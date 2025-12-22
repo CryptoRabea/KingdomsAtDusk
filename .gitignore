@@ -49,12 +49,10 @@
 *.lighting
 /Assets/Mesh Optimizer
 /Assets
-/Library
 /Logs
 /Packages
 *.backup
 /Temp
-/ProjectSettings
 /Packages
 /Packages
-/Assets
+/Library
