@@ -12102,7 +12102,7 @@ MonoBehaviour:
       sizeOverridden: 0
     - dockPosition: 1
       containerId: overlay-toolbar__top
-      displayed: 0
+      displayed: 1
       id: Services/Environment
       index: 8
       contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":0.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
@@ -12960,9 +12960,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: 0, y: 0, z: 0}
+    m_Target: {x: 69.71154, y: 106.06889, z: 72.58037}
     speed: 2
-    m_Value: {x: 0, y: 0, z: 0}
+    m_Value: {x: 69.71154, y: 106.06889, z: 72.58037}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -13008,13 +13008,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.08717229, y: 0.89959055, z: -0.21045254, w: -0.3726226}
+    m_Target: {x: 0.05673433, y: 0.5805441, z: -0.040579975, w: 0.81125104}
     speed: 2
-    m_Value: {x: -0.08717229, y: 0.89959055, z: -0.21045254, w: -0.3726226}
+    m_Value: {x: 0.05673433, y: 0.58054405, z: -0.04057997, w: 0.811251}
   m_Size:
-    m_Target: 10
+    m_Target: 0.86375403
     speed: 2
-    m_Value: 10
+    m_Value: 0.86375403
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -13379,7 +13379,7 @@ MonoBehaviour:
       m_Data: 115344
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 115422
+    - m_Data: 115048
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -13412,7 +13412,7 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 115422
+    - m_Data: 115048
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

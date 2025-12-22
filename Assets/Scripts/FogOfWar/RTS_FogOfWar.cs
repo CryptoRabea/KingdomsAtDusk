@@ -813,7 +813,6 @@ namespace RTS.FogOfWar
                     Shadowcaster.LevelColumn.ETileVisibility.Revealed;
             }
 
-            int scanResult = 0;
 
             // Iterate through a square region around the central levelCoordinates
             for (int xIterator = -additionalRadius; xIterator <= additionalRadius; xIterator++)
