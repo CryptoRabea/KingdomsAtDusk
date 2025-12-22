@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using RTS.Core;
 
 namespace RTS.UI
 {
@@ -57,6 +58,8 @@ namespace RTS.UI
                 return;
             }
 
+            // Reset the bootstrap flag so next direct play will show loading screen
+            GameSceneBootstrap.ResetTransitionFlag();
             StartCoroutine(LoadSceneAsync(mainMenuSceneName));
         }
 
@@ -112,6 +115,8 @@ namespace RTS.UI
         {
             isTransitioning = true;
 
+            // Mark that we're coming from a transition so GameSceneBootstrap doesn't show its own loading
+            GameSceneBootstrap.MarkAsTransition();
 
             // Show loading screen
             LoadingScreenManager loadingScreen = LoadingScreenManager.Instance;

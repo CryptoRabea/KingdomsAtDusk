@@ -8,6 +8,7 @@ namespace RTS.UI
     /// <summary>
     /// Manages loading screen display with progress bar and tips.
     /// Can be used before main menu or between scene transitions.
+    /// Includes performance optimizations for smoother loading.
     /// </summary>
     public class LoadingScreenManager : MonoBehaviour
     {
@@ -21,7 +22,15 @@ namespace RTS.UI
         [Header("Settings")]
         [SerializeField] private float minimumDisplayTime = 1f;
         [SerializeField] private bool smoothProgress = true;
-        [SerializeField] private float progressSmoothSpeed = 2f;
+        [SerializeField] private float progressSmoothSpeed = 3f;
+
+        [Header("Performance Optimizations")]
+        [Tooltip("Run garbage collection during loading to reduce stutters during gameplay")]
+        [SerializeField] private bool runGCDuringLoading = true;
+        [Tooltip("Unload unused assets during loading")]
+        [SerializeField] private bool unloadUnusedAssets = true;
+        [Tooltip("Lower quality settings during loading for faster load")]
+        [SerializeField] private bool reducedQualityDuringLoad = false;
 
         [Header("Loading Tips")]
         [SerializeField] private string[] loadingTips = new string[]
@@ -30,7 +39,10 @@ namespace RTS.UI
             "Tip: Manage resources wisely for your kingdom",
             "Tip: Use control groups to manage your army",
             "Tip: Scout the fog of war to reveal the map",
-            "Tip: Buildings can train different unit types"
+            "Tip: Buildings can train different unit types",
+            "Tip: Walls slow down enemy units",
+            "Tip: Towers can be built on walls for defense",
+            "Tip: Keep your peasants happy for better production"
         };
 
         private static LoadingScreenManager instance;
@@ -38,6 +50,9 @@ namespace RTS.UI
         private float currentProgress = 0f;
         private float loadingStartTime;
         private bool isLoading = false;
+        private int originalVSyncCount;
+        private int originalTargetFrameRate;
+        private AsyncOperation cleanupOperation;
 
         public static LoadingScreenManager Instance
         {
@@ -85,6 +100,12 @@ namespace RTS.UI
             currentProgress = 0f;
             UpdateProgress(0f);
 
+            // Apply performance optimizations during loading
+            ApplyLoadingOptimizations();
+
+            // Start background cleanup operations
+            StartCoroutine(PerformBackgroundOptimizations());
+
             if (showTip && loadingTipText != null && loadingTips.Length > 0)
             {
                 string randomTip = loadingTips[Random.Range(0, loadingTips.Length)];
@@ -95,7 +116,56 @@ namespace RTS.UI
             {
                 loadingTipText.gameObject.SetActive(false);
             }
+        }
 
+        private void ApplyLoadingOptimizations()
+        {
+            // Store original settings
+            originalVSyncCount = QualitySettings.vSyncCount;
+            originalTargetFrameRate = Application.targetFrameRate;
+
+            // Disable VSync during loading for faster asset loading
+            if (reducedQualityDuringLoad)
+            {
+                QualitySettings.vSyncCount = 0;
+                Application.targetFrameRate = -1; // Uncapped
+            }
+        }
+
+        private void RestoreSettings()
+        {
+            // Restore original settings
+            if (reducedQualityDuringLoad)
+            {
+                QualitySettings.vSyncCount = originalVSyncCount;
+                Application.targetFrameRate = originalTargetFrameRate;
+            }
+        }
+
+        private IEnumerator PerformBackgroundOptimizations()
+        {
+            // Wait a frame to let loading screen appear
+            yield return null;
+
+            // Run garbage collection during loading to reduce stutters during gameplay
+            if (runGCDuringLoading)
+            {
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
+                System.GC.Collect();
+            }
+
+            yield return null;
+
+            // Unload unused assets
+            if (unloadUnusedAssets)
+            {
+                cleanupOperation = Resources.UnloadUnusedAssets();
+                while (cleanupOperation != null && !cleanupOperation.isDone)
+                {
+                    yield return null;
+                }
+            }
         }
 
         /// <summary>
@@ -112,12 +182,27 @@ namespace RTS.UI
             float elapsedTime = Time.realtimeSinceStartup - loadingStartTime;
             if (elapsedTime < minimumDisplayTime)
             {
-                yield return new WaitForSeconds(minimumDisplayTime - elapsedTime);
+                yield return new WaitForSecondsRealtime(minimumDisplayTime - elapsedTime);
+            }
+
+            // Wait for cleanup operation to complete
+            if (cleanupOperation != null && !cleanupOperation.isDone)
+            {
+                yield return cleanupOperation;
+            }
+
+            // Final garbage collection before gameplay starts
+            if (runGCDuringLoading)
+            {
+                System.GC.Collect();
             }
 
             // Ensure progress reaches 100%
             SetProgress(1f);
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSecondsRealtime(0.2f);
+
+            // Restore original settings before hiding
+            RestoreSettings();
 
             if (loadingScreenRoot != null)
             {
@@ -125,6 +210,7 @@ namespace RTS.UI
             }
 
             isLoading = false;
+            cleanupOperation = null;
         }
 
         /// <summary>
@@ -156,9 +242,10 @@ namespace RTS.UI
         {
             if (!isLoading) return;
 
+            // Use unscaledDeltaTime so progress updates even when game is paused
             if (smoothProgress && Mathf.Abs(currentProgress - targetProgress) > 0.01f)
             {
-                currentProgress = Mathf.Lerp(currentProgress, targetProgress, Time.deltaTime * progressSmoothSpeed);
+                currentProgress = Mathf.Lerp(currentProgress, targetProgress, Time.unscaledDeltaTime * progressSmoothSpeed);
                 UpdateProgress(currentProgress);
             }
         }

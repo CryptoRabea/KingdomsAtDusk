@@ -277,6 +277,15 @@ namespace RTS.FogOfWar
         // Cached play area size for proper fog plane scaling (used when usePlayAreaBounds is enabled)
         private Vector2 cachedPlayAreaSize;
 
+        // World bounds for accurate coordinate conversion when using PlayAreaBounds
+        private Vector2 worldBoundsMin;
+        private Vector2 worldBoundsMax;
+
+        // Cached references for performance
+        private MeshRenderer fogPlaneMeshRenderer;
+        private Color32[] cachedBufferPixels;
+        private Color32[] cachedTargetPixels;
+
 
 
         // --- --- ---
@@ -378,6 +387,10 @@ namespace RTS.FogOfWar
                     // Cache the play area size for fog plane scaling
                     cachedPlayAreaSize = playAreaBounds.Size;
 
+                    // Store world bounds for accurate coordinate conversion
+                    worldBoundsMin = playAreaBounds.WorldMin;
+                    worldBoundsMax = playAreaBounds.WorldMax;
+
                     // Calculate unitScale to keep dimensions within 128 limit
                     // while covering the entire play area
                     float maxDimension = Mathf.Max(cachedPlayAreaSize.x, cachedPlayAreaSize.y);
@@ -400,12 +413,16 @@ namespace RTS.FogOfWar
                 {
                     Debug.LogWarning("RTS_FogOfWar: usePlayAreaBounds is enabled but no PlayAreaBounds found in scene. Using manual settings.");
                     cachedPlayAreaSize = Vector2.zero;
+                    worldBoundsMin = Vector2.zero;
+                    worldBoundsMax = Vector2.zero;
                     InitializeFallbackMidPoint();
                 }
             }
             else
             {
                 cachedPlayAreaSize = Vector2.zero;
+                worldBoundsMin = Vector2.zero;
+                worldBoundsMax = Vector2.zero;
                 InitializeFallbackMidPoint();
             }
 
@@ -478,11 +495,18 @@ namespace RTS.FogOfWar
 
             fogPlaneTextureLerpBuffer.filterMode = FilterMode.Bilinear;
 
-            fogPlane.GetComponent<MeshRenderer>().material = new Material(fogPlaneMaterial);
+            // Cache the mesh renderer for performance
+            fogPlaneMeshRenderer = fogPlane.GetComponent<MeshRenderer>();
+            fogPlaneMeshRenderer.material = new Material(fogPlaneMaterial);
+            fogPlaneMeshRenderer.material.SetTexture("_MainTex", fogPlaneTextureLerpBuffer);
 
-            fogPlane.GetComponent<MeshRenderer>().material.SetTexture("_MainTex", fogPlaneTextureLerpBuffer);
-
+            // Disable the collider - not needed for fog
             fogPlane.GetComponent<MeshCollider>().enabled = false;
+
+            // Pre-allocate pixel arrays for texture updates (avoids GC allocation every frame)
+            int pixelCount = levelDimensionX * levelDimensionY;
+            cachedBufferPixels = new Color32[pixelCount];
+            cachedTargetPixels = new Color32[pixelCount];
         }
 
 
@@ -575,7 +599,7 @@ namespace RTS.FogOfWar
 
 
 
-        // Doing shader business on the script, if we pull this out as a shader pass, same operations must be repeated
+        // Optimized texture buffer update - reuses cached arrays to avoid GC allocation
         private void UpdateFogPlaneTextureBuffer()
         {
             // Safety check - ensure textures are initialized
@@ -584,21 +608,27 @@ namespace RTS.FogOfWar
                 return;
             }
 
-            Color32[] bufferPixels = fogPlaneTextureLerpBuffer.GetPixels32();
-            Color32[] targetPixels = fogPlaneTextureLerpTarget.GetPixels32();
+            // Reuse cached arrays instead of allocating new ones each frame
+            fogPlaneTextureLerpBuffer.GetPixels32(cachedBufferPixels);
+            fogPlaneTextureLerpTarget.GetPixels32(cachedTargetPixels);
 
-            if (bufferPixels.Length != targetPixels.Length)
+            float lerpFactor = fogLerpSpeed * Time.deltaTime;
+
+            // Optimized loop - avoid function call overhead by inlining lerp
+            for (int i = 0; i < cachedBufferPixels.Length; i++)
             {
-                return;
+                Color32 buffer = cachedBufferPixels[i];
+                Color32 target = cachedTargetPixels[i];
+
+                cachedBufferPixels[i] = new Color32(
+                    (byte)(buffer.r + (target.r - buffer.r) * lerpFactor),
+                    (byte)(buffer.g + (target.g - buffer.g) * lerpFactor),
+                    (byte)(buffer.b + (target.b - buffer.b) * lerpFactor),
+                    (byte)(buffer.a + (target.a - buffer.a) * lerpFactor)
+                );
             }
 
-            for (int i = 0; i < bufferPixels.Length; i++)
-            {
-                bufferPixels[i] = Color.Lerp(bufferPixels[i], targetPixels[i], fogLerpSpeed * Time.deltaTime);
-            }
-
-            fogPlaneTextureLerpBuffer.SetPixels32(bufferPixels);
-
+            fogPlaneTextureLerpBuffer.SetPixels32(cachedBufferPixels);
             fogPlaneTextureLerpBuffer.Apply();
         }
 
@@ -607,12 +637,13 @@ namespace RTS.FogOfWar
         private void UpdateFogPlaneTextureTarget()
         {
             // Safety check - ensure fog plane and textures are initialized
-            if (fogPlane == null || fogPlaneTextureLerpTarget == null)
+            if (fogPlane == null || fogPlaneTextureLerpTarget == null || fogPlaneMeshRenderer == null)
             {
                 return;
             }
 
-            fogPlane.GetComponent<MeshRenderer>().material.SetColor("_Color", fogColor);
+            // Use cached mesh renderer reference
+            fogPlaneMeshRenderer.material.SetColor("_Color", fogColor);
 
             fogPlaneTextureLerpTarget.SetPixels32(shadowcaster.fogField.GetColors(fogPlaneAlpha, this));
 
@@ -809,11 +840,26 @@ namespace RTS.FogOfWar
 
 
 
-        /// Converts unit (divided by unitScale, then rounded) world coordinates to level coordinates.
+        /// Converts world coordinates to level (grid) coordinates.
+        /// When usePlayAreaBounds is enabled, uses proper interpolation within world bounds.
         public Vector2Int WorldToLevel(Vector3 worldCoordinates)
         {
-            Vector2Int unitWorldCoordinates = GetUnitVector(worldCoordinates);
+            // When using PlayAreaBounds, use direct world-to-grid interpolation for accuracy
+            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
+            {
+                // Normalize position within world bounds (0 to 1), then scale to grid
+                float normalizedX = Mathf.InverseLerp(worldBoundsMin.x, worldBoundsMax.x, worldCoordinates.x);
+                float normalizedZ = Mathf.InverseLerp(worldBoundsMin.y, worldBoundsMax.y, worldCoordinates.z);
 
+                // Convert to grid coordinates (0 to levelDimension-1)
+                int gridX = Mathf.Clamp(Mathf.FloorToInt(normalizedX * levelDimensionX), 0, levelDimensionX - 1);
+                int gridZ = Mathf.Clamp(Mathf.FloorToInt(normalizedZ * levelDimensionY), 0, levelDimensionY - 1);
+
+                return new Vector2Int(gridX, gridZ);
+            }
+
+            // Legacy conversion for non-PlayAreaBounds mode
+            Vector2Int unitWorldCoordinates = GetUnitVector(worldCoordinates);
             return new Vector2Int(
                 unitWorldCoordinates.x + (levelDimensionX / 2),
                 unitWorldCoordinates.y + (levelDimensionY / 2));
@@ -821,18 +867,18 @@ namespace RTS.FogOfWar
 
 
 
-        /// Converts level coordinates into world coordinates.
-        public Vector3 GetWorldVector(Vector2Int worldCoordinates)
+        /// Converts level (grid) coordinates to world coordinates.
+        public Vector3 GetWorldVector(Vector2Int levelCoordinates)
         {
             return new Vector3(
-                GetWorldX(worldCoordinates.x + (levelDimensionX / 2)),
-                0,
-                GetWorldY(worldCoordinates.y + (levelDimensionY / 2)));
+                GetWorldX(levelCoordinates.x),
+                fixedLevelMidPoint.y,
+                GetWorldY(levelCoordinates.y));
         }
 
 
 
-        /// Converts "pure" world coordinates into unit world coordinates.
+        /// Converts world coordinates to unit grid coordinates (legacy method).
         public Vector2Int GetUnitVector(Vector3 worldCoordinates)
         {
             return new Vector2Int(GetUnitX(worldCoordinates.x), GetUnitY(worldCoordinates.z));
@@ -840,9 +886,17 @@ namespace RTS.FogOfWar
 
 
 
-        /// Converts level coordinate to corresponding unit world coordinates.
+        /// Converts level/grid X coordinate to world X coordinate.
         public float GetWorldX(int xValue)
         {
+            // When using PlayAreaBounds, interpolate within world bounds
+            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
+            {
+                float t = (xValue + 0.5f) / levelDimensionX; // Center of the grid cell
+                return Mathf.Lerp(worldBoundsMin.x, worldBoundsMax.x, t);
+            }
+
+            // Legacy conversion
             if (levelData.levelDimensionX % 2 == 0)
             {
                 return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
@@ -853,17 +907,32 @@ namespace RTS.FogOfWar
 
 
 
-        /// Converts world coordinate to unit world coordinates.
+        /// Converts world X coordinate to unit X coordinate (for legacy mode).
         public int GetUnitX(float xValue)
         {
+            // When using PlayAreaBounds, this is handled by WorldToLevel
+            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
+            {
+                float normalizedX = Mathf.InverseLerp(worldBoundsMin.x, worldBoundsMax.x, xValue);
+                return Mathf.FloorToInt(normalizedX * levelDimensionX) - (levelDimensionX / 2);
+            }
+
             return Mathf.RoundToInt((xValue - fixedLevelMidPoint.x) / unitScale);
         }
 
 
 
-        /// Converts level coordinate to corresponding unit world coordinates.
+        /// Converts level/grid Y coordinate to world Z coordinate.
         public float GetWorldY(int yValue)
         {
+            // When using PlayAreaBounds, interpolate within world bounds
+            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
+            {
+                float t = (yValue + 0.5f) / levelDimensionY; // Center of the grid cell
+                return Mathf.Lerp(worldBoundsMin.y, worldBoundsMax.y, t);
+            }
+
+            // Legacy conversion
             if (levelData.levelDimensionY % 2 == 0)
             {
                 return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
@@ -874,9 +943,16 @@ namespace RTS.FogOfWar
 
 
 
-        /// Converts world coordinate to unit world coordinates.
+        /// Converts world Z coordinate to unit Y coordinate (for legacy mode).
         public int GetUnitY(float yValue)
         {
+            // When using PlayAreaBounds, this is handled by WorldToLevel
+            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
+            {
+                float normalizedZ = Mathf.InverseLerp(worldBoundsMin.y, worldBoundsMax.y, yValue);
+                return Mathf.FloorToInt(normalizedZ * levelDimensionY) - (levelDimensionY / 2);
+            }
+
             return Mathf.RoundToInt((yValue - fixedLevelMidPoint.z) / unitScale);
         }
 
