@@ -4,6 +4,7 @@ using System.IO;                    // Directory
 using System.Linq;                  // Enumerable
 using UnityEditor;                  // Handles
 using UnityEngine;                  // Monobehaviour
+using RTS.Core;                     // PlayAreaBounds
 
 
 
@@ -227,14 +228,18 @@ namespace RTS.FogOfWar
 
         [BigHeader("Scan Properties")]
         [SerializeField]
+        [Tooltip("When enabled, the fog plane will automatically size itself to match the PlayAreaBounds in the scene.")]
+        private bool usePlayAreaBounds = true;
+        [SerializeField]
         [Range(1, 128)]
-        [Tooltip("If you need more than 128 units, consider using raycasting-based fog modules instead.")]
+        [Tooltip("If you need more than 128 units, consider using raycasting-based fog modules instead. Ignored when usePlayAreaBounds is enabled.")]
         private int levelDimensionX = 11;
         [SerializeField]
         [Range(1, 128)]
-        [Tooltip("If you need more than 128 units, consider using raycasting-based fog modules instead.")]
+        [Tooltip("If you need more than 128 units, consider using raycasting-based fog modules instead. Ignored when usePlayAreaBounds is enabled.")]
         private int levelDimensionY = 11;
         [SerializeField]
+        [Tooltip("Scale of each fog grid cell in world units. Ignored when usePlayAreaBounds is enabled.")]
         private float unitScale = 1;
         public float _UnitScale => unitScale;
         [SerializeField]
@@ -268,6 +273,9 @@ namespace RTS.FogOfWar
 
         // Store the initial fixed position of levelMidPoint to keep fog in world space
         private Vector3 fixedLevelMidPoint;
+
+        // Cached play area size for proper fog plane scaling (used when usePlayAreaBounds is enabled)
+        private Vector2 cachedPlayAreaSize;
 
 
 
@@ -350,16 +358,47 @@ namespace RTS.FogOfWar
 
         private void InitializeVariables()
         {
-            // Store the initial fixed position to keep fog in world space
-            // Use the transform's position as fallback if levelMidPoint is not assigned
-            if (levelMidPoint != null)
+            // Check if we should use PlayAreaBounds for automatic sizing
+            if (usePlayAreaBounds)
             {
-                fixedLevelMidPoint = levelMidPoint.position;
+                PlayAreaBounds playAreaBounds = PlayAreaBounds.Instance;
+                if (playAreaBounds != null)
+                {
+                    // Use PlayAreaBounds center as the fog center
+                    fixedLevelMidPoint = playAreaBounds.Center;
+
+                    // Cache the play area size for fog plane scaling
+                    cachedPlayAreaSize = playAreaBounds.Size;
+
+                    // Calculate unitScale to keep dimensions within 128 limit
+                    // while covering the entire play area
+                    float maxDimension = Mathf.Max(cachedPlayAreaSize.x, cachedPlayAreaSize.y);
+
+                    // Calculate unitScale so that the larger dimension fits within 128 grid cells
+                    // Using a minimum unitScale of 1 to avoid too fine granularity
+                    unitScale = Mathf.Max(1f, Mathf.Ceil(maxDimension / 128f));
+
+                    // Calculate grid dimensions based on play area size and unitScale
+                    levelDimensionX = Mathf.CeilToInt(cachedPlayAreaSize.x / unitScale);
+                    levelDimensionY = Mathf.CeilToInt(cachedPlayAreaSize.y / unitScale);
+
+                    // Clamp to valid range (1-128)
+                    levelDimensionX = Mathf.Clamp(levelDimensionX, 1, 128);
+                    levelDimensionY = Mathf.Clamp(levelDimensionY, 1, 128);
+
+                    Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}");
+                }
+                else
+                {
+                    Debug.LogWarning("RTS_FogOfWar: usePlayAreaBounds is enabled but no PlayAreaBounds found in scene. Using manual settings.");
+                    cachedPlayAreaSize = Vector2.zero;
+                    InitializeFallbackMidPoint();
+                }
             }
             else
             {
-                fixedLevelMidPoint = transform.position;
-                Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
+                cachedPlayAreaSize = Vector2.zero;
+                InitializeFallbackMidPoint();
             }
 
             // This is for faster development iteration purposes
@@ -372,6 +411,21 @@ namespace RTS.FogOfWar
             if (levelNameToSave == String.Empty)
             {
                 levelNameToSave = "Default";
+            }
+        }
+
+        private void InitializeFallbackMidPoint()
+        {
+            // Store the initial fixed position to keep fog in world space
+            // Use the transform's position as fallback if levelMidPoint is not assigned
+            if (levelMidPoint != null)
+            {
+                fixedLevelMidPoint = levelMidPoint.position;
+            }
+            else
+            {
+                fixedLevelMidPoint = transform.position;
+                Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
             }
         }
 
@@ -388,10 +442,26 @@ namespace RTS.FogOfWar
                 fixedLevelMidPoint.y + fogPlaneHeight,
                 fixedLevelMidPoint.z);
 
-            fogPlane.transform.localScale = new Vector3(
-                (levelDimensionX * unitScale) / 10.0f,
-                1,
-                (levelDimensionY * unitScale) / 10.0f);
+            // Calculate fog plane scale
+            // Unity's primitive plane is 10x10 units, so we divide by 10 to get the correct scale
+            Vector3 fogPlaneScale;
+            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
+            {
+                // Use the exact play area size for precise matching with PlayAreaBounds
+                fogPlaneScale = new Vector3(
+                    cachedPlayAreaSize.x / 10.0f,
+                    1,
+                    cachedPlayAreaSize.y / 10.0f);
+            }
+            else
+            {
+                // Use the traditional formula based on level dimensions and unit scale
+                fogPlaneScale = new Vector3(
+                    (levelDimensionX * unitScale) / 10.0f,
+                    1,
+                    (levelDimensionY * unitScale) / 10.0f);
+            }
+            fogPlane.transform.localScale = fogPlaneScale;
 
             fogPlaneTextureLerpTarget = new Texture2D(levelDimensionX, levelDimensionY);
             fogPlaneTextureLerpBuffer = new Texture2D(levelDimensionX, levelDimensionY);
