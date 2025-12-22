@@ -1,167 +1,60 @@
-# Unity
-[Ll]ibrary/
-[Tt]emp/
-Library/
-Logs/
-Agents/
-# VS / Rider
-.vscode/
-.idea/
-*.sln
-*.pidb
-*.booproj
-
-*Agents
-
-# Auto-generated
-*.suo
-*.pidb.meta
-*.booproj.meta
-
-# Cache
-*.apk
-*.aab
-*.DS_Store
-
-# Unity generated folders
-Sysroot/
-
-# IDE
-.vscode/
-.idea/
-*.sln
-*.pidb
-*.booproj
-
-# Packages & builds
-*.unitypackage
-*.apk
-*.aab
-*.zip
-*.rar
-*.7z
-*.Fbx
-*.png
-*.asset
-*.mat
-*.prefab
-*.jpg
-*.exr
-*.tga
-*.unity
-*.lighting
-*.terrainlayer
-*.controller
-*.vsconfig
-*.config
+/.vs
 *.csproj
-*.slnx
-*.sln
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Excluded asset packs
-Assets/2D Casual UI/
-Assets/Palmov Island/
-Assets/Other Models/
-Assets/3D Cartoon Village/
-Assets/Materials/
-Assets/TextMesh pro/
-Assets/60 free icons pack/
-Assets/Medieval Buildings and Objects/
-Assets/StrategyGameResourceIcons/
-Assets/VanillaLoopStudio/
-
-
-.vs/
-Assets/Advance Studios/Medieval Castle/Art.meta
+*.asset
+*.prefab
 *.meta
-*.anim
-*.wav
-*.pdf
-*.txt
-/Assets/ConstructableMedievalHouses
-*.meta
-/Assets/Polytope Studio
-/Assets/BigRookGames
-Logs/AssetImportWorker0.log
-Logs/AssetImportWorker0.log
-Logs/AssetImportWorker1.log
-Logs/shadercompiler-UnityShaderCompiler.exe28.log
-*.log
-Logs/AssetImportWorker2.log
-*.log
-Logs/AssetImportWorker2.log
-Logs/AssetImportWorker3.log
-/Logs
-/Logs
-/Logs
-/Logs
-*.mp3
-*.shadergraph
-*.dwlt
-
-
-/Assets/Procedural Worlds
-/Packages
-*.psd
-*.glb
-*.mtl
-*.obj
-*.gif
+.vsconfig
+/.vscode
 *.blend
-*.shader
-*.cginc
-/Assets/Enviro 3 - Sky and Weather
-/Assets/ThirdParties
-/Assets/VolumetricFog2
-/mdFiles
-/ProfilerCaptures
-/Assets/Book of The Dead
-*.brush
-/Assets/Free UI build package
-/Assets/Plugins
-/Assets/ProceduralTerrainPainter
-/Assets/Epic Game Hits SFX
-/Assets/Samples
-/Assets/TerrainDemoScene_URP
-/UserSettings
-/UserSettings
-AGENTS.md
-/Assets/JMO Assets
-/Assets/Mesh Optimizer
-/Assets/UnityTechnologies
-/Assets/WaterWorks
-/Assets/IgniteCoders
-/Assets/Tree_Packs
-/Assets/Houidisoft technology
-/Assets/Easy Texture Editor
-/Assets/AOSFogWar
-/Assets/Heightmaps
-/Assets/ConsolePro
-/Assets/Tafi
-/Assets/Stylized Oasis
-/Assets/PinePie
-/Assets/PalmTreePack
-/Assets/MeshTerrainEditor
-/Assets/GreenBugGames
-/Assets/BlackPeaStudios
-/Assets/epyphany
-/Assets/PolishedSurfaces
-/Assets/AmplifyShader
-*.pcache
-/UserSettings
-/ProjectSettings
-/UserSettings
-*.dwlt
-UserSettings/Layouts/default-6000.dwlt
-UserSettings/Layouts/default-6000.dwlt
-/UserSettings
-/Assets/TriForge Assets
-/Assets/Mono Limbo
-/Assets/Hovl Studio
-/ProjectSettings
+*.png
+*.controller
 *.tif
+*.jpg
 *.raw
+*.fbx
+*.mat
+*.shadergraph
+*.mp3
+*.brush
+*.terrainlayer
+*.wav
+*.psd
+*.unity
+*.shader
+*.tga
+*.tga
+*.exr
+*.cubemap
+
+/Assets/BlackPeaStudios
+/Assets/CartHorsePack
+/Assets/Almgp_automapping_shader
+*.pdf
+*.cginc
+/Assets/Easy Texture Editor
+/Assets/Desert Sandbox (NEW)
+/Assets/Enviro 3 - Additional Weather Pack
+/Assets/Daniel Mistage
+/Assets/Enviro 3 - Sky and Weather
+/Assets/epyphany
+/Assets/GreenBugGames
+*.zip
+*.rtf
+*.obj
+*.hdr
+*.txt
+*.shadersubgraph
+*.anim
+/Assets/IgniteCoders
+*.lighting
+/Assets/Mesh Optimizer
+/Assets
+/Library
+/Logs
+/Packages
+*.backup
+/Temp
+/ProjectSettings
+/Packages
+/Packages
+/Assets
