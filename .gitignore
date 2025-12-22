@@ -48,11 +48,35 @@
 /Assets/IgniteCoders
 *.lighting
 /Assets/Mesh Optimizer
-/Assets
-/Logs
+\/Logs
 /Packages
 *.backup
 /Temp
 /Packages
 /Packages
 /Library
+/Assets/JMO Assets
+/Assets/MobileDependencyResolver
+/Assets/Mono Limbo
+/Assets/PinePie
+/Assets/Plugins
+/Assets/ProceduralTerrainPainter
+/Assets/Samples
+/Assets/Scenes
+/Assets/Resources
+/Assets/Stylized Oasis
+/Assets/Tafi
+/Assets/TerrainDemoScene_URP
+/Assets/TextMesh Pro
+/Assets/ThirdParties
+/Assets/TriForge Assets
+/Assets/VolumetricFog2
+/Assets/YughuesFreeGroundMaterials
+/Assets/YughuesFreeRockMaterials
+/Logs
+/Assets/YughuesFreeSandMaterials
+*.pcache
+/Assets/Hovl Studio
+/Assets/Free UI build package
+/Assets/modular_village_collection
+/Assets/PalmTreePack
