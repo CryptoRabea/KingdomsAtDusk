@@ -330,6 +330,12 @@ namespace RTS.FogOfWar
 
         private void CheckProperties()
         {
+            // Ensure fogRevealers list is initialized
+            if (fogRevealers == null)
+            {
+                fogRevealers = new List<FogRevealer>();
+            }
+
             foreach (FogRevealer fogRevealer in fogRevealers)
             {
                 if (fogRevealer._RevealerTransform == null)
@@ -361,7 +367,9 @@ namespace RTS.FogOfWar
             // Check if we should use PlayAreaBounds for automatic sizing
             if (usePlayAreaBounds)
             {
-                PlayAreaBounds playAreaBounds = PlayAreaBounds.Instance;
+                // Use FindFirstObjectByType directly to avoid script execution order issues
+                // (PlayAreaBounds.Instance might not be set yet if its Awake() hasn't run)
+                PlayAreaBounds playAreaBounds = FindFirstObjectByType<PlayAreaBounds>();
                 if (playAreaBounds != null)
                 {
                     // Use PlayAreaBounds center as the fog center
@@ -700,6 +708,12 @@ namespace RTS.FogOfWar
         /// Adds a new FogRevealer instance to the list and returns its index
         public int AddFogRevealer(FogRevealer fogRevealer)
         {
+            // Ensure list is initialized
+            if (fogRevealers == null)
+            {
+                fogRevealers = new List<FogRevealer>();
+            }
+
             fogRevealers.Add(fogRevealer);
 
             return fogRevealers.Count - 1;
