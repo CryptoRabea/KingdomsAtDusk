@@ -14,7 +14,7 @@ namespace RTS.FogOfWar
 
     public class RTS_FogOfWar : MonoBehaviour
     {
-        
+
         [System.Serializable]
         public class LevelData
         {
