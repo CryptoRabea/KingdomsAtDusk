@@ -295,17 +295,6 @@ namespace RTS.UI
             miniMapRenderTexture.useMipMap = false;
             miniMapRenderTexture.Create();
 
-            // Assign to raw image
-            if (miniMapImage != null)
-            {
-                miniMapImage.texture = miniMapRenderTexture;
-                miniMapImage.uvRect = new Rect(0, 0, 1, 1);
-            }
-            else
-            {
-                return;
-            }
-
             // Get world bounds from PlayAreaBounds or fall back to config
             Vector2 worldSize;
             Vector3 worldCenter;
@@ -321,6 +310,29 @@ namespace RTS.UI
                 worldCenter = config.WorldCenter;
             }
 
+            float worldWidth = worldSize.x;
+            float worldDepth = worldSize.y;
+            float maxDimension = Mathf.Max(worldWidth, worldDepth);
+
+            // Calculate UV rect to show only the play area portion of the render texture
+            // The camera sees a square area (maxDimension x maxDimension), but we only want
+            // to display the actual play area (worldWidth x worldDepth) on the minimap
+            float uvWidth = worldWidth / maxDimension;
+            float uvHeight = worldDepth / maxDimension;
+            float uvX = (1f - uvWidth) / 2f;  // Center the view
+            float uvY = (1f - uvHeight) / 2f;
+
+            // Assign to raw image with adjusted UV rect
+            if (miniMapImage != null)
+            {
+                miniMapImage.texture = miniMapRenderTexture;
+                miniMapImage.uvRect = new Rect(uvX, uvY, uvWidth, uvHeight);
+            }
+            else
+            {
+                return;
+            }
+
             // Only create a new camera if one wasn't assigned
             bool cameraWasAssigned = miniMapCamera != null;
             if (!cameraWasAssigned)
@@ -333,12 +345,8 @@ namespace RTS.UI
             miniMapCamera.targetTexture = miniMapRenderTexture;
             miniMapCamera.orthographic = true;
 
-            // Calculate orthographic size to fit entire play area
-            float worldWidth = worldSize.x;
-            float worldDepth = worldSize.y;
-
-            // Use the larger dimension to ensure entire world is visible
-            miniMapCamera.orthographicSize = Mathf.Max(worldWidth, worldDepth) / 2f;
+            // Use the larger dimension to ensure entire world is visible in the square render texture
+            miniMapCamera.orthographicSize = maxDimension / 2f;
 
             // Position camera above world center (only if we created the camera or it needs repositioning)
             if (!cameraWasAssigned)
@@ -449,11 +457,13 @@ namespace RTS.UI
 
         /// <summary>
         /// Get the actual world bounds visible by the minimap camera.
-        /// This accounts for orthographic size and aspect ratio.
+        /// Uses actual play area bounds for accurate marker positioning.
         /// </summary>
         private Bounds GetCameraViewBounds()
         {
-            // Get world center from PlayAreaBounds or config
+            // Get world bounds from PlayAreaBounds or config
+            // IMPORTANT: Use actual play area bounds, not camera orthographic bounds,
+            // to ensure markers are positioned correctly on non-square maps
             Vector3 worldCenter;
             Vector2 worldSize;
 
@@ -468,29 +478,11 @@ namespace RTS.UI
                 worldSize = config.WorldSize;
             }
 
-            if (miniMapCamera == null)
-            {
-                // Fallback to bounds if camera not set up yet
-                return new Bounds(
-                    worldCenter,
-                    new Vector3(worldSize.x, 0, worldSize.y)
-                );
-            }
-
-            // For orthographic camera looking down (90 degrees on X axis):
-            // - Camera's vertical extent (in world Z) = orthographicSize * 2
-            // - Camera's horizontal extent (in world X) = orthographicSize * aspect * 2
-            // - For square render texture, aspect = 1.0
-
-            float orthoSize = miniMapCamera.orthographicSize;
-            float aspect = 1.0f; // Square render texture
-
-            float viewWidth = orthoSize * aspect * 2f;  // World X extent
-            float viewDepth = orthoSize * 2f;            // World Z extent
-
-            Vector3 size = new Vector3(viewWidth, 0, viewDepth);
-
-            return new Bounds(worldCenter, size);
+            // Return actual play area bounds for accurate world-to-minimap conversion
+            return new Bounds(
+                worldCenter,
+                new Vector3(worldSize.x, 0, worldSize.y)
+            );
         }
 
         private void MoveCameraToPosition(Vector3 targetPosition)
