@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-namespace RTS.Debug.EnemySpawner
+namespace RTS.DebugTools.EnemySpawner
 {
     /// <summary>
     /// Configuration for an enemy type that can be spawned.
