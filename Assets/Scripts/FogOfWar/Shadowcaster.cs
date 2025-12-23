@@ -171,10 +171,6 @@ namespace RTS.FogOfWar
 
 
 
-        /// An iterator that transforms coordinates based on a single quadrant to all the others.
-        /// 
-        /// For an explanation in depth, refer to the link below.\n
-        /// https://www.albertford.com/shadowcasting
         private class QuadrantIterator
         {
             public QuadrantIterator(RTS_FogOfWar fogWar)
