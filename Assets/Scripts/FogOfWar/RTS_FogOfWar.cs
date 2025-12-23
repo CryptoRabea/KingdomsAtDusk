@@ -254,6 +254,7 @@ namespace RTS.FogOfWar
         private bool LogOutOfRange = false;
 
         // External shadowcaster module
+
         public Shadowcaster shadowcaster { get; private set; } = new Shadowcaster();
 
         public LevelData levelData { get; private set; } = new LevelData();
