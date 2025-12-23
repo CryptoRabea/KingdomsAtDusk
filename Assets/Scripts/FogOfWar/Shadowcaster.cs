@@ -405,7 +405,29 @@ namespace RTS.FogOfWar
                 return;
             }
 
-            if (quadrantPoint.magnitude > sightRange)
+            // Use aspect-corrected distance calculation for circular reveals on non-square maps
+            // The grid cell aspect ratio accounts for different cell sizes in X vs Y
+            // If cells are taller than wide (aspect < 1), we scale up Y to match X scale
+            // If cells are wider than tall (aspect > 1), we scale up X to match Y scale
+            float aspectRatio = fogWar.GridCellAspectRatio;
+            float scaledX, scaledY;
+
+            if (aspectRatio >= 1f)
+            {
+                // X cells are larger or equal, scale X down to match Y
+                scaledX = quadrantPoint.x / aspectRatio;
+                scaledY = quadrantPoint.y;
+            }
+            else
+            {
+                // Y cells are larger, scale Y down to match X
+                scaledX = quadrantPoint.x;
+                scaledY = quadrantPoint.y * aspectRatio;
+            }
+
+            float correctedMagnitude = Mathf.Sqrt(scaledX * scaledX + scaledY * scaledY);
+
+            if (correctedMagnitude > sightRange)
             {
                 return;
             }

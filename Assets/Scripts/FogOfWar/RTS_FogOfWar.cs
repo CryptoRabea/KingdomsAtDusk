@@ -283,6 +283,12 @@ namespace RTS.FogOfWar
         // Cached references for performance
         private MeshRenderer fogPlaneMeshRenderer;
 
+        // Grid cell aspect ratio for circular reveals on non-square maps
+        // cellAspectRatio = cellSizeX / cellSizeY
+        // If > 1, X cells are larger; if < 1, X cells are smaller
+        private float gridCellAspectRatio = 1f;
+        public float GridCellAspectRatio => gridCellAspectRatio;
+
 
 
         // --- --- ---
@@ -404,7 +410,14 @@ namespace RTS.FogOfWar
                     levelDimensionX = Mathf.Clamp(levelDimensionX, 1, 128);
                     levelDimensionY = Mathf.Clamp(levelDimensionY, 1, 128);
 
-                    UnityEngine.Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}");
+                    // Calculate grid cell aspect ratio for circular reveals
+                    // cellSizeX = worldSizeX / gridDimX, cellSizeY = worldSizeY / gridDimY
+                    // aspectRatio = cellSizeX / cellSizeY
+                    float cellSizeX = cachedPlayAreaSize.x / levelDimensionX;
+                    float cellSizeY = cachedPlayAreaSize.y / levelDimensionY;
+                    gridCellAspectRatio = cellSizeX / cellSizeY;
+
+                    Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}, CellAspect: {gridCellAspectRatio:F3}");
                 }
                 else
                 {
@@ -412,6 +425,8 @@ namespace RTS.FogOfWar
                     cachedPlayAreaSize = Vector2.zero;
                     worldBoundsMin = Vector2.zero;
                     worldBoundsMax = Vector2.zero;
+                    // Legacy mode with uniform unitScale, cells are square
+                    gridCellAspectRatio = 1f;
                     InitializeFallbackMidPoint();
                 }
             }
@@ -420,6 +435,8 @@ namespace RTS.FogOfWar
                 cachedPlayAreaSize = Vector2.zero;
                 worldBoundsMin = Vector2.zero;
                 worldBoundsMax = Vector2.zero;
+                // In legacy mode with uniform unitScale, cells are square
+                gridCellAspectRatio = 1f;
                 InitializeFallbackMidPoint();
             }
 
