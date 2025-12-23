@@ -404,11 +404,11 @@ namespace RTS.FogOfWar
                     levelDimensionX = Mathf.Clamp(levelDimensionX, 1, 128);
                     levelDimensionY = Mathf.Clamp(levelDimensionY, 1, 128);
 
-                    Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}");
+                    UnityEngine.Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}");
                 }
                 else
                 {
-                    Debug.LogWarning("RTS_FogOfWar: usePlayAreaBounds is enabled but no PlayAreaBounds found in scene. Using manual settings.");
+                    UnityEngine.Debug.LogWarning("RTS_FogOfWar: usePlayAreaBounds is enabled but no PlayAreaBounds found in scene. Using manual settings.");
                     cachedPlayAreaSize = Vector2.zero;
                     worldBoundsMin = Vector2.zero;
                     worldBoundsMax = Vector2.zero;
@@ -447,7 +447,7 @@ namespace RTS.FogOfWar
             else
             {
                 fixedLevelMidPoint = transform.position;
-                Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
+                UnityEngine.Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
             }
         }
 
