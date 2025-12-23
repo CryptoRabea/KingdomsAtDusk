@@ -57,14 +57,14 @@ namespace RTS.Core
             if (needsLoadingScreen)
             {
                 if (showDebugLogs)
-                    Debug.Log("GameSceneBootstrap: Direct play detected, showing loading screen");
+                    UnityEngine.Debug.Log("GameSceneBootstrap: Direct play detected, showing loading screen");
 
                 StartCoroutine(BootstrapWithLoadingScreen());
             }
             else
             {
                 if (showDebugLogs)
-                    Debug.Log("GameSceneBootstrap: Came from transition or loading screen already active");
+                    UnityEngine.Debug.Log("GameSceneBootstrap: Came from transition or loading screen already active");
 
                 // Reset flag for next time
                 cameFromTransition = false;
@@ -205,7 +205,7 @@ namespace RTS.Core
             hasInitialized = true;
 
             if (showDebugLogs)
-                Debug.Log($"GameSceneBootstrap: Initialization complete in {Time.realtimeSinceStartup - startTime:F2}s");
+                UnityEngine.Debug.Log($"GameSceneBootstrap: Initialization complete in {Time.realtimeSinceStartup - startTime:F2}s");
         }
 
         private LoadingScreenManager FindOrCreateLoadingScreen()
@@ -234,7 +234,7 @@ namespace RTS.Core
             }
 
             if (showDebugLogs)
-                Debug.LogWarning("GameSceneBootstrap: Could not find or create LoadingScreenManager");
+                UnityEngine.Debug.LogWarning("GameSceneBootstrap: Could not find or create LoadingScreenManager");
 
             return null;
         }

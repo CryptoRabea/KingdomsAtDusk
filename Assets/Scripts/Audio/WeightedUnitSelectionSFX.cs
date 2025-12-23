@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RTS.Core.Events;
 
-namespace RTS.Audio
+namespace RTS.DebugAudio
 {
     /// <summary>
     /// Plays weighted audio clips when multiple units are selected via selection box.
@@ -124,7 +124,7 @@ namespace RTS.Audio
             if (Time.time - lastPlayTime < cooldown)
             {
                 if (showDebugLogs)
-                    Debug.Log($"[WeightedUnitSelectionSFX] On cooldown");
+             UnityEngine.       Debug.Log($"[WeightedUnitSelectionSFX] On cooldown");
                 return;
             }
 
@@ -136,7 +136,7 @@ namespace RTS.Audio
             if (selectionManager == null)
             {
                 if (showDebugLogs)
-                    Debug.LogWarning("[WeightedUnitSelectionSFX] No selection manager found");
+                    UnityEngine.Debug.LogWarning("[WeightedUnitSelectionSFX] No selection manager found");
                 return;
             }
 
@@ -159,7 +159,7 @@ namespace RTS.Audio
                 clipToPlay = SelectWeightedClip(matchingSet.clips);
 
                 if (showDebugLogs && clipToPlay != null)
-                    Debug.Log($"[WeightedUnitSelectionSFX] Playing weighted clip '{clipToPlay.name}' from set '{matchingSet.name}'");
+                    UnityEngine.Debug.Log($"[WeightedUnitSelectionSFX] Playing weighted clip '{clipToPlay.name}' from set '{matchingSet.name}'");
             }
             else
             {
@@ -172,7 +172,7 @@ namespace RTS.Audio
                         clipToPlay = validFallbacks[Random.Range(0, validFallbacks.Length)];
 
                         if (showDebugLogs && clipToPlay != null)
-                            Debug.Log($"[WeightedUnitSelectionSFX] Playing fallback clip '{clipToPlay.name}'");
+                            UnityEngine.Debug.Log($"[WeightedUnitSelectionSFX] Playing fallback clip '{clipToPlay.name}'");
                     }
                 }
             }
@@ -183,7 +183,7 @@ namespace RTS.Audio
             }
             else if (showDebugLogs)
             {
-                Debug.LogWarning("[WeightedUnitSelectionSFX] No valid clip found to play");
+                UnityEngine.Debug.LogWarning("[WeightedUnitSelectionSFX] No valid clip found to play");
             }
         }
 
@@ -230,7 +230,7 @@ namespace RTS.Audio
                     if (actualPercentage >= set.requiredTagPercentage)
                     {
                         if (showDebugLogs)
-                            Debug.Log($"[WeightedUnitSelectionSFX] Matched set '{set.name}' ({matchingUnits}/{selectionCount} = {actualPercentage:P0})");
+                            UnityEngine.Debug.Log($"[WeightedUnitSelectionSFX] Matched set '{set.name}' ({matchingUnits}/{selectionCount} = {actualPercentage:P0})");
 
                         return set;
                     }
@@ -239,7 +239,7 @@ namespace RTS.Audio
                 {
                     // No tag requirements, use this set
                     if (showDebugLogs)
-                        Debug.Log($"[WeightedUnitSelectionSFX] Matched set '{set.name}' (no tag requirements)");
+                        UnityEngine.Debug.Log($"[WeightedUnitSelectionSFX] Matched set '{set.name}' (no tag requirements)");
 
                     return set;
                 }

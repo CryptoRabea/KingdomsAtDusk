@@ -178,7 +178,7 @@ namespace RTS.DayNightCycle
 
             if (timeService == null)
             {
-                Debug.LogWarning("[TimeDisplayUI] ITimeService not found! UI will be disabled.");
+               UnityEngine. Debug.LogWarning("[TimeDisplayUI] ITimeService not found! UI will be disabled.");
                 gameObject.SetActive(false);
                 return;
             }

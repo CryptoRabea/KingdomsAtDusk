@@ -15,12 +15,7 @@ namespace RTS.FogOfWar
 
     public class RTS_FogOfWar : MonoBehaviour
     {
-        /// A class for storing the base level data.
-        ///
-        /// This class is later serialized into Json format.\n
-        /// Empty spaces are stored as 0, while the obstacles are stored as 1.\n
-        /// If a level is loaded instead of being scanned,
-        /// the level dimension properties of csFogWar will be replaced by the level data.
+        
         [System.Serializable]
         public class LevelData
         {
@@ -231,6 +226,7 @@ namespace RTS.FogOfWar
         private bool LogOutOfRange = false;
 
         // External shadowcaster module
+
         public Shadowcaster shadowcaster { get; private set; } = new Shadowcaster();
 
         public LevelData levelData { get; private set; } = new LevelData();
@@ -361,7 +357,18 @@ namespace RTS.FogOfWar
                 float cellSizeY = cachedPlayAreaSize.y / levelDimensionY;
                 gridCellAspectRatio = cellSizeX / cellSizeY;
 
-                Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}, CellAspect: {gridCellAspectRatio:F3}");
+                    Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}, CellAspect: {gridCellAspectRatio:F3}");
+                }
+                else
+                {
+                    UnityEngine.Debug.LogWarning("RTS_FogOfWar: usePlayAreaBounds is enabled but no PlayAreaBounds found in scene. Using manual settings.");
+                    cachedPlayAreaSize = Vector2.zero;
+                    worldBoundsMin = Vector2.zero;
+                    worldBoundsMax = Vector2.zero;
+                    // Legacy mode with uniform unitScale, cells are square
+                    gridCellAspectRatio = 1f;
+                    InitializeFallbackMidPoint();
+                }
             }
             else
             {
@@ -378,6 +385,27 @@ namespace RTS.FogOfWar
             if (obstacleLayers.value == 0)
             {
                 obstacleLayers = LayerMask.GetMask("Default");
+            }
+
+            // This is also for faster development iteration purposes
+            if (levelNameToSave == String.Empty)
+            {
+                levelNameToSave = "Default";
+            }
+        }
+
+        private void InitializeFallbackMidPoint()
+        {
+            // Store the initial fixed position to keep fog in world space
+            // Use the transform's position as fallback if levelMidPoint is not assigned
+            if (levelMidPoint != null)
+            {
+                fixedLevelMidPoint = levelMidPoint.position;
+            }
+            else
+            {
+                fixedLevelMidPoint = transform.position;
+                UnityEngine.Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
             }
         }
 

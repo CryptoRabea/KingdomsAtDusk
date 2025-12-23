@@ -41,10 +41,7 @@ namespace RTS.FogOfWar
 
             public Color32[] GetColors(float fogPlaneAlpha, RTS_FogOfWar fogWar)
             {
-                if (colors == null)
-                {
-                    colors = new Color32[levelRow.Count * levelRow[0].Count()];
-                }
+                colors ??= new Color32[levelRow.Count * levelRow[0].Count()];
 
                 for (int xIterator = 0; xIterator < levelRow[0].Count(); xIterator++)
                 {
@@ -171,10 +168,6 @@ namespace RTS.FogOfWar
 
 
 
-        /// An iterator that transforms coordinates based on a single quadrant to all the others.
-        /// 
-        /// For an explanation in depth, refer to the link below.\n
-        /// https://www.albertford.com/shadowcasting
         private class QuadrantIterator
         {
             public QuadrantIterator(RTS_FogOfWar fogWar)
@@ -192,7 +185,7 @@ namespace RTS.FogOfWar
 
             public Vector2Int QuadrantToLevel(Vector2Int quadrantVector)
             {
-                Vector2Int quadrantPoint = new Vector2Int();
+                Vector2Int quadrantPoint = new();
 
                 switch (cardinal)
                 {
@@ -228,25 +221,25 @@ namespace RTS.FogOfWar
         {
             public ColumnIterator(int depth, int maxDepth, float startSlope, float endSlope)
             {
-                this.depth = depth;
-                this.maxDepth = maxDepth;
-                this.startSlope = startSlope;
-                this.endSlope = endSlope;
+                this.Depth = depth;
+                this.MaxDepth = maxDepth;
+                this.StartSlope = startSlope;
+                this.EndSlope = endSlope;
             }
 
             public List<Vector2Int> GetTiles()
             {
                 List<Vector2Int> quadrantPoints = new List<Vector2Int>();
 
-                int minRow = Mathf.RoundToInt(depth * startSlope);
-                int maxRow = Mathf.RoundToInt(depth * endSlope);
+                int minRow = Mathf.RoundToInt(Depth * StartSlope);
+                int maxRow = Mathf.RoundToInt(Depth * EndSlope);
 
                 for (int i = minRow; i < maxRow + 1; i++)
                 {
-                    quadrantPoints.Add(new Vector2Int(depth, i));
+                    quadrantPoints.Add(new Vector2Int(Depth, i));
                 }
 
-                if (endSlope == 1)
+                if (EndSlope == 1)
                 {
                     quadrantPoints.RemoveAt(quadrantPoints.Count - 1);
                 }
@@ -256,24 +249,22 @@ namespace RTS.FogOfWar
 
             public bool IsProceedable()
             {
-                return (depth < maxDepth);
+                return (Depth < MaxDepth);
             }
 
             public void ProceedIfPossible()
             {
-                if (depth < maxDepth)
+                if (Depth < MaxDepth)
                 {
-                    depth += 1;
+                    Depth += 1;
                 }
             }
 
-            // In my implementaion, we consider the depth as the x axis of the eastern quadrant
-            public int depth { get; private set; } = 0;
-            public int maxDepth { get; private set; } = 0;
+            public int Depth { get; private set; } = 0;
+            public int MaxDepth { get; private set; } = 0;
 
-            // The variable startSlope is the 'lower' one, and the endSlope is the 'higher' one
-            public float startSlope { get; set; } = 0;
-            public float endSlope { get; set; } = 0;
+            public float StartSlope { get; set; } = 0;
+            public float EndSlope { get; set; } = 0;
         }
 
 
@@ -285,6 +276,8 @@ namespace RTS.FogOfWar
 
         // We declare this here to prevent creating and destroying the same object over and over
         private QuadrantIterator quadrantIterator = null;
+
+        public Shadowcaster(FogField fogField) => this.fogField = fogField;
 
 
 
@@ -357,7 +350,7 @@ namespace RTS.FogOfWar
                         {
                             if (IsTileObstacle(lastQuadrantPoint) == true && IsTileEmpty(quadrantPoint) == true)
                             {
-                                columnIterator.startSlope = GetQuadrantSlope(quadrantPoint);
+                                columnIterator.StartSlope = GetQuadrantSlope(quadrantPoint);
                             }
 
                             if (IsTileEmpty(lastQuadrantPoint) == true && IsTileObstacle(quadrantPoint) == true)
@@ -368,9 +361,9 @@ namespace RTS.FogOfWar
                                 }
 
                                 ColumnIterator nextColumnIterator = new ColumnIterator(
-                                    columnIterator.depth,
+                                    columnIterator.Depth,
                                     sightRange,
-                                    columnIterator.startSlope,
+                                    columnIterator.StartSlope,
                                     GetQuadrantSlope(quadrantPoint));
 
                                 nextColumnIterator.ProceedIfPossible();
@@ -479,8 +472,8 @@ namespace RTS.FogOfWar
 
         private bool IsTileVisible(ColumnIterator columnIterator, Vector2Int quadrantPoint)
         {
-            return (quadrantPoint.y >= columnIterator.depth * columnIterator.startSlope) &&
-                (quadrantPoint.y <= columnIterator.depth * columnIterator.endSlope);
+            return (quadrantPoint.y >= columnIterator.Depth * columnIterator.StartSlope) &&
+                (quadrantPoint.y <= columnIterator.Depth * columnIterator.EndSlope);
         }
 
 
