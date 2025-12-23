@@ -283,7 +283,7 @@ namespace RTS.FogOfWar
         // We declare this here to prevent creating and destroying the same object over and over
         private QuadrantIterator quadrantIterator = null;
 
-        public Shadowcaster(FogField fogField) => this.fogField = fogField;
+        public Shadowcaster() { }
 
 
 
