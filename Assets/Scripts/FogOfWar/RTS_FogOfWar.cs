@@ -139,9 +139,8 @@ namespace RTS.FogOfWar
                     return currentLevelCoordinates;
                 }
 
-                currentLevelCoordinates = new Vector2Int(
-                    fogWar.GetUnitX(revealerTransform.position.x),
-                    fogWar.GetUnitY(revealerTransform.position.z));
+                // Use WorldToLevel for proper coordinate conversion (works with both legacy and PlayAreaBounds modes)
+                currentLevelCoordinates = fogWar.WorldToLevel(revealerTransform.position);
 
                 return currentLevelCoordinates;
             }
