@@ -295,25 +295,19 @@ namespace RTS.UI
             miniMapRenderTexture.useMipMap = false;
             miniMapRenderTexture.Create();
 
-            // Get world bounds from PlayAreaBounds (required) or fall back to config
+            // Get world bounds from PlayAreaBounds or fall back to config
             Vector2 worldSize;
             Vector3 worldCenter;
-            float cameraHeight;
 
             if (playAreaBounds != null)
             {
                 worldSize = playAreaBounds.Size;
                 worldCenter = playAreaBounds.Center;
-                // Calculate camera height based on play area size to ensure entire area is visible
-                // Use the larger dimension plus some padding
-                cameraHeight = Mathf.Max(worldSize.x, worldSize.y) + 50f;
             }
             else
             {
-                Debug.LogWarning("MiniMapControllerPro: No PlayAreaBounds found, using config values");
                 worldSize = config.WorldSize;
                 worldCenter = config.WorldCenter;
-                cameraHeight = config.minimapCameraHeight;
             }
 
             float worldWidth = worldSize.x;
@@ -354,10 +348,13 @@ namespace RTS.UI
             // Use the larger dimension to ensure entire world is visible in the square render texture
             miniMapCamera.orthographicSize = maxDimension / 2f;
 
-            // Always position camera based on PlayAreaBounds to ensure proper sync
-            Vector3 cameraPosition = worldCenter;
-            cameraPosition.y = cameraHeight;
-            miniMapCamera.transform.SetPositionAndRotation(cameraPosition, Quaternion.Euler(90f, 0f, 0f));
+            // Position camera above world center (only if we created the camera or it needs repositioning)
+            if (!cameraWasAssigned)
+            {
+                Vector3 cameraPosition = worldCenter;
+                cameraPosition.y = config.minimapCameraHeight;
+                miniMapCamera.transform.SetPositionAndRotation(cameraPosition, Quaternion.Euler(90f, 0f, 0f));
+            }
 
             // Set render settings
             miniMapCamera.cullingMask = config.minimapLayers;
