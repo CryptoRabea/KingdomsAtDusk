@@ -1,7 +1,7 @@
 using UnityEngine;
 using RTS.Core.Events;
 
-namespace RTS.Debug.EnemySpawner
+namespace RTS.DebugTools.EnemySpawner
 {
     /// <summary>
     /// Manages enemy spawner selection via raycasting.

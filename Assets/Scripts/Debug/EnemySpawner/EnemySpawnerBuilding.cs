@@ -6,7 +6,7 @@ using RTS.Core.Events;
 using RTS.Core.Services;
 using RTS.Units;
 
-namespace RTS.Debug.EnemySpawner
+namespace RTS.DebugTools.EnemySpawner
 {
     /// <summary>
     /// Debug building for spawning enemy units during gameplay testing.
@@ -595,7 +595,7 @@ namespace RTS.Debug.EnemySpawner
     /// <summary>
     /// Event published when an enemy spawner is selected.
     /// </summary>
-    public class EnemySpawnerSelectedEvent
+    public struct EnemySpawnerSelectedEvent
     {
         public EnemySpawnerBuilding Spawner { get; }
 
@@ -608,7 +608,7 @@ namespace RTS.Debug.EnemySpawner
     /// <summary>
     /// Event published when an enemy spawner is deselected.
     /// </summary>
-    public class EnemySpawnerDeselectedEvent
+    public struct EnemySpawnerDeselectedEvent
     {
         public EnemySpawnerBuilding Spawner { get; }
 
