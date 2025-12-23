@@ -283,8 +283,6 @@ namespace RTS.FogOfWar
 
         // Cached references for performance
         private MeshRenderer fogPlaneMeshRenderer;
-        private Color32[] cachedBufferPixels;
-        private Color32[] cachedTargetPixels;
 
 
 
@@ -502,11 +500,6 @@ namespace RTS.FogOfWar
 
             // Disable the collider - not needed for fog
             fogPlane.GetComponent<MeshCollider>().enabled = false;
-
-            // Pre-allocate pixel arrays for texture updates (avoids GC allocation every frame)
-            int pixelCount = levelDimensionX * levelDimensionY;
-            cachedBufferPixels = new Color32[pixelCount];
-            cachedTargetPixels = new Color32[pixelCount];
         }
 
 
@@ -608,19 +601,24 @@ namespace RTS.FogOfWar
                 return;
             }
 
-            // Reuse cached arrays instead of allocating new ones each frame
-            fogPlaneTextureLerpBuffer.GetPixels32(cachedBufferPixels);
-            fogPlaneTextureLerpTarget.GetPixels32(cachedTargetPixels);
+            // Get pixel arrays (Unity allocates these, but we reuse the references)
+            Color32[] bufferPixels = fogPlaneTextureLerpBuffer.GetPixels32();
+            Color32[] targetPixels = fogPlaneTextureLerpTarget.GetPixels32();
+
+            if (bufferPixels.Length != targetPixels.Length)
+            {
+                return;
+            }
 
             float lerpFactor = fogLerpSpeed * Time.deltaTime;
 
             // Optimized loop - avoid function call overhead by inlining lerp
-            for (int i = 0; i < cachedBufferPixels.Length; i++)
+            for (int i = 0; i < bufferPixels.Length; i++)
             {
-                Color32 buffer = cachedBufferPixels[i];
-                Color32 target = cachedTargetPixels[i];
+                Color32 buffer = bufferPixels[i];
+                Color32 target = targetPixels[i];
 
-                cachedBufferPixels[i] = new Color32(
+                bufferPixels[i] = new Color32(
                     (byte)(buffer.r + (target.r - buffer.r) * lerpFactor),
                     (byte)(buffer.g + (target.g - buffer.g) * lerpFactor),
                     (byte)(buffer.b + (target.b - buffer.b) * lerpFactor),
@@ -628,7 +626,7 @@ namespace RTS.FogOfWar
                 );
             }
 
-            fogPlaneTextureLerpBuffer.SetPixels32(cachedBufferPixels);
+            fogPlaneTextureLerpBuffer.SetPixels32(bufferPixels);
             fogPlaneTextureLerpBuffer.Apply();
         }
 
