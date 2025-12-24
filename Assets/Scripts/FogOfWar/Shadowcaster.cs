@@ -1,9 +1,9 @@
 
 
 using RTS.FogOfWar;
-using System.Collections.Generic;   // List
-using System.Linq;                  // Enumerable
-using UnityEngine;                  // Vector2
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 
 
@@ -20,10 +20,10 @@ namespace RTS.FogOfWar
     public class Shadowcaster
     {
         /// A class that holds visibility data updated based on the FOV.
-        /// 
+        ///
         /// This class is only instantiated and managed by a single Shadowcaster object,\n
         /// and the object only lasts per session, unlike the serialized LevelData of csFogWar.\n
-        /// This class also has the GetColors() method, which returns the actual texture data in a 1D Color array format. 
+        /// This class also has the GetColors() method, which returns the actual texture data in a 1D Color array format.
         public class FogField
         {
             public void AddColumn(LevelColumn levelColumn)
@@ -404,29 +404,11 @@ namespace RTS.FogOfWar
                 return;
             }
 
-            // Use aspect-corrected distance calculation for circular reveals on non-square maps
-            // The grid cell aspect ratio accounts for different cell sizes in X vs Y
-            // If cells are taller than wide (aspect < 1), we scale up Y to match X scale
-            // If cells are wider than tall (aspect > 1), we scale up X to match Y scale
-            float aspectRatio = fogWar.GridCellAspectRatio;
-            float scaledX, scaledY;
+            // With a square grid and uniform cell size, reveals are naturally circular
+            // Just use standard Euclidean distance check
+            float magnitude = quadrantPoint.magnitude;
 
-            if (aspectRatio >= 1f)
-            {
-                // X cells are larger or equal, scale X down to match Y
-                scaledX = quadrantPoint.x / aspectRatio;
-                scaledY = quadrantPoint.y;
-            }
-            else
-            {
-                // Y cells are larger, scale Y down to match X
-                scaledX = quadrantPoint.x;
-                scaledY = quadrantPoint.y * aspectRatio;
-            }
-
-            float correctedMagnitude = Mathf.Sqrt(scaledX * scaledX + scaledY * scaledY);
-
-            if (correctedMagnitude > sightRange)
+            if (magnitude > sightRange)
             {
                 return;
             }
