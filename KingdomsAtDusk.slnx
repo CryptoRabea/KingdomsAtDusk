@@ -22,6 +22,7 @@
   <Project Path="Unity.UI.Shaders.Sample.csproj" />
   <Project Path="Whinarn.IndMeshSimplifier.Editor.csproj" />
   <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
+  <Project Path="SampleAssembly.csproj" />
   <Project Path="VFXGraph.OutputEventHandlers.csproj" />
   <Project Path="Boxophobic.TheVegetationEngine.Scripts.csproj" />
   <Project Path="BigRookGames.csproj" />
