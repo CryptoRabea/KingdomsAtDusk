@@ -182,21 +182,6 @@ namespace KingdomsAtDusk.FogOfWar
             Gizmos.DrawWireCube(center, size);
         }
 
-        /// <summary>
-        /// Create GameBoundary from legacy csFogWar configuration
-        /// </summary>
-        public static GameBoundary FromLegacyFogWar(Transform levelMidPoint, int levelDimensionX, int levelDimensionY, float unitScale, float cellSize = 2f)
-        {
-            Vector3 center = levelMidPoint.position;
-            Vector3 size = new Vector3(
-                levelDimensionX * unitScale,
-                100f, // Default height
-                levelDimensionY * unitScale
-            );
-
-            return new GameBoundary(center, size, cellSize);
-        }
-
         public override string ToString()
         {
             return $"GameBoundary(Center: {center}, Size: {size}, CellSize: {cellSize}, GridDims: {GridDimensions})";

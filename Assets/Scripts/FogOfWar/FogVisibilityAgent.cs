@@ -88,7 +88,7 @@ namespace RTS.FogOfWar
                 Gizmos.color = Color.red;
                 Gizmos.DrawWireSphere(
                     transform.position, // Use the actual object position
-                    (additionalRadius + 0.5f) * fogWar._UnitScale); // Calculate radius based on grid units
+                    (additionalRadius + 0.5f) * fogWar.CellSize); // Calculate radius based on grid cells
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace RTS.FogOfWar
             }
             Gizmos.DrawWireSphere(
                 transform.position, // Use the actual object position
-                (additionalRadius + 0.5f) * fogWar._UnitScale); // Calculate radius based on grid units
+                (additionalRadius + 0.5f) * fogWar.CellSize); // Calculate radius based on grid cells
         }
 #endif
     }

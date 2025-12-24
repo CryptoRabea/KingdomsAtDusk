@@ -1,10 +1,9 @@
-using System;                       // Convert
-using System.Collections.Generic;   // List
-using System.IO;                    // Directory
-using System.Linq;                  // Enumerable
-using UnityEditor;                  // Handles
-using UnityEngine;                  // Monobehaviour
-using RTS.Core;                     // PlayAreaBounds
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using RTS.Core;
 
 
 
@@ -52,13 +51,9 @@ namespace RTS.FogOfWar
                 }
             }
 
-            // Adding private getter / setters are not allowed for serialization
+            // Grid dimensions (calculated from PlayAreaBounds)
             public int levelDimensionX = 0;
             public int levelDimensionY = 0;
-
-            public float unitScale = 0;
-
-            public float scanSpacingPerUnit = 0;
 
             [SerializeField]
             private List<LevelColumn> levelRow = new List<LevelColumn>();
@@ -134,7 +129,7 @@ namespace RTS.FogOfWar
                     return currentLevelCoordinates;
                 }
 
-                // Use WorldToLevel for proper coordinate conversion (works with both legacy and PlayAreaBounds modes)
+                // Use WorldToLevel for proper coordinate conversion
                 currentLevelCoordinates = fogWar.WorldToLevel(revealerTransform.position);
 
                 return currentLevelCoordinates;
@@ -181,16 +176,13 @@ namespace RTS.FogOfWar
         private List<FogRevealer> fogRevealers = null;
         public List<FogRevealer> _FogRevealers => fogRevealers;
         [SerializeField]
-        private Transform levelMidPoint = null;
-        public Transform _LevelMidPoint => levelMidPoint;
-        [SerializeField]
         [Range(1, 30)]
         private float FogRefreshRate = 10;
 
         [BigHeader("Fog Properties")]
         [SerializeField]
         [Range(0, 100)]
-        private float fogPlaneHeight = 1;
+        private float fogPlaneHeight = 20;
         [SerializeField]
         private Material fogPlaneMaterial = null;
         [SerializeField]
@@ -211,33 +203,13 @@ namespace RTS.FogOfWar
         [SerializeField]
         private Texture2D fogPlaneTextureLerpBuffer = null;
 
-        [BigHeader("Level Data")]
+        [BigHeader("Grid Settings")]
         [SerializeField]
-        private TextAsset LevelDataToLoad = null;
-        [SerializeField]
-        private bool saveDataOnScan = true;
-        [ShowIf("saveDataOnScan")]
-        [SerializeField]
-        private string levelNameToSave = "Default";
+        [Range(32, 256)]
+        [Tooltip("Resolution of the fog grid. Higher = more detailed but slower. This is the number of cells along each axis.")]
+        private int gridResolution = 128;
 
-        [BigHeader("Scan Properties")]
-        [SerializeField]
-        [Tooltip("When enabled, the fog plane will automatically size itself to match the PlayAreaBounds in the scene.")]
-        private bool usePlayAreaBounds = true;
-        [SerializeField]
-        [Range(1, 128)]
-        [Tooltip("If you need more than 128 units, consider using raycasting-based fog modules instead. Ignored when usePlayAreaBounds is enabled.")]
-        private int levelDimensionX = 11;
-        [SerializeField]
-        [Range(1, 128)]
-        [Tooltip("If you need more than 128 units, consider using raycasting-based fog modules instead. Ignored when usePlayAreaBounds is enabled.")]
-        private int levelDimensionY = 11;
-        [SerializeField]
-        [Tooltip("Scale of each fog grid cell in world units. Ignored when usePlayAreaBounds is enabled.")]
-        private float unitScale = 1;
-        public float _UnitScale => unitScale;
-        [SerializeField]
-        private float scanSpacingPerUnit = 0.25f;
+        [BigHeader("Obstacle Scan Settings")]
         [SerializeField]
         private float rayStartHeight = 5;
         [SerializeField]
@@ -264,26 +236,25 @@ namespace RTS.FogOfWar
 
         private float FogRefreshRateTimer = 0;
 
-        private const string levelScanDataPath = "/LevelData";
+        // PlayAreaBounds reference (required)
+        private PlayAreaBounds playAreaBounds;
 
-        // Store the initial fixed position of levelMidPoint to keep fog in world space
-        private Vector3 fixedLevelMidPoint;
-
-        // Cached play area size for proper fog plane scaling (used when usePlayAreaBounds is enabled)
-        private Vector2 cachedPlayAreaSize;
-
-        // World bounds for accurate coordinate conversion when using PlayAreaBounds
+        // Calculated values from PlayAreaBounds
+        private Vector3 boundsCenter;
+        private Vector2 boundsSize;
         private Vector2 worldBoundsMin;
         private Vector2 worldBoundsMax;
 
+        // Grid dimensions (always square for circular reveals)
+        private int levelDimensionX;
+        private int levelDimensionY;
+
+        // World units per grid cell (same for both axes for circular reveals)
+        private float cellSize;
+        public float CellSize => cellSize;
+
         // Cached references for performance
         private MeshRenderer fogPlaneMeshRenderer;
-
-        // Grid cell aspect ratio for circular reveals on non-square maps
-        // cellAspectRatio = cellSizeX / cellSizeY
-        // If > 1, X cells are larger; if < 1, X cells are smaller
-        private float gridCellAspectRatio = 1f;
-        public float GridCellAspectRatio => gridCellAspectRatio;
 
 
 
@@ -295,24 +266,9 @@ namespace RTS.FogOfWar
         {
             CheckProperties();
 
-            InitializeVariables();
+            InitializeFromPlayAreaBounds();
 
-            if (LevelDataToLoad == null)
-            {
-                ScanLevel();
-
-                if (saveDataOnScan == true)
-                {
-                    // Preprocessor definitions are used because the save function code will be stripped out on build
-#if UNITY_EDITOR
-                    SaveScanAsLevelData();
-#endif
-                }
-            }
-            else
-            {
-                LoadLevelData();
-            }
+            ScanLevel();
 
             InitializeFog();
 
@@ -351,116 +307,47 @@ namespace RTS.FogOfWar
                 }
             }
 
-            if (unitScale <= 0)
-            {
-            }
-
-            if (scanSpacingPerUnit <= 0)
-            {
-            }
-
-            if (levelMidPoint == null)
-            {
-            }
-
             if (fogPlaneMaterial == null)
             {
+                Debug.LogError("RTS_FogOfWar: fogPlaneMaterial is not assigned!");
             }
         }
 
 
 
-        private void InitializeVariables()
+        private void InitializeFromPlayAreaBounds()
         {
-            // Check if we should use PlayAreaBounds for automatic sizing
-            if (usePlayAreaBounds)
+            // Find PlayAreaBounds - this is now required
+            playAreaBounds = FindFirstObjectByType<PlayAreaBounds>();
+            if (playAreaBounds == null)
             {
-                // Use FindFirstObjectByType directly to avoid script execution order issues
-                // (PlayAreaBounds.Instance might not be set yet if its Awake() hasn't run)
-                PlayAreaBounds playAreaBounds = FindFirstObjectByType<PlayAreaBounds>();
-                if (playAreaBounds != null)
-                {
-                    // Use PlayAreaBounds center as the fog center
-                    fixedLevelMidPoint = playAreaBounds.Center;
-
-                    // Cache the play area size for fog plane scaling
-                    cachedPlayAreaSize = playAreaBounds.Size;
-
-                    // Store world bounds for accurate coordinate conversion
-                    worldBoundsMin = playAreaBounds.WorldMin;
-                    worldBoundsMax = playAreaBounds.WorldMax;
-
-                    // Calculate unitScale to keep dimensions within 128 limit
-                    // while covering the entire play area
-                    float maxDimension = Mathf.Max(cachedPlayAreaSize.x, cachedPlayAreaSize.y);
-
-                    // Calculate unitScale so that the larger dimension fits within 128 grid cells
-                    // Using a minimum unitScale of 1 to avoid too fine granularity
-                    unitScale = Mathf.Max(1f, Mathf.Ceil(maxDimension / 128f));
-
-                    // Calculate grid dimensions based on play area size and unitScale
-                    levelDimensionX = Mathf.CeilToInt(cachedPlayAreaSize.x / unitScale);
-                    levelDimensionY = Mathf.CeilToInt(cachedPlayAreaSize.y / unitScale);
-
-                    // Clamp to valid range (1-128)
-                    levelDimensionX = Mathf.Clamp(levelDimensionX, 1, 128);
-                    levelDimensionY = Mathf.Clamp(levelDimensionY, 1, 128);
-
-                    // Calculate grid cell aspect ratio for circular reveals
-                    // cellSizeX = worldSizeX / gridDimX, cellSizeY = worldSizeY / gridDimY
-                    // aspectRatio = cellSizeX / cellSizeY
-                    float cellSizeX = cachedPlayAreaSize.x / levelDimensionX;
-                    float cellSizeY = cachedPlayAreaSize.y / levelDimensionY;
-                    gridCellAspectRatio = cellSizeX / cellSizeY;
-
-                    Debug.Log($"RTS_FogOfWar: Using PlayAreaBounds - Size: {cachedPlayAreaSize}, Grid: {levelDimensionX}x{levelDimensionY}, UnitScale: {unitScale}, CellAspect: {gridCellAspectRatio:F3}");
-                }
-                else
-                {
-                    UnityEngine.Debug.LogWarning("RTS_FogOfWar: usePlayAreaBounds is enabled but no PlayAreaBounds found in scene. Using manual settings.");
-                    cachedPlayAreaSize = Vector2.zero;
-                    worldBoundsMin = Vector2.zero;
-                    worldBoundsMax = Vector2.zero;
-                    // Legacy mode with uniform unitScale, cells are square
-                    gridCellAspectRatio = 1f;
-                    InitializeFallbackMidPoint();
-                }
+                Debug.LogError("RTS_FogOfWar: No PlayAreaBounds found in scene! This is required for fog of war to work.");
+                enabled = false;
+                return;
             }
-            else
-            {
-                cachedPlayAreaSize = Vector2.zero;
-                worldBoundsMin = Vector2.zero;
-                worldBoundsMax = Vector2.zero;
-                // In legacy mode with uniform unitScale, cells are square
-                gridCellAspectRatio = 1f;
-                InitializeFallbackMidPoint();
-            }
+
+            // Get bounds data from PlayAreaBounds
+            boundsCenter = playAreaBounds.Center;
+            boundsSize = playAreaBounds.Size;
+            worldBoundsMin = playAreaBounds.WorldMin;
+            worldBoundsMax = playAreaBounds.WorldMax;
+
+            // Use square grid for circular reveals - both dimensions use the same cell count
+            // This ensures sight range works the same in all directions
+            levelDimensionX = gridResolution;
+            levelDimensionY = gridResolution;
+
+            // Calculate cell size based on the larger dimension to ensure full coverage
+            // Using the same cell size for both axes ensures circular reveals
+            float maxWorldSize = Mathf.Max(boundsSize.x, boundsSize.y);
+            cellSize = maxWorldSize / gridResolution;
+
+            Debug.Log($"RTS_FogOfWar: Initialized from PlayAreaBounds - Center: {boundsCenter}, Size: {boundsSize}, Grid: {levelDimensionX}x{levelDimensionY}, CellSize: {cellSize:F3}");
 
             // This is for faster development iteration purposes
             if (obstacleLayers.value == 0)
             {
                 obstacleLayers = LayerMask.GetMask("Default");
-            }
-
-            // This is also for faster development iteration purposes
-            if (levelNameToSave == String.Empty)
-            {
-                levelNameToSave = "Default";
-            }
-        }
-
-        private void InitializeFallbackMidPoint()
-        {
-            // Store the initial fixed position to keep fog in world space
-            // Use the transform's position as fallback if levelMidPoint is not assigned
-            if (levelMidPoint != null)
-            {
-                fixedLevelMidPoint = levelMidPoint.position;
-            }
-            else
-            {
-                fixedLevelMidPoint = transform.position;
-                UnityEngine.Debug.LogWarning("RTS_FogOfWar: levelMidPoint not assigned, using this object's position as the fog center.");
             }
         }
 
@@ -472,31 +359,18 @@ namespace RTS.FogOfWar
 
             fogPlane.name = "[RUNTIME] Fog_Plane";
 
+            // Position fog plane at bounds center, raised by fogPlaneHeight
+            // The center is calculated from PlayAreaBounds, not from the fog object's position
             fogPlane.transform.position = new Vector3(
-                fixedLevelMidPoint.x,
-                fixedLevelMidPoint.y + fogPlaneHeight,
-                fixedLevelMidPoint.z);
+                boundsCenter.x,
+                boundsCenter.y + fogPlaneHeight,
+                boundsCenter.z);
 
-            // Calculate fog plane scale
-            // Unity's primitive plane is 10x10 units, so we divide by 10 to get the correct scale
-            Vector3 fogPlaneScale;
-            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
-            {
-                // Use the exact play area size for precise matching with PlayAreaBounds
-                fogPlaneScale = new Vector3(
-                    cachedPlayAreaSize.x / 10.0f,
-                    1,
-                    cachedPlayAreaSize.y / 10.0f);
-            }
-            else
-            {
-                // Use the traditional formula based on level dimensions and unit scale
-                fogPlaneScale = new Vector3(
-                    (levelDimensionX * unitScale) / 10.0f,
-                    1,
-                    (levelDimensionY * unitScale) / 10.0f);
-            }
-            fogPlane.transform.localScale = fogPlaneScale;
+            // Unity's primitive plane is 10x10 units
+            // Scale to match the larger dimension (since we use a square grid)
+            float maxWorldSize = Mathf.Max(boundsSize.x, boundsSize.y);
+            float planeScale = maxWorldSize / 10.0f;
+            fogPlane.transform.localScale = new Vector3(planeScale, 1, planeScale);
 
             fogPlaneTextureLerpTarget = new Texture2D(levelDimensionX, levelDimensionY);
             fogPlaneTextureLerpBuffer = new Texture2D(levelDimensionX, levelDimensionY);
@@ -594,9 +468,12 @@ namespace RTS.FogOfWar
 
                 fogRevealer.GetCurrentLevelCoordinates(this);
 
+                // Convert sight range from world units to grid cells
+                int sightRangeInCells = Mathf.RoundToInt(fogRevealer._SightRange / cellSize);
+
                 shadowcaster.ProcessLevelData(
                     fogRevealer._CurrentLevelCoordinates,
-                    Mathf.RoundToInt(fogRevealer._SightRange / unitScale));
+                    sightRangeInCells);
             }
 
             UpdateFogPlaneTextureTarget();
@@ -664,12 +541,12 @@ namespace RTS.FogOfWar
 
         private void ScanLevel()
         {
-
-            // These operations have no real computational meaning, but it will bring consistency to the data
+            // Store grid dimensions in levelData for reference
             levelData.levelDimensionX = levelDimensionX;
             levelData.levelDimensionY = levelDimensionY;
-            levelData.unitScale = unitScale;
-            levelData.scanSpacingPerUnit = scanSpacingPerUnit;
+
+            // Scan spacing based on cell size
+            float scanSpacing = cellSize * 0.25f;
 
             for (int xIterator = 0; xIterator < levelDimensionX; xIterator++)
             {
@@ -678,15 +555,17 @@ namespace RTS.FogOfWar
 
                 for (int yIterator = 0; yIterator < levelDimensionY; yIterator++)
                 {
+                    Vector3 worldPos = GetWorldVector(new Vector2Int(xIterator, yIterator));
+
                     bool isObstacleHit = Physics.BoxCast(
                         new Vector3(
-                            GetWorldX(xIterator),
-                            fixedLevelMidPoint.y + rayStartHeight,
-                            GetWorldY(yIterator)),
+                            worldPos.x,
+                            boundsCenter.y + rayStartHeight,
+                            worldPos.z),
                         new Vector3(
-                            (unitScale - scanSpacingPerUnit) / 2.0f,
-                            unitScale / 2.0f,
-                            (unitScale - scanSpacingPerUnit) / 2.0f),
+                            (cellSize - scanSpacing) / 2.0f,
+                            cellSize / 2.0f,
+                            (cellSize - scanSpacing) / 2.0f),
                         Vector3.down,
                         Quaternion.identity,
                         rayMaxDistance,
@@ -699,49 +578,6 @@ namespace RTS.FogOfWar
                     }
                 }
             }
-
-        }
-
-
-
-        // We intend to use Application.dataPath only for accessing project files directory (only in unity editor)
-#if UNITY_EDITOR
-        private void SaveScanAsLevelData()
-        {
-            string fullPath = Application.dataPath + levelScanDataPath + "/" + levelNameToSave + ".json";
-
-            if (Directory.Exists(Application.dataPath + levelScanDataPath) == false)
-            {
-                Directory.CreateDirectory(Application.dataPath + levelScanDataPath);
-
-            }
-
-            if (File.Exists(fullPath) == true)
-            {
-            }
-
-            string levelJson = JsonUtility.ToJson(levelData);
-
-            File.WriteAllText(fullPath, levelJson);
-
-        }
-#endif
-
-
-
-        private void LoadLevelData()
-        {
-
-            // Exception check is indirectly performed through branching on the upper part of the code
-            string levelJson = LevelDataToLoad.ToString();
-
-            levelData = JsonUtility.FromJson<LevelData>(levelJson);
-
-            levelDimensionX = levelData.levelDimensionX;
-            levelDimensionY = levelData.levelDimensionY;
-            unitScale = levelData.unitScale;
-            scanSpacingPerUnit = levelData.scanSpacingPerUnit;
-
         }
 
 
@@ -789,9 +625,9 @@ namespace RTS.FogOfWar
         {
             bool result =
                 levelCoordinates.x >= 0 &&
-                levelCoordinates.x < levelData.levelDimensionX &&
+                levelCoordinates.x < levelDimensionX &&
                 levelCoordinates.y >= 0 &&
-                levelCoordinates.y < levelData.levelDimensionY;
+                levelCoordinates.y < levelDimensionY;
 
             if (result == false && LogOutOfRange == true)
             {
@@ -850,28 +686,26 @@ namespace RTS.FogOfWar
 
 
         /// Converts world coordinates to level (grid) coordinates.
-        /// When usePlayAreaBounds is enabled, uses proper interpolation within world bounds.
+        /// Uses PlayAreaBounds center and uniform cell size for accurate circular reveals.
         public Vector2Int WorldToLevel(Vector3 worldCoordinates)
         {
-            // When using PlayAreaBounds, use direct world-to-grid interpolation for accuracy
-            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
-            {
-                // Normalize position within world bounds (0 to 1), then scale to grid
-                float normalizedX = Mathf.InverseLerp(worldBoundsMin.x, worldBoundsMax.x, worldCoordinates.x);
-                float normalizedZ = Mathf.InverseLerp(worldBoundsMin.y, worldBoundsMax.y, worldCoordinates.z);
+            // Calculate offset from the center of the grid (which corresponds to bounds center)
+            // The grid is square and centered on boundsCenter
+            float maxWorldSize = Mathf.Max(boundsSize.x, boundsSize.y);
+            float halfGridWorldSize = maxWorldSize / 2f;
 
-                // Convert to grid coordinates (0 to levelDimension-1)
-                int gridX = Mathf.Clamp(Mathf.FloorToInt(normalizedX * levelDimensionX), 0, levelDimensionX - 1);
-                int gridZ = Mathf.Clamp(Mathf.FloorToInt(normalizedZ * levelDimensionY), 0, levelDimensionY - 1);
+            // Convert world position to grid position
+            // Grid cell (0,0) is at boundsCenter - halfGridWorldSize
+            float gridMinX = boundsCenter.x - halfGridWorldSize;
+            float gridMinZ = boundsCenter.z - halfGridWorldSize;
 
-                return new Vector2Int(gridX, gridZ);
-            }
+            float localX = worldCoordinates.x - gridMinX;
+            float localZ = worldCoordinates.z - gridMinZ;
 
-            // Legacy conversion for non-PlayAreaBounds mode
-            Vector2Int unitWorldCoordinates = GetUnitVector(worldCoordinates);
-            return new Vector2Int(
-                unitWorldCoordinates.x + (levelDimensionX / 2),
-                unitWorldCoordinates.y + (levelDimensionY / 2));
+            int gridX = Mathf.Clamp(Mathf.FloorToInt(localX / cellSize), 0, levelDimensionX - 1);
+            int gridZ = Mathf.Clamp(Mathf.FloorToInt(localZ / cellSize), 0, levelDimensionY - 1);
+
+            return new Vector2Int(gridX, gridZ);
         }
 
 
@@ -881,16 +715,8 @@ namespace RTS.FogOfWar
         {
             return new Vector3(
                 GetWorldX(levelCoordinates.x),
-                fixedLevelMidPoint.y,
-                GetWorldY(levelCoordinates.y));
-        }
-
-
-
-        /// Converts world coordinates to unit grid coordinates (legacy method).
-        public Vector2Int GetUnitVector(Vector3 worldCoordinates)
-        {
-            return new Vector2Int(GetUnitX(worldCoordinates.x), GetUnitY(worldCoordinates.z));
+                boundsCenter.y,
+                GetWorldZ(levelCoordinates.y));
         }
 
 
@@ -898,72 +724,30 @@ namespace RTS.FogOfWar
         /// Converts level/grid X coordinate to world X coordinate.
         public float GetWorldX(int xValue)
         {
-            // When using PlayAreaBounds, interpolate within world bounds
-            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
-            {
-                float t = (xValue + 0.5f) / levelDimensionX; // Center of the grid cell
-                return Mathf.Lerp(worldBoundsMin.x, worldBoundsMax.x, t);
-            }
+            float maxWorldSize = Mathf.Max(boundsSize.x, boundsSize.y);
+            float halfGridWorldSize = maxWorldSize / 2f;
+            float gridMinX = boundsCenter.x - halfGridWorldSize;
 
-            // Legacy conversion
-            if (levelData.levelDimensionX % 2 == 0)
-            {
-                return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - xValue) * unitScale);
-            }
-
-            return (fixedLevelMidPoint.x - ((levelDimensionX / 2.0f) - (xValue + 0.5f)) * unitScale);
-        }
-
-
-
-        /// Converts world X coordinate to unit X coordinate (for legacy mode).
-        public int GetUnitX(float xValue)
-        {
-            // When using PlayAreaBounds, this is handled by WorldToLevel
-            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
-            {
-                float normalizedX = Mathf.InverseLerp(worldBoundsMin.x, worldBoundsMax.x, xValue);
-                return Mathf.FloorToInt(normalizedX * levelDimensionX) - (levelDimensionX / 2);
-            }
-
-            return Mathf.RoundToInt((xValue - fixedLevelMidPoint.x) / unitScale);
+            // Return center of the grid cell
+            return gridMinX + (xValue + 0.5f) * cellSize;
         }
 
 
 
         /// Converts level/grid Y coordinate to world Z coordinate.
-        public float GetWorldY(int yValue)
+        public float GetWorldZ(int yValue)
         {
-            // When using PlayAreaBounds, interpolate within world bounds
-            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
-            {
-                float t = (yValue + 0.5f) / levelDimensionY; // Center of the grid cell
-                return Mathf.Lerp(worldBoundsMin.y, worldBoundsMax.y, t);
-            }
+            float maxWorldSize = Mathf.Max(boundsSize.x, boundsSize.y);
+            float halfGridWorldSize = maxWorldSize / 2f;
+            float gridMinZ = boundsCenter.z - halfGridWorldSize;
 
-            // Legacy conversion
-            if (levelData.levelDimensionY % 2 == 0)
-            {
-                return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - yValue) * unitScale);
-            }
-
-            return (fixedLevelMidPoint.z - ((levelDimensionY / 2.0f) - (yValue + 0.5f)) * unitScale);
+            // Return center of the grid cell
+            return gridMinZ + (yValue + 0.5f) * cellSize;
         }
 
 
-
-        /// Converts world Z coordinate to unit Y coordinate (for legacy mode).
-        public int GetUnitY(float yValue)
-        {
-            // When using PlayAreaBounds, this is handled by WorldToLevel
-            if (usePlayAreaBounds && cachedPlayAreaSize != Vector2.zero)
-            {
-                float normalizedZ = Mathf.InverseLerp(worldBoundsMin.y, worldBoundsMax.y, yValue);
-                return Mathf.FloorToInt(normalizedZ * levelDimensionY) - (levelDimensionY / 2);
-            }
-
-            return Mathf.RoundToInt((yValue - fixedLevelMidPoint.z) / unitScale);
-        }
+        // Legacy method name for compatibility
+        public float GetWorldY(int yValue) => GetWorldZ(yValue);
 
 
 
@@ -1000,12 +784,12 @@ namespace RTS.FogOfWar
                         Handles.DrawWireCube(
                             new Vector3(
                                 GetWorldX(xIterator),
-                                fixedLevelMidPoint.y,
-                                GetWorldY(yIterator)),
+                                boundsCenter.y,
+                                GetWorldZ(yIterator)),
                             new Vector3(
-                                unitScale - scanSpacingPerUnit,
-                                unitScale,
-                                unitScale - scanSpacingPerUnit));
+                                cellSize * 0.9f,
+                                cellSize,
+                                cellSize * 0.9f));
                     }
                     else
                     {
@@ -1014,9 +798,9 @@ namespace RTS.FogOfWar
                         Gizmos.DrawSphere(
                             new Vector3(
                                 GetWorldX(xIterator),
-                                fixedLevelMidPoint.y,
-                                GetWorldY(yIterator)),
-                            unitScale / 5.0f);
+                                boundsCenter.y,
+                                GetWorldZ(yIterator)),
+                            cellSize / 5.0f);
                     }
 
                     if (shadowcaster.fogField[xIterator][yIterator] == Shadowcaster.LevelColumn.ETileVisibility.Revealed)
@@ -1026,9 +810,9 @@ namespace RTS.FogOfWar
                         Gizmos.DrawSphere(
                             new Vector3(
                                 GetWorldX(xIterator),
-                                fixedLevelMidPoint.y,
-                                GetWorldY(yIterator)),
-                            unitScale / 3.0f);
+                                boundsCenter.y,
+                                GetWorldZ(yIterator)),
+                            cellSize / 3.0f);
                     }
                 }
             }
