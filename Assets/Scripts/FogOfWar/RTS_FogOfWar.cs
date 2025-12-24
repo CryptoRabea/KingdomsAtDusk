@@ -182,7 +182,13 @@ namespace RTS.FogOfWar
         [BigHeader("Fog Properties")]
         [SerializeField]
         [Range(0, 100)]
+        [Tooltip("Height offset of the fog plane above the play area. Used to avoid collision with terrain/mountains.")]
         private float fogPlaneHeight = 20;
+        /// <summary>
+        /// Height offset of the fog plane above the play area center.
+        /// Use this when other systems need to account for the fog's vertical position.
+        /// </summary>
+        public float FogPlaneHeight => fogPlaneHeight;
         [SerializeField]
         private Material fogPlaneMaterial = null;
         [SerializeField]
@@ -252,6 +258,17 @@ namespace RTS.FogOfWar
         // World units per grid cell (same for both axes for circular reveals)
         private float cellSize;
         public float CellSize => cellSize;
+
+        /// <summary>
+        /// Center of the play area bounds in world space.
+        /// </summary>
+        public Vector3 BoundsCenter => boundsCenter;
+
+        /// <summary>
+        /// The actual Y position of the fog plane in world space (BoundsCenter.y + FogPlaneHeight).
+        /// Use this when you need to account for the fog's vertical position.
+        /// </summary>
+        public float FogPlaneWorldY => boundsCenter.y + fogPlaneHeight;
 
         // Cached references for performance
         private MeshRenderer fogPlaneMeshRenderer;
