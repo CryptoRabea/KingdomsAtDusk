@@ -6,17 +6,13 @@
   <Project Path="Unity.RenderPipelines.Universal.Runtime.csproj" />
   <Project Path="MalbersAnimations.Editor.csproj" />
   <Project Path="Unity.RenderPipelines.Core.Samples.Runtime.csproj" />
-  <Project Path="Boxophobic.TheVegetationEngine.Runtime.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="LinteumClient.csproj" />
   <Project Path="Enviro3.Runtime.csproj" />
   <Project Path="VFXGraph.OutputEventHandlers.Editor.csproj" />
   <Project Path="sc.terrain.painter.editor.csproj" />
-  <Project Path="Boxophobic.Utils.Editor.csproj" />
   <Project Path="Whinarn.IndMeshSimplifier.Runtime.csproj" />
   <Project Path="sc.terrain.painter.runtime.csproj" />
-  <Project Path="Boxophobic.TheVegetationEngine.Editor.csproj" />
-  <Project Path="Boxophobic.Utils.Scripts.csproj" />
   <Project Path="Unity.RenderPipelines.Core.Samples.Editor.csproj" />
   <Project Path="KrisDevelopment.EnviroSpawn.csproj" />
   <Project Path="Unity.UI.Shaders.Sample.csproj" />
@@ -24,7 +20,6 @@
   <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
   <Project Path="SampleAssembly.csproj" />
   <Project Path="VFXGraph.OutputEventHandlers.csproj" />
-  <Project Path="Boxophobic.TheVegetationEngine.Scripts.csproj" />
   <Project Path="BigRookGames.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
   <Project Path="Unity.UI.Shaders.Sample.Editor.csproj" />

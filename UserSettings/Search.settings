@@ -1,7 +1,7 @@
-trackSelection = true
+trackSelection = false
 refreshSearchWindowsInPlayMode = false
 pickerAdvancedUI = false
-fetchPreview = true
+fetchPreview = false
 defaultFlags = 0
 keepOpen = true
 queryFolder = "Assets"
@@ -9,6 +9,10 @@ onBoardingDoNotAskAgain = true
 showPackageIndexes = false
 showStatusBar = false
 scopes = {
+	"picker_window_position_offset.00000000" = "-201.3334;201.3333;544;550"
+	"picker_visibility_flags.00000000" = "0"
+	"picker_item_size.00000000" = "1"
+	"picker_inspector.00000000" = "0"
 }
 providers = {
 	asset = {
@@ -81,6 +85,41 @@ providers = {
 		priority = 2500
 		defaultAction = null
 	}
+	menu = {
+		active = true
+		priority = 80
+		defaultAction = null
+	}
+	settings = {
+		active = true
+		priority = 100
+		defaultAction = null
+	}
+	calculator = {
+		active = true
+		priority = 10
+		defaultAction = null
+	}
+	static_methods = {
+		active = false
+		priority = 85
+		defaultAction = null
+	}
+	component = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
+	system = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
+	nodehierarchy = {
+		active = true
+		priority = 2500
+		defaultAction = null
+	}
 }
 objectSelectors = {
 }
@@ -91,14 +130,14 @@ searchItemFavorites = [
 savedSearchesSortOrder = 0
 showSavedSearchPanel = false
 hideTabs = false
-indexOnEditorStartup = true
+indexOnEditorStartup = false
 logIndexingPerformanceReport = false
 expandedQueries = [
 ]
 queryBuilder = true
 ignoredProperties = "id;name;classname;imagecontentshash"
 helperWidgetCurrentArea = "all"
-disabledIndexers = ""
+disabledIndexers = "UnityEditor.Rendering.Universal.PPv2ConversionIndexers.ConversionIndexer;;;UnityEditor.Search.IndexerExtensions.TerrainIndexing;;;UnityEditor.Search.IndexerExtensions.MaterialShaderReferences;;;UnityEditor.Search.IndexerExtensions.AnimationClipEventsIndexing;;;UnityEditor.Search.IndexerExtensions.IndexPrefabTypes;;;UnityEditor.Search.IndexerExtensions.Texture2DIndexing;;;UnityEditor.Search.IndexerExtensions.AssemblyDefRefIndexing;;;UnityEditor.Search.IndexerExtensions.AssemblyDefIndexing;;;UnityEditor.Search.IndexerExtensions.ShaderIndexing;;;UnityEditor.Search.IndexerExtensions.IndexMeshRendererMaterials"
 minIndexVariations = 2
 findProviderIndexHelper = true
 itemIconSize = 32
